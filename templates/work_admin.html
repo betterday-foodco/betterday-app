@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BD Work — Corporate Orders</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root { --primary: #4ea2fd; --dark: #00465e; --accent: #faebda; }
+        body { font-family: -apple-system, sans-serif; background: var(--accent); margin: 0; padding: 30px; color: var(--dark); }
+        .header { background: var(--dark); color: white; padding: 14px 24px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { margin: 0; font-size: 1.1rem; font-weight: 900; }
+        .filter-bar { background: white; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .filter-bar input { padding: 8px 12px; border: 1.5px solid #e0e8f0; border-radius: 8px; font-size: .85rem; font-family: inherit; }
+        .filter-bar button { background: var(--dark); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; font-size: .85rem; cursor: pointer; }
+        .company-block { background: white; border-radius: 14px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .company-header { background: var(--dark); color: white; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
+        .company-name { font-weight: 900; font-size: 1rem; }
+        .week-section { padding: 14px 18px; border-bottom: 1px solid #f0f4f8; }
+        .week-section:last-child { border-bottom: none; }
+        .week-label { font-size: .72rem; font-weight: 800; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; letter-spacing: .5px; }
+        table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+        th { text-align: left; padding: 6px 8px; color: #8898aa; font-size: .7rem; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid #f0f4f8; }
+        td { padding: 8px 8px; border-bottom: 1px solid #f8fafc; }
+        tr:last-child td { border-bottom: none; }
+        .tier-badge { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: .65rem; font-weight: 800; text-transform: uppercase; }
+        .tier-free { background: #e8faf0; color: #27ae60; }
+        .tier-tier1, .tier-tier2, .tier-tier3 { background: #e8f3ff; color: var(--primary); }
+        .tier-full { background: #f0f4f8; color: #7b8c9f; }
+        .empty { text-align: center; padding: 40px; color: #9aacb8; font-weight: 600; }
+        .back-link { color: var(--primary); text-decoration: none; font-size: .85rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏢 Corporate Orders</h1>
+        <a href="/BD-Admin" class="back-link" style="color:rgba(255,255,255,.7)">← Back to Admin</a>
+    </div>
+
+    <form class="filter-bar" method="GET">
+        <input name="company_id" placeholder="Filter by Company ID…" value="{{ company_id }}">
+        <input name="sunday" placeholder="Filter by Sunday anchor (YYYY-MM-DD)…" value="{{ sunday_anchor }}">
+        <button type="submit">Filter</button>
+        <a href="/work/admin" style="font-size:.82rem;color:#9aacb8;margin-left:4px;">Clear</a>
+    </form>
+
+    {% if grouped %}
+        {% for company, weeks in grouped.items() %}
+        <div class="company-block">
+            <div class="company-header">
+                <div class="company-name">{{ company }}</div>
+                <div style="font-size:.8rem;opacity:.7;">{{ weeks.values()|sum(attribute='__len__') }} total orders</div>
+            </div>
+            {% for delivery_date, orders in weeks.items() %}
+            <div class="week-section">
+                <div class="week-label">📦 Delivery: {{ delivery_date }} — {{ orders|length }} meals</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Dish</th>
+                            <th>Tier</th>
+                            <th>They Pay</th>
+                            <th>Co. Covers</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in orders %}
+                        <tr>
+                            <td style="font-weight:700;">{{ o.EmployeeName }}</td>
+                            <td>{{ o.DishName or '—' }}</td>
+                            <td><span class="tier-badge tier-{{ o.Tier }}">{{ o.Tier }}</span></td>
+                            <td>${{ '%.2f'|format(o.EmployeePrice|float) }}</td>
+                            <td style="color:#27ae60;font-weight:700;">${{ '%.2f'|format(o.CompanyCoverage|float) }}</td>
+                            <td>{{ o.Status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty">No corporate orders yet. Orders will appear here as employees submit them.</div>
+    {% endif %}
+</body>
+</html>
