@@ -1,1 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BetterDay for Work</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream:   #faebda;
+      --dark:    #00465e;
+      --primary: #4ea2fd;
+      --green:   #27ae60;
+      --red:     #e74c3c;
+      --amber:   #f39c12;
+      --radius:  20px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      color: var(--dark);
+    }
 
+    /* ── SCREEN SYSTEM ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── SHARED AUTH BACKGROUND ── */
+    .auth-bg { min-height: 100vh; display: grid; grid-template-rows: 220px 1fr; position: relative; }
+    .auth-bg-top { background: var(--dark); position: relative; overflow: hidden; }
+    .auth-bg-top::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 80% 50%, rgba(78,162,253,.25) 0%, transparent 65%),
+                  radial-gradient(ellipse at 20% 80%, rgba(250,235,218,.08) 0%, transparent 50%);
+    }
+    .auth-bg-dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .auth-bg-bottom { background: var(--cream); }
+    .auth-card-wrap {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .auth-card {
+      background: #fff;
+      border-radius: 28px;
+      padding: 36px 36px 32px;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 24px 60px rgba(0,70,94,.16), 0 4px 16px rgba(0,70,94,.08);
+      position: relative; z-index: 10;
+    }
+    .auth-brand {
+      position: absolute; top: 32px; left: 0; right: 0;
+      display: flex; flex-direction: column; align-items: center;
+      z-index: 5;
+    }
+    .auth-logo-mark {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+      box-shadow: 0 8px 24px rgba(78,162,253,.4);
+    }
+    .auth-logo-mark svg { width: 26px; height: 26px; fill: #fff; }
+    .auth-wordmark { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #fff; }
+    .auth-tagline { font-size: .8rem; color: rgba(255,255,255,.55); font-weight: 500; margin-top: 2px; letter-spacing: .3px; }
+
+    /* ── CARD TYPOGRAPHY ── */
+    .card-eyebrow { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin-bottom: 6px; }
+    .card-title { font-family: 'DM Serif Display', serif; font-size: 1.75rem; color: var(--dark); line-height: 1.15; margin-bottom: 6px; }
+    .card-subtitle { font-size: .9rem; color: #7b8c9f; line-height: 1.5; margin-bottom: 28px; }
+
+    /* ── FORM ELEMENTS ── */
+    .field-group { margin-bottom: 14px; }
+    .field-group label { display: block; font-size: .78rem; font-weight: 700; color: var(--dark); margin-bottom: 5px; }
+    .field-group input {
+      width: 100%; padding: 13px 16px;
+      border: 2px solid #e8edf2; border-radius: 12px;
+      font-size: .95rem; font-family: 'DM Sans', sans-serif;
+      color: var(--dark); background: #f8fafc;
+      transition: .15s; outline: none;
+    }
+    .field-group input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(78,162,253,.1); }
+    .field-group input.valid { border-color: var(--green); background: #fff; }
+    .field-group input.error { border-color: var(--red); background: #fff; }
+
+    /* Company code confirm */
+    .code-field-wrap { position: relative; }
+    .code-field-wrap input { text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding-right: 44px; }
+    .code-check { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 1rem; opacity: 0; transition: opacity .2s; }
+    .code-check.show { opacity: 1; }
+    .company-confirm {
+      display: none; align-items: center; gap: 8px;
+      background: #f0faf4; border-radius: 10px;
+      padding: 10px 12px; margin-top: 8px;
+      font-size: .85rem; font-weight: 600; color: var(--green);
+    }
+    .company-confirm.show { display: flex; }
+
+    /* ── BUTTONS ── */
+    .btn-main {
+      width: 100%; padding: 15px;
+      background: var(--dark); color: #fff;
+      border: none; border-radius: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 800;
+      cursor: pointer; transition: .15s;
+      box-shadow: 0 6px 20px rgba(0,70,94,.28);
+      margin-top: 6px;
+    }
+    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,70,94,.32); }
+    .btn-main:disabled { background: #c5d0d8; box-shadow: none; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      width: 100%; padding: 12px;
+      background: transparent; color: var(--primary);
+      border: 2px solid rgba(78,162,253,.3); border-radius: 14px;
+      font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 700;
+      cursor: pointer; transition: .15s; margin-top: 8px;
+    }
+    .btn-ghost:hover { border-color: var(--primary); background: rgba(78,162,253,.06); }
+
+    .form-error {
+      display: none; background: rgba(231,76,60,.08);
+      border: 1px solid rgba(231,76,60,.2); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 14px;
+      font-size: .83rem; color: var(--red); font-weight: 600;
+    }
+    .form-error.show { display: block; }
+
+    /* ── LOADING SPINNER ── */
+    .spinner-wrap { text-align: center; padding: 40px 0; }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid #e8edf2;
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin .7s linear infinite; margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-label { font-size: .85rem; color: #7b8c9f; font-weight: 600; }
+
+    /* ══════════════════════════════════════
+       MENU SCREEN
+    ══════════════════════════════════════ */
+    .menu-shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+
+    /* Topbar */
+    .menu-topbar {
+      background: var(--dark); padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 58px; flex-shrink: 0;
+    }
+    .menu-topbar-brand { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: #fff; }
+    .menu-topbar-brand span { color: var(--primary); }
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.1); border-radius: 999px;
+      padding: 6px 14px 6px 8px; border: 1px solid rgba(255,255,255,.15);
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 800; color: #fff;
+    }
+    .user-name { font-size: .82rem; font-weight: 700; color: #fff; }
+    .logout-btn {
+      font-size: .75rem; color: rgba(255,255,255,.5); cursor: pointer;
+      border: none; background: transparent; font-family: 'DM Sans', sans-serif;
+      padding: 0; margin-left: 4px; font-weight: 600;
+    }
+    .logout-btn:hover { color: rgba(255,255,255,.9); }
+
+    /* Week tabs */
+    .week-tabs-bar {
+      background: var(--dark); border-top: 1px solid rgba(255,255,255,.08);
+      padding: 0 24px; display: flex; gap: 0;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      overflow-x: auto;
+    }
+    .week-tabs-bar::-webkit-scrollbar { display: none; }
+    .week-tab {
+      padding: 14px 20px; font-size: .82rem; font-weight: 700;
+      color: rgba(255,255,255,.5); cursor: pointer; border: none;
+      background: transparent; font-family: 'DM Sans', sans-serif;
+      border-bottom: 3px solid transparent; white-space: nowrap;
+      transition: .15s; position: relative;
+    }
+    .week-tab:hover { color: rgba(255,255,255,.8); }
+    .week-tab.active { color: #fff; border-bottom-color: var(--primary); }
+    .week-tab .tab-date { display: block; font-size: .7rem; font-weight: 500; color: rgba(255,255,255,.4); margin-top: 2px; }
+    .week-tab.active .tab-date { color: rgba(255,255,255,.6); }
+    .week-tab .tab-badge {
+      display: inline-block; font-size: .6rem; font-weight: 900;
+      padding: 2px 6px; border-radius: 999px; margin-left: 6px;
+      vertical-align: middle;
+    }
+    .tab-badge-open { background: rgba(39,174,96,.25); color: #5fe49a; }
+    .tab-badge-closed { background: rgba(231,76,60,.2); color: #ff8a80; }
+    .tab-badge-next { background: rgba(78,162,253,.2); color: #7cc4ff; }
+
+    /* Pricing banner */
+    .pricing-banner { background: #fff3e8; border-bottom: 2px solid rgba(0,70,94,.07); padding: 10px 24px; }
+    .pricing-banner-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pricing-company { font-size: 1rem; font-weight: 900; color: var(--dark); }
+    .pricing-sep { color: #bcc6d0; }
+    .pricing-tier { font-size: .88rem; color: #50657a; display: flex; align-items: center; gap: 6px; }
+    .pricing-tier strong { color: var(--dark); }
+    .pricing-delivery { margin-left: auto; font-size: .82rem; font-weight: 700; color: var(--primary); }
+
+    /* Menu grid */
+    .menu-scroll { flex: 1; padding: 20px 24px 160px; overflow-y: auto; }
+    .menu-inner { max-width: 1100px; margin: 0 auto; }
+    .menu-section-title {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: #7b8c9f; margin: 20px 0 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .menu-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(0,70,94,.1); }
+    .meal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px; }
+    @media (max-width: 700px) { .meal-grid { grid-template-columns: 1fr 1fr; } }
+
+    .meal-card {
+      background: #fff; border-radius: 20px;
+      overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 3px 12px rgba(0,70,94,.08); transition: .2s;
+    }
+    .meal-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,70,94,.12); }
+    .meal-img { width: 100%; aspect-ratio: 3/2; object-fit: cover; display: block; background: #e8d5c4; }
+    .meal-img-placeholder {
+      width: 100%; aspect-ratio: 3/2;
+      background: linear-gradient(135deg, #e8d5c4, #d4c4b0);
+      display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    }
+    .meal-body { padding: 14px 14px 12px; flex: 1; display: flex; flex-direction: column; }
+    .meal-name {
+      font-size: .92rem; font-weight: 800; text-align: center;
+      color: var(--dark); min-height: 2.6em;
+      display: flex; align-items: center; justify-content: center; line-height: 1.3;
+    }
+    .meal-divider { width: 40%; border: none; border-bottom: 1px solid rgba(0,70,94,.12); margin: 8px auto; }
+    .meal-footer { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .qty-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--dark); color: var(--cream);
+      border-radius: 999px; padding: 6px 12px; border: none; min-width: 110px;
+      justify-content: space-between;
+    }
+    .qty-btn { background: transparent; border: none; color: var(--cream); font-size: 1rem; cursor: pointer; padding: 0 2px; }
+    .qty-val { font-size: .88rem; font-weight: 700; min-width: 14px; text-align: center; }
+    .btn-add {
+      background: transparent; border: 2px solid rgba(0,70,94,.25);
+      border-radius: 999px; padding: 7px 14px;
+      font-size: .8rem; font-weight: 700; color: var(--dark);
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .15s;
+    }
+    .btn-add:hover { background: var(--dark); color: #fff; border-color: var(--dark); }
+
+    /* Next meal chip in topbar */
+    .next-price-chip {
+      font-size: .78rem; color: rgba(255,255,255,.7);
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 999px; padding: 4px 12px; margin-right: 8px;
+    }
+    .next-price-chip strong { color: #7dd8ff; }
+
+    /* Bottom bar */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+      background: var(--dark); box-shadow: 0 -4px 24px rgba(0,0,0,.25);
+    }
+    .bottom-bar-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 14px 24px; display: flex; align-items: center;
+      justify-content: space-between; gap: 16px;
+    }
+    .bb-left { display: flex; flex-direction: column; gap: 2px; }
+    .bb-count { font-size: .8rem; color: rgba(255,255,255,.55); }
+    .bb-total { font-size: 1.25rem; font-weight: 900; color: #fff; }
+    .bb-savings { font-size: .75rem; color: #5fe49a; }
+    .bb-right { display: flex; align-items: center; gap: 10px; }
+    .bb-clear { font-size: .78rem; color: rgba(255,255,255,.4); border: none; background: transparent; cursor: pointer; padding: 4px 8px; font-family: 'DM Sans', sans-serif; border-radius: 6px; }
+    .bb-clear:hover { color: rgba(255,255,255,.8); background: rgba(255,255,255,.1); }
+    .btn-review {
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 999px; padding: 12px 28px;
+      font-size: .95rem; font-weight: 800; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      box-shadow: 0 4px 14px rgba(78,162,253,.4); transition: .15s; white-space: nowrap;
+    }
+    .btn-review:hover { background: #3b8cd9; transform: translateY(-1px); }
+    .btn-review:disabled { background: rgba(255,255,255,.15); color: rgba(255,255,255,.35); cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ── CLOSED WEEK OVERLAY ── */
+    .closed-overlay {
+      background: #fff; border-radius: 20px; padding: 36px 28px;
+      text-align: center; max-width: 440px; margin: 40px auto;
+      box-shadow: 0 8px 32px rgba(0,70,94,.1);
+    }
+    .closed-icon { font-size: 3rem; margin-bottom: 16px; }
+    .closed-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--dark); margin-bottom: 8px; }
+    .closed-sub { font-size: .92rem; color: #7b8c9f; line-height: 1.6; margin-bottom: 24px; }
+    .closed-cutoff { 
+      background: rgba(231,76,60,.08); border: 1px solid rgba(231,76,60,.2);
+      border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;
+      font-size: .85rem; color: var(--red); font-weight: 700;
+    }
+    .btn-next-week {
+      background: var(--primary); color: #fff; border: none;
+      border-radius: 14px; padding: 14px 28px;
+      font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 800;
+      cursor: pointer; transition: .15s;
+      box-shadow: 0 6px 20px rgba(78,162,253,.35);
+    }
+    .btn-next-week:hover { background: #3b8cd9; transform: translateY(-2px); }
+
+    /* ── ORDER SUMMARY MODAL ── */
+    .modal-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(3px); }
+    .modal-card {
+      position: relative; z-index: 1;
+      background: var(--cream); border-radius: 24px;
+      width: 100%; max-width: 440px;
+      box-shadow: 0 32px 80px rgba(0,0,0,.35);
+      overflow: hidden;
+      animation: slideUp .25s cubic-bezier(.34,1.3,.64,1);
+    }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-close {
+      position: absolute; top: 12px; right: 14px;
+      border: none; background: rgba(0,70,94,.1); color: var(--dark);
+      width: 30px; height: 30px; border-radius: 50%;
+      font-size: 1rem; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; font-weight: 700;
+    }
+    .modal-close:hover { background: rgba(0,70,94,.2); }
+    .modal-header { padding: 22px 22px 14px; }
+    .modal-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--dark); }
+    .modal-delivery { font-size: .82rem; color: #7b8c9f; margin-top: 3px; }
+    .modal-white-box { background: #fff; margin: 0 14px; border-radius: 16px; padding: 14px 16px; box-shadow: 0 3px 12px rgba(0,0,0,.06); }
+    .modal-row { display: grid; grid-template-columns: 38px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(0,70,94,.06); }
+    .modal-row:last-child { border-bottom: none; }
+    .modal-thumb { width: 38px; height: 38px; border-radius: 9px; overflow: hidden; background: #eee; }
+    .modal-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .modal-meal-name { font-size: .87rem; font-weight: 700; color: var(--dark); }
+    .modal-meal-qty { font-size: .75rem; color: #8898aa; }
+    .modal-meal-price { font-size: .9rem; font-weight: 800; color: var(--dark); }
+    .modal-subtotals { padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .modal-subtotal-row { display: flex; justify-content: space-between; font-size: .85rem; }
+    .modal-your-total { padding: 14px 22px 4px; display: flex; justify-content: space-between; align-items: baseline; }
+    .modal-total-label { font-size: 1rem; font-weight: 800; color: var(--dark); }
+    .modal-total-amt { font-size: 1.5rem; font-weight: 900; color: var(--dark); }
+    .modal-name-section { padding: 10px 22px; }
+    .modal-name-input {
+      width: 100%; padding: 12px 14px;
+      border: 2px solid #e8edf2; border-radius: 12px;
+      font-size: .95rem; font-family: 'DM Sans', sans-serif;
+      color: var(--dark); background: #f8fafc; outline: none; transition: .15s;
+    }
+    .modal-name-input:focus { border-color: var(--primary); background: #fff; }
+    .modal-pay-wrap { padding: 8px 22px 0; }
+    .btn-pay {
+      width: 100%; padding: 16px;
+      background: var(--dark); color: #fff; border: none;
+      border-radius: 14px; font-family: 'DM Sans', sans-serif;
+      font-size: 1.05rem; font-weight: 900; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,70,94,.3); transition: .15s;
+    }
+    .btn-pay:hover { transform: translateY(-2px); }
+    .btn-pay:disabled { background: #c5d0d8; cursor: not-allowed; transform: none; box-shadow: none; }
+    .modal-benefit { margin: 14px 22px 4px; background: #eaf7ef; border-radius: 12px; padding: 12px 14px; }
+    .modal-benefit-label { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--green); margin-bottom: 7px; }
+    .benefit-row { display: flex; justify-content: space-between; font-size: .82rem; padding: 3px 0; }
+    .modal-proto-note { padding: 10px 22px 18px; font-size: .7rem; color: #bbb; text-align: center; }
+
+    /* ── THANK YOU ── */
+    .thankyou-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--cream); padding: 40px 24px; }
+    .thankyou-card { background: #fff; border-radius: 28px; padding: 40px 36px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 24px 60px rgba(0,70,94,.12); }
+    .thankyou-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), #2ecc71);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 20px;
+      box-shadow: 0 12px 32px rgba(39,174,96,.3);
+      animation: bounceIn .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes bounceIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .thankyou-title { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--dark); margin-bottom: 8px; }
+    .thankyou-sub { font-size: .95rem; color: #50657a; line-height: 1.5; margin-bottom: 24px; }
+    .thankyou-detail { background: #f8fafc; border-radius: 14px; padding: 16px 20px; text-align: left; margin-bottom: 24px; }
+    .thankyou-row { display: flex; justify-content: space-between; font-size: .85rem; padding: 4px 0; }
+    .thankyou-row span:first-child { color: #7b8c9f; }
+    .thankyou-row span:last-child { font-weight: 700; color: var(--dark); }
+    .btn-back { width: 100%; padding: 14px; background: var(--dark); color: #fff; border: none; border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(0,70,94,.25); transition: .15s; }
+    .btn-back:hover { transform: translateY(-2px); }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 1: COMPANY CODE ENTRY
+═══════════════════════════════════════ -->
+<div id="sLogin" class="screen active">
+  <div class="auth-bg">
+    <div class="auth-bg-top">
+      <div class="auth-bg-dots"></div>
+      <div class="auth-brand">
+        <div class="auth-logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        </div>
+        <div class="auth-wordmark">BetterDay</div>
+        <div class="auth-tagline">FOR WORK</div>
+      </div>
+    </div>
+    <div class="auth-bg-bottom"></div>
+    <div class="auth-card-wrap">
+      <div class="auth-card">
+        <div class="card-eyebrow">Welcome</div>
+        <div class="card-title">Enter your<br>company code</div>
+        <div class="card-subtitle">Your office manager shared this with you when your team signed up.</div>
+
+        <div class="form-error" id="loginError">We couldn't find that company code. Check with your office manager.</div>
+
+        <div class="field-group">
+          <label>Company Code</label>
+          <div class="code-field-wrap">
+            <input type="text" id="loginCode" placeholder="e.g. BROCK"
+              oninput="previewCode(this)"
+              onkeydown="if(event.key==='Enter') doLogin()">
+            <span class="code-check" id="loginCodeCheck"></span>
+          </div>
+          <div class="company-confirm" id="loginCompanyConfirm">
+            <span>🏢</span>
+            <span id="loginCompanyName"></span>
+          </div>
+        </div>
+
+        <div id="loginLoadingWrap" class="spinner-wrap hidden">
+          <div class="spinner"></div>
+          <div class="spinner-label">Looking up your company…</div>
+        </div>
+
+        <button class="btn-main" id="loginBtn" onclick="doLogin()" disabled>Continue →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 2: MENU
+═══════════════════════════════════════ -->
+<div id="sMenu" class="screen">
+  <div class="menu-shell">
+    <div class="menu-topbar">
+      <div class="menu-topbar-brand">Better<span>Day</span> for Work</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="next-price-chip" id="nextPriceChip">Next meal: <strong id="nextMealPrice">—</strong></div>
+        <div class="user-chip">
+          <div class="user-avatar" id="userAvatar">?</div>
+          <div class="user-name" id="userName">—</div>
+          <button class="logout-btn" onclick="doLogout()">Sign out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week selector tabs -->
+    <div class="week-tabs-bar" id="weekTabsBar"></div>
+
+    <div class="pricing-banner">
+      <div class="pricing-banner-inner" id="pricingBannerInner"></div>
+    </div>
+
+    <div class="menu-scroll">
+      <div class="menu-inner" id="menuInner"></div>
+    </div>
+
+    <div class="bottom-bar" id="bottomBar">
+      <div class="bottom-bar-inner">
+        <div class="bb-left">
+          <div class="bb-count" id="bbCount">Add meals to get started</div>
+          <div style="display:flex;align-items:baseline;gap:8px;">
+            <span style="font-size:.88rem;color:rgba(255,255,255,.7);">You pay</span>
+            <span class="bb-total" id="bbTotal">$0.00</span>
+          </div>
+          <div class="bb-savings" id="bbSavings"></div>
+        </div>
+        <div class="bb-right">
+          <button class="bb-clear" onclick="clearCart()">Clear</button>
+          <button class="btn-review" id="reviewBtn" onclick="openSummary()" disabled>Review Order →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 3: THANK YOU
+═══════════════════════════════════════ -->
+<div id="sThankYou" class="screen">
+  <div class="thankyou-wrap">
+    <div class="thankyou-card">
+      <div class="thankyou-icon">✓</div>
+      <div class="thankyou-title">You're all set!</div>
+      <div class="thankyou-sub">Your order is confirmed. We'll have it in the fridge by lunchtime on delivery day.</div>
+      <div class="thankyou-detail" id="tyDetail"></div>
+      <p style="font-size:.8rem;color:#aab4be;margin-bottom:20px;line-height:1.5;">
+        In the full build, your card will be charged via Stripe and you'll get a confirmation email.
+      </p>
+      <button class="btn-back" onclick="goBackToMenu()">← Order for another week</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ORDER SUMMARY MODAL
+═══════════════════════════════════════ -->
+<div id="summaryModal" class="modal-overlay hidden">
+  <div class="modal-backdrop" onclick="closeSummary()"></div>
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeSummary()">×</button>
+    <div class="modal-header">
+      <div class="modal-title">Your Order</div>
+      <div class="modal-delivery" id="modalDelivery"></div>
+    </div>
+    <div class="modal-white-box">
+      <div id="modalRows"></div>
+      <div class="modal-subtotals" id="modalSubtotals"></div>
+    </div>
+    <div class="modal-your-total">
+      <span class="modal-total-label">Your Total</span>
+      <span class="modal-total-amt" id="modalTotal">$0.00</span>
+    </div>
+    <div class="modal-name-section">
+      <div class="field-group" style="margin-bottom:0">
+        <label style="font-size:.75rem;font-weight:700;color:var(--dark);display:block;margin-bottom:5px;">Your Name (for the fridge label)</label>
+        <input type="text" id="employeeNameInput" class="modal-name-input" placeholder="First & Last Name" oninput="checkNameInput()">
+      </div>
+    </div>
+    <div class="modal-pay-wrap">
+      <button class="btn-pay" id="payBtn" onclick="doCheckout()" disabled>Enter your name above to continue</button>
+    </div>
+    <div class="modal-benefit" id="modalBenefit" style="display:none;">
+      <div class="modal-benefit-label">🎁 Your Benefit This Week</div>
+      <div id="benefitRows"></div>
+    </div>
+    <div class="modal-proto-note">Prototype — real build connects to Stripe for payment</div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIGURATION
+═══════════════════════════════════════════════ */
+const SCRIPT_URL = "{{ script_url }}";
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let currentCompany  = null;   // full company object from Apps Script
+let currentEmployee = '';     // name entered at checkout
+let cart            = [];     // { mealId, meal, price, tier, weekIndex }
+let weeks           = [];     // computed week windows
+let activeWeekIndex = 0;      // which tab is showing
+let menuCache       = {};     // sundayAnchor → { meat:[], vegan:[] }
+let pendingCode     = '';     // typed code, pre-validated
+
+/* ═══════════════════════════════════════════════
+   WEEK WINDOW LOGIC
+   ─────────────────────────────────────────────
+   Cutoff: Thursday 00:01 AM local time
+   (= Wednesday midnight)
+   Delivery: Monday of the NEXT week after the
+   Sunday that anchors each production week.
+
+   We always show 3 windows:
+     - Active window (open or just-closed)
+     - Next window
+     - Window after that
+═══════════════════════════════════════════════ */
+function getSundayAnchor(dateObj) {
+  // Returns the Sunday that starts a production week for a given date
+  const d = new Date(dateObj);
+  const day = d.getDay(); // 0=Sun
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getDeliveryMonday(sundayAnchor) {
+  // Delivery is the Monday after the Sunday anchor
+  const d = new Date(sundayAnchor);
+  d.setDate(d.getDate() + 1);
+  return d;
+}
+
+function getCutoffForSunday(sundayAnchor) {
+  // Cutoff is Thursday 00:01 AM of the SAME week
+  // i.e. 4 days after Sunday
+  const d = new Date(sundayAnchor);
+  d.setDate(d.getDate() + 4); // Thursday
+  d.setHours(0, 1, 0, 0);    // 00:01 AM
+  return d;
+}
+
+function formatDateShort(d) {
+  return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+}
+function formatDateFull(d) {
+  return d.toLocaleDateString('en-CA', { weekday: 'long', month: 'short', day: 'numeric' });
+}
+function toYMD(d) {
+  return d.toISOString().split('T')[0];
+}
+
+function computeWeeks() {
+  const now = new Date();
+  weeks = [];
+
+  // Find the current production Sunday anchor
+  // If we're past Wednesday midnight (Thu 00:01), bump to NEXT Sunday
+  const todaySunday = getSundayAnchor(now);
+  const thisCutoff  = getCutoffForSunday(todaySunday);
+
+  let firstSunday;
+  if (now >= thisCutoff) {
+    // Past cutoff — the "current" week is grayed, but we still show it as week 0
+    // and weeks 1+2 are the next two open weeks
+    firstSunday = todaySunday;
+  } else {
+    firstSunday = todaySunday;
+  }
+
+  for (let i = 0; i < 3; i++) {
+    const sun = new Date(firstSunday);
+    sun.setDate(sun.getDate() + 7 * i);
+    const cutoff  = getCutoffForSunday(sun);
+    const delivery = getDeliveryMonday(sun);
+    const isOpen  = now < cutoff;
+    const isPast  = delivery < now;
+
+    weeks.push({
+      sundayAnchor:   toYMD(sun),
+      deliveryDate:   delivery,
+      deliveryStr:    formatDateFull(delivery),
+      deliveryShort:  formatDateShort(delivery),
+      cutoff:         cutoff,
+      cutoffStr:      cutoff.toLocaleDateString('en-CA', { weekday: 'long', month: 'short', day: 'numeric' }) + ' at 12:01 AM',
+      isOpen:         isOpen,
+      isPast:         isPast,
+    });
+  }
+
+  // Set active tab to first open week; if none open, stay on 0
+  activeWeekIndex = weeks.findIndex(w => w.isOpen);
+  if (activeWeekIndex < 0) activeWeekIndex = 0;
+}
+
+/* ═══════════════════════════════════════════════
+   SCREEN NAV
+═══════════════════════════════════════════════ */
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ═══════════════════════════════════════════════
+   LOGIN — company code lookup
+═══════════════════════════════════════════════ */
+let debounceTimer = null;
+
+function previewCode(input) {
+  const code = input.value.trim().toUpperCase();
+  const checkEl = document.getElementById('loginCodeCheck');
+  const confirmEl = document.getElementById('loginCompanyConfirm');
+  const nameEl = document.getElementById('loginCompanyName');
+  const btnEl = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.classList.remove('show');
+
+  if (code.length < 2) {
+    checkEl.textContent = '';
+    checkEl.classList.remove('show');
+    confirmEl.classList.remove('show');
+    btnEl.disabled = true;
+    pendingCode = '';
+    currentCompany = null;
+    return;
+  }
+
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(async () => {
+    document.getElementById('loginLoadingWrap').classList.remove('hidden');
+    btnEl.disabled = true;
+    try {
+      const resp = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_company', company_id: code })
+      });
+      const data = await resp.json();
+      if (data.found) {
+        checkEl.textContent = '✅';
+        checkEl.classList.add('show');
+        input.classList.add('valid');
+        input.classList.remove('error');
+        nameEl.textContent = data.company.CompanyName;
+        confirmEl.classList.add('show');
+        btnEl.disabled = false;
+        pendingCode = code;
+        currentCompany = data.company;
+      } else {
+        checkEl.textContent = '❌';
+        checkEl.classList.add('show');
+        input.classList.add('error');
+        input.classList.remove('valid');
+        confirmEl.classList.remove('show');
+        btnEl.disabled = true;
+        pendingCode = '';
+        currentCompany = null;
+      }
+    } catch(err) {
+      console.error('Lookup error:', err);
+    }
+    document.getElementById('loginLoadingWrap').classList.add('hidden');
+  }, 600);
+}
+
+async function doLogin() {
+  const errEl = document.getElementById('loginError');
+  errEl.classList.remove('show');
+
+  if (!currentCompany) {
+    // Try to look up directly if they hit Enter without debounce firing
+    const code = document.getElementById('loginCode').value.trim().toUpperCase();
+    if (!code) return;
+    try {
+      const resp = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_company', company_id: code })
+      });
+      const data = await resp.json();
+      if (!data.found) { errEl.classList.add('show'); return; }
+      currentCompany = data.company;
+    } catch(e) { errEl.classList.add('show'); return; }
+  }
+
+  cart = [];
+  computeWeeks();
+  setupMenu();
+  goTo('sMenu');
+}
+
+function doLogout() {
+  currentCompany  = null;
+  currentEmployee = '';
+  cart = [];
+  weeks = [];
+  menuCache = {};
+  document.getElementById('loginCode').value = '';
+  document.getElementById('loginCodeCheck').classList.remove('show');
+  document.getElementById('loginCompanyConfirm').classList.remove('show');
+  document.getElementById('loginBtn').disabled = true;
+  goTo('sLogin');
+}
+
+/* ═══════════════════════════════════════════════
+   MENU SETUP
+═══════════════════════════════════════════════ */
+function setupMenu() {
+  const c = currentCompany;
+
+  // User chip — show company name
+  document.getElementById('userAvatar').textContent = c.CompanyName.slice(0, 2).toUpperCase();
+  document.getElementById('userName').textContent = c.CompanyName;
+
+  // Pricing banner
+  buildPricingBanner();
+
+  // Week tabs
+  buildWeekTabs();
+
+  // Render active week
+  renderWeek(activeWeekIndex);
+}
+
+function buildPricingBanner() {
+  const c = currentCompany;
+  let tiers = [];
+
+  const freeMeals = parseInt(c.FreeMealsPerWeek) || 0;
+  const t1meals   = parseInt(c.Tier1_Meals) || 0;
+  const t2meals   = parseInt(c.Tier2_Meals) || 0;
+  const t3meals   = parseInt(c.Tier3_Meals) || 0;
+  const fullPrice = parseFloat(c.FullPrice) || 16.99;
+
+  if (freeMeals > 0) tiers.push(`Meals 1–${freeMeals}: <strong style="color:var(--green)">FREE</strong>`);
+
+  let cursor = freeMeals;
+  if (t1meals > 0) {
+    tiers.push(`Meals ${cursor+1}–${cursor+t1meals}: <strong>$${parseFloat(c.Tier1_EmployeePrice).toFixed(2)}</strong>`);
+    cursor += t1meals;
+  }
+  if (t2meals > 0) {
+    tiers.push(`Meals ${cursor+1}–${cursor+t2meals}: <strong>$${parseFloat(c.Tier2_EmployeePrice).toFixed(2)}</strong>`);
+    cursor += t2meals;
+  }
+  if (t3meals > 0) {
+    tiers.push(`Meals ${cursor+1}–${cursor+t3meals}: <strong>$${parseFloat(c.Tier3_EmployeePrice).toFixed(2)}</strong>`);
+    cursor += t3meals;
+  }
+  if (c.AllowExtraAtFullPrice === 'TRUE' || c.AllowExtraAtFullPrice === true) {
+    tiers.push(`Additional: <strong>$${fullPrice.toFixed(2)}</strong>`);
+  }
+
+  const deliveryInfo = weeks[activeWeekIndex]
+    ? `📦 Next delivery: <strong>${weeks[activeWeekIndex].deliveryShort}</strong>`
+    : '';
+
+  document.getElementById('pricingBannerInner').innerHTML =
+    `<span class="pricing-company">${c.CompanyName}</span>` +
+    tiers.map(t => `<span class="pricing-sep">·</span><span class="pricing-tier">${t}</span>`).join('') +
+    `<span class="pricing-delivery">${deliveryInfo}</span>`;
+}
+
+function buildWeekTabs() {
+  const bar = document.getElementById('weekTabsBar');
+  bar.innerHTML = '';
+  weeks.forEach((w, i) => {
+    let badge = '';
+    if (w.isOpen)  badge = `<span class="tab-badge tab-badge-open">Open</span>`;
+    else           badge = `<span class="tab-badge tab-badge-closed">Closed</span>`;
+    if (i > 0 && w.isOpen) badge = `<span class="tab-badge tab-badge-next">Pre-order</span>`;
+
+    const btn = document.createElement('button');
+    btn.className = 'week-tab' + (i === activeWeekIndex ? ' active' : '');
+    btn.innerHTML = `Delivery ${w.deliveryShort}${badge}<span class="tab-date">Menu week of ${toYMD(new Date(w.sundayAnchor)).slice(5)}</span>`;
+    btn.onclick = () => switchWeek(i);
+    bar.appendChild(btn);
+  });
+}
+
+async function switchWeek(index) {
+  activeWeekIndex = index;
+  buildWeekTabs();
+  buildPricingBanner();
+  renderWeek(index);
+}
+
+/* ═══════════════════════════════════════════════
+   WEEK CONTENT RENDERING
+═══════════════════════════════════════════════ */
+async function renderWeek(index) {
+  const w = weeks[index];
+  const inner = document.getElementById('menuInner');
+  inner.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-label">Loading this week\'s menu…</div></div>';
+
+  if (!w.isOpen) {
+    // Show closed overlay with prompt to jump to next open week
+    const nextOpen = weeks.findIndex(wk => wk.isOpen);
+    inner.innerHTML = `
+      <div class="closed-overlay">
+        <div class="closed-icon">⏰</div>
+        <div class="closed-title">Just missed it!</div>
+        <div class="closed-sub">
+          Ordering for the <strong>${w.deliveryStr}</strong> delivery has now closed.
+          Orders lock every Wednesday at midnight so our kitchen can plan ahead.
+        </div>
+        <div class="closed-cutoff">
+          Cutoff was: ${w.cutoffStr}
+        </div>
+        ${nextOpen >= 0
+          ? `<button class="btn-next-week" onclick="switchWeek(${nextOpen})">
+              Pre-order for ${weeks[nextOpen].deliveryShort} →
+            </button>`
+          : '<p style="font-size:.85rem;color:#7b8c9f;">Check back Thursday for the next ordering window.</p>'
+        }
+      </div>`;
+    return;
+  }
+
+  // Load menu from cache or fetch
+  let menu = menuCache[w.sundayAnchor];
+  if (!menu) {
+    try {
+      const resp = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_menu', sunday_anchor: w.sundayAnchor })
+      });
+      menu = await resp.json();
+      menuCache[w.sundayAnchor] = menu;
+    } catch(err) {
+      inner.innerHTML = `<div class="closed-overlay"><div class="closed-icon">😕</div><div class="closed-title">Couldn't load menu</div><div class="closed-sub">Check your connection and try again.</div></div>`;
+      return;
+    }
+  }
+
+  const meatItems  = menu.meat  || [];
+  const veganItems = menu.vegan || [];
+
+  if (!meatItems.length && !veganItems.length) {
+    inner.innerHTML = `<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">This week's menu hasn't been published. Check back soon!</div></div>`;
+    return;
+  }
+
+  let html = '';
+  if (meatItems.length) {
+    html += `<div class="menu-section-title">Meat Options</div><div class="meal-grid" id="grid-meat-${index}">`;
+    meatItems.forEach(item => { html += mealCardHTML(item, index); });
+    html += '</div>';
+  }
+  if (veganItems.length) {
+    html += `<div class="menu-section-title">Plant-Based Options</div><div class="meal-grid" id="grid-vegan-${index}">`;
+    veganItems.forEach(item => { html += mealCardHTML(item, index); });
+    html += '</div>';
+  }
+  inner.innerHTML = html;
+
+  // Re-render quantities for any already-carted items
+  cart.filter(i => i.weekIndex === index).forEach(i => {
+    const qty = cart.filter(x => x.mealId === i.mealId && x.weekIndex === index).length;
+    renderMealControl(i.mealId, qty, index);
+  });
+}
+
+function mealCardHTML(item, weekIndex) {
+  const id = String(item.id);
+  return `
+    <div class="meal-card" id="mcard-${weekIndex}-${id}">
+      <img class="meal-img" src="${item.image || ''}"
+        referrerpolicy="no-referrer"
+        onerror="this.outerHTML='<div class=meal-img-placeholder>🍽️</div>'">
+      <div class="meal-body">
+        <div class="meal-name">${item.name}</div>
+        <hr class="meal-divider">
+        <div class="meal-footer">
+          <div id="ctrl-${weekIndex}-${id}">
+            <button class="btn-add" onclick="addMeal('${id}', ${weekIndex}, ${JSON.stringify(item).replace(/"/g, '&quot;')})">+ Add</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   TIER PRICING ENGINE
+═══════════════════════════════════════════════ */
+function getTierForNextItem(weekIndex) {
+  const c = currentCompany;
+  const weekCart = cart.filter(i => i.weekIndex === weekIndex);
+  const count = weekCart.length;
+
+  const freeMeals = parseInt(c.FreeMealsPerWeek) || 0;
+  const t1meals   = parseInt(c.Tier1_Meals) || 0;
+  const t2meals   = parseInt(c.Tier2_Meals) || 0;
+  const t3meals   = parseInt(c.Tier3_Meals) || 0;
+
+  if (count < freeMeals) return { tier: 'free', price: 0 };
+  if (count < freeMeals + t1meals) return { tier: 'tier1', price: parseFloat(c.Tier1_EmployeePrice) || 0 };
+  if (count < freeMeals + t1meals + t2meals) return { tier: 'tier2', price: parseFloat(c.Tier2_EmployeePrice) || 0 };
+  if (count < freeMeals + t1meals + t2meals + t3meals) return { tier: 'tier3', price: parseFloat(c.Tier3_EmployeePrice) || 0 };
+  if (c.AllowExtraAtFullPrice === 'TRUE' || c.AllowExtraAtFullPrice === true) {
+    return { tier: 'full', price: parseFloat(c.FullPrice) || 16.99 };
+  }
+  return null; // no more meals allowed
+}
+
+function recomputeTiers(weekIndex) {
+  // Re-assign tiers to all items in a week after a removal
+  const c = currentCompany;
+  const freeMeals = parseInt(c.FreeMealsPerWeek) || 0;
+  const t1meals   = parseInt(c.Tier1_Meals) || 0;
+  const t2meals   = parseInt(c.Tier2_Meals) || 0;
+  const t3meals   = parseInt(c.Tier3_Meals) || 0;
+
+  const weekItems = cart.filter(i => i.weekIndex === weekIndex);
+  weekItems.forEach((item, idx) => {
+    if (idx < freeMeals) {
+      item.tier = 'free'; item.price = 0;
+    } else if (idx < freeMeals + t1meals) {
+      item.tier = 'tier1'; item.price = parseFloat(c.Tier1_EmployeePrice) || 0;
+    } else if (idx < freeMeals + t1meals + t2meals) {
+      item.tier = 'tier2'; item.price = parseFloat(c.Tier2_EmployeePrice) || 0;
+    } else if (idx < freeMeals + t1meals + t2meals + t3meals) {
+      item.tier = 'tier3'; item.price = parseFloat(c.Tier3_EmployeePrice) || 0;
+    } else {
+      item.tier = 'full'; item.price = parseFloat(c.FullPrice) || 16.99;
+    }
+  });
+}
+
+function getNextPriceLabel(weekIndex) {
+  const t = getTierForNextItem(weekIndex);
+  if (!t) return 'Max reached';
+  if (t.tier === 'free') return 'FREE 🎉';
+  return '$' + t.price.toFixed(2);
+}
+
+/* ═══════════════════════════════════════════════
+   CART ACTIONS
+═══════════════════════════════════════════════ */
+function addMeal(id, weekIndex, meal) {
+  const t = getTierForNextItem(weekIndex);
+  if (!t) { alert('You\'ve reached the maximum meals for this week.'); return; }
+  cart.push({ mealId: id, meal, price: t.price, tier: t.tier, weekIndex });
+  const qty = cart.filter(i => i.mealId === id && i.weekIndex === weekIndex).length;
+  renderMealControl(id, qty, weekIndex);
+  renderCart();
+  document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
+}
+
+function removeMeal(id, weekIndex) {
+  let idx = -1;
+  for (let i = cart.length - 1; i >= 0; i--) {
+    if (cart[i].mealId === id && cart[i].weekIndex === weekIndex) { idx = i; break; }
+  }
+  if (idx < 0) return;
+  cart.splice(idx, 1);
+  recomputeTiers(weekIndex);
+  const qty = cart.filter(i => i.mealId === id && i.weekIndex === weekIndex).length;
+  renderMealControl(id, qty, weekIndex);
+  renderCart();
+  document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
+}
+
+function renderMealControl(id, qty, weekIndex) {
+  const wrap = document.getElementById(`ctrl-${weekIndex}-${id}`);
+  if (!wrap) return;
+  if (qty === 0) {
+    wrap.innerHTML = `<button class="btn-add" onclick="addMeal('${id}', ${weekIndex}, ${JSON.stringify(cart.find(i=>i.mealId===id&&i.weekIndex===weekIndex)?.meal || menuCache[weeks[weekIndex]?.sundayAnchor]?.meat?.concat(menuCache[weeks[weekIndex]?.sundayAnchor]?.vegan||[])?.find(m=>String(m.id)===id) || {id,name:'',image:''}).replace(/"/g,'&quot;')})">+ Add</button>`;
+    // Simpler re-render using stored meal data
+    const mealData = findMealInCache(id, weekIndex);
+    if (mealData) {
+      wrap.innerHTML = `<button class="btn-add" onclick="addMeal('${id}', ${weekIndex}, ${JSON.stringify(mealData).replace(/"/g,'&quot;')})">+ Add</button>`;
+    }
+  } else {
+    wrap.innerHTML = `<div class="qty-pill">
+      <button class="qty-btn" onclick="removeMeal('${id}', ${weekIndex})">−</button>
+      <span class="qty-val">${qty}</span>
+      <button class="qty-btn" onclick="addMeal('${id}', ${weekIndex}, ${JSON.stringify(findMealInCache(id, weekIndex) || {}).replace(/"/g,'&quot;')})">+</button>
+    </div>`;
+  }
+}
+
+function findMealInCache(id, weekIndex) {
+  const anchor = weeks[weekIndex]?.sundayAnchor;
+  const menu = menuCache[anchor];
+  if (!menu) return { id, name: '', image: '' };
+  return [...(menu.meat||[]), ...(menu.vegan||[])].find(m => String(m.id) === String(id)) || { id, name: '', image: '' };
+}
+
+function clearCart() {
+  cart = [];
+  renderWeek(activeWeekIndex);
+  renderCart();
+}
+
+function renderCart() {
+  const activeCartItems = cart.filter(i => i.weekIndex === activeWeekIndex);
+  const total    = cart.reduce((s, i) => s + i.price, 0);
+  const allCount = cart.length;
+
+  let savings = 0;
+  const fullPrice = parseFloat(currentCompany?.FullPrice) || 16.99;
+  cart.forEach(i => { if (i.tier !== 'full') savings += fullPrice - i.price; });
+
+  let countLabel = 'Add meals to get started';
+  if (allCount > 0) {
+    const byWeek = {};
+    cart.forEach(i => {
+      const label = weeks[i.weekIndex]?.deliveryShort || `Week ${i.weekIndex+1}`;
+      byWeek[label] = (byWeek[label] || 0) + 1;
+    });
+    countLabel = allCount + ' meal' + (allCount !== 1 ? 's' : '') + ' · ' +
+      Object.entries(byWeek).map(([w, n]) => `${n} for ${w}`).join(', ');
+  }
+
+  document.getElementById('bbCount').textContent = countLabel;
+  document.getElementById('bbTotal').textContent = '$' + total.toFixed(2);
+  document.getElementById('bbSavings').textContent = savings > 0
+    ? `${currentCompany.CompanyName} saved you $${savings.toFixed(2)}`
+    : '';
+  document.getElementById('reviewBtn').disabled = allCount === 0;
+}
+
+/* ═══════════════════════════════════════════════
+   ORDER SUMMARY MODAL
+═══════════════════════════════════════════════ */
+function openSummary() {
+  if (!cart.length) return;
+  const c = currentCompany;
+  const fullPrice = parseFloat(c.FullPrice) || 16.99;
+
+  // Group by week then by meal
+  const byWeek = {};
+  cart.forEach(item => {
+    if (!byWeek[item.weekIndex]) byWeek[item.weekIndex] = [];
+    byWeek[item.weekIndex].push(item);
+  });
+
+  const total    = cart.reduce((s, i) => s + i.price, 0);
+  const fullValue = cart.length * fullPrice;
+  const savings  = fullValue - total;
+
+  // Delivery info
+  const weekLabels = Object.keys(byWeek).map(wi => weeks[wi]?.deliveryStr || '').join(', ');
+  document.getElementById('modalDelivery').textContent = weekLabels + ' · ' + (c.FridgeLocationDescription || c.AddressLine1 || '');
+
+  // Rows
+  let rowsHTML = '';
+  Object.entries(byWeek).forEach(([wi, items]) => {
+    if (Object.keys(byWeek).length > 1) {
+      rowsHTML += `<div style="font-size:.7rem;font-weight:800;text-transform:uppercase;color:var(--primary);padding:8px 0 4px;">${weeks[wi]?.deliveryShort} delivery</div>`;
+    }
+    const grouped = {};
+    items.forEach(i => {
+      if (!grouped[i.mealId]) grouped[i.mealId] = { meal: i.meal, entries: [] };
+      grouped[i.mealId].entries.push(i);
+    });
+    Object.values(grouped).forEach(g => {
+      const lineTotal = g.entries.reduce((s,e) => s+e.price, 0);
+      const tierLabel = g.entries.map(e => e.tier === 'free' ? 'FREE' : '$'+e.price.toFixed(2)).join(' + ');
+      rowsHTML += `<div class="modal-row">
+        <div class="modal-thumb"><img src="${g.meal.image||''}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'"></div>
+        <div><div class="modal-meal-name">${g.meal.name||'Meal'}</div><div class="modal-meal-qty">${g.entries.length}× ${tierLabel}</div></div>
+        <div class="modal-meal-price">${lineTotal===0?'<span style="color:var(--green);font-weight:800">FREE</span>':'$'+lineTotal.toFixed(2)}</div>
+      </div>`;
+    });
+  });
+
+  document.getElementById('modalRows').innerHTML = rowsHTML;
+  document.getElementById('modalSubtotals').innerHTML = `
+    <div class="modal-subtotal-row"><span style="color:#50657a">Full retail value (${cart.length} meals)</span><span style="font-weight:700">$${fullValue.toFixed(2)}</span></div>
+    ${savings > 0 ? `<div class="modal-subtotal-row"><span style="color:var(--green)">${c.CompanyName} savings</span><span style="font-weight:700;color:var(--green)">–$${savings.toFixed(2)}</span></div>` : ''}`;
+
+  document.getElementById('modalTotal').textContent = '$' + total.toFixed(2);
+
+  // Benefit section
+  const freeCount = cart.filter(i => i.tier === 'free').length;
+  const t1Count   = cart.filter(i => i.tier === 'tier1').length;
+  const t2Count   = cart.filter(i => i.tier === 'tier2').length;
+  const t3Count   = cart.filter(i => i.tier === 'tier3').length;
+  const benefitEl = document.getElementById('modalBenefit');
+  if (savings > 0) {
+    let bRows = '';
+    if (freeCount) bRows += `<div class="benefit-row"><span>${freeCount} complimentary meal${freeCount>1?'s':''}</span><span style="color:var(--green);font-weight:700">–$${(freeCount*fullPrice).toFixed(2)}</span></div>`;
+    if (t1Count)   bRows += `<div class="benefit-row"><span>Tier 1 subsidy (${t1Count} meal${t1Count>1?'s':''})</span><span style="color:var(--green);font-weight:700">–$${(t1Count*(fullPrice-parseFloat(c.Tier1_EmployeePrice||0))).toFixed(2)}</span></div>`;
+    if (t2Count)   bRows += `<div class="benefit-row"><span>Tier 2 subsidy (${t2Count} meal${t2Count>1?'s':''})</span><span style="color:var(--green);font-weight:700">–$${(t2Count*(fullPrice-parseFloat(c.Tier2_EmployeePrice||0))).toFixed(2)}</span></div>`;
+    if (t3Count)   bRows += `<div class="benefit-row"><span>Tier 3 subsidy (${t3Count} meal${t3Count>1?'s':''})</span><span style="color:var(--green);font-weight:700">–$${(t3Count*(fullPrice-parseFloat(c.Tier3_EmployeePrice||0))).toFixed(2)}</span></div>`;
+    document.getElementById('benefitRows').innerHTML = bRows;
+    benefitEl.style.display = 'block';
+  } else {
+    benefitEl.style.display = 'none';
+  }
+
+  // Reset name field
+  document.getElementById('employeeNameInput').value = '';
+  document.getElementById('payBtn').disabled = true;
+  document.getElementById('payBtn').textContent = 'Enter your name above to continue';
+
+  document.getElementById('summaryModal').classList.remove('hidden');
+}
+
+function checkNameInput() {
+  const val = document.getElementById('employeeNameInput').value.trim();
+  const btn = document.getElementById('payBtn');
+  const total = cart.reduce((s,i) => s+i.price, 0);
+  if (val.length > 1) {
+    btn.disabled = false;
+    btn.textContent = total > 0 ? `Pay  $${total.toFixed(2)}` : 'Submit Order (no charge)';
+  } else {
+    btn.disabled = true;
+    btn.textContent = 'Enter your name above to continue';
+  }
+}
+
+function closeSummary() {
+  document.getElementById('summaryModal').classList.add('hidden');
+}
+
+async function doCheckout() {
+  const name = document.getElementById('employeeNameInput').value.trim();
+  if (!name) return;
+  currentEmployee = name;
+
+  const c        = currentCompany;
+  const total    = cart.reduce((s,i) => s+i.price, 0);
+  const fullPrice = parseFloat(c.FullPrice) || 16.99;
+  const savings  = cart.length * fullPrice - total;
+
+  // Submit each item to the backend
+  for (const item of cart) {
+    const w = weeks[item.weekIndex];
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action:           'submit_corporate_order',
+          company_id:       c.CompanyID,
+          company_name:     c.CompanyName,
+          delivery_date:    toYMD(w.deliveryDate),
+          sunday_anchor:    w.sundayAnchor,
+          employee_name:    name,
+          meal_id:          item.mealId,
+          dish_name:        item.meal?.name || '',
+          diet_type:        item.meal?.diet || '',
+          tier:             item.tier,
+          employee_price:   item.price,
+          company_coverage: (fullPrice - item.price).toFixed(2),
+          bd_coverage:      '0.00'  // placeholder until Stripe
+        })
+      });
+    } catch(e) { console.error('Submit error:', e); }
+  }
+
+  closeSummary();
+
+  // Build thank-you detail
+  const byWeek = {};
+  cart.forEach(i => { if (!byWeek[i.weekIndex]) byWeek[i.weekIndex] = []; byWeek[i.weekIndex].push(i); });
+  let detailHTML = `<div class="thankyou-row"><span>Name</span><span>${name}</span></div>`;
+  Object.entries(byWeek).forEach(([wi, items]) => {
+    const w = weeks[wi];
+    detailHTML += `<div class="thankyou-row"><span>Delivery</span><span>${w?.deliveryStr || ''}</span></div>`;
+    detailHTML += `<div class="thankyou-row"><span>Location</span><span>${c.FridgeLocationDescription || c.AddressLine1 || ''}</span></div>`;
+    detailHTML += `<div class="thankyou-row"><span>Meals (${items.length})</span><span>${items.map(i=>i.meal?.name||'Meal').join(', ')}</span></div>`;
+  });
+  detailHTML += `<div class="thankyou-row" style="border-top:1px solid #e8edf2;margin-top:6px;padding-top:8px;">
+    <span style="font-weight:800">${c.CompanyName} covered</span>
+    <span style="font-weight:800;color:var(--green)">–$${savings.toFixed(2)}</span>
+  </div>
+  <div class="thankyou-row" style="font-size:.92rem;">
+    <span style="font-weight:800">You paid</span>
+    <span style="font-weight:800">${total > 0 ? '$'+total.toFixed(2) : 'Nothing 🎉'}</span>
+  </div>`;
+
+  document.getElementById('tyDetail').innerHTML = detailHTML;
+  cart = [];
+  goTo('sThankYou');
+}
+
+function goBackToMenu() {
+  computeWeeks();
+  setupMenu();
+  goTo('sMenu');
+}
+</script>
+</body>
+</html>
