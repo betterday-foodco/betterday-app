@@ -544,8 +544,14 @@ def work_admin():
         if isinstance(o, dict):
             grouped[o.get('CompanyName', '—')][o.get('DeliveryDate', '—')].append(o)
 
+    # Convert to plain dicts so Jinja can iterate safely
+    grouped_plain = {
+        company: dict(weeks)
+        for company, weeks in grouped.items()
+    }
+
     return render_template('work_admin.html',
-                           grouped=dict(grouped),
+                           grouped=grouped_plain,
                            company_id=company_id,
                            sunday_anchor=sunday_anchor)
 
