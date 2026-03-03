@@ -289,6 +289,53 @@
     .thankyou-row span:last-child  { font-weight: 700; color: var(--dark); }
     .btn-back { width: 100%; padding: 14px; background: var(--dark); color: #fff; border: none; border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(0,70,94,.25); transition: .15s; }
     .btn-back:hover { transform: translateY(-2px); }
+
+    /* ── CHECKOUT LOADING OVERLAY ── */
+    .checkout-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(0,70,94,.88); backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    .checkout-overlay-ring { width: 60px; height: 60px; border: 5px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin .75s linear infinite; }
+    .checkout-overlay-label { font-size: 1.05rem; font-weight: 800; color: #fff; }
+    .checkout-overlay-sub { font-size: .82rem; color: rgba(255,255,255,.6); }
+
+    /* ── INLINE BUTTON LOADING ── */
+    .btn-loading { position: relative; pointer-events: none; opacity: .82; }
+    .btn-loading::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+
+    /* ── PROFILE SCREEN ── */
+    .profile-wrap { min-height: 100vh; background: var(--cream); display: flex; flex-direction: column; }
+    .profile-topbar { background: var(--dark); padding: 0 20px; height: 54px; display: flex; align-items: center; flex-shrink: 0; }
+    .profile-back-btn { background: transparent; border: none; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px; transition: .15s; }
+    .profile-back-btn:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .profile-hero { background: var(--dark); padding: 0 24px 28px; }
+    .profile-avatar-lg { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(78,162,253,.4); }
+    .profile-name-lg { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #fff; margin-bottom: 2px; }
+    .profile-email-lg { font-size: .82rem; color: rgba(255,255,255,.5); margin-bottom: 14px; }
+    .profile-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .profile-chip { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 5px 13px; font-size: .74rem; font-weight: 700; color: rgba(255,255,255,.75); }
+    .profile-chip.green { background: rgba(39,174,96,.22); border-color: rgba(39,174,96,.35); color: #5fe49a; }
+    .profile-chip.blue { background: rgba(78,162,253,.2); border-color: rgba(78,162,253,.3); color: #7cc4ff; }
+    .profile-body { padding: 22px 24px 40px; max-width: 560px; margin: 0 auto; width: 100%; }
+    .profile-section-label { font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .9px; color: #8898aa; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+    .profile-section-label::after { content: ''; flex: 1; height: 1px; background: rgba(0,70,94,.1); }
+    .session-info-box { background: rgba(78,162,253,.07); border: 1.5px solid rgba(78,162,253,.18); border-radius: 14px; padding: 14px 16px; margin-bottom: 22px; display: flex; align-items: flex-start; gap: 12px; }
+    .session-info-icon { font-size: 1.35rem; flex-shrink: 0; margin-top: 1px; }
+    .session-info-title { font-size: .88rem; font-weight: 800; color: var(--dark); margin-bottom: 3px; }
+    .session-info-desc { font-size: .78rem; color: #50657a; line-height: 1.55; }
+    .order-hist-card { background: #fff; border-radius: 14px; padding: 13px 15px; margin-bottom: 9px; box-shadow: 0 2px 8px rgba(0,70,94,.07); display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; }
+    .order-hist-thumb { width: 40px; height: 40px; border-radius: 9px; overflow: hidden; background: #e8d5c4; flex-shrink: 0; }
+    .order-hist-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .order-hist-meal { font-size: .88rem; font-weight: 800; color: var(--dark); line-height: 1.3; }
+    .order-hist-date { font-size: .72rem; color: #8898aa; margin-top: 2px; }
+    .order-hist-right { text-align: right; }
+    .order-hist-price { font-size: .9rem; font-weight: 800; color: var(--dark); }
+    .order-tier-pill { display: inline-block; font-size: .6rem; font-weight: 800; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; margin-top: 3px; }
+    .tier-free { background: #eaf7ef; color: var(--green); }
+    .tier-tier1,.tier-tier2,.tier-tier3 { background: #e8f3ff; color: var(--primary); }
+    .tier-full { background: #f0f4f8; color: #7b8c9f; }
+    .profile-empty { text-align: center; padding: 40px 20px; color: #bcc6d0; }
+    .profile-empty-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .profile-logout-btn { width: 100%; padding: 13px; background: transparent; color: var(--red); border: 2px solid rgba(231,76,60,.22); border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: .92rem; font-weight: 800; cursor: pointer; margin-top: 8px; transition: .15s; }
+    .profile-logout-btn:hover { background: rgba(231,76,60,.05); border-color: rgba(231,76,60,.4); }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -393,7 +440,7 @@
           </div>
 
           <div id="magicSendBtn">
-            <button class="btn-main" onclick="doSendMagicLink()">Send sign-in link →</button>
+            <button class="btn-main" id="signinBtn" onclick="doSendMagicLink()">Send sign-in link →</button>
           </div>
         </div>
 
@@ -412,6 +459,7 @@
             <label>Email address</label>
             <input type="email" id="joinEmail" placeholder="sarah@company.com or sarah@gmail.com"
               oninput="checkJoinEmail(this)">
+            <div id="joinEmailExistsHint" style="display:none;margin-top:6px;font-size:.78rem;color:var(--amber);font-weight:600;"></div>
           </div>
 
           <!-- Company PIN — shown only for personal emails -->
@@ -462,10 +510,10 @@
       <div class="menu-topbar-brand">Better<span>Day</span> for Work</div>
       <div style="display:flex;align-items:center;gap:6px;">
         <div class="next-price-chip">Next meal: <strong id="nextMealPrice">—</strong></div>
-        <div class="user-chip" onclick="doLogout()">
+        <div class="user-chip" onclick="openProfile()">
           <div class="user-avatar" id="userAvatar">?</div>
           <div class="user-name" id="userName">—</div>
-          <button class="logout-btn">Sign out</button>
+          <span style="font-size:.7rem;color:rgba(255,255,255,.4);margin-left:2px;">↗</span>
         </div>
       </div>
     </div>
@@ -505,6 +553,49 @@
       <button class="btn-back" onclick="goBackToMenu()">← Order for another week</button>
     </div>
   </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 5 — PROFILE
+════════════════════════════════════════════ -->
+<div id="sProfile" class="screen">
+  <div class="profile-wrap">
+    <div class="profile-topbar">
+      <button class="profile-back-btn" onclick="goTo('sMenu')">← Back to menu</button>
+    </div>
+    <div class="profile-hero">
+      <div class="profile-avatar-lg" id="profileAvatarLg">?</div>
+      <div class="profile-name-lg" id="profileNameLg">—</div>
+      <div class="profile-email-lg" id="profileEmailLg">—</div>
+      <div class="profile-chips">
+        <span class="profile-chip" id="profileCompanyChip">—</span>
+        <span class="profile-chip blue">30-day device login</span>
+      </div>
+    </div>
+    <div class="profile-body">
+      <div class="session-info-box">
+        <div class="session-info-icon">🔐</div>
+        <div>
+          <div class="session-info-title">This device is remembered</div>
+          <div class="session-info-desc" id="profileSessionDesc">You're signed in on this device. We'll remember you for 30 days — no password or link needed when you come back.</div>
+        </div>
+      </div>
+      <div class="profile-section-label">Recent Orders</div>
+      <div id="profileOrdersList">
+        <div class="spinner-wrap"><div class="spinner"></div><div class="spinner-label">Loading your orders…</div></div>
+      </div>
+      <button class="profile-logout-btn" onclick="doLogout()">Sign out of this device</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CHECKOUT LOADING OVERLAY
+════════════════════════════════════════════ -->
+<div id="checkoutOverlay" class="checkout-overlay hidden">
+  <div class="checkout-overlay-ring"></div>
+  <div class="checkout-overlay-label">Placing your order…</div>
+  <div class="checkout-overlay-sub">Please don't close this page</div>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -612,6 +703,19 @@ async function doCompanyNext() {
   populateAuthCompanySplash();
   switchAuthTab('signin');
   goTo('sAuth');
+  // 🚀 Start warming menu cache while user is on auth screen
+  const _now = new Date();
+  const _s0 = new Date(_now); _s0.setDate(_s0.getDate()-_s0.getDay()); _s0.setHours(0,0,0,0);
+  for (let _i = 0; _i < 3; _i++) {
+    const _sun = new Date(_s0); _sun.setDate(_sun.getDate() + 7*_i);
+    const _anchor = _sun.toISOString().split('T')[0];
+    const _cutoff = new Date(_sun); _cutoff.setDate(_cutoff.getDate()+4); _cutoff.setHours(0,1,0,0);
+    if (_now < _cutoff && !menuCache[_anchor]) {
+      apiFetch({ action: 'get_menu', sunday_anchor: _anchor })
+        .then(m => { menuCache[_anchor] = m; })
+        .catch(() => {});
+    }
+  }
 }
 
 function populateAuthCompanySplash() {
@@ -636,6 +740,7 @@ function resumeSession() {
   const sess = loadSession();
   if (!sess) return;
   currentEmployee = sess.emp;
+  preloadActiveWeekMenu(); // instant for returning users — fires before transition
   enterMenu();
 }
 
@@ -651,43 +756,48 @@ function switchAuthTab(tab) {
 async function doSendMagicLink(isResend = false) {
   const email = document.getElementById('signinEmail').value.trim().toLowerCase();
   const err   = document.getElementById('signinError');
+  const btn   = document.getElementById('signinBtn');
   err.classList.remove('show');
   if (!email || !email.includes('@')) { err.textContent = 'Please enter a valid email address.'; err.classList.add('show'); return; }
 
-  document.getElementById('magicSendBtn').classList.add('hidden');
-  // In this prototype we simulate magic link — in production send via Apps Script / email provider
-  // For now: look up employee by email and auto-sign in (simulating clicking the link)
+  // Loading state — block double-tap
+  btn.classList.add('btn-loading');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
   try {
-    const d = await apiFetch({ action: 'get_employee_by_email', email, company_id: currentCompany.CompanyID });
-    if (d.found) {
-      // Simulate: show "check inbox" then auto-resolve after 2s (prototype behaviour)
-      document.getElementById('magicSentEmail').textContent = email;
-      document.getElementById('magicSentWrap').classList.remove('hidden');
-      // In real build: stop here. User clicks email link. For prototype: auto-login.
-      setTimeout(() => {
-        currentEmployee = d.employee;
-        saveSession(currentEmployee, currentCompany);
-        enterMenu();
-      }, 1800);
-    } else {
+    // First: verify employee exists
+    const chk = await apiFetch({ action: 'get_employee_by_email', email, company_id: currentCompany.CompanyID });
+    if (!chk.found) {
       err.textContent = 'No account found for that email. Try joining instead.';
       err.classList.add('show');
-      document.getElementById('magicSendBtn').classList.remove('hidden');
+      btn.classList.remove('btn-loading'); btn.disabled = false; btn.textContent = 'Send sign-in link →';
+      return;
     }
+    // Send real magic link email via Apps Script
+    await apiFetch({ action: 'create_magic_token', email, company_id: currentCompany.CompanyID });
+    // Fire menu preload NOW — user will be in inbox for 30+ seconds, use that time
+    preloadActiveWeekMenu();
+    // Show "check inbox" state — user must click the link
+    document.getElementById('magicSentEmail').textContent = email;
+    document.getElementById('magicSentWrap').classList.remove('hidden');
+    document.getElementById('magicSendBtn').classList.add('hidden');
   } catch(e) {
     err.textContent = 'Something went wrong. Please try again.';
     err.classList.add('show');
-    document.getElementById('magicSendBtn').classList.remove('hidden');
+    btn.classList.remove('btn-loading'); btn.disabled = false; btn.textContent = 'Send sign-in link →';
   }
 }
 
 // ── JOIN: EMAIL CHECK ──
+let _emailCheckTimer = null;
 function checkJoinEmail(input) {
   const email = input.value.trim().toLowerCase();
   const companyDomain = (currentCompany?.CompanyEmailDomain || '').toLowerCase().replace(/^@/, '');
   const pinSection = document.getElementById('joinPinSection');
-  const joinBtn    = document.getElementById('joinBtn');
+  const existsHint = document.getElementById('joinEmailExistsHint');
 
+  if (existsHint) existsHint.style.display = 'none';
   if (!email.includes('@')) { pinSection.classList.add('hidden'); checkJoinReady(); return; }
 
   const emailDomain = email.split('@')[1] || '';
@@ -701,6 +811,20 @@ function checkJoinEmail(input) {
     if (joinPin === '__COMPANY_EMAIL__') joinPin = ''; // reset if switched back
     updateJoinPinDisplay();
   }
+
+  // Debounced real-time duplicate check
+  clearTimeout(_emailCheckTimer);
+  _emailCheckTimer = setTimeout(async () => {
+    if (!email.includes('@') || !currentCompany) return;
+    try {
+      const chk = await apiFetch({ action: 'get_employee_by_email', email, company_id: currentCompany.CompanyID });
+      if (chk.found && existsHint) {
+        existsHint.style.display = 'block';
+        const safeEmail = email.replace(/'/g, "\\'");
+        existsHint.innerHTML = `Account already exists — <button onclick="switchAuthTab('signin');document.getElementById('signinEmail').value='${safeEmail}'" style="background:none;border:none;color:var(--primary);font-weight:800;cursor:pointer;font-family:inherit;font-size:inherit;padding:0;">sign in instead →</button>`;
+      }
+    } catch(e) {}
+  }, 700);
   checkJoinReady();
 }
 
@@ -746,7 +870,13 @@ async function doJoin() {
   const email = document.getElementById('joinEmail').value.trim().toLowerCase();
   const err   = document.getElementById('joinError');
   const suc   = document.getElementById('joinSuccess');
+  const btn   = document.getElementById('joinBtn');
   err.classList.remove('show'); suc.classList.remove('show');
+
+  // Loading state
+  btn.classList.add('btn-loading'); btn.disabled = true; btn.textContent = 'Creating account…';
+
+  const resetBtn = () => { btn.classList.remove('btn-loading'); btn.disabled = false; btn.textContent = 'Create account →'; };
 
   // Verify PIN if needed
   const pinSection = document.getElementById('joinPinSection');
@@ -756,8 +886,8 @@ async function doJoin() {
     // Check PIN against company
     try {
       const pv = await apiFetch({ action: 'verify_company_pin', company_id: currentCompany.CompanyID, pin: joinPin });
-      if (!pv.valid) { flashPinError(); err.textContent = 'Incorrect company PIN. Ask your office manager.'; err.classList.add('show'); return; }
-    } catch(e) { err.textContent = 'Could not verify PIN. Try again.'; err.classList.add('show'); return; }
+      if (!pv.valid) { flashPinError(); err.textContent = 'Incorrect company PIN. Ask your office manager.'; err.classList.add('show'); resetBtn(); return; }
+    } catch(e) { err.textContent = 'Could not verify PIN. Try again.'; err.classList.add('show'); resetBtn(); return; }
   }
 
   // Register employee
@@ -766,22 +896,43 @@ async function doJoin() {
     if (d.success) {
       currentEmployee = { firstName: first, lastName: last, email };
       saveSession(currentEmployee, currentCompany);
+      preloadActiveWeekMenu(); // start fetching menu during account setup completion
       enterMenu();
     } else if (d.exists) {
-      err.textContent = 'An account with that email already exists. Try signing in instead.';
+      err.textContent = 'An account with that email already exists. Sign in instead.';
       err.classList.add('show');
+      resetBtn();
       switchAuthTab('signin');
       document.getElementById('signinEmail').value = email;
     } else {
       err.textContent = d.error || 'Something went wrong. Please try again.';
-      err.classList.add('show');
+      err.classList.add('show'); resetBtn();
     }
-  } catch(e) { err.textContent = 'Could not create account. Try again.'; err.classList.add('show'); }
+  } catch(e) { err.textContent = 'Could not create account. Try again.'; err.classList.add('show'); resetBtn(); }
 }
 
 // ── ENTER MENU ──
 function enterMenu() {
   cart = []; computeWeeks(); setupMenu(); goTo('sMenu');
+  // Immediately preload all other open weeks in parallel (no setTimeout delay)
+  weeks.forEach((w, i) => {
+    if (i === activeWeekIndex || menuCache[w.sundayAnchor] || !w.isOpen) return;
+    apiFetch({ action: 'get_menu', sunday_anchor: w.sundayAnchor })
+      .then(m => { menuCache[w.sundayAnchor] = m; })
+      .catch(() => {});
+  });
+}
+
+// ── PRE-LOAD ACTIVE WEEK DURING SIGN-IN ──
+// Called as soon as we know who the user is — fires the menu fetch
+// while user is still in transition (inbox wait, session resume, etc.)
+function preloadActiveWeekMenu() {
+  computeWeeks();
+  const active = weeks[activeWeekIndex];
+  if (!active || menuCache[active.sundayAnchor]) return;
+  apiFetch({ action: 'get_menu', sunday_anchor: active.sundayAnchor })
+    .then(m => { menuCache[active.sundayAnchor] = m; })
+    .catch(() => {});
 }
 
 function doLogout() {
@@ -814,8 +965,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         currentCompany  = d.company;
         currentEmployee = d.employee;
         saveSession(currentEmployee, currentCompany);
+        preloadActiveWeekMenu(); // start menu fetch while transition happens
         enterMenu();
-        // Clean URL
         window.history.replaceState({}, '', window.location.pathname);
         return;
       }
@@ -1100,16 +1251,40 @@ function openSummary() {
 }
 function closeSummary() { document.getElementById('summaryModal').classList.add('hidden'); }
 
+let _checkoutInProgress = false;
 async function doCheckout() {
+  if (_checkoutInProgress) return; // Hard guard — blocks any double-tap
+  _checkoutInProgress = true;
+  const btn = document.getElementById('payBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Placing order…'; }
+  // Full-screen overlay locks all interaction instantly
+  document.getElementById('checkoutOverlay').classList.remove('hidden');
+  closeSummary();
+
   const c=currentCompany, emp=currentEmployee;
   const total=cart.reduce((s,i)=>s+i.price,0), fp=parseFloat(c.FullPrice)||16.99, savings=cart.length*fp-total;
-  for (const item of cart) {
-    const w=weeks[item.weekIndex];
-    try { await apiFetch({action:'submit_corporate_order',company_id:c.CompanyID,company_name:c.CompanyName,delivery_date:toYMD(w.deliveryDate),sunday_anchor:w.sundayAnchor,employee_name:`${emp.firstName} ${emp.lastName}`,employee_email:emp.email,meal_id:item.mealId,dish_name:item.meal?.name||'',diet_type:item.meal?.diet||'',tier:item.tier,employee_price:item.price,company_coverage:(fp-item.price).toFixed(2),bd_coverage:'0.00'}); }
-    catch(e){console.error(e);}
-  }
-  closeSummary();
-  const byWeek={}; cart.forEach(i=>{if(!byWeek[i.weekIndex])byWeek[i.weekIndex]=[];byWeek[i.weekIndex].push(i);});
+  const cartSnapshot = [...cart]; // snapshot before clearing
+
+  // Submit all meals in parallel — much faster than sequential awaits
+  const submits = cartSnapshot.map(item => {
+    const w = weeks[item.weekIndex];
+    return apiFetch({
+      action:'submit_corporate_order',
+      company_id:c.CompanyID, company_name:c.CompanyName,
+      delivery_date:toYMD(w.deliveryDate), sunday_anchor:w.sundayAnchor,
+      employee_name:`${emp.firstName} ${emp.lastName}`, employee_email:emp.email,
+      meal_id:item.mealId, dish_name:item.meal?.name||'',
+      diet_type:item.meal?.diet||'', tier:item.tier, employee_price:item.price,
+      company_coverage:(fp-item.price).toFixed(2), bd_coverage:'0.00'
+    }).catch(e => { console.error('Order submit error:', e); return {success:false}; });
+  });
+
+  try { await Promise.all(submits); } catch(e) { console.error('Checkout error:', e); }
+
+  document.getElementById('checkoutOverlay').classList.add('hidden');
+  _checkoutInProgress = false;
+
+  const byWeek={}; cartSnapshot.forEach(i=>{if(!byWeek[i.weekIndex])byWeek[i.weekIndex]=[];byWeek[i.weekIndex].push(i);});
   let dh=`<div class="thankyou-row"><span>Name</span><span>${emp.firstName} ${emp.lastName}</span></div>`;
   Object.entries(byWeek).forEach(([wi,items])=>{
     const w=weeks[wi];
@@ -1123,6 +1298,54 @@ async function doCheckout() {
 }
 
 function goBackToMenu() { computeWeeks(); setupMenu(); goTo('sMenu'); }
+
+// ── PROFILE ──
+async function openProfile() {
+  const emp = currentEmployee, c = currentCompany;
+  if (!emp) return;
+  const initials = ((emp.firstName[0]||'')+(emp.lastName[0]||'')).toUpperCase();
+  document.getElementById('profileAvatarLg').textContent = initials;
+  document.getElementById('profileNameLg').textContent   = emp.firstName + ' ' + emp.lastName;
+  document.getElementById('profileEmailLg').textContent  = emp.email;
+  document.getElementById('profileCompanyChip').textContent = c?.CompanyName || '';
+  // Show exact days remaining on session
+  const sess = loadSession();
+  if (sess && sess.savedAt) {
+    const daysLeft = Math.max(0, 30 - Math.floor((Date.now() - sess.savedAt) / 86400000));
+    document.getElementById('profileSessionDesc').textContent =
+      `You're signed in on this device. Session expires in ${daysLeft} day${daysLeft!==1?'s':''} — no password or link needed until then.`;
+  }
+  goTo('sProfile');
+  // Async load order history
+  const list = document.getElementById('profileOrdersList');
+  list.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-label">Loading your orders…</div></div>';
+  try {
+    const orders = await apiFetch({ action: 'get_orders_by_employee', email: emp.email });
+    if (!Array.isArray(orders) || !orders.length) {
+      list.innerHTML = '<div class="profile-empty"><div class="profile-empty-icon">🍽️</div><div>No orders yet — your history will appear here after your first delivery</div></div>';
+    } else {
+      const tierLabels = {free:'Complimentary',tier1:'Tier 1',tier2:'Tier 2',tier3:'Tier 3',full:'Full price'};
+      list.innerHTML = orders.map(o => {
+        const price = parseFloat(o.EmployeePrice||0);
+        const tierClass = 'tier-' + (o.Tier || 'full');
+        const tierLabel = tierLabels[o.Tier] || 'Full price';
+        return `<div class="order-hist-card">
+          <div class="order-hist-thumb"><img src="" onerror="this.style.display='none'" referrerpolicy="no-referrer"></div>
+          <div>
+            <div class="order-hist-meal">${o.DishName || 'Meal'}</div>
+            <div class="order-hist-date">${o.DeliveryDate || ''} · ${o.CompanyName || ''}</div>
+          </div>
+          <div class="order-hist-right">
+            <div class="order-hist-price">${price===0?'<span style="color:var(--green);font-weight:800">FREE</span>':'$'+price.toFixed(2)}</div>
+            <div><span class="order-tier-pill ${tierClass}">${tierLabel}</span></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    list.innerHTML = '<div class="profile-empty"><div class="profile-empty-icon">😕</div><div>Couldn\'t load orders — try again later</div></div>';
+  }
+}
 </script>
 </body>
 </html>
