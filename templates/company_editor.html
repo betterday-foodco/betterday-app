@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ company.CompanyName or 'New Company' }} — BD Company Editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root { --cream:#faebda; --dark:#00465e; --primary:#4ea2fd; --green:#27ae60; --red:#e74c3c; --amber:#f39c12; }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;padding-bottom:80px;}
+
+        .header{background:var(--dark);padding:0 32px;height:64px;display:flex;align-items:center;box-shadow:0 4px 24px rgba(0,70,94,.3);position:sticky;top:0;z-index:100;}
+        .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 90% 50%,rgba(78,162,253,.2) 0%,transparent 60%);pointer-events:none;}
+        .header-logo{height:30px;filter:brightness(0) invert(1);margin-right:14px;}
+        .header-divider{width:1px;height:22px;background:rgba(255,255,255,.2);margin-right:14px;}
+        .header-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:white;position:relative;}
+        .header-sub{font-size:.72rem;color:rgba(255,255,255,.45);margin-top:1px;position:relative;}
+        .header-right{margin-left:auto;display:flex;gap:10px;align-items:center;}
+        .header-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:.78rem;font-weight:800;text-decoration:none;transition:.15s;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;}
+        .btn-back{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.15);}
+        .btn-back:hover{background:rgba(255,255,255,.2);}
+
+        .container{max-width:900px;margin:0 auto;padding:28px 32px;}
+
+        /* ALERTS */
+        .alert{padding:13px 18px;border-radius:12px;margin-bottom:20px;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:10px;}
+        .alert-success{background:rgba(39,174,96,.1);border:1px solid rgba(39,174,96,.25);color:#1a7a3c;}
+        .alert-error{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);color:var(--red);}
+
+        /* SECTIONS */
+        .form-section{background:white;border-radius:20px;padding:24px 26px;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,70,94,.06);border:1px solid rgba(0,70,94,.06);}
+        .form-section-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(0,70,94,.07);}
+        .fs-icon{width:36px;height:36px;border-radius:10px;background:rgba(78,162,253,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+        .fs-title{font-weight:800;font-size:1rem;color:var(--dark);}
+        .fs-sub{font-size:.72rem;color:#7b8c9f;margin-top:2px;}
+
+        /* FIELDS */
+        .field-grid{display:grid;gap:14px;}
+        .field-grid-2{grid-template-columns:1fr 1fr;}
+        .field-grid-3{grid-template-columns:1fr 1fr 1fr;}
+        .field-grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+        @media(max-width:600px){.field-grid-2,.field-grid-3,.field-grid-4{grid-template-columns:1fr;}}
+        .field{display:flex;flex-direction:column;gap:5px;}
+        .field label{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7b8c9f;}
+        .field input,.field select,.field textarea{padding:11px 14px;border:2px solid #e8edf2;border-radius:11px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--dark);background:#f8fafc;transition:.15s;outline:none;width:100%;}
+        .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);background:white;box-shadow:0 0 0 3px rgba(78,162,253,.1);}
+        .field textarea{resize:vertical;min-height:80px;}
+        .field-hint{font-size:.68rem;color:#a0aebb;font-weight:600;margin-top:2px;}
+
+        /* TIER ROWS */
+        .tier-section{display:flex;flex-direction:column;gap:16px;}
+        .tier-row{background:#f8fafc;border:1.5px solid rgba(0,70,94,.08);border-radius:14px;padding:16px 18px;}
+        .tier-row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+        .tier-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.4px;}
+        .tier-badge-free{background:rgba(39,174,96,.12);color:var(--green);}
+        .tier-badge-t1,.tier-badge-t2,.tier-badge-t3{background:rgba(78,162,253,.12);color:var(--primary);}
+        .tier-badge-full{background:rgba(0,70,94,.07);color:#7b8c9f;}
+        .tier-toggle{display:flex;align-items:center;gap:8px;}
+        .tier-toggle label{font-size:.75rem;font-weight:700;color:#50657a;}
+        .tier-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary);}
+        .tier-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+        @media(max-width:500px){.tier-fields{grid-template-columns:1fr 1fr;}}
+
+        /* PRICE PREVIEW */
+        .price-preview{background:rgba(78,162,253,.06);border:1.5px solid rgba(78,162,253,.15);border-radius:14px;padding:16px 18px;margin-top:8px;}
+        .price-preview-title{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:var(--primary);margin-bottom:12px;}
+        .price-preview-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(78,162,253,.1);font-size:.82rem;}
+        .price-preview-row:last-child{border-bottom:none;}
+        .price-preview-label{color:#50657a;font-weight:600;}
+        .price-preview-val{font-weight:800;color:var(--dark);}
+        .price-preview-val.green{color:var(--green);}
+
+        /* SAVE BAR */
+        .save-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid rgba(0,70,94,.1);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 -4px 20px rgba(0,70,94,.08);z-index:100;}
+        .save-bar-info{font-size:.8rem;color:#7b8c9f;font-weight:600;}
+        .save-bar-info strong{color:var(--dark);}
+        .btn-save{padding:13px 32px;background:var(--dark);color:white;border:none;border-radius:12px;font-weight:900;font-size:.95rem;cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif;box-shadow:0 4px 16px rgba(0,70,94,.25);}
+        .btn-save:hover{background:var(--primary);transform:translateY(-1px);}
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="{{ url_for('static', filename='Logo.svg') }}" class="header-logo" alt="BetterDay">
+    <div class="header-divider"></div>
+    <div style="position:relative;">
+        <div class="header-title">{{ company.CompanyName or 'New Company' }}</div>
+        <div class="header-sub">{{ 'Edit company' if company else 'Create new corporate client' }}</div>
+    </div>
+    <div class="header-right">
+        <a href="/work/admin" class="header-btn btn-back">← Corporate Admin</a>
+    </div>
+</div>
+
+<div class="container">
+
+    {% if success %}
+    <div class="alert alert-success">✅ {{ success }}</div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        <input type="hidden" name="company_id" value="{{ company_id }}">
+
+        <!-- IDENTITY -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="fs-icon">🏢</div>
+                <div>
+                    <div class="fs-title">Company Identity</div>
+                    <div class="fs-sub">Core details and status</div>
+                </div>
+            </div>
+            <div class="field-grid field-grid-3">
+                <div class="field">
+                    <label>Company ID *</label>
+                    <input type="text" name="CompanyID" value="{{ company.CompanyID or '' }}" placeholder="e.g. BROCK" style="text-transform:uppercase;font-weight:800;letter-spacing:1px;" required>
+                    <span class="field-hint">Short unique code used in the employee portal</span>
+                </div>
+                <div class="field">
+                    <label>Company Name *</label>
+                    <input type="text" name="CompanyName" value="{{ company.CompanyName or '' }}" placeholder="Brock Health" required>
+                </div>
+                <div class="field">
+                    <label>Status</label>
+                    <select name="Status">
+                        <option value="Active" {% if not company.Status or company.Status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if company.Status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="Pilot" {% if company.Status == 'Pilot' %}selected{% endif %}>Pilot</option>
+                        <option value="Paused" {% if company.Status == 'Paused' %}selected{% endif %}>Paused</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field-grid field-grid-2" style="margin-top:14px;">
+                <div class="field">
+                    <label>Company Email Domain</label>
+                    <input type="text" name="CompanyEmailDomain" value="{{ company.CompanyEmailDomain or '' }}" placeholder="brockhealth.com">
+                    <span class="field-hint">Employees with this domain skip the PIN requirement</span>
+                </div>
+                <div class="field">
+                    <label>Stripe Customer ID</label>
+                    <input type="text" name="StripeCustomerID" value="{{ company.StripeCustomerID or '' }}" placeholder="cus_…">
+                </div>
+            </div>
+        </div>
+
+        <!-- DELIVERY -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="fs-icon">📦</div>
+                <div>
+                    <div class="fs-title">Delivery Details</div>
+                    <div class="fs-sub">Address, fridge location, access notes</div>
+                </div>
+            </div>
+            <div class="field-grid field-grid-2">
+                <div class="field">
+                    <label>Address Line 1</label>
+                    <input type="text" name="AddressLine1" value="{{ company.AddressLine1 or '' }}" placeholder="123 Main Street">
+                </div>
+                <div class="field">
+                    <label>Address Line 2</label>
+                    <input type="text" name="AddressLine2" value="{{ company.AddressLine2 or '' }}" placeholder="Suite 400">
+                </div>
+            </div>
+            <div class="field-grid field-grid-3" style="margin-top:14px;">
+                <div class="field">
+                    <label>City</label>
+                    <input type="text" name="City" value="{{ company.City or '' }}" placeholder="Calgary">
+                </div>
+                <div class="field">
+                    <label>Province / State</label>
+                    <input type="text" name="ProvinceState" value="{{ company.ProvinceState or '' }}" placeholder="AB">
+                </div>
+                <div class="field">
+                    <label>Postal Code</label>
+                    <input type="text" name="PostalCode" value="{{ company.PostalCode or '' }}" placeholder="T2P 1J9">
+                </div>
+            </div>
+            <div class="field-grid field-grid-2" style="margin-top:14px;">
+                <div class="field">
+                    <label>Fridge / Drop Location</label>
+                    <input type="text" name="FridgeLocationDescription" value="{{ company.FridgeLocationDescription or '' }}" placeholder="Main floor kitchen, left of elevator">
+                </div>
+                <div class="field">
+                    <label>Delivery Window</label>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="text" name="DeliveryWindowStart" value="{{ company.DeliveryWindowStart or '' }}" placeholder="7:00 AM" style="flex:1;">
+                        <span style="color:#a0aebb;font-weight:700;">to</span>
+                        <input type="text" name="DeliveryWindowEnd" value="{{ company.DeliveryWindowEnd or '' }}" placeholder="9:00 AM" style="flex:1;">
+                    </div>
+                </div>
+            </div>
+            <div class="field" style="margin-top:14px;">
+                <label>Delivery Instructions</label>
+                <textarea name="DeliveryInstructions">{{ company.DeliveryInstructions or company.AccessInstructions or '' }}</textarea>
+                <span class="field-hint">Shown on invoices and picklists — parking, buzzer codes, specific contacts</span>
+            </div>
+            <div class="field" style="margin-top:14px;">
+                <label>Internal Notes</label>
+                <textarea name="InternalNotes">{{ company.InternalNotes or '' }}</textarea>
+            </div>
+        </div>
+
+        <!-- CONTACTS -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="fs-icon">👤</div>
+                <div>
+                    <div class="fs-title">Contacts &amp; Billing</div>
+                    <div class="fs-sub">Primary contact and billing information</div>
+                </div>
+            </div>
+            <div class="field-grid field-grid-3">
+                <div class="field">
+                    <label>Primary Contact Name</label>
+                    <input type="text" name="PrimaryContactName" value="{{ company.PrimaryContactName or '' }}" placeholder="Jane Smith">
+                </div>
+                <div class="field">
+                    <label>Primary Contact Email</label>
+                    <input type="email" name="PrimaryContactEmail" value="{{ company.PrimaryContactEmail or '' }}" placeholder="jane@company.com">
+                </div>
+                <div class="field">
+                    <label>Primary Contact Phone</label>
+                    <input type="text" name="PrimaryContactPhone" value="{{ company.PrimaryContactPhone or '' }}" placeholder="403-555-0100">
+                </div>
+            </div>
+            <div class="field-grid field-grid-3" style="margin-top:14px;">
+                <div class="field">
+                    <label>Billing Contact Name</label>
+                    <input type="text" name="BillingContactName" value="{{ company.BillingContactName or '' }}" placeholder="Finance Dept">
+                </div>
+                <div class="field">
+                    <label>Billing Contact Email</label>
+                    <input type="email" name="BillingContactEmail" value="{{ company.BillingContactEmail or '' }}" placeholder="billing@company.com">
+                </div>
+                <div class="field">
+                    <label>Billing Frequency</label>
+                    <select name="BillingFrequency">
+                        <option value="Weekly" {% if company.BillingFrequency == 'Weekly' %}selected{% endif %}>Weekly</option>
+                        <option value="Bi-weekly" {% if company.BillingFrequency == 'Bi-weekly' %}selected{% endif %}>Bi-weekly</option>
+                        <option value="Monthly" {% if company.BillingFrequency == 'Monthly' or not company.BillingFrequency %}selected{% endif %}>Monthly</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field-grid field-grid-2" style="margin-top:14px;">
+                <div class="field">
+                    <label>Invoice Prefix</label>
+                    <input type="text" name="InvoicePrefix" value="{{ company.InvoicePrefix or '' }}" placeholder="BD-BROCK">
+                    <span class="field-hint">Used on invoice numbers e.g. BD-BROCK-0001</span>
+                </div>
+                <div class="field">
+                    <label>Billing Reference / PO Number</label>
+                    <input type="text" name="BillingReference" value="{{ company.BillingReference or '' }}" placeholder="PO-2026-01">
+                </div>
+            </div>
+        </div>
+
+        <!-- SUBSIDY TIERS -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="fs-icon">💰</div>
+                <div>
+                    <div class="fs-title">Meal Subsidy Program</div>
+                    <div class="fs-sub">Configure free meals, subsidised tiers, and pricing</div>
+                </div>
+            </div>
+
+            <div class="tier-section">
+
+                <!-- Full / Base Price -->
+                <div class="tier-row">
+                    <div class="tier-row-header">
+                        <span class="tier-badge tier-badge-full">Base Pricing</span>
+                    </div>
+                    <div class="tier-fields">
+                        <div class="field">
+                            <label>Full Retail Price ($)</label>
+                            <input type="number" step="0.01" name="BasePrice" id="basePrice"
+                                   value="{{ company.BasePrice or '16.99' }}" placeholder="16.99" oninput="updatePreview()">
+                            <span class="field-hint">What BetterDay normally charges per meal</span>
+                        </div>
+                        <div class="field">
+                            <label>Max Meals / Employee / Week</label>
+                            <input type="number" name="MaxMealsPerEmployeePerWeek"
+                                   value="{{ company.MaxMealsPerEmployeePerWeek or '' }}" placeholder="No limit">
+                        </div>
+                        <div class="field">
+                            <label>Allow Extra at Full Price?</label>
+                            <select name="AllowExtraAtFullPrice">
+                                <option value="TRUE" {% if company.AllowExtraAtFullPrice == 'TRUE' %}selected{% endif %}>Yes</option>
+                                <option value="FALSE" {% if company.AllowExtraAtFullPrice != 'TRUE' %}selected{% endif %}>No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Free Meals -->
+                <div class="tier-row">
+                    <div class="tier-row-header">
+                        <span class="tier-badge tier-badge-free">🎁 Free Meals</span>
+                        <div class="tier-toggle">
+                            <input type="checkbox" id="enableFree" onchange="toggleTier('freeFields', this.checked)"
+                                   {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string != '0' %}checked{% endif %}>
+                            <label for="enableFree">Enable free meal benefit</label>
+                        </div>
+                    </div>
+                    <div id="freeFields" {% if not company.FreeMealsPerWeek or company.FreeMealsPerWeek|string == '0' %}style="display:none"{% endif %}>
+                        <div class="tier-fields">
+                            <div class="field">
+                                <label>Free Meals Per Week</label>
+                                <input type="number" name="FreeMealsPerWeek" id="freeMeals"
+                                       value="{{ company.FreeMealsPerWeek or '' }}" placeholder="1" oninput="updatePreview()">
+                                <span class="field-hint">First N meals are fully covered by company</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tier 1 -->
+                <div class="tier-row">
+                    <div class="tier-row-header">
+                        <span class="tier-badge tier-badge-t1">Tier 1 Subsidy</span>
+                        <div class="tier-toggle">
+                            <input type="checkbox" id="enableT1" onchange="toggleTier('t1Fields', this.checked)"
+                                   {% if company.Tier1_EmployeePrice %}checked{% endif %}>
+                            <label for="enableT1">Enable Tier 1</label>
+                        </div>
+                    </div>
+                    <div id="t1Fields" {% if not company.Tier1_EmployeePrice %}style="display:none"{% endif %}>
+                        <div class="tier-fields">
+                            <div class="field">
+                                <label>Meals in this tier</label>
+                                <input type="number" name="Tier1_Meals" id="t1Meals"
+                                       value="{{ company.Tier1_Meals or company.SubsidizedMealsPerWeek or '' }}" placeholder="4" oninput="updatePreview()">
+                            </div>
+                            <div class="field">
+                                <label>Employee Price ($)</label>
+                                <input type="number" step="0.01" name="Tier1_EmployeePrice" id="t1EmpPrice"
+                                       value="{{ company.Tier1_EmployeePrice or '' }}" placeholder="0.00" oninput="updatePreview()">
+                            </div>
+                            <div class="field">
+                                <label>Company Subsidy ($)</label>
+                                <input type="number" step="0.01" name="Tier1_CompanySubsidy"
+                                       value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto-calculated" readonly
+                                       id="t1CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
+                                <span class="field-hint">Auto = Full price − Employee price</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tier 2 -->
+                <div class="tier-row">
+                    <div class="tier-row-header">
+                        <span class="tier-badge tier-badge-t2">Tier 2 Subsidy</span>
+                        <div class="tier-toggle">
+                            <input type="checkbox" id="enableT2" onchange="toggleTier('t2Fields', this.checked)"
+                                   {% if company.Tier2_EmployeePrice %}checked{% endif %}>
+                            <label for="enableT2">Enable Tier 2</label>
+                        </div>
+                    </div>
+                    <div id="t2Fields" {% if not company.Tier2_EmployeePrice %}style="display:none"{% endif %}>
+                        <div class="tier-fields">
+                            <div class="field">
+                                <label>Meals in this tier</label>
+                                <input type="number" name="Tier2_Meals" id="t2Meals"
+                                       value="{{ company.Tier2_Meals or '' }}" placeholder="3" oninput="updatePreview()">
+                            </div>
+                            <div class="field">
+                                <label>Employee Price ($)</label>
+                                <input type="number" step="0.01" name="Tier2_EmployeePrice" id="t2EmpPrice"
+                                       value="{{ company.Tier2_EmployeePrice or '' }}" placeholder="5.99" oninput="updatePreview()">
+                            </div>
+                            <div class="field">
+                                <label>Company Subsidy ($)</label>
+                                <input type="number" step="0.01" name="Tier2_CompanySubsidy"
+                                       value="{{ company.Tier2_CompanySubsidy or '' }}" placeholder="auto" readonly
+                                       id="t2CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="tier-row">
+                    <div class="tier-row-header">
+                        <span class="tier-badge tier-badge-t3">Tier 3 Subsidy</span>
+                        <div class="tier-toggle">
+                            <input type="checkbox" id="enableT3" onchange="toggleTier('t3Fields', this.checked)"
+                                   {% if company.Tier3_EmployeePrice %}checked{% endif %}>
+                            <label for="enableT3">Enable Tier 3</label>
+                        </div>
+                    </div>
+                    <div id="t3Fields" {% if not company.Tier3_EmployeePrice %}style="display:none"{% endif %}>
+                        <div class="tier-fields">
+                            <div class="field">
+                                <label>Meals in this tier</label>
+                                <input type="number" name="Tier3_Meals" id="t3Meals"
+                                       value="{{ company.Tier3_Meals or '' }}" placeholder="2" oninput="updatePreview()">
+                            </div>
+                            <div class="field">
+                                <label>Employee Price ($)</label>
+                                <input type="number" step="0.01" name="Tier3_EmployeePrice" id="t3EmpPrice"
+                                       value="{{ company.Tier3_EmployeePrice or '' }}" placeholder="9.99" oninput="updatePreview()">
+                            </div>
+                            <div class="field">
+                                <label>Company Subsidy ($)</label>
+                                <input type="number" step="0.01" name="Tier3_CompanySubsidy"
+                                       value="{{ company.Tier3_CompanySubsidy or '' }}" placeholder="auto" readonly
+                                       id="t3CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- LIVE PRICE PREVIEW -->
+            <div class="price-preview" id="pricePreview" style="margin-top:20px;">
+                <div class="price-preview-title">💡 Employee sees this pricing ladder</div>
+                <div id="previewRows"></div>
+            </div>
+        </div>
+
+        <div class="save-bar">
+            <div class="save-bar-info">
+                Editing <strong>{{ company.CompanyName or 'New Company' }}</strong>
+                — changes saved to Google Sheets
+            </div>
+            <button type="submit" class="btn-save">Save Company →</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+function toggleTier(fieldId, show) {
+    document.getElementById(fieldId).style.display = show ? '' : 'none';
+    updatePreview();
+}
+
+function updatePreview() {
+    const fp = parseFloat(document.getElementById('basePrice')?.value) || 16.99;
+    const free = parseInt(document.getElementById('freeMeals')?.value) || 0;
+    const freeEnabled = document.getElementById('enableFree')?.checked;
+
+    const t1En = document.getElementById('enableT1')?.checked;
+    const t1m  = parseInt(document.getElementById('t1Meals')?.value) || 0;
+    const t1ep = parseFloat(document.getElementById('t1EmpPrice')?.value) || 0;
+
+    const t2En = document.getElementById('enableT2')?.checked;
+    const t2m  = parseInt(document.getElementById('t2Meals')?.value) || 0;
+    const t2ep = parseFloat(document.getElementById('t2EmpPrice')?.value) || 0;
+
+    const t3En = document.getElementById('enableT3')?.checked;
+    const t3m  = parseInt(document.getElementById('t3Meals')?.value) || 0;
+    const t3ep = parseFloat(document.getElementById('t3EmpPrice')?.value) || 0;
+
+    // Update auto-calculated subsidy fields
+    const setSubsidy = (id, ep) => {
+        const el = document.getElementById(id);
+        if (el) el.value = Math.max(0, fp - ep).toFixed(2);
+    };
+    setSubsidy('t1CoSubsidy', t1ep);
+    setSubsidy('t2CoSubsidy', t2ep);
+    setSubsidy('t3CoSubsidy', t3ep);
+
+    // Build preview rows
+    const rows = [];
+    let cur = 0;
+    if (freeEnabled && free > 0) {
+        rows.push({ label: `Meal${free > 1 ? 's' : ''} 1–${free}`, val: 'FREE 🎉', green: true });
+        cur += free;
+    }
+    if (t1En && t1m > 0) {
+        rows.push({ label: `Meal${t1m > 1 ? 's' : ''} ${cur+1}–${cur+t1m}`, val: `$${t1ep.toFixed(2)}` });
+        cur += t1m;
+    }
+    if (t2En && t2m > 0) {
+        rows.push({ label: `Meal${t2m > 1 ? 's' : ''} ${cur+1}–${cur+t2m}`, val: `$${t2ep.toFixed(2)}` });
+        cur += t2m;
+    }
+    if (t3En && t3m > 0) {
+        rows.push({ label: `Meal${t3m > 1 ? 's' : ''} ${cur+1}–${cur+t3m}`, val: `$${t3ep.toFixed(2)}` });
+        cur += t3m;
+    }
+    rows.push({ label: 'Additional meals', val: `$${fp.toFixed(2)} (full price)` });
+
+    document.getElementById('previewRows').innerHTML = rows.map(r =>
+        `<div class="price-preview-row">
+            <span class="price-preview-label">${r.label}</span>
+            <span class="price-preview-val ${r.green ? 'green' : ''}">${r.val}</span>
+        </div>`
+    ).join('');
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', updatePreview);
+</script>
+</body>
+</html>
