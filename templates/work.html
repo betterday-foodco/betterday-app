@@ -751,6 +751,7 @@ let existingOrderCounts = {}; // { sundayAnchor: count } — meals already place
 
 // ── SESSION (localStorage) ──
 const LS_SESSION = 'bd_work_session';
+const LS_COUNTS  = email => `bd_counts_${email}`;
 function saveSession(emp, company) {
   try { localStorage.setItem(LS_SESSION, JSON.stringify({ emp, companyId: company.CompanyID, savedAt: Date.now() })); } catch(e){}
 }
@@ -764,7 +765,12 @@ function loadSession() {
     return s;
   } catch(e) { return null; }
 }
-function clearSession() { try { localStorage.removeItem(LS_SESSION); } catch(e){} }
+function clearSession() {
+  try {
+    if (currentEmployee?.email) localStorage.removeItem(LS_COUNTS(currentEmployee.email));
+    localStorage.removeItem(LS_SESSION);
+  } catch(e) {}
+}
 
 // ── NAV ──
 function goTo(id) {
@@ -1022,25 +1028,32 @@ async function doJoin() {
 
 // ── ENTER MENU ──
 function enterMenu() {
-  cart = []; existingOrderCounts = {}; computeWeeks(); setupMenu(); goTo('sMenu');
-  // Immediately preload all other open weeks in parallel (no setTimeout delay)
+  cart = []; existingOrderCounts = {}; computeWeeks();
+  // Seed from localStorage cache so render is instant for returning users
+  if (currentEmployee?.email) {
+    try {
+      const cached = localStorage.getItem(LS_COUNTS(currentEmployee.email));
+      if (cached) existingOrderCounts = JSON.parse(cached);
+    } catch(e) {}
+  }
+  setupMenu(); goTo('sMenu');
+  // Preload other open weeks in the background
   weeks.forEach((w, i) => {
     if (i === activeWeekIndex || menuCache[w.sundayAnchor] || !w.isOpen) return;
     apiFetch({ action: 'get_menu', sunday_anchor: w.sundayAnchor })
       .then(m => { menuCache[w.sundayAnchor] = m; })
       .catch(() => {});
   });
-  // Silently fetch how many meals this employee already has for each open week
-  // so tier limits and the "max reached" guard account for prior orders
+  // Fetch fresh counts in background; update banner + re-render with real baseline
   if (currentEmployee?.email) {
     apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email })
       .then(r => {
-        if (r?.counts) {
-          existingOrderCounts = r.counts;
-          // Refresh the "next meal price" label and pricing banner with the real baseline
-          document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
-          buildPricingBanner();
-        }
+        if (!r?.counts) return;
+        existingOrderCounts = r.counts;
+        try { localStorage.setItem(LS_COUNTS(currentEmployee.email), JSON.stringify(r.counts)); } catch(e) {}
+        document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
+        buildPricingBanner();
+        renderWeek(activeWeekIndex);
       })
       .catch(() => {});
   }
