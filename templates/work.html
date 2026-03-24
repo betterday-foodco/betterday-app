@@ -151,12 +151,21 @@
     .tab-badge-closed { background: rgba(231,76,60,.2);  color: #ff8a80; }
     .tab-badge-next   { background: rgba(78,162,253,.2); color: #7cc4ff; }
     .pricing-banner { background: #fff3e8; border-bottom: 2px solid rgba(0,70,94,.07); padding: 10px 24px; }
-    .pricing-banner-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .pricing-company  { font-size: 1rem; font-weight: 900; color: var(--dark); }
+    .pricing-banner-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: nowrap; }
+    .pricing-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 0; }
+    .pricing-company  { font-size: 1rem; font-weight: 900; color: var(--dark); white-space: nowrap; }
+    .pricing-plan-label { font-size: .68rem; font-weight: 700; color: #7b8c9f; background: rgba(0,70,94,.07); padding: 2px 8px; border-radius: 999px; white-space: nowrap; letter-spacing: .2px; }
     .pricing-sep      { color: #bcc6d0; }
-    .pricing-tier     { font-size: .88rem; color: #50657a; display: flex; align-items: center; gap: 6px; }
+    .pricing-tier     { font-size: .88rem; color: #50657a; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .pricing-tier strong { color: var(--dark); }
     .pricing-delivery { margin-left: auto; font-size: .82rem; font-weight: 700; color: var(--primary); }
+    @media (max-width: 900px) {
+      .pricing-left { flex-wrap: nowrap; overflow: hidden; }
+      .pricing-company { font-size: .88rem; }
+      .pricing-plan-label { display: none; }
+      .pricing-tier { font-size: .8rem; }
+      .pricing-banner { padding: 8px 14px; }
+    }
     .menu-inner { max-width: 1100px; margin: 0 auto; }
     .menu-section-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #7b8c9f; margin: 20px 0 14px; display: flex; align-items: center; gap: 10px; }
     .menu-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(0,70,94,.1); }
@@ -269,7 +278,8 @@
     /* ── MOBILE BOTTOM CART BAR ── */
     .mob-cart-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; }
     @media (min-width: 900px) { .mob-cart-bar { display: none; } }
-    .mob-cart-toggle { background: var(--dark); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 -4px 20px rgba(0,0,0,.25); }
+    .mob-cart-toggle { background: var(--dark); padding: 18px 20px 13px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 -4px 20px rgba(0,0,0,.25); border-radius: 20px 20px 0 0; position: relative; }
+    .mob-cart-toggle::before { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 32px; height: 4px; background: rgba(255,255,255,.22); border-radius: 2px; }
     .mob-toggle-left { display: flex; align-items: center; gap: 10px; }
     .mob-cart-badge { background: var(--primary); color: #fff; font-size: .7rem; font-weight: 900; border-radius: 999px; padding: 2px 8px; min-width: 22px; text-align: center; }
     .mob-toggle-label { font-size: .9rem; font-weight: 800; color: #fff; }
@@ -1286,10 +1296,13 @@ function buildPricingBanner() {
     ? `<span class="pricing-sep">·</span><span class="pricing-tier" style="color:#e67e22;"><strong>${alreadyOrdered} meal${alreadyOrdered!==1?'s':''} ordered this week</strong></span>`
     : '';
   document.getElementById('pricingBannerInner').innerHTML=
+    `<div class="pricing-left">`+
     `<span class="pricing-company">${c.CompanyName}</span>`+
+    `<span class="pricing-plan-label">Employer Subsidy Plan</span>`+
     tiers.map(t=>`<span class="pricing-sep">·</span><span class="pricing-tier">${t}</span>`).join('')+
     orderedChip+
-    `<span id="pricingToggleSlot" style="margin-left:auto"></span>`;
+    `</div>`+
+    `<span id="pricingToggleSlot" style="flex-shrink:0"></span>`;
 }
 
 function buildWeekTabs() {
