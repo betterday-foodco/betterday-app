@@ -120,6 +120,8 @@
     .form-success.show { display: block; }
     .spinner-wrap { text-align: center; padding: 32px 0; }
     .spinner { width: 32px; height: 32px; border: 3px solid #e8edf2; border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 10px; }
+    .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dark); color: #fff; padding: 13px 22px; border-radius: 14px; font-size: .88rem; font-weight: 700; font-family: 'DM Sans',sans-serif; box-shadow: 0 8px 28px rgba(0,0,0,.25); z-index: 9999; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner-label { font-size: .82rem; color: #7b8c9f; font-weight: 600; }
 
@@ -305,21 +307,25 @@
     .profile-topbar { background: var(--dark); padding: 0 20px; height: 54px; display: flex; align-items: center; flex-shrink: 0; }
     .profile-back-btn { background: transparent; border: none; color: rgba(255,255,255,.6); font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px; transition: .15s; }
     .profile-back-btn:hover { color: #fff; background: rgba(255,255,255,.1); }
-    .profile-hero { background: var(--dark); padding: 0 24px 28px; }
-    .profile-avatar-lg { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(78,162,253,.4); }
-    .profile-name-lg { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #fff; margin-bottom: 2px; }
-    .profile-email-lg { font-size: .82rem; color: rgba(255,255,255,.5); margin-bottom: 14px; }
-    .profile-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-    .profile-chip { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 5px 13px; font-size: .74rem; font-weight: 700; color: rgba(255,255,255,.75); }
+    .profile-hero { background: var(--dark); padding: 10px 20px 16px; display: flex; align-items: center; gap: 13px; }
+    .profile-avatar-lg { width: 46px; height: 46px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+    .profile-hero-info { flex: 1; min-width: 0; }
+    .profile-name-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+    .profile-name-lg { font-size: .95rem; font-weight: 700; color: #fff; }
+    .profile-email-lg { font-size: .75rem; color: rgba(255,255,255,.42); }
+    .profile-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .profile-chip { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 3px 10px; font-size: .68rem; font-weight: 700; color: rgba(255,255,255,.75); }
     .profile-chip.green { background: rgba(39,174,96,.22); border-color: rgba(39,174,96,.35); color: #5fe49a; }
     .profile-chip.blue { background: rgba(78,162,253,.2); border-color: rgba(78,162,253,.3); color: #7cc4ff; }
     .profile-body { padding: 22px 24px 40px; max-width: 560px; margin: 0 auto; width: 100%; }
     .profile-section-label { font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .9px; color: #8898aa; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
     .profile-section-label::after { content: ''; flex: 1; height: 1px; background: rgba(0,70,94,.1); }
-    .session-info-box { background: rgba(78,162,253,.07); border: 1.5px solid rgba(78,162,253,.18); border-radius: 14px; padding: 14px 16px; margin-bottom: 22px; display: flex; align-items: flex-start; gap: 12px; }
-    .session-info-icon { font-size: 1.35rem; flex-shrink: 0; margin-top: 1px; }
-    .session-info-title { font-size: .88rem; font-weight: 800; color: var(--dark); margin-bottom: 3px; }
-    .session-info-desc { font-size: .78rem; color: #50657a; line-height: 1.55; }
+    .session-info-box { background: rgba(78,162,253,.07); border: 1px solid rgba(78,162,253,.18); border-radius: 12px; padding: 10px 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+    .session-info-icon { font-size: 1rem; flex-shrink: 0; }
+    .session-info-title { font-size: .8rem; font-weight: 700; color: var(--dark); display: inline; }
+    .session-info-desc { font-size: .75rem; color: #50657a; line-height: 1.5; }
+    .order-hist-group-label { font-size: .78rem; font-weight: 800; color: var(--dark); margin: 18px 0 8px; opacity: .6; }
+    .order-hist-group-label:first-child { margin-top: 0; }
     .order-hist-card { background: #fff; border-radius: 14px; padding: 13px 15px; margin-bottom: 9px; box-shadow: 0 2px 8px rgba(0,70,94,.07); display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; }
     .order-hist-thumb { width: 40px; height: 40px; border-radius: 9px; overflow: hidden; background: #e8d5c4; flex-shrink: 0; }
     .order-hist-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -357,8 +363,8 @@
     <div class="auth-card-wrap">
       <div class="auth-card">
         <div class="card-eyebrow">Welcome</div>
-        <div class="card-title">Enter your<br>company code</div>
-        <div class="card-subtitle">Your office manager gave you this when your team signed up.</div>
+        <div class="card-title">Enter your company code</div>
+        <div class="card-subtitle" style="font-size:.78rem;font-style:italic;">Ask your office admin for the company code.</div>
         <div class="form-error" id="companyError">That code doesn't exist. Double-check with your office manager.</div>
         <div class="field-group">
           <label>Company Code</label>
@@ -568,11 +574,15 @@
     </div>
     <div class="profile-hero">
       <div class="profile-avatar-lg" id="profileAvatarLg">?</div>
-      <div class="profile-name-lg" id="profileNameLg">—</div>
-      <div class="profile-email-lg" id="profileEmailLg">—</div>
-      <div class="profile-chips">
-        <span class="profile-chip" id="profileCompanyChip">—</span>
-        <span class="profile-chip blue">30-day device login</span>
+      <div class="profile-hero-info">
+        <div class="profile-name-row">
+          <span class="profile-name-lg" id="profileNameLg">—</span>
+          <span class="profile-email-lg" id="profileEmailLg">—</span>
+        </div>
+        <div class="profile-chips">
+          <span class="profile-chip" id="profileCompanyChip">—</span>
+          <span class="profile-chip blue">30-day login</span>
+        </div>
       </div>
     </div>
     <div class="profile-body">
@@ -595,6 +605,8 @@
 <!-- ══════════════════════════════════════════
      CHECKOUT LOADING OVERLAY
 ════════════════════════════════════════════ -->
+<div id="toast" class="toast"></div>
+
 <div id="checkoutOverlay" class="checkout-overlay hidden">
   <div class="checkout-overlay-ring"></div>
   <div class="checkout-overlay-label">Placing your order…</div>
@@ -632,16 +644,17 @@
 </div>
 
 <script>
-const SCRIPT_URL = "{{ script_url }}";
+const SCRIPT_URL = "/api/gas";
 
 // ── STATE ──
-let currentCompany  = null;
-let currentEmployee = null; // { firstName, lastName, email }
-let cart            = [];
-let weeks           = [];
-let activeWeekIndex = 0;
-let menuCache       = {};
-let joinPin         = '';
+let currentCompany      = null;
+let currentEmployee     = null; // { firstName, lastName, email }
+let cart                = [];
+let weeks               = [];
+let activeWeekIndex     = 0;
+let menuCache           = {};
+let joinPin             = '';
+let existingOrderCounts = {}; // { sundayAnchor: count } — meals already placed this week
 
 // ── SESSION (localStorage) ──
 const LS_SESSION = 'bd_work_session';
@@ -916,7 +929,7 @@ async function doJoin() {
 
 // ── ENTER MENU ──
 function enterMenu() {
-  cart = []; computeWeeks(); setupMenu(); goTo('sMenu');
+  cart = []; existingOrderCounts = {}; computeWeeks(); setupMenu(); goTo('sMenu');
   // Immediately preload all other open weeks in parallel (no setTimeout delay)
   weeks.forEach((w, i) => {
     if (i === activeWeekIndex || menuCache[w.sundayAnchor] || !w.isOpen) return;
@@ -924,6 +937,20 @@ function enterMenu() {
       .then(m => { menuCache[w.sundayAnchor] = m; })
       .catch(() => {});
   });
+  // Silently fetch how many meals this employee already has for each open week
+  // so tier limits and the "max reached" guard account for prior orders
+  if (currentEmployee?.email) {
+    apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email })
+      .then(r => {
+        if (r?.counts) {
+          existingOrderCounts = r.counts;
+          // Refresh the "next meal price" label and pricing banner with the real baseline
+          document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
+          buildPricingBanner();
+        }
+      })
+      .catch(() => {});
+  }
 }
 
 // ── PRE-LOAD ACTIVE WEEK DURING SIGN-IN ──
@@ -954,29 +981,48 @@ async function apiFetch(payload) {
   return r.json();
 }
 
-// ── ON LOAD: Check for magic link token in URL OR saved session ──
+// ── ON LOAD: Check magic link token → saved session → URL pre-fill ──
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
   const companyCode = params.get('co'); // e.g. /work?co=BROCK&token=xxx
 
+  // 1. Magic link landing — highest priority
   if (token) {
-    // Magic link landing
     try {
       const d = await apiFetch({ action: 'verify_magic_token', token });
       if (d.valid) {
         currentCompany  = d.company;
         currentEmployee = d.employee;
         saveSession(currentEmployee, currentCompany);
-        preloadActiveWeekMenu(); // start menu fetch while transition happens
+        preloadActiveWeekMenu();
         enterMenu();
         window.history.replaceState({}, '', window.location.pathname);
         return;
       }
     } catch(e) {}
+    // Token invalid/expired — fall through; pre-fill company if co= present
   }
 
-  // Pre-fill company code from URL param e.g. betterday.ca/work?co=BROCK
+  // 2. Restore saved session — skip company code screen entirely
+  const sess = loadSession();
+  if (sess && sess.companyId) {
+    try {
+      const compData = await apiFetch({ action: 'get_company', company_id: sess.companyId });
+      if (compData.found) {
+        currentCompany  = compData.company;
+        currentEmployee = sess.emp;
+        preloadActiveWeekMenu();
+        enterMenu();
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+    } catch(e) {}
+    // Company lookup failed — clear stale session and show login
+    clearSession();
+  }
+
+  // 3. Pre-fill company code from URL param e.g. betterday.ca/work?co=BROCK
   if (companyCode) {
     const input = document.getElementById('companyCodeInput');
     input.value = companyCode.toUpperCase();
@@ -1031,9 +1077,15 @@ function buildPricingBanner() {
   if(t3>0){tiers.push(`Meals ${cur+1}–${cur+t3}: <strong>$${parseFloat(c.Tier3_EmployeePrice).toFixed(2)}</strong>`);cur+=t3;}
   if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) tiers.push(`Additional: <strong>$${fp.toFixed(2)}</strong>`);
   const del = weeks[activeWeekIndex] ? `📦 Next delivery: <strong>${weeks[activeWeekIndex].deliveryShort}</strong>` : '';
+  const anchor = weeks[activeWeekIndex]?.sundayAnchor || '';
+  const alreadyOrdered = existingOrderCounts[anchor] || 0;
+  const orderedChip = alreadyOrdered > 0
+    ? `<span class="pricing-sep">·</span><span class="pricing-tier" style="color:#e67e22;"><strong>${alreadyOrdered} meal${alreadyOrdered!==1?'s':''} ordered this week</strong></span>`
+    : '';
   document.getElementById('pricingBannerInner').innerHTML=
     `<span class="pricing-company">${c.CompanyName}</span>`+
     tiers.map(t=>`<span class="pricing-sep">·</span><span class="pricing-tier">${t}</span>`).join('')+
+    orderedChip+
     `<span class="pricing-delivery">${del}</span>`;
 }
 
@@ -1051,6 +1103,7 @@ function buildWeekTabs() {
 }
 
 async function switchWeek(i) { activeWeekIndex=i; buildWeekTabs(); buildPricingBanner(); renderWeek(i); document.getElementById('nextMealPrice').textContent=getNextPriceLabel(i); }
+
 
 async function renderWeek(index) {
   const w=weeks[index], inner=document.getElementById('menuInner');
@@ -1176,15 +1229,31 @@ function getTierForPosition(weekIndex, pos) {
   if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) return {tier:'full',price:parseFloat(c.FullPrice)||16.99};
   return null;
 }
-function getTierForNextItem(wi) { return getTierForPosition(wi, cart.filter(i=>i.weekIndex===wi).length); }
+function getTierForNextItem(wi) {
+  const anchor = weeks[wi]?.sundayAnchor || '';
+  const already = existingOrderCounts[anchor] || 0;
+  return getTierForPosition(wi, already + cart.filter(i=>i.weekIndex===wi).length);
+}
 function recomputeTiers(wi) { cart.filter(i=>i.weekIndex===wi).forEach((item,idx)=>{const t=getTierForPosition(wi,idx);if(t){item.tier=t.tier;item.price=t.price;}}); }
 function getNextPriceLabel(wi) { const t=getTierForNextItem(wi); if(!t) return 'Max'; return t.tier==='free'?'FREE 🎉':'$'+t.price.toFixed(2); }
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
 
 // ══════════════════════════════════════════
 // CART
 // ══════════════════════════════════════════
 function addMeal(id, wi, meal) {
-  const t=getTierForNextItem(wi); if(!t){alert('Maximum meals reached for this week.');return;}
+  const t=getTierForNextItem(wi); if(!t){showToast('Maximum meals reached for this week');return;}
   cart.push({mealId:id,meal,price:t.price,tier:t.tier,weekIndex:wi});
   renderMealControl(id,cart.filter(i=>i.mealId===id&&i.weekIndex===wi).length,wi);
   renderCart(); document.getElementById('nextMealPrice').textContent=getNextPriceLabel(activeWeekIndex);
@@ -1293,7 +1362,10 @@ async function doCheckout() {
     const w=weeks[wi];
     dh+=`<div class="thankyou-row"><span>Delivery</span><span>${w?.deliveryStr||''}</span></div>`;
     dh+=`<div class="thankyou-row"><span>Location</span><span>${c.FridgeLocationDescription||c.AddressLine1||''}</span></div>`;
-    dh+=`<div class="thankyou-row"><span>Meals (${items.length})</span><span>${items.map(i=>i.meal?.name||'Meal').join(', ')}</span></div>`;
+    // Group by meal name, build "Dish A (×3) | Dish B" style list
+    const mg={}; items.forEach(i=>{const n=i.meal?.name||'Meal';mg[n]=(mg[n]||0)+1;});
+    const mealLine=Object.entries(mg).map(([n,q])=>q>1?`${n} ×${q}`:n).join(' &nbsp;|&nbsp; ');
+    dh+=`<div class="thankyou-row"><span>Meals (${items.length})</span><span style="text-align:right;line-height:1.5;">${mealLine}</span></div>`;
   });
   dh+=`<div class="thankyou-row" style="border-top:1px solid #e8edf2;margin-top:6px;padding-top:8px;"><span style="font-weight:800">${c.CompanyName} covered</span><span style="font-weight:800;color:var(--green)">–$${savings.toFixed(2)}</span></div><div class="thankyou-row"><span style="font-weight:800">You paid</span><span style="font-weight:800">${total>0?'$'+total.toFixed(2):'Nothing 🎉'}</span></div>`;
   document.getElementById('tyDetail').innerHTML=dh;
@@ -1328,21 +1400,37 @@ async function openProfile() {
       list.innerHTML = '<div class="profile-empty"><div class="profile-empty-icon">🍽️</div><div>No orders yet — your history will appear here after your first delivery</div></div>';
     } else {
       const tierLabels = {free:'Complimentary',tier1:'Tier 1',tier2:'Tier 2',tier3:'Tier 3',full:'Full price'};
-      list.innerHTML = orders.map(o => {
-        const price = parseFloat(o.EmployeePrice||0);
-        const tierClass = 'tier-' + (o.Tier || 'full');
-        const tierLabel = tierLabels[o.Tier] || 'Full price';
-        return `<div class="order-hist-card">
-          <div class="order-hist-thumb"><img src="" onerror="this.style.display='none'" referrerpolicy="no-referrer"></div>
-          <div>
-            <div class="order-hist-meal">${o.DishName || 'Meal'}</div>
-            <div class="order-hist-date">${o.DeliveryDate || ''} · ${o.CompanyName || ''}</div>
-          </div>
-          <div class="order-hist-right">
-            <div class="order-hist-price">${price===0?'<span style="color:var(--green);font-weight:800">FREE</span>':'$'+price.toFixed(2)}</div>
-            <div><span class="order-tier-pill ${tierClass}">${tierLabel}</span></div>
-          </div>
-        </div>`;
+      // Group by delivery date
+      const grouped = {};
+      orders.forEach(o => {
+        const key = o.DeliveryDate || 'Unknown date';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(o);
+      });
+      const formatDate = d => {
+        const dt = new Date(d + 'T12:00:00');
+        if (isNaN(dt.getTime())) return d;
+        return dt.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' });
+      };
+      list.innerHTML = Object.keys(grouped).sort((a,b) => b.localeCompare(a)).map(date => {
+        const cards = grouped[date].map(o => {
+          const price = (v => (isNaN(v) || v < 0) ? 0 : v)(parseFloat(String(o.EmployeePrice ?? '').replace(/[^0-9.-]/g, '')));
+          const tierClass = 'tier-' + (o.Tier || 'full');
+          const tierLabel = tierLabels[o.Tier] || 'Full price';
+          const dishName = o.DishName && !o.DishName.startsWith('#') ? o.DishName : (o.MealID ? 'Meal #' + o.MealID : 'Meal');
+          return `<div class="order-hist-card">
+            <div class="order-hist-thumb"><img src="${o.Image||''}" onerror="this.style.display='none'" referrerpolicy="no-referrer"></div>
+            <div>
+              <div class="order-hist-meal">${dishName}</div>
+              <div class="order-hist-date">${[o.DeliveryDate ? formatDate(o.DeliveryDate) : '', o.CompanyName || ''].filter(Boolean).join(' · ')}</div>
+            </div>
+            <div class="order-hist-right">
+              <div class="order-hist-price">${price===0?'<span style="color:var(--green);font-weight:800">FREE</span>':'$'+price.toFixed(2)}</div>
+              <div><span class="order-tier-pill ${tierClass}">${tierLabel}</span></div>
+            </div>
+          </div>`;
+        }).join('');
+        return `<div class="order-hist-group-label">${formatDate(date)}</div>${cards}`;
       }).join('');
     }
   } catch(e) {
