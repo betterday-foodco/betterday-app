@@ -1344,6 +1344,17 @@ function getTierForNextItem(wi) {
 }
 function recomputeTiers(wi) { cart.filter(i=>i.weekIndex===wi).forEach((item,idx)=>{const t=getTierForPosition(wi,idx);if(t){item.tier=t.tier;item.price=t.price;}}); }
 function getNextPriceLabel(wi) { const t=getTierForNextItem(wi); if(!t) return 'Max'; return t.tier==='free'?'FREE 🎉':'$'+t.price.toFixed(2); }
+// Returns {co, bd} subsidy split for a cart item using per-tier company columns.
+// Falls back to full remainder → company if columns not yet populated.
+function getCoverage(item) {
+  const c=currentCompany, fp=parseFloat(c.FullPrice)||16.99;
+  const pfx = item.tier==='free'?'FreeTier':item.tier==='tier1'?'Tier1':item.tier==='tier2'?'Tier2':item.tier==='tier3'?'Tier3':null;
+  if (pfx) {
+    const co=parseFloat(c[pfx+'_CompanySubsidy']), bd=parseFloat(c[pfx+'_BDSubsidy']);
+    if (!isNaN(co) && !isNaN(bd)) return {co, bd};
+  }
+  return {co: fp-item.price, bd: 0};
+}
 
 // ══════════════════════════════════════════
 // TOAST
@@ -1467,7 +1478,7 @@ async function doCheckout() {
       employee_name:`${emp.firstName} ${emp.lastName}`, employee_email:emp.email,
       meal_id:item.mealId, dish_name:item.meal?.name||'',
       diet_type:item.meal?.diet||'', tier:item.tier, employee_price:item.price,
-      company_coverage:(fp-item.price).toFixed(2), bd_coverage:'0.00'
+      company_coverage:getCoverage(item).co.toFixed(2), bd_coverage:getCoverage(item).bd.toFixed(2)
     }).catch(e => { console.error('Order submit error:', e); return {success:false}; });
   });
 

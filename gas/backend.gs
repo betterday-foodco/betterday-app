@@ -267,7 +267,10 @@ function doPost(e) {
         if (!rows[i][0]) continue;
         var rowEmail = String(rows[i][6]).trim().toLowerCase();
         if (rowEmail !== email) continue;
-        var anchor = String(rows[i][4]).trim(); // SundayAnchor col
+        var rawAnchor = rows[i][4]; // SundayAnchor col — may be a Date object
+        var anchor = (Object.prototype.toString.call(rawAnchor) === "[object Date]")
+          ? Utilities.formatDate(rawAnchor, "GMT", "yyyy-MM-dd")
+          : String(rawAnchor).trim();
         counts[anchor] = (counts[anchor] || 0) + 1;
       }
       return jsonOut({counts: counts});
