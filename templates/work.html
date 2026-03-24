@@ -191,9 +191,8 @@
     .btn-add { background: var(--dark); color: #fff; border: none; border-radius: 14px; padding: 13px 0; font-size: .9rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .15s; box-shadow: 0 4px 14px rgba(0,70,94,.22); width: 100%; letter-spacing: .2px; }
     .btn-add:hover { background: #005a7a; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,70,94,.28); }
 
-    /* ── FLOATING CATEGORY TOGGLE ── */
-    .cat-float { position: sticky; top: 0; z-index: 100; display: flex; justify-content: center; padding: 10px 0 4px; pointer-events: none; }
-    .cat-float-inner { display: flex; background: rgba(0,70,94,.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 999px; padding: 4px; gap: 2px; pointer-events: all; box-shadow: 0 4px 20px rgba(0,0,0,.22); }
+    /* ── CATEGORY TOGGLE (inline in pricing banner) ── */
+    .cat-float-inner { display: flex; background: rgba(0,70,94,.88); border-radius: 999px; padding: 3px; gap: 2px; box-shadow: 0 2px 10px rgba(0,0,0,.15); }
     .cat-btn { padding: 7px 20px; border-radius: 999px; border: none; font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 800; cursor: pointer; transition: .15s; color: rgba(255,255,255,.55); background: transparent; }
     .cat-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(78,162,253,.45); }
     .cat-btn:hover:not(.active) { color: #fff; background: rgba(255,255,255,.1); }
@@ -1028,29 +1027,23 @@ async function doJoin() {
 }
 
 // ── ENTER MENU ──
-function enterMenu() {
-  cart = []; existingOrderCounts = {}; computeWeeks(); setupMenu(); goTo('sMenu');
-  // Immediately preload all other open weeks in parallel (no setTimeout delay)
+async function enterMenu() {
+  cart = []; existingOrderCounts = {}; computeWeeks();
+  // Fetch existing order counts BEFORE rendering so tier/limit logic starts from the right baseline
+  if (currentEmployee?.email) {
+    try {
+      const r = await apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email });
+      if (r?.counts) existingOrderCounts = r.counts;
+    } catch(e) {}
+  }
+  setupMenu(); goTo('sMenu');
+  // Preload other open weeks in the background
   weeks.forEach((w, i) => {
     if (i === activeWeekIndex || menuCache[w.sundayAnchor] || !w.isOpen) return;
     apiFetch({ action: 'get_menu', sunday_anchor: w.sundayAnchor })
       .then(m => { menuCache[w.sundayAnchor] = m; })
       .catch(() => {});
   });
-  // Silently fetch how many meals this employee already has for each open week
-  // so tier limits and the "max reached" guard account for prior orders
-  if (currentEmployee?.email) {
-    apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email })
-      .then(r => {
-        if (r?.counts) {
-          existingOrderCounts = r.counts;
-          // Refresh the "next meal price" label and pricing banner with the real baseline
-          document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
-          buildPricingBanner();
-        }
-      })
-      .catch(() => {});
-  }
 }
 
 // ── PRE-LOAD ACTIVE WEEK DURING SIGN-IN ──
@@ -1176,7 +1169,6 @@ function buildPricingBanner() {
   if(t2>0){tiers.push(`Meals ${cur+1}–${cur+t2}: <strong>$${parseFloat(c.Tier2_EmployeePrice).toFixed(2)}</strong>`);cur+=t2;}
   if(t3>0){tiers.push(`Meals ${cur+1}–${cur+t3}: <strong>$${parseFloat(c.Tier3_EmployeePrice).toFixed(2)}</strong>`);cur+=t3;}
   if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) tiers.push(`Additional: <strong>$${fp.toFixed(2)}</strong>`);
-  const del = weeks[activeWeekIndex] ? `📦 Next delivery: <strong>${weeks[activeWeekIndex].deliveryShort}</strong>` : '';
   const anchor = weeks[activeWeekIndex]?.sundayAnchor || '';
   const alreadyOrdered = existingOrderCounts[anchor] || 0;
   const orderedChip = alreadyOrdered > 0
@@ -1186,7 +1178,7 @@ function buildPricingBanner() {
     `<span class="pricing-company">${c.CompanyName}</span>`+
     tiers.map(t=>`<span class="pricing-sep">·</span><span class="pricing-tier">${t}</span>`).join('')+
     orderedChip+
-    `<span class="pricing-delivery">${del}</span>`;
+    `<span id="pricingToggleSlot" style="margin-left:auto"></span>`;
 }
 
 function buildWeekTabs() {
@@ -1224,7 +1216,11 @@ async function renderWeek(index) {
   const meat=menu.meat||[], veg=menu.vegan||[];
   if (!meat.length&&!veg.length) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">Check back soon!</div></div>`; return; }
   const hasBoth = meat.length>0 && veg.length>0;
-  let html = hasBoth ? `<div class="cat-float"><div class="cat-float-inner"><button class="cat-btn active" id="catBtnMeat" onclick="filterCategory('meat')">🥩 Meat</button><button class="cat-btn" id="catBtnVeg" onclick="filterCategory('veg')">🌱 Plant-Based</button></div></div>` : '';
+  const slot = document.getElementById('pricingToggleSlot');
+  if (slot) slot.innerHTML = hasBoth
+    ? `<div class="cat-float-inner"><button class="cat-btn active" id="catBtnMeat" onclick="filterCategory('meat')">🥩 Meat</button><button class="cat-btn" id="catBtnVeg" onclick="filterCategory('veg')">🌱 Plant-Based</button></div>`
+    : '';
+  let html = '';
   if (meat.length) { html+=`<div id="sec-meat-wrap"><div class="menu-section-title">Meat &amp; Omnivore Options</div><div class="meal-grid">`; meat.forEach(i=>{html+=mealCardHTML(i,index);}); html+='</div></div>'; }
   if (veg.length)  { html+=`<div id="sec-veg-wrap"><div class="menu-section-title">Plant-Based Options</div><div class="meal-grid">`;  veg.forEach(i=>{html+=mealCardHTML(i,index);}); html+='</div></div>'; }
   inner.innerHTML=html;
@@ -1425,13 +1421,15 @@ async function doCheckout() {
   const bdPerMeal = parseFloat(c.BDCoveragePerMeal) || 0;
   const cartSnapshot = [...cart]; // snapshot before clearing
 
-  // Generate one OrderID per unique delivery week client-side (unique, no extra round trip)
+  // Reserve sequential OrderIDs from the server (one per unique delivery week)
   const anchors = [...new Set(cartSnapshot.map(i => weeks[i.weekIndex].sundayAnchor))];
   const orderIdMap = {};
-  const _ts = Date.now().toString(36).toUpperCase();
-  anchors.forEach((anchor, i) => {
-    orderIdMap[anchor] = `ORD-${_ts}-${i}`;
-  });
+  await Promise.all(anchors.map(async anchor => {
+    try {
+      const r = await apiFetch({ action: 'reserve_order_id', email: currentEmployee.email, sunday_anchor: anchor });
+      orderIdMap[anchor] = r.order_id;
+    } catch(e) { orderIdMap[anchor] = ''; }
+  }));
   // Submit all meals in parallel with their assigned OrderIDs
   const submits = cartSnapshot.map(item => {
     const w = weeks[item.weekIndex];

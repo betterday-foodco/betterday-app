@@ -370,6 +370,7 @@ function doPost(e) {
       var dishNameIdx = headers.indexOf("DishName");
       var dietIdx     = headers.indexOf("DietType");
       if (orderIdIdx < 0) return jsonOut({success: false, error: "OrderID column not found"});
+      if (mealIdIdx < 0)  return jsonOut({success: false, error: "MealID column not found in sheet headers"});
       var orderId   = String(data.order_id).trim();
       var oldMealId = String(data.old_meal_id).trim();
       var email     = String(data.email || "").trim().toLowerCase();
