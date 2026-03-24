@@ -1686,7 +1686,7 @@ async function openMealPicker(slotIdx) {
             <div class="picker-meal-diet">${item.diet==='veg'||item.diet==='vegan'?'🌱 Plant-Based':'🥩 Meat'}</div>
           </div>
           <button class="picker-select-btn ${isCurrent?'current':'available'}"
-            ${isCurrent?'disabled':'onclick="pickMeal('+JSON.stringify(item).replace(/"/g,"'")+')'"}>
+            ${isCurrent?'disabled':'onclick="pickMeal('+JSON.stringify(item).replace(/"/g,"'")+')"'}>
             ${isCurrent?'Current':'Select'}
           </button>
         </div>`;
