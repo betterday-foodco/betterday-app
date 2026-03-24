@@ -128,7 +128,8 @@
     .spinner-label { font-size: .82rem; color: #7b8c9f; font-weight: 600; }
 
     /* ── MENU SHELL ── */
-    .menu-shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+    #sMenu.active { display: flex; flex-direction: column; height: 100dvh; }
+    .menu-shell { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--cream); }
     .menu-topbar { background: var(--dark); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 58px; flex-shrink: 0; }
     .menu-topbar-brand { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: #fff; }
     .menu-topbar-brand span { color: var(--primary); }
@@ -156,13 +157,22 @@
     .pricing-tier     { font-size: .88rem; color: #50657a; display: flex; align-items: center; gap: 6px; }
     .pricing-tier strong { color: var(--dark); }
     .pricing-delivery { margin-left: auto; font-size: .82rem; font-weight: 700; color: var(--primary); }
-    .menu-scroll { flex: 1; padding: 20px 24px 160px; overflow-y: auto; }
     .menu-inner { max-width: 1100px; margin: 0 auto; }
     .menu-section-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #7b8c9f; margin: 20px 0 14px; display: flex; align-items: center; gap: 10px; }
     .menu-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(0,70,94,.1); }
     .meal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px; }
     @media (max-width: 900px) { .meal-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 500px)  { .meal-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) {
+      .meal-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .meal-img-wrap { aspect-ratio: 1 / 1; }
+      .meal-body { padding: 9px 9px 8px; gap: 4px; }
+      .meal-name { font-size: .78rem; }
+      .meal-desc { display: none; }
+      .macros-row { gap: 3px; }
+      .macro-chip { font-size: .58rem; padding: 2px 5px; }
+      .qty-btn { padding: 9px 12px; }
+      .btn-add { padding: 10px 0; font-size: .8rem; }
+    }
 
     /* ── MEAL CARD ── */
     .meal-card { background: #fff; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 3px 12px rgba(0,70,94,.08); transition: transform .2s, box-shadow .2s; }
@@ -225,19 +235,69 @@
     .next-price-chip { font-size: .78rem; color: rgba(255,255,255,.7); background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 4px 12px; margin-right: 8px; }
     .next-price-chip strong { color: #7dd8ff; }
 
-    /* Bottom bar */
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; background: var(--dark); box-shadow: 0 -4px 24px rgba(0,0,0,.25); }
-    .bottom-bar-inner { max-width: 1100px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .bb-left { display: flex; flex-direction: column; gap: 2px; }
-    .bb-count { font-size: .8rem; color: rgba(255,255,255,.55); }
-    .bb-total { font-size: 1.25rem; font-weight: 900; color: #fff; }
-    .bb-savings { font-size: .75rem; color: #5fe49a; }
-    .bb-right { display: flex; align-items: center; gap: 10px; }
-    .bb-clear { font-size: .78rem; color: rgba(255,255,255,.4); border: none; background: transparent; cursor: pointer; padding: 4px 8px; font-family: 'DM Sans', sans-serif; border-radius: 6px; }
-    .bb-clear:hover { color: rgba(255,255,255,.8); background: rgba(255,255,255,.1); }
-    .btn-review { background: var(--primary); color: #fff; border: none; border-radius: 999px; padding: 12px 28px; font-size: .95rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; box-shadow: 0 4px 14px rgba(78,162,253,.4); transition: .15s; white-space: nowrap; }
-    .btn-review:hover { background: #3b8cd9; transform: translateY(-1px); }
-    .btn-review:disabled { background: rgba(255,255,255,.15); color: rgba(255,255,255,.35); cursor: not-allowed; transform: none; box-shadow: none; }
+    /* ── MENU BODY + SCROLL ── */
+    .menu-body { flex: 1; display: flex; min-height: 0; }
+    .menu-scroll { flex: 1; min-width: 0; overflow-y: auto; padding: 20px 24px 90px; }
+    @media (min-width: 900px) { .menu-scroll { padding-bottom: 30px; } }
+
+    /* ── DESKTOP SIDE CART ── */
+    .side-cart { width: 290px; flex-shrink: 0; background: #fff; border-left: 1px solid rgba(0,70,94,.1); display: none; flex-direction: column; overflow: hidden; }
+    @media (min-width: 900px) { .side-cart { display: flex; } }
+    .sc-head { padding: 18px 18px 12px; border-bottom: 1px solid #f0f4f8; flex-shrink: 0; }
+    .sc-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--dark); }
+    .sc-delivery { font-size: .7rem; color: #9aabb8; margin-top: 3px; }
+    .sc-items { flex: 1; overflow-y: auto; padding: 10px 14px; }
+    .sc-empty-msg { font-size: .8rem; color: #b0c4cc; text-align: center; padding: 24px 0; }
+    .sc-item-row { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid #f5f8fa; }
+    .sc-item-row:last-child { border-bottom: none; }
+    .sc-thumb { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #e8d5c4; }
+    .sc-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .sc-item-info { flex: 1; min-width: 0; }
+    .sc-item-name { font-size: .75rem; font-weight: 700; color: var(--dark); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sc-item-meta { font-size: .67rem; color: #9aabb8; }
+    .sc-item-price { font-size: .78rem; font-weight: 800; color: var(--dark); white-space: nowrap; }
+    .sc-footer { flex-shrink: 0; padding: 12px 14px 16px; border-top: 1px solid #f0f4f8; }
+    .sc-subtotal-row { display: flex; justify-content: space-between; font-size: .73rem; padding: 2px 0; color: #6b7f90; }
+    .sc-savings-row { color: var(--green); font-weight: 700; }
+    .sc-total-row { display: flex; justify-content: space-between; align-items: baseline; margin: 8px 0 10px; }
+    .sc-total-row > span:first-child { font-size: .82rem; font-weight: 700; color: var(--dark); }
+    .sc-total-amt { font-size: 1.2rem; font-weight: 900; color: var(--dark); }
+    .sc-checkout-btn { width: 100%; padding: 12px; background: var(--dark); color: #fff; border: none; border-radius: 12px; font-size: .88rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .15s; }
+    .sc-checkout-btn:hover { background: #005a7a; }
+    .sc-clear-btn { width: 100%; padding: 7px; background: transparent; color: #b0c4cc; border: none; font-size: .72rem; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 6px; }
+    .sc-clear-btn:hover { color: var(--red); }
+
+    /* ── MOBILE BOTTOM CART BAR ── */
+    .mob-cart-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; }
+    @media (min-width: 900px) { .mob-cart-bar { display: none; } }
+    .mob-cart-toggle { background: var(--dark); padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 -4px 20px rgba(0,0,0,.25); }
+    .mob-toggle-left { display: flex; align-items: center; gap: 10px; }
+    .mob-cart-badge { background: var(--primary); color: #fff; font-size: .7rem; font-weight: 900; border-radius: 999px; padding: 2px 8px; min-width: 22px; text-align: center; }
+    .mob-toggle-label { font-size: .9rem; font-weight: 800; color: #fff; }
+    .mob-cart-total-label { font-size: 1rem; font-weight: 900; color: #fff; }
+    .mob-cart-chevron { font-size: 1rem; color: rgba(255,255,255,.55); margin-left: 8px; display: inline-block; transition: transform .25s; }
+    .mob-cart-chevron.open { transform: rotate(180deg); }
+    .mob-cart-sheet { background: var(--cream); border-radius: 20px 20px 0 0; box-shadow: 0 -8px 40px rgba(0,0,0,.22); max-height: 72vh; overflow-y: auto; }
+    .mcs-drag-handle { width: 36px; height: 4px; background: rgba(0,70,94,.18); border-radius: 2px; margin: 10px auto 2px; }
+    .mcs-head { padding: 6px 20px 10px; border-bottom: 1px solid rgba(0,70,94,.07); }
+    .mcs-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--dark); }
+    .mcs-delivery { font-size: .7rem; color: #9aabb8; margin-top: 2px; }
+    .mcs-items { padding: 8px 16px; }
+    .mcs-item-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(0,70,94,.06); }
+    .mcs-item-row:last-child { border-bottom: none; }
+    .mcs-thumb { width: 40px; height: 40px; border-radius: 9px; overflow: hidden; flex-shrink: 0; background: #e8d5c4; }
+    .mcs-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .mcs-item-info { flex: 1; min-width: 0; }
+    .mcs-item-name { font-size: .82rem; font-weight: 700; color: var(--dark); line-height: 1.3; }
+    .mcs-item-meta { font-size: .7rem; color: #9aabb8; }
+    .mcs-item-price { font-size: .82rem; font-weight: 800; color: var(--dark); }
+    .mcs-subtotals { padding: 6px 16px 4px; border-top: 1px solid rgba(0,70,94,.07); }
+    .mcs-subtotal-row { display: flex; justify-content: space-between; font-size: .76rem; padding: 2px 0; color: #6b7f90; }
+    .mcs-savings-row { color: var(--green); font-weight: 700; }
+    .mcs-total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 16px 2px; }
+    .mcs-total-row span:first-child { font-size: .88rem; font-weight: 700; color: var(--dark); }
+    .mcs-total-row span:last-child { font-size: 1.3rem; font-weight: 900; color: var(--dark); }
+    .mcs-checkout-btn { width: calc(100% - 32px); display: block; margin: 10px 16px 16px; padding: 14px; background: var(--dark); color: #fff; border: none; border-radius: 14px; font-size: .95rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 
     /* Closed week overlay */
     .closed-overlay { background: #fff; border-radius: 20px; padding: 36px 28px; text-align: center; max-width: 440px; margin: 40px auto; box-shadow: 0 8px 32px rgba(0,70,94,.1); }
@@ -577,20 +637,44 @@
     </div>
     <div class="week-tabs-bar" id="weekTabsBar"></div>
     <div class="pricing-banner"><div class="pricing-banner-inner" id="pricingBannerInner"></div></div>
-    <div class="menu-scroll"><div class="menu-inner" id="menuInner"></div></div>
-    <div class="bottom-bar">
-      <div class="bottom-bar-inner">
-        <div class="bb-left">
-          <div class="bb-count" id="bbCount">Add meals to get started</div>
-          <div style="display:flex;align-items:baseline;gap:8px;">
-            <span style="font-size:.88rem;color:rgba(255,255,255,.7);">You pay</span>
-            <span class="bb-total" id="bbTotal">$0.00</span>
-          </div>
-          <div class="bb-savings" id="bbSavings"></div>
+    <div class="menu-body">
+      <div class="menu-scroll"><div class="menu-inner" id="menuInner"></div></div>
+      <!-- DESKTOP SIDE CART -->
+      <aside class="side-cart" id="sideCart">
+        <div class="sc-head">
+          <div class="sc-title">Your Order</div>
+          <div class="sc-delivery" id="scDelivery"></div>
         </div>
-        <div class="bb-right">
-          <button class="bb-clear" onclick="clearCart()">Clear</button>
-          <button class="btn-review" id="reviewBtn" onclick="openSummary()" disabled>Review Order →</button>
+        <div class="sc-items" id="scItems"><div class="sc-empty-msg">Add meals to get started</div></div>
+        <div class="sc-footer" id="scFooter" style="display:none">
+          <div class="sc-subtotals" id="scSubtotals"></div>
+          <div class="sc-total-row"><span>Your Total</span><span class="sc-total-amt" id="scTotal">$0.00</span></div>
+          <button class="sc-checkout-btn" onclick="openSummary()">Place Order</button>
+          <button class="sc-clear-btn" onclick="clearCart()">Clear cart</button>
+        </div>
+      </aside>
+    </div>
+    <!-- MOBILE BOTTOM CART BAR -->
+    <div class="mob-cart-bar" id="mobCartBar">
+      <div class="mob-cart-sheet" id="mobCartSheet" style="display:none">
+        <div class="mcs-drag-handle"></div>
+        <div class="mcs-head">
+          <div class="mcs-title">Your Order</div>
+          <div class="mcs-delivery" id="mcsDelivery"></div>
+        </div>
+        <div class="mcs-items" id="mcsItems"></div>
+        <div class="mcs-subtotals" id="mcsSubtotals" style="display:none"></div>
+        <div class="mcs-total-row"><span>Your Total</span><span id="mcsTotal">$0.00</span></div>
+        <button class="mcs-checkout-btn" onclick="closeMobCart();openSummary()">Place Order</button>
+      </div>
+      <div class="mob-cart-toggle" onclick="toggleMobCart()">
+        <div class="mob-toggle-left">
+          <span class="mob-cart-badge" id="mobCartBadge">0</span>
+          <span class="mob-toggle-label">View Cart</span>
+        </div>
+        <div style="display:flex;align-items:center;">
+          <span class="mob-cart-total-label" id="mobCartTotalLabel">$0.00</span>
+          <span class="mob-cart-chevron" id="mobCartChevron">↑</span>
         </div>
       </div>
     </div>
@@ -1403,16 +1487,66 @@ function renderMealControl(id, qty, wi) {
     :`<div class="qty-pill"><button class="qty-btn" onclick="removeMeal('${id}',${wi})">−</button><span class="qty-val">${qty}</span><button class="qty-btn" onclick="addMeal('${id}',${wi},${j})">+</button></div>`;
 }
 function clearCart() { cart=[]; renderWeek(activeWeekIndex); renderCart(); }
+function buildCartItemRows(ic, tc, nc, mc, pc) {
+  // ic=itemClass tc=thumbClass nc=nameClass mc=metaClass pc=priceClass
+  const g={};
+  cart.forEach(item=>{
+    const k=item.mealId+'_'+item.weekIndex;
+    if(!g[k]) g[k]={meal:item.meal,entries:[]};
+    g[k].entries.push(item);
+  });
+  return Object.values(g).map(({meal,entries})=>{
+    const lt=entries.reduce((s,e)=>s+e.price,0);
+    const priceHtml=lt===0?`<span style="color:var(--green);font-weight:800">FREE</span>`:'$'+lt.toFixed(2);
+    const meta=entries.length+'× '+entries.map(e=>e.tier==='free'?'FREE':'$'+e.price.toFixed(2)).join('+');
+    return `<div class="${ic}"><div class="${tc}"><img src="${meal?.image||''}" referrerpolicy="no-referrer" onerror="this.style.display='none'"></div><div style="flex:1;min-width:0"><div class="${nc}">${meal?.name||'Meal'}</div><div class="${mc}">${meta}</div></div><div class="${pc}">${priceHtml}</div></div>`;
+  }).join('');
+}
+function renderMobSheet() {
+  const total=cart.reduce((s,i)=>s+i.price,0), n=cart.length;
+  const fp=parseFloat(currentCompany?.FullPrice)||16.99;
+  const savings=cart.reduce((s,i)=>s+(i.tier!=='full'?fp-i.price:0),0);
+  const delivStr=(weeks[activeWeekIndex]?.deliveryStr||'')+(currentCompany?.FridgeLocationDescription||currentCompany?.AddressLine1?' · '+(currentCompany.FridgeLocationDescription||currentCompany.AddressLine1):'');
+  document.getElementById('mcsDelivery').textContent=delivStr;
+  document.getElementById('mcsItems').innerHTML=n>0?buildCartItemRows('mcs-item-row','mcs-thumb','mcs-item-name','mcs-item-meta','mcs-item-price'):'<div style="text-align:center;color:#b0c4cc;padding:16px;font-size:.82rem;">No meals added yet</div>';
+  const sub=document.getElementById('mcsSubtotals');
+  sub.style.display=savings>0?'':'none';
+  sub.innerHTML=`<div class="mcs-subtotal-row"><span>Full retail (${n} meal${n!==1?'s':''})</span><span>$${(n*fp).toFixed(2)}</span></div>`+(savings>0?`<div class="mcs-subtotal-row mcs-savings-row"><span>${currentCompany.CompanyName} savings</span><span>–$${savings.toFixed(2)}</span></div>`:'');
+  document.getElementById('mcsTotal').textContent='$'+total.toFixed(2);
+}
+let _mobCartOpen=false;
+function toggleMobCart(){
+  _mobCartOpen=!_mobCartOpen;
+  document.getElementById('mobCartSheet').style.display=_mobCartOpen?'':'none';
+  document.getElementById('mobCartChevron').classList.toggle('open',_mobCartOpen);
+  if(_mobCartOpen) renderMobSheet();
+}
+function closeMobCart(){
+  _mobCartOpen=false;
+  document.getElementById('mobCartSheet').style.display='none';
+  document.getElementById('mobCartChevron').classList.remove('open');
+}
 function renderCart() {
   const total=cart.reduce((s,i)=>s+i.price,0), n=cart.length;
   const fp=parseFloat(currentCompany?.FullPrice)||16.99;
-  let savings=0; cart.forEach(i=>{if(i.tier!=='full')savings+=fp-i.price;});
-  let label='Add meals to get started';
-  if(n>0){const bw={};cart.forEach(i=>{const l=weeks[i.weekIndex]?.deliveryShort||`Week ${i.weekIndex+1}`;bw[l]=(bw[l]||0)+1;});label=n+' meal'+(n!==1?'s':'')+' · '+Object.entries(bw).map(([w,c])=>`${c} for ${w}`).join(', ');}
-  document.getElementById('bbCount').textContent=label;
-  document.getElementById('bbTotal').textContent='$'+total.toFixed(2);
-  document.getElementById('bbSavings').textContent=savings>0?`${currentCompany.CompanyName} saved you $${savings.toFixed(2)}`:'';
-  document.getElementById('reviewBtn').disabled=n===0;
+  const savings=cart.reduce((s,i)=>s+(i.tier!=='full'?fp-i.price:0),0);
+  // ── Desktop side cart ──
+  document.getElementById('scDelivery').textContent=weeks[activeWeekIndex]?.deliveryStr||'';
+  if(n===0){
+    document.getElementById('scItems').innerHTML='<div class="sc-empty-msg">Add meals to get started</div>';
+    document.getElementById('scFooter').style.display='none';
+  } else {
+    document.getElementById('scItems').innerHTML=buildCartItemRows('sc-item-row','sc-thumb','sc-item-name','sc-item-meta','sc-item-price');
+    document.getElementById('scSubtotals').innerHTML=`<div class="sc-subtotal-row"><span>Full retail (${n} meal${n!==1?'s':''})</span><span>$${(n*fp).toFixed(2)}</span></div>`+(savings>0?`<div class="sc-subtotal-row sc-savings-row"><span>${currentCompany.CompanyName} savings</span><span>–$${savings.toFixed(2)}</span></div>`:'');
+    document.getElementById('scTotal').textContent='$'+total.toFixed(2);
+    document.getElementById('scFooter').style.display='';
+  }
+  // ── Mobile bar ──
+  document.getElementById('mobCartBadge').textContent=n;
+  document.getElementById('mobCartTotalLabel').textContent='$'+total.toFixed(2);
+  if(_mobCartOpen) renderMobSheet();
+  // ── Next-meal chip ──
+  document.getElementById('nextMealPrice').textContent=getNextPriceLabel(activeWeekIndex);
 }
 
 // ══════════════════════════════════════════
@@ -1420,6 +1554,7 @@ function renderCart() {
 // ══════════════════════════════════════════
 function openSummary() {
   if(!cart.length)return;
+  closeMobCart();
   const c=currentCompany, fp=parseFloat(c.FullPrice)||16.99;
   const byWeek={}; cart.forEach(i=>{if(!byWeek[i.weekIndex])byWeek[i.weekIndex]=[];byWeek[i.weekIndex].push(i);});
   const total=cart.reduce((s,i)=>s+i.price,0), fv=cart.length*fp, savings=fv-total;
