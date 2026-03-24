@@ -749,6 +749,7 @@ let existingOrderCounts = {}; // { sundayAnchor: count } — meals already place
 
 // ── SESSION (localStorage) ──
 const LS_SESSION = 'bd_work_session';
+const LS_COUNTS  = email => `bd_counts_${email}`;
 function saveSession(emp, company) {
   try { localStorage.setItem(LS_SESSION, JSON.stringify({ emp, companyId: company.CompanyID, savedAt: Date.now() })); } catch(e){}
 }
@@ -762,7 +763,12 @@ function loadSession() {
     return s;
   } catch(e) { return null; }
 }
-function clearSession() { try { localStorage.removeItem(LS_SESSION); } catch(e){} }
+function clearSession() {
+  try {
+    if (currentEmployee?.email) localStorage.removeItem(LS_COUNTS(currentEmployee.email));
+    localStorage.removeItem(LS_SESSION);
+  } catch(e) {}
+}
 
 // ── NAV ──
 function goTo(id) {
@@ -1029,14 +1035,25 @@ async function doJoin() {
 // ── ENTER MENU ──
 async function enterMenu() {
   cart = []; existingOrderCounts = {}; computeWeeks();
-  // Fetch existing order counts BEFORE rendering so tier/limit logic starts from the right baseline
+  // Seed from localStorage cache so render is instant for returning users
   if (currentEmployee?.email) {
     try {
-      const r = await apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email });
-      if (r?.counts) existingOrderCounts = r.counts;
+      const cached = localStorage.getItem(LS_COUNTS(currentEmployee.email));
+      if (cached) existingOrderCounts = JSON.parse(cached);
     } catch(e) {}
   }
   setupMenu(); goTo('sMenu');
+  // Fetch fresh counts in background; update banner + re-render if they changed
+  if (currentEmployee?.email) {
+    apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email })
+      .then(r => {
+        if (!r?.counts) return;
+        existingOrderCounts = r.counts;
+        try { localStorage.setItem(LS_COUNTS(currentEmployee.email), JSON.stringify(r.counts)); } catch(e) {}
+        buildPricingBanner();
+        renderWeek(activeWeekIndex);
+      }).catch(() => {});
+  }
   // Preload other open weeks in the background
   weeks.forEach((w, i) => {
     if (i === activeWeekIndex || menuCache[w.sundayAnchor] || !w.isOpen) return;

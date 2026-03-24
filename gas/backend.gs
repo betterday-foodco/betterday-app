@@ -436,8 +436,12 @@ function doPost(e) {
         if (!cellVal) continue;
         var sundayDate = new Date(cellVal);
         if (isNaN(sundayDate.getTime())) continue;
-        var rowSunday = Utilities.formatDate(sundayDate, "GMT", "yyyy-MM-dd");
-        if (rowSunday === sundayMatch) {
+        // Fuzzy match: compare within ±24h to absorb timezone offsets between
+        // the sheet's stored date and the UTC anchor sent from the frontend.
+        // Using noon UTC as the reference makes the window symmetric.
+        var sundayMatchMs = new Date(sundayMatch + 'T12:00:00Z').getTime();
+        var diffMs = Math.abs(sundayDate.getTime() - sundayMatchMs);
+        if (diffMs <= 24 * 60 * 60 * 1000) {
           meatIds  = extractIdsFromCell(schedRows[i][AI_COL]);
           veganIds = extractIdsFromCell(schedRows[i][AJ_COL]);
           break;
