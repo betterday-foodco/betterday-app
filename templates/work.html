@@ -320,6 +320,8 @@
     .session-info-icon { font-size: 1.35rem; flex-shrink: 0; margin-top: 1px; }
     .session-info-title { font-size: .88rem; font-weight: 800; color: var(--dark); margin-bottom: 3px; }
     .session-info-desc { font-size: .78rem; color: #50657a; line-height: 1.55; }
+    .order-hist-group-label { font-size: .78rem; font-weight: 800; color: var(--dark); margin: 18px 0 8px; opacity: .6; }
+    .order-hist-group-label:first-child { margin-top: 0; }
     .order-hist-card { background: #fff; border-radius: 14px; padding: 13px 15px; margin-bottom: 9px; box-shadow: 0 2px 8px rgba(0,70,94,.07); display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; }
     .order-hist-thumb { width: 40px; height: 40px; border-radius: 9px; overflow: hidden; background: #e8d5c4; flex-shrink: 0; }
     .order-hist-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -1328,21 +1330,37 @@ async function openProfile() {
       list.innerHTML = '<div class="profile-empty"><div class="profile-empty-icon">🍽️</div><div>No orders yet — your history will appear here after your first delivery</div></div>';
     } else {
       const tierLabels = {free:'Complimentary',tier1:'Tier 1',tier2:'Tier 2',tier3:'Tier 3',full:'Full price'};
-      list.innerHTML = orders.map(o => {
-        const price = parseFloat(o.EmployeePrice||0);
-        const tierClass = 'tier-' + (o.Tier || 'full');
-        const tierLabel = tierLabels[o.Tier] || 'Full price';
-        return `<div class="order-hist-card">
-          <div class="order-hist-thumb"><img src="" onerror="this.style.display='none'" referrerpolicy="no-referrer"></div>
-          <div>
-            <div class="order-hist-meal">${o.DishName || 'Meal'}</div>
-            <div class="order-hist-date">${o.DeliveryDate || ''} · ${o.CompanyName || ''}</div>
-          </div>
-          <div class="order-hist-right">
-            <div class="order-hist-price">${price===0?'<span style="color:var(--green);font-weight:800">FREE</span>':'$'+price.toFixed(2)}</div>
-            <div><span class="order-tier-pill ${tierClass}">${tierLabel}</span></div>
-          </div>
-        </div>`;
+      // Group by delivery date
+      const grouped = {};
+      orders.forEach(o => {
+        const key = o.DeliveryDate || 'Unknown date';
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(o);
+      });
+      const formatDate = d => {
+        const dt = new Date(d + 'T12:00:00');
+        if (isNaN(dt)) return d;
+        return dt.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' });
+      };
+      list.innerHTML = Object.keys(grouped).sort((a,b) => b.localeCompare(a)).map(date => {
+        const cards = grouped[date].map(o => {
+          const price = parseFloat(o.EmployeePrice) || 0;
+          const tierClass = 'tier-' + (o.Tier || 'full');
+          const tierLabel = tierLabels[o.Tier] || 'Full price';
+          const dishName = o.DishName && !o.DishName.startsWith('#') ? o.DishName : (o.MealID ? 'Meal #' + o.MealID : 'Meal');
+          return `<div class="order-hist-card">
+            <div class="order-hist-thumb"><img src="${o.Image||''}" onerror="this.style.display='none'" referrerpolicy="no-referrer"></div>
+            <div>
+              <div class="order-hist-meal">${dishName}</div>
+              <div class="order-hist-date">${o.DietType || ''}</div>
+            </div>
+            <div class="order-hist-right">
+              <div class="order-hist-price">${price===0?'<span style="color:var(--green);font-weight:800">FREE</span>':'$'+price.toFixed(2)}</div>
+              <div><span class="order-tier-pill ${tierClass}">${tierLabel}</span></div>
+            </div>
+          </div>`;
+        }).join('');
+        return `<div class="order-hist-group-label">${formatDate(date)}</div>${cards}`;
       }).join('');
     }
   } catch(e) {
