@@ -641,13 +641,14 @@
 const SCRIPT_URL = "/api/gas";
 
 // ── STATE ──
-let currentCompany  = null;
-let currentEmployee = null; // { firstName, lastName, email }
-let cart            = [];
-let weeks           = [];
-let activeWeekIndex = 0;
-let menuCache       = {};
-let joinPin         = '';
+let currentCompany      = null;
+let currentEmployee     = null; // { firstName, lastName, email }
+let cart                = [];
+let weeks               = [];
+let activeWeekIndex     = 0;
+let menuCache           = {};
+let joinPin             = '';
+let existingOrderCounts = {}; // { sundayAnchor: count } — meals already placed this week
 
 // ── SESSION (localStorage) ──
 const LS_SESSION = 'bd_work_session';
@@ -922,7 +923,7 @@ async function doJoin() {
 
 // ── ENTER MENU ──
 function enterMenu() {
-  cart = []; computeWeeks(); setupMenu(); goTo('sMenu');
+  cart = []; existingOrderCounts = {}; computeWeeks(); setupMenu(); goTo('sMenu');
   // Immediately preload all other open weeks in parallel (no setTimeout delay)
   weeks.forEach((w, i) => {
     if (i === activeWeekIndex || menuCache[w.sundayAnchor] || !w.isOpen) return;
@@ -930,6 +931,19 @@ function enterMenu() {
       .then(m => { menuCache[w.sundayAnchor] = m; })
       .catch(() => {});
   });
+  // Silently fetch how many meals this employee already has for each open week
+  // so tier limits and the "max reached" guard account for prior orders
+  if (currentEmployee?.email) {
+    apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email })
+      .then(r => {
+        if (r?.counts) {
+          existingOrderCounts = r.counts;
+          // Refresh the "next meal price" label now that we know the real baseline
+          document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
+        }
+      })
+      .catch(() => {});
+  }
 }
 
 // ── PRE-LOAD ACTIVE WEEK DURING SIGN-IN ──
@@ -960,29 +974,48 @@ async function apiFetch(payload) {
   return r.json();
 }
 
-// ── ON LOAD: Check for magic link token in URL OR saved session ──
+// ── ON LOAD: Check magic link token → saved session → URL pre-fill ──
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
   const companyCode = params.get('co'); // e.g. /work?co=BROCK&token=xxx
 
+  // 1. Magic link landing — highest priority
   if (token) {
-    // Magic link landing
     try {
       const d = await apiFetch({ action: 'verify_magic_token', token });
       if (d.valid) {
         currentCompany  = d.company;
         currentEmployee = d.employee;
         saveSession(currentEmployee, currentCompany);
-        preloadActiveWeekMenu(); // start menu fetch while transition happens
+        preloadActiveWeekMenu();
         enterMenu();
         window.history.replaceState({}, '', window.location.pathname);
         return;
       }
     } catch(e) {}
+    // Token invalid/expired — fall through; pre-fill company if co= present
   }
 
-  // Pre-fill company code from URL param e.g. betterday.ca/work?co=BROCK
+  // 2. Restore saved session — skip company code screen entirely
+  const sess = loadSession();
+  if (sess && sess.companyId) {
+    try {
+      const compData = await apiFetch({ action: 'get_company', company_id: sess.companyId });
+      if (compData.found) {
+        currentCompany  = compData.company;
+        currentEmployee = sess.emp;
+        preloadActiveWeekMenu();
+        enterMenu();
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+    } catch(e) {}
+    // Company lookup failed — clear stale session and show login
+    clearSession();
+  }
+
+  // 3. Pre-fill company code from URL param e.g. betterday.ca/work?co=BROCK
   if (companyCode) {
     const input = document.getElementById('companyCodeInput');
     input.value = companyCode.toUpperCase();
@@ -1182,7 +1215,11 @@ function getTierForPosition(weekIndex, pos) {
   if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) return {tier:'full',price:parseFloat(c.FullPrice)||16.99};
   return null;
 }
-function getTierForNextItem(wi) { return getTierForPosition(wi, cart.filter(i=>i.weekIndex===wi).length); }
+function getTierForNextItem(wi) {
+  const anchor = weeks[wi]?.sundayAnchor || '';
+  const already = existingOrderCounts[anchor] || 0;
+  return getTierForPosition(wi, already + cart.filter(i=>i.weekIndex===wi).length);
+}
 function recomputeTiers(wi) { cart.filter(i=>i.weekIndex===wi).forEach((item,idx)=>{const t=getTierForPosition(wi,idx);if(t){item.tier=t.tier;item.price=t.price;}}); }
 function getNextPriceLabel(wi) { const t=getTierForNextItem(wi); if(!t) return 'Max'; return t.tier==='free'?'FREE 🎉':'$'+t.price.toFixed(2); }
 
@@ -1311,7 +1348,10 @@ async function doCheckout() {
     const w=weeks[wi];
     dh+=`<div class="thankyou-row"><span>Delivery</span><span>${w?.deliveryStr||''}</span></div>`;
     dh+=`<div class="thankyou-row"><span>Location</span><span>${c.FridgeLocationDescription||c.AddressLine1||''}</span></div>`;
-    dh+=`<div class="thankyou-row"><span>Meals (${items.length})</span><span>${items.map(i=>i.meal?.name||'Meal').join(', ')}</span></div>`;
+    // Group by meal name, build "Dish A (×3) | Dish B" style list
+    const mg={}; items.forEach(i=>{const n=i.meal?.name||'Meal';mg[n]=(mg[n]||0)+1;});
+    const mealLine=Object.entries(mg).map(([n,q])=>q>1?`${n} ×${q}`:n).join(' &nbsp;|&nbsp; ');
+    dh+=`<div class="thankyou-row"><span>Meals (${items.length})</span><span style="text-align:right;line-height:1.5;">${mealLine}</span></div>`;
   });
   dh+=`<div class="thankyou-row" style="border-top:1px solid #e8edf2;margin-top:6px;padding-top:8px;"><span style="font-weight:800">${c.CompanyName} covered</span><span style="font-weight:800;color:var(--green)">–$${savings.toFixed(2)}</span></div><div class="thankyou-row"><span style="font-weight:800">You paid</span><span style="font-weight:800">${total>0?'$'+total.toFixed(2):'Nothing 🎉'}</span></div>`;
   document.getElementById('tyDetail').innerHTML=dh;
@@ -1355,12 +1395,12 @@ async function openProfile() {
       });
       const formatDate = d => {
         const dt = new Date(d + 'T12:00:00');
-        if (isNaN(dt)) return d;
+        if (isNaN(dt.getTime())) return d;
         return dt.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' });
       };
       list.innerHTML = Object.keys(grouped).sort((a,b) => b.localeCompare(a)).map(date => {
         const cards = grouped[date].map(o => {
-          const price = parseFloat(o.EmployeePrice) || 0;
+          const price = (v => isNaN(v) ? 0 : v)(parseFloat(o.EmployeePrice));
           const tierClass = 'tier-' + (o.Tier || 'full');
           const tierLabel = tierLabels[o.Tier] || 'Full price';
           const dishName = o.DishName && !o.DishName.startsWith('#') ? o.DishName : (o.MealID ? 'Meal #' + o.MealID : 'Meal');

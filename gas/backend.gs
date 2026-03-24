@@ -180,16 +180,25 @@ function doPost(e) {
           subject: "Your BetterDay sign-in link",
           body: "Click the link below to sign in:\n\n" + signInUrl + "\n\nExpires in 15 minutes. Didn't request this? Ignore it.",
           htmlBody:
-            "<div style='font-family:sans-serif;max-width:480px;margin:0 auto;'>" +
-            "<div style='background:#00465e;padding:24px;border-radius:14px 14px 0 0;text-align:center;'>" +
-            "<div style='font-family:Georgia,serif;font-size:1.4rem;color:#fff;font-weight:700;'>BetterDay</div>" +
-            "<div style='font-size:.7rem;color:rgba(255,255,255,.45);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;'>for work</div></div>" +
-            "<div style='background:#fff;padding:32px 28px;border-radius:0 0 14px 14px;border:1px solid #e8edf2;border-top:none;'>" +
-            "<p style='font-size:1.05rem;font-weight:800;color:#00465e;margin:0 0 8px;'>Sign in to BetterDay</p>" +
-            "<p style='font-size:.88rem;color:#50657a;line-height:1.6;margin:0 0 24px;'>Click below — no password needed. Link expires in 15 minutes and works once only.</p>" +
-            "<a href='" + signInUrl + "' style='display:block;background:#4ea2fd;color:#fff;text-decoration:none;padding:15px;border-radius:12px;text-align:center;font-weight:800;font-size:1rem;'>Sign in to BetterDay \u2192</a>" +
-            "<p style='font-size:.72rem;color:#bbb;margin:20px 0 0;'>Didn\u2019t request this? You can safely ignore this email.</p>" +
-            "</div></div>"
+            "<!DOCTYPE html><html><body style='margin:0;padding:0;background:#f4ede3;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;'>" +
+            "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
+            "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
+            // Header
+            "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
+            "<div style='font-family:Georgia,\"Times New Roman\",serif;font-size:1.5rem;color:#fff;font-weight:700;letter-spacing:-0.5px;'>BetterDay</div>" +
+            "<div style='font-size:.65rem;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>FOR WORK</div>" +
+            "</td></tr>" +
+            // Body
+            "<tr><td style='background:#ffffff;padding:36px 32px 28px;'>" +
+            "<p style='font-size:1.15rem;font-weight:800;color:#0d2030;margin:0 0 10px;'>Your sign-in link is ready</p>" +
+            "<p style='font-size:.9rem;color:#50657a;line-height:1.65;margin:0 0 28px;'>Click the button below to sign in — no password needed. This link expires in <strong>15 minutes</strong> and can only be used once.</p>" +
+            "<a href='" + signInUrl + "' style='display:block;background:#00465e;color:#ffffff;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-weight:700;font-size:1rem;letter-spacing:0.2px;'>Sign in to BetterDay &rarr;</a>" +
+            "</td></tr>" +
+            // Footer
+            "<tr><td style='background:#f9f5f0;border-radius:0 0 16px 16px;padding:20px 32px;border-top:1px solid #e8e0d5;'>" +
+            "<p style='font-size:.75rem;color:#9aabb8;margin:0;line-height:1.6;'>If you didn&rsquo;t request this, you can safely ignore it &mdash; your account is secure.<br>Questions? Reply to this email.</p>" +
+            "</td></tr>" +
+            "</table></td></tr></table></body></html>"
         });
       } catch(mailErr) {
         Logger.log("Magic link email failed: " + mailErr.toString());
@@ -244,6 +253,24 @@ function doPost(e) {
         }
       }
       return jsonOut({valid: false, error: "Token not found"});
+    }
+    // ─────────────────────────────────────────
+    // GET WEEK ORDER COUNTS (how many meals employee already placed per week)
+    // ─────────────────────────────────────────
+    if (data.action === "get_week_order_counts") {
+      var corpSheet = ssHub.getSheetByName("CorporateOrders");
+      if (!corpSheet) return jsonOut({counts: {}});
+      var rows = corpSheet.getDataRange().getValues();
+      var email = String(data.email || "").trim().toLowerCase();
+      var counts = {}; // { sundayAnchor: count }
+      for (var i = 1; i < rows.length; i++) {
+        if (!rows[i][0]) continue;
+        var rowEmail = String(rows[i][6]).trim().toLowerCase();
+        if (rowEmail !== email) continue;
+        var anchor = String(rows[i][4]).trim(); // SundayAnchor col
+        counts[anchor] = (counts[anchor] || 0) + 1;
+      }
+      return jsonOut({counts: counts});
     }
     // ─────────────────────────────────────────
     // GET ORDERS BY EMPLOYEE (for profile screen)
