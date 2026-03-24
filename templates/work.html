@@ -850,6 +850,7 @@ let activeWeekIndex     = 0;
 let menuCache           = {};
 let joinPin             = '';
 let existingOrderCounts = {}; // { sundayAnchor: count } — meals already placed this week
+let _prefetchedCounts   = null; // { email, counts } — hydrated before enterMenu()
 
 // ── SESSION (localStorage) ──
 const LS_SESSION = 'bd_work_session';
@@ -965,7 +966,8 @@ function resumeSession() {
   const sess = loadSession();
   if (!sess) return;
   currentEmployee = sess.emp;
-  preloadActiveWeekMenu(); // instant for returning users — fires before transition
+  preloadActiveWeekMenu();
+  preloadOrderCounts(sess.emp.email); // fire counts fetch before transition
   enterMenu();
 }
 
@@ -1001,8 +1003,9 @@ async function doSendMagicLink(isResend = false) {
     }
     // Send real magic link email via Apps Script
     await apiFetch({ action: 'create_magic_token', email, company_id: currentCompany.CompanyID });
-    // Fire menu preload NOW — user will be in inbox for 30+ seconds, use that time
+    // Fire menu + counts preload NOW — user will be in inbox for 30+ seconds, use that time
     preloadActiveWeekMenu();
+    preloadOrderCounts(email);
     // Show "check inbox" state — user must click the link
     document.getElementById('magicSentEmail').textContent = email;
     document.getElementById('magicSentWrap').classList.remove('hidden');
@@ -1121,7 +1124,8 @@ async function doJoin() {
     if (d.success) {
       currentEmployee = { firstName: first, lastName: last, email };
       saveSession(currentEmployee, currentCompany);
-      preloadActiveWeekMenu(); // start fetching menu during account setup completion
+      preloadActiveWeekMenu();
+      preloadOrderCounts(email); // new user will have 0 counts, loads instantly
       enterMenu();
     } else if (d.exists) {
       err.textContent = 'An account with that email already exists. Sign in instead.';
@@ -1139,12 +1143,18 @@ async function doJoin() {
 // ── ENTER MENU ──
 function enterMenu() {
   cart = []; existingOrderCounts = {}; computeWeeks();
-  // Seed from localStorage cache so render is instant for returning users
-  if (currentEmployee?.email) {
+  const email = currentEmployee?.email;
+  if (_prefetchedCounts?.email === email) {
+    // Preload already completed — use fresh counts immediately, no extra fetch needed
+    existingOrderCounts = _prefetchedCounts.counts;
+  } else if (email) {
+    // Seed from localStorage so render is instant while counts load
     try {
-      const cached = localStorage.getItem(LS_COUNTS(currentEmployee.email));
+      const cached = localStorage.getItem(LS_COUNTS(email));
       if (cached) existingOrderCounts = JSON.parse(cached);
     } catch(e) {}
+    // Counts weren't prefetched yet — start the fetch now (preloadOrderCounts self-applies on completion)
+    preloadOrderCounts(email);
   }
   setupMenu(); goTo('sMenu');
   // Preload other open weeks in the background
@@ -1154,41 +1164,6 @@ function enterMenu() {
       .then(m => { menuCache[w.sundayAnchor] = m; })
       .catch(() => {});
   });
-  // Fetch fresh counts in background; update banner + re-render with real baseline
-  if (currentEmployee?.email) {
-    apiFetch({ action: 'get_week_order_counts', email: currentEmployee.email })
-      .then(r => {
-        if (!r?.counts) return;
-        existingOrderCounts = r.counts;
-        try { localStorage.setItem(LS_COUNTS(currentEmployee.email), JSON.stringify(r.counts)); } catch(e) {}
-        // Re-validate cart: trim any items that now exceed the real weekly limit
-        const c=currentCompany;
-        if(c){
-          const free=parseInt(c.FreeMealsPerWeek)||0,t1=parseInt(c.Tier1_Meals)||0,t2=parseInt(c.Tier2_Meals)||0,t3=parseInt(c.Tier3_Meals)||0;
-          const hardCap=(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true)?Infinity:free+t1+t2+t3;
-          if(hardCap!==Infinity){
-            let trimmed=false;
-            weeks.forEach((w,wi)=>{
-              const already=existingOrderCounts[w.sundayAnchor]||0;
-              const canAdd=Math.max(0,hardCap-already);
-              let cartForWeek=cart.filter(i=>i.weekIndex===wi);
-              if(cartForWeek.length>canAdd){
-                let excess=cartForWeek.length-canAdd;
-                for(let j=cart.length-1;j>=0&&excess>0;j--){if(cart[j].weekIndex===wi){cart.splice(j,1);excess--;}}
-                trimmed=true;
-              }
-            });
-            if(trimmed){renderCart();renderWeek(activeWeekIndex);showToast('Some meals removed — you\u2019ve already reached your weekly limit','warn');}
-          }
-          // Recompute tiers for any remaining cart items now that counts are accurate
-          [...new Set(cart.map(i=>i.weekIndex))].forEach(wi=>recomputeTiers(wi));
-        }
-        document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
-        buildPricingBanner();
-        renderWeek(activeWeekIndex);
-      })
-      .catch(() => {});
-  }
 }
 
 // ── PRE-LOAD ACTIVE WEEK DURING SIGN-IN ──
@@ -1203,9 +1178,30 @@ function preloadActiveWeekMenu() {
     .catch(() => {});
 }
 
+// ── PRE-LOAD ORDER COUNTS DURING SIGN-IN ──
+// Fired as early as possible so counts are ready (or nearly ready) by
+// the time enterMenu() runs — eliminates the post-render stale window.
+function preloadOrderCounts(email) {
+  if (!email) return;
+  apiFetch({ action: 'get_week_order_counts', email })
+    .then(r => {
+      if (!r?.counts) return;
+      _prefetchedCounts = { email, counts: r.counts };
+      try { localStorage.setItem(LS_COUNTS(email), JSON.stringify(r.counts)); } catch(e) {}
+      // If the menu is already showing for this user, apply immediately
+      if (currentEmployee?.email === email && document.getElementById('sMenu')?.classList.contains('active')) {
+        existingOrderCounts = r.counts;
+        [...new Set(cart.map(i=>i.weekIndex))].forEach(wi=>recomputeTiers(wi));
+        document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
+        buildPricingBanner();
+      }
+    })
+    .catch(() => {});
+}
+
 function doLogout() {
   clearSession();
-  currentEmployee = null; currentCompany = null; cart = []; weeks = []; menuCache = {};
+  currentEmployee = null; currentCompany = null; cart = []; weeks = []; menuCache = {}; _prefetchedCounts = null;
   // Reset company code screen
   document.getElementById('companyCodeInput').value = '';
   document.getElementById('companyCodeCheck').classList.remove('show');
@@ -1234,6 +1230,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         currentEmployee = d.employee;
         saveSession(currentEmployee, currentCompany);
         preloadActiveWeekMenu();
+        preloadOrderCounts(d.employee.email);
         enterMenu();
         window.history.replaceState({}, '', window.location.pathname);
         return;
@@ -1251,6 +1248,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         currentCompany  = compData.company;
         currentEmployee = sess.emp;
         preloadActiveWeekMenu();
+        preloadOrderCounts(sess.emp.email);
         enterMenu();
         window.history.replaceState({}, '', window.location.pathname);
         return;
