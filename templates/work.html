@@ -1298,7 +1298,8 @@ function jumpToSection(sectionId, activeBtnId) {
   const el = document.getElementById(sectionId);
   const ms = document.querySelector('.menu-scroll');
   if (!el || !ms) return;
-  ms.scrollTo({ top: el.offsetTop - 56, behavior: 'smooth' });
+  const top = ms.scrollTop + el.getBoundingClientRect().top - ms.getBoundingClientRect().top - 56;
+  ms.scrollTo({ top, behavior: 'smooth' });
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(activeBtnId)?.classList.add('active');
 }
