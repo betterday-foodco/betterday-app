@@ -1469,6 +1469,11 @@ async function doCheckout() {
   });
   dh+=`<div class="thankyou-row" style="border-top:1px solid #e8edf2;margin-top:6px;padding-top:8px;"><span style="font-weight:800">${c.CompanyName} covered</span><span style="font-weight:800;color:var(--green)">–$${savings.toFixed(2)}</span></div><div class="thankyou-row"><span style="font-weight:800">You paid</span><span style="font-weight:800">${total>0?'$'+total.toFixed(2):'Nothing 🎉'}</span></div>`;
   document.getElementById('tyDetail').innerHTML=dh;
+  // Update local counts so tier/limit logic is correct if user orders again
+  cartSnapshot.forEach(i => {
+    const anchor = weeks[i.weekIndex]?.sundayAnchor;
+    if (anchor) existingOrderCounts[anchor] = (existingOrderCounts[anchor] || 0) + 1;
+  });
   cart=[]; goTo('sThankYou');
 }
 
