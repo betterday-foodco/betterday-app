@@ -1309,7 +1309,7 @@ function setupScrollSpy() {
   ms._spy = () => {
     const veg = document.getElementById('sec-veg');
     if (!veg) return;
-    const isVeg = ms.scrollTop + 120 >= veg.offsetTop;
+    const isVeg = veg.getBoundingClientRect().top - ms.getBoundingClientRect().top < 120;
     document.getElementById('catBtnMeat')?.classList.toggle('active', !isVeg);
     document.getElementById('catBtnVeg')?.classList.toggle('active', isVeg);
   };
