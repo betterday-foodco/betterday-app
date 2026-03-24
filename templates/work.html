@@ -944,8 +944,9 @@ function enterMenu() {
       .then(r => {
         if (r?.counts) {
           existingOrderCounts = r.counts;
-          // Refresh the "next meal price" label now that we know the real baseline
+          // Refresh the "next meal price" label and pricing banner with the real baseline
           document.getElementById('nextMealPrice').textContent = getNextPriceLabel(activeWeekIndex);
+          buildPricingBanner();
         }
       })
       .catch(() => {});
@@ -1076,9 +1077,15 @@ function buildPricingBanner() {
   if(t3>0){tiers.push(`Meals ${cur+1}–${cur+t3}: <strong>$${parseFloat(c.Tier3_EmployeePrice).toFixed(2)}</strong>`);cur+=t3;}
   if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) tiers.push(`Additional: <strong>$${fp.toFixed(2)}</strong>`);
   const del = weeks[activeWeekIndex] ? `📦 Next delivery: <strong>${weeks[activeWeekIndex].deliveryShort}</strong>` : '';
+  const anchor = weeks[activeWeekIndex]?.sundayAnchor || '';
+  const alreadyOrdered = existingOrderCounts[anchor] || 0;
+  const orderedChip = alreadyOrdered > 0
+    ? `<span class="pricing-sep">·</span><span class="pricing-tier" style="color:#e67e22;"><strong>${alreadyOrdered} meal${alreadyOrdered!==1?'s':''} ordered this week</strong></span>`
+    : '';
   document.getElementById('pricingBannerInner').innerHTML=
     `<span class="pricing-company">${c.CompanyName}</span>`+
     tiers.map(t=>`<span class="pricing-sep">·</span><span class="pricing-tier">${t}</span>`).join('')+
+    orderedChip+
     `<span class="pricing-delivery">${del}</span>`;
 }
 
@@ -1096,6 +1103,7 @@ function buildWeekTabs() {
 }
 
 async function switchWeek(i) { activeWeekIndex=i; buildWeekTabs(); buildPricingBanner(); renderWeek(i); document.getElementById('nextMealPrice').textContent=getNextPriceLabel(i); }
+
 
 async function renderWeek(index) {
   const w=weeks[index], inner=document.getElementById('menuInner');
