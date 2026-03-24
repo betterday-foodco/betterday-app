@@ -1690,7 +1690,8 @@ async function openMealPicker(slotIdx) {
     };
     html = buildSection(menu.meat||[], '🥩 Meat & Omnivore') + buildSection(menu.vegan||[], '🌱 Plant-Based');
   }
-  document.getElementById('pickerBody').innerHTML = html;
+  document.getElementById('pickerBody').innerHTML = html ||
+    '<div class="profile-empty"><div class="profile-empty-icon">🗓️</div><div>Menu not available yet for this week — check back soon</div></div>';
 }
 function closeMealPicker() { document.getElementById('mealPickerOverlay').classList.add('hidden'); _pickerSlotIdx = null; }
 
