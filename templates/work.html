@@ -325,19 +325,18 @@
     .session-info-title { font-size: .8rem; font-weight: 700; color: var(--dark); display: inline; }
     .session-info-desc { font-size: .75rem; color: #50657a; line-height: 1.5; }
     /* ── E-COMMERCE ORDER CARDS ── */
-    .order-card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,70,94,.08); }
-    .order-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-    .order-num { font-size: .7rem; font-weight: 900; color: #9aabb8; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 3px; }
-    .order-delivery-date { font-size: .95rem; font-weight: 800; color: var(--dark); }
-    .order-meta { font-size: .78rem; color: #8898aa; margin-top: 3px; }
-    .order-card-right { text-align: right; flex-shrink: 0; }
-    .order-status-badge { display: inline-block; font-size: .6rem; font-weight: 900; text-transform: uppercase; letter-spacing: .6px; padding: 3px 9px; border-radius: 999px; margin-bottom: 5px; }
+    .order-card { background: #fff; border-radius: 12px; padding: 10px 14px; margin-bottom: 6px; box-shadow: 0 2px 8px rgba(0,70,94,.07); display: flex; align-items: center; gap: 10px; }
+    .order-card-info { flex: 1; min-width: 0; }
+    .order-delivery-date { font-size: .88rem; font-weight: 800; color: var(--dark); white-space: nowrap; }
+    .order-meta { font-size: .72rem; color: #8898aa; margin-top: 1px; }
+    .order-card-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+    .order-price-block { text-align: right; }
+    .order-paid-amt { font-size: .82rem; font-weight: 800; color: var(--dark); }
+    .order-saved-line { font-size: .65rem; color: var(--green); font-weight: 700; white-space: nowrap; }
+    .order-status-badge { display: inline-block; font-size: .58rem; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
     .order-status-open   { background: rgba(39,174,96,.15); color: var(--green); }
     .order-status-closed { background: #f0f4f8; color: #9aabb8; }
-    .order-paid-amt { font-size: .88rem; font-weight: 800; color: var(--dark); }
-    .order-card-divider { height: 1px; background: rgba(0,70,94,.07); margin: 0 0 12px; }
-    .order-card-actions { display: flex; gap: 8px; }
-    .order-btn { flex: 1; padding: 10px 12px; border: none; border-radius: 10px; font-family: 'DM Sans',sans-serif; font-size: .82rem; font-weight: 800; cursor: pointer; transition: .12s; }
+    .order-btn-icon { padding: 6px 11px; border: none; border-radius: 8px; font-family: 'DM Sans',sans-serif; font-size: .8rem; font-weight: 800; cursor: pointer; transition: .12s; white-space: nowrap; }
     .order-btn-view { background: #f0f4f8; color: var(--dark); }
     .order-btn-view:hover { background: #e4e9f0; }
     .order-btn-swap { background: var(--green); color: #fff; }
@@ -1557,25 +1556,22 @@ function renderOrderHistory(rows, company) {
       ? `<span class="order-status-badge ${swappable?'order-status-open':'order-status-closed'}">${swappable?'Open':'Closed'}</span>`
       : `<span class="order-status-badge order-status-closed">Legacy</span>`;
     const swapBtn = hasOrderId && swappable
-      ? `<button class="order-btn order-btn-swap" onclick="openSwapModal('${key}')">Swap Meals</button>`
+      ? `<button class="order-btn-icon order-btn-swap" onclick="openSwapModal('${key}')">Swap</button>`
       : '';
     // Store order data in global map for modals
     _orderCache[key] = { meals, anchor, cutoff };
     return `<div class="order-card">
-      <div class="order-card-top">
-        <div>
-          <div class="order-num">${hasOrderId ? 'Order #'+key : 'Previous order'}</div>
-          <div class="order-delivery-date">${fmtDate(first.DeliveryDate)}</div>
-          <div class="order-meta">${meals.length} meal${meals.length!==1?'s':''} · ${first.CompanyName||''}</div>
-        </div>
-        <div class="order-card-right">
-          ${statusBadge}
-          <div class="order-paid-amt">${paidStr}${savedStr?`<div style="font-size:.7rem;color:var(--green);font-weight:700;">${savedStr}</div>`:''}</div>
-        </div>
+      <div class="order-card-info">
+        <div class="order-delivery-date">${fmtDate(first.DeliveryDate)}</div>
+        <div class="order-meta">${meals.length} meal${meals.length!==1?'s':''} · ${first.CompanyName||''}</div>
       </div>
-      <div class="order-card-divider"></div>
-      <div class="order-card-actions">
-        <button class="order-btn order-btn-view" onclick="openOrderInvoice('${key}')">View Order ↓</button>
+      <div class="order-card-right">
+        <div class="order-price-block">
+          <div class="order-paid-amt">${paidStr}</div>
+          ${savedStr?`<div class="order-saved-line">${savedStr}</div>`:''}
+        </div>
+        ${statusBadge}
+        <button class="order-btn-icon order-btn-view" onclick="openOrderInvoice('${key}')">↓</button>
         ${swapBtn}
       </div>
     </div>`;
@@ -1594,7 +1590,10 @@ function openOrderInvoice(key) {
   const totalSaved = meals.length * fp - totalPaid;
   let rows = meals.map(o => {
     const price = parsePrice(o.EmployeePrice);
-    const dishName = (o.DishName && !o.DishName.startsWith('#')) ? o.DishName : ('Meal #' + o.MealID);
+    const mealIdStr = String(o.MealID||'');
+    const dishName = (o.DishName && !o.DishName.startsWith('#') && !o.DishName.includes('@'))
+      ? o.DishName
+      : (/^\d+$/.test(mealIdStr) ? 'Meal #' + mealIdStr : 'Legacy meal');
     const priceStr = price === 0
       ? `<span style="color:var(--green);font-weight:800">FREE</span>`
       : `$${price.toFixed(2)}`;
@@ -1634,7 +1633,10 @@ function openSwapModal(key) {
 function renderSwapBody(meals, anchor) {
   const tierLabel = {free:'Complimentary',tier1:'Tier 1',tier2:'Tier 2',tier3:'Tier 3',full:'Full price'};
   document.getElementById('swapBody').innerHTML = meals.map((o, idx) => {
-    const dishName = (o.DishName && !o.DishName.startsWith('#')) ? o.DishName : ('Meal #' + o.MealID);
+    const mealIdStr = String(o.MealID||'');
+    const dishName = (o.DishName && !o.DishName.startsWith('#') && !o.DishName.includes('@'))
+      ? o.DishName
+      : (/^\d+$/.test(mealIdStr) ? 'Meal #' + mealIdStr : 'Legacy meal');
     const price = parsePrice(o.EmployeePrice);
     const priceStr = price === 0 ? 'FREE' : `$${price.toFixed(2)}`;
     const img = getMealImage(o.MealID, anchor);
