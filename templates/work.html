@@ -120,6 +120,8 @@
     .form-success.show { display: block; }
     .spinner-wrap { text-align: center; padding: 32px 0; }
     .spinner { width: 32px; height: 32px; border: 3px solid #e8edf2; border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 10px; }
+    .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--dark); color: #fff; padding: 13px 22px; border-radius: 14px; font-size: .88rem; font-weight: 700; font-family: 'DM Sans',sans-serif; box-shadow: 0 8px 28px rgba(0,0,0,.25); z-index: 9999; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner-label { font-size: .82rem; color: #7b8c9f; font-weight: 600; }
 
@@ -597,6 +599,8 @@
 <!-- ══════════════════════════════════════════
      CHECKOUT LOADING OVERLAY
 ════════════════════════════════════════════ -->
+<div id="toast" class="toast"></div>
+
 <div id="checkoutOverlay" class="checkout-overlay hidden">
   <div class="checkout-overlay-ring"></div>
   <div class="checkout-overlay-label">Placing your order…</div>
@@ -1183,10 +1187,22 @@ function recomputeTiers(wi) { cart.filter(i=>i.weekIndex===wi).forEach((item,idx
 function getNextPriceLabel(wi) { const t=getTierForNextItem(wi); if(!t) return 'Max'; return t.tier==='free'?'FREE 🎉':'$'+t.price.toFixed(2); }
 
 // ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+let _toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════════
 // CART
 // ══════════════════════════════════════════
 function addMeal(id, wi, meal) {
-  const t=getTierForNextItem(wi); if(!t){alert('Maximum meals reached for this week.');return;}
+  const t=getTierForNextItem(wi); if(!t){showToast('Maximum meals reached for this week');return;}
   cart.push({mealId:id,meal,price:t.price,tier:t.tier,weekIndex:wi});
   renderMealControl(id,cart.filter(i=>i.mealId===id&&i.weekIndex===wi).length,wi);
   renderCart(); document.getElementById('nextMealPrice').textContent=getNextPriceLabel(activeWeekIndex);
