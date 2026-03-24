@@ -1645,18 +1645,27 @@ function closeSwapModal() { document.getElementById('swapModal').classList.add('
 
 // ── MEAL PICKER ──
 let _pickerSlotIdx = null;
-function openMealPicker(slotIdx) {
+async function openMealPicker(slotIdx) {
   if (!_swapKey) return;
   const data = _orderCache[_swapKey]; if (!data) return;
   const { meals, anchor } = data;
   _pickerSlotIdx = slotIdx;
   const currentMealId = String(meals[slotIdx].MealID);
-  const menu = menuCache[anchor];
   document.getElementById('pickerSub').textContent = `Replacing: ${meals[slotIdx].DishName || 'Meal #'+meals[slotIdx].MealID}`;
+  document.getElementById('pickerBody').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-label">Loading menu…</div></div>';
+  document.getElementById('mealPickerOverlay').classList.remove('hidden');
+  // Fetch menu if not already cached
+  if (!menuCache[anchor]) {
+    try {
+      menuCache[anchor] = await apiFetch({ action: 'get_menu', sunday_anchor: anchor });
+    } catch(e) {
+      document.getElementById('pickerBody').innerHTML = '<div class="profile-empty"><div class="profile-empty-icon">😕</div><div>Couldn\'t load menu — try again</div></div>';
+      return;
+    }
+  }
+  const menu = menuCache[anchor];
   let html = '';
-  if (!menu) {
-    html = '<div class="profile-empty"><div class="profile-empty-icon">📋</div><div>Menu not cached — go back to the menu tab to load it first, then return here.</div></div>';
-  } else {
+  {
     const buildSection = (items, label) => {
       if (!items.length) return '';
       let s = `<div class="picker-section-label">${label}</div>`;
@@ -1679,7 +1688,6 @@ function openMealPicker(slotIdx) {
     html = buildSection(menu.meat||[], '🥩 Meat & Omnivore') + buildSection(menu.vegan||[], '🌱 Plant-Based');
   }
   document.getElementById('pickerBody').innerHTML = html;
-  document.getElementById('mealPickerOverlay').classList.remove('hidden');
 }
 function closeMealPicker() { document.getElementById('mealPickerOverlay').classList.add('hidden'); _pickerSlotIdx = null; }
 
