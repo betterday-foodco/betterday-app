@@ -395,6 +395,50 @@ function doPost(e) {
       return jsonOut({success: false, error: "Meal not found in order"});
     }
     // ─────────────────────────────────────────
+    // UPDATE EMPLOYEE EMAIL
+    // ─────────────────────────────────────────
+    if (data.action === "update_employee_email") {
+      var empSheet = getOrCreateEmployeesSheet(ssHub);
+      var rows = empSheet.getDataRange().getValues();
+      var oldEmail  = String(data.old_email  || "").trim().toLowerCase();
+      var newEmail  = String(data.new_email  || "").trim().toLowerCase();
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      if (!newEmail || !newEmail.includes("@")) return jsonOut({success: false, error: "Invalid email address."});
+      // Check new email not already in use for this company
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][4]).trim().toLowerCase() === newEmail &&
+            String(rows[i][1]).trim().toUpperCase() === companyId) {
+          return jsonOut({success: false, error: "That email is already in use."});
+        }
+      }
+      // Find and update the employee row (Email is col index 4, 1-based col 5)
+      var empRowIdx = -1;
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][4]).trim().toLowerCase() === oldEmail &&
+            String(rows[i][1]).trim().toUpperCase() === companyId) {
+          empSheet.getRange(i + 1, 5).setValue(newEmail);
+          empRowIdx = i;
+          break;
+        }
+      }
+      if (empRowIdx < 0) return jsonOut({success: false, error: "Account not found."});
+      // Update EmployeeEmail in CorporateOrders so order history stays linked
+      var corpSheet = ssHub.getSheetByName("CorporateOrders");
+      if (corpSheet) {
+        var oRows = corpSheet.getDataRange().getValues();
+        var oHeaders = oRows[0];
+        var emailColIdx = oHeaders.indexOf("EmployeeEmail");
+        if (emailColIdx >= 0) {
+          for (var i = 1; i < oRows.length; i++) {
+            if (String(oRows[i][emailColIdx]).trim().toLowerCase() === oldEmail) {
+              corpSheet.getRange(i + 1, emailColIdx + 1).setValue(newEmail);
+            }
+          }
+        }
+      }
+      return jsonOut({success: true});
+    }
+    // ─────────────────────────────────────────
     // GET CORPORATE ORDERS
     // ─────────────────────────────────────────
     if (data.action === "get_corporate_orders") {

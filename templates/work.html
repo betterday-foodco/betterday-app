@@ -479,6 +479,16 @@
     .profile-empty-icon { font-size: 2.4rem; margin-bottom: 10px; }
     .profile-logout-btn { width: 100%; padding: 13px; background: transparent; color: var(--red); border: 2px solid rgba(231,76,60,.22); border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: .92rem; font-weight: 800; cursor: pointer; margin-top: 8px; transition: .15s; }
     .profile-logout-btn:hover { background: rgba(231,76,60,.05); border-color: rgba(231,76,60,.4); }
+    .profile-change-email-card { background: #fff; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(0,70,94,.06); }
+    .profile-change-email-card label { font-size: .72rem; font-weight: 700; color: #8898aa; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 8px; }
+    .profile-change-email-row { display: flex; gap: 8px; }
+    .profile-change-email-input { flex: 1; border: 1.5px solid #e2e8f0; border-radius: 9px; padding: 9px 12px; font-family: 'DM Sans',sans-serif; font-size: .88rem; color: var(--dark); outline: none; min-width: 0; }
+    .profile-change-email-input:focus { border-color: var(--primary); }
+    .profile-change-email-btn { background: var(--dark); color: #fff; border: none; border-radius: 9px; padding: 9px 18px; font-family: 'DM Sans',sans-serif; font-size: .82rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: .12s; }
+    .profile-change-email-btn:disabled { opacity: .5; cursor: default; }
+    .profile-change-email-msg { font-size: .76rem; margin-top: 7px; font-weight: 600; }
+    .profile-change-email-msg.ok  { color: var(--primary); }
+    .profile-change-email-msg.err { color: #e53e3e; }
 
     .hidden { display: none !important; }
   </style>
@@ -754,6 +764,15 @@
           <div class="session-info-title">This device is remembered</div>
           <div class="session-info-desc" id="profileSessionDesc">You're signed in on this device. We'll remember you for 30 days — no password or link needed when you come back.</div>
         </div>
+      </div>
+      <div class="profile-section-label">Account</div>
+      <div class="profile-change-email-card">
+        <label>Change email address</label>
+        <div class="profile-change-email-row">
+          <input type="email" class="profile-change-email-input" id="changeEmailInput" placeholder="new@email.com">
+          <button class="profile-change-email-btn" id="changeEmailBtn" onclick="doChangeEmail()">Save</button>
+        </div>
+        <div class="profile-change-email-msg hidden" id="changeEmailMsg"></div>
       </div>
       <div class="profile-section-label">Order History</div>
       <div id="profileOrdersList">
@@ -1217,6 +1236,41 @@ function preloadOrderCounts(email) {
       }
     })
     .catch(err => { console.error('[BetterDay] get_week_order_counts failed:', err); });
+}
+
+async function doChangeEmail() {
+  const input = document.getElementById('changeEmailInput');
+  const btn   = document.getElementById('changeEmailBtn');
+  const msg   = document.getElementById('changeEmailMsg');
+  const newEmail = input.value.trim().toLowerCase();
+  msg.className = 'profile-change-email-msg hidden';
+  if (!newEmail || !newEmail.includes('@')) {
+    msg.textContent = 'Please enter a valid email address.';
+    msg.className = 'profile-change-email-msg err'; return;
+  }
+  if (newEmail === currentEmployee?.email) {
+    msg.textContent = 'That\'s already your current email.';
+    msg.className = 'profile-change-email-msg err'; return;
+  }
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await apiFetch({ action: 'update_employee_email', old_email: currentEmployee.email, new_email: newEmail, company_id: currentCompany.CompanyID });
+    if (r.success) {
+      currentEmployee.email = newEmail;
+      saveSession(currentEmployee, currentCompany);
+      document.getElementById('profileEmailLg').textContent = newEmail;
+      input.value = '';
+      msg.textContent = '✓ Email updated successfully.';
+      msg.className = 'profile-change-email-msg ok';
+    } else {
+      msg.textContent = r.error || 'Could not update email. Try again.';
+      msg.className = 'profile-change-email-msg err';
+    }
+  } catch(e) {
+    msg.textContent = 'Something went wrong. Please try again.';
+    msg.className = 'profile-change-email-msg err';
+  }
+  btn.disabled = false; btn.textContent = 'Save';
 }
 
 function doLogout() {
