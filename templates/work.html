@@ -256,7 +256,7 @@
     .modal-header   { padding: 22px 22px 14px; }
     .modal-title    { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--dark); }
     .modal-delivery { font-size: .82rem; color: #7b8c9f; margin-top: 3px; }
-    .modal-white-box { background: #fff; margin: 0 14px; border-radius: 16px; padding: 14px 16px; box-shadow: 0 3px 12px rgba(0,0,0,.06); }
+    .modal-white-box { background: #fff; margin: 0 14px 14px; border-radius: 16px; padding: 14px 16px; box-shadow: 0 3px 12px rgba(0,0,0,.06); }
     .modal-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(0,70,94,.06); }
     .modal-row:last-child { border-bottom: none; }
     .modal-thumb { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; background: #eee; }
@@ -1557,9 +1557,9 @@ function renderOrderHistory(rows, company) {
       ? `<span style="color:var(--green);font-weight:900">FREE</span>`
       : `$${totalPaid.toFixed(2)}`;
     const savedStr = totalSaved > 0 ? ` · saved $${totalSaved.toFixed(2)}` : '';
-    const statusBadge = hasOrderId
-      ? `<span class="order-status-badge ${swappable?'order-status-open':'order-status-closed'}">${swappable?'Open':'Closed'}</span>`
-      : `<span class="order-status-badge order-status-closed">Legacy</span>`;
+    const statusBadge = (hasOrderId && swappable)
+      ? `<span class="order-status-badge order-status-open">Open</span>`
+      : '';
     const swapBtn = hasOrderId && swappable
       ? `<button class="order-btn-icon order-btn-swap" onclick="openSwapModal('${key}')">Swap</button>`
       : '';
@@ -1576,7 +1576,7 @@ function renderOrderHistory(rows, company) {
           ${savedStr?`<div class="order-saved-line">${savedStr}</div>`:''}
         </div>
         ${statusBadge}
-        <button class="order-btn-icon order-btn-view" onclick="openOrderInvoice('${key}')">↓</button>
+        <button class="order-btn-icon order-btn-view" onclick="openOrderInvoice('${key}')">View</button>
         ${swapBtn}
       </div>
     </div>`;
