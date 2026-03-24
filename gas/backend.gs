@@ -261,16 +261,21 @@ function doPost(e) {
       var corpSheet = ssHub.getSheetByName("CorporateOrders");
       if (!corpSheet) return jsonOut({counts: {}});
       var rows = corpSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var emailIdx  = headers.indexOf("EmployeeEmail");
+      var anchorIdx = headers.indexOf("SundayAnchor");
+      if (emailIdx < 0 || anchorIdx < 0) return jsonOut({counts: {}});
       var email = String(data.email || "").trim().toLowerCase();
-      var counts = {}; // { sundayAnchor: count }
+      var tz = Session.getScriptTimeZone();
+      var counts = {};
       for (var i = 1; i < rows.length; i++) {
         if (!rows[i][0]) continue;
-        var rowEmail = String(rows[i][6]).trim().toLowerCase();
+        var rowEmail = String(rows[i][emailIdx]).trim().toLowerCase();
         if (rowEmail !== email) continue;
-        var rawAnchor = rows[i][4]; // SundayAnchor col — may be a Date object
-        var anchor = (Object.prototype.toString.call(rawAnchor) === "[object Date]")
-          ? Utilities.formatDate(rawAnchor, "GMT", "yyyy-MM-dd")
-          : String(rawAnchor).trim();
+        var raw = rows[i][anchorIdx];
+        var anchor = (Object.prototype.toString.call(raw) === "[object Date]")
+          ? Utilities.formatDate(raw, tz, "yyyy-MM-dd")
+          : String(raw).trim();
         counts[anchor] = (counts[anchor] || 0) + 1;
       }
       return jsonOut({counts: counts});

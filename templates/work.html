@@ -1198,7 +1198,7 @@ function preloadOrderCounts(email) {
         buildWeekTabs();
       }
     })
-    .catch(() => {});
+    .catch(err => { console.error('[BetterDay] get_week_order_counts failed:', err); });
 }
 
 function doLogout() {
