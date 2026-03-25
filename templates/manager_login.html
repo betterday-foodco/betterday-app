@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Manager Portal — BetterDay</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #00465e;
+            --text: #222222;
+            --text-secondary: #717171;
+            --border: #DDDDDD;
+            --bg: #F7F7F7;
+            --white: #FFFFFF;
+            --error-bg: #FEF2F2;
+            --error-border: #FECACA;
+            --error-text: #B91C1C;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 24px rgba(0,0,0,.06);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 36px;
+        }
+        .logo-wrap { text-align: center; margin-bottom: 32px; }
+        .logo { height: 26px; opacity: .9; }
+        .card-title { font-size: 1.35rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .card-sub { font-size: .875rem; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.5; }
+        .divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+        .field { margin-bottom: 18px; }
+        label { display: block; font-size: .8rem; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: .9rem;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--white);
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        input[type=text]:focus, input[type=password]:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(0,70,94,.08);
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--brand);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: .9rem;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background .15s, transform .1s;
+        }
+        .btn-login:hover { background: #005878; transform: translateY(-1px); }
+        .btn-login:active { transform: translateY(0); }
+        .error-msg {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: .85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 24px;
+            font-size: .8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .footer-note a { color: var(--brand); text-decoration: none; font-weight: 600; }
+        .footer-note a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="logo-wrap">
+        <img src="{{ url_for('static', filename='Logo.svg') }}" class="logo" alt="BetterDay">
+    </div>
+
+    <div class="card-title">Manager Portal</div>
+    <div class="card-sub">Sign in to view your company's meal program, order history, and monthly reports.</div>
+
+    <div class="divider"></div>
+
+    {% if error %}
+    <div class="error-msg">
+        <span>⚠</span> {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" autocomplete="off">
+        <div class="field">
+            <label for="company_id">Company ID</label>
+            <input type="text" id="company_id" name="company_id"
+                   placeholder="e.g. BROCK"
+                   style="text-transform:uppercase; font-weight:600; letter-spacing:.5px;"
+                   required autofocus>
+        </div>
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn-login">Sign In →</button>
+    </form>
+
+    <div class="footer-note">
+        Need access or forgot your password?<br>
+        Contact <a href="mailto:hello@eatbetterday.ca">hello@eatbetterday.ca</a>
+    </div>
+</div>
+
+</body>
+</html>

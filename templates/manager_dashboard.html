@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ company_name }} — Manager Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #00465e;
+            --brand-light: #E8F2F5;
+            --text: #222222;
+            --text-2: #484848;
+            --text-secondary: #717171;
+            --border: #EBEBEB;
+            --bg: #F7F7F7;
+            --white: #FFFFFF;
+            --green: #008A05;
+            --green-bg: #F0FBF0;
+            --blue-bg: #EFF6FF;
+            --blue: #1D4ED8;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* ── NAV ── */
+        .nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 40px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo { height: 22px; margin-right: 20px; opacity: .9; }
+        .nav-sep { width: 1px; height: 20px; background: var(--border); margin-right: 20px; }
+        .nav-company { font-weight: 700; font-size: .9rem; color: var(--text); }
+        .nav-right { margin-left: auto; }
+        .btn-logout {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 7px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            transition: .15s;
+        }
+        .btn-logout:hover { border-color: var(--text-2); color: var(--text); }
+
+        /* ── CONTAINER ── */
+        .container { max-width: 1080px; margin: 0 auto; padding: 40px 40px 80px; }
+
+        /* ── PAGE HEADER ── */
+        .page-header { margin-bottom: 32px; }
+        .page-eyebrow { font-size: .72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+        .page-title { font-size: 1.55rem; font-weight: 700; color: var(--text); }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 36px;
+        }
+        @media (max-width: 720px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 22px;
+        }
+        .stat-label { font-size: .72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .3px; }
+        .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
+        .stat-sub { font-size: .75rem; color: var(--text-secondary); }
+        .stat-card.brand .stat-value { color: var(--brand); }
+
+        /* ── TABS ── */
+        .tabs-wrap { margin-bottom: 28px; border-bottom: 1px solid var(--border); }
+        .tabs { display: flex; gap: 0; }
+        .tab {
+            padding: 13px 22px;
+            font-size: .875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color .15s;
+            user-select: none;
+        }
+        .tab:hover { color: var(--text); }
+        .tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+        /* ── TAB PANELS ── */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── SECTION HEADER ── */
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+
+        /* ── WEEK SELECTOR ── */
+        .week-select {
+            padding: 9px 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-size: .85rem;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--white);
+            outline: none;
+            cursor: pointer;
+            min-width: 200px;
+        }
+        .week-select:focus { border-color: var(--brand); }
+
+        /* ── TABLE ── */
+        .table-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .table-empty { padding: 56px 40px; text-align: center; color: var(--text-secondary); font-size: .9rem; }
+        .week-block { display: none; }
+        .week-block.active { display: block; }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: #FAFAFA; }
+        thead tr { border-bottom: 1px solid var(--border); }
+        th {
+            text-align: left;
+            padding: 12px 18px;
+            font-size: .68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        td { padding: 14px 18px; font-size: .875rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-2); }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #FAFAFA; }
+        .td-name { font-weight: 600; color: var(--text); }
+        .td-meal { color: var(--text-secondary); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .td-emp { font-weight: 600; }
+        .td-co { font-weight: 600; color: var(--green); }
+
+        /* ── BADGES ── */
+        .tier-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .7rem; font-weight: 700; text-transform: capitalize; }
+        .tier-free { background: var(--green-bg); color: var(--green); }
+        .tier-tier1, .tier-tier2, .tier-tier3 { background: var(--blue-bg); color: var(--blue); }
+        .tier-full { background: #F3F4F6; color: #6B7280; }
+        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .7rem; font-weight: 600; background: #F3F4F6; color: #6B7280; text-transform: capitalize; }
+        .status-confirmed { background: var(--green-bg); color: var(--green); }
+        .status-pending { background: #FFF7ED; color: #C2410C; }
+
+        /* ── WEEK SUMMARY BAR ── */
+        .week-summary {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            background: #FAFAFA;
+        }
+        .ws-cell { padding: 14px 18px; font-size: .8rem; }
+        .ws-label { color: var(--text-secondary); font-weight: 600; margin-bottom: 2px; }
+        .ws-val { font-weight: 700; color: var(--text); font-size: .95rem; }
+        .ws-val.green { color: var(--green); }
+        .ws-sep { width: 1px; background: var(--border); align-self: stretch; margin: 10px 0; }
+
+        /* ── MONTHLY ── */
+        .month-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        .month-header {
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+        .month-name { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .month-pill { font-size: .78rem; font-weight: 600; color: var(--text-secondary); background: #F3F4F6; padding: 4px 12px; border-radius: 20px; }
+        .month-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+        .ms-cell { padding: 20px 22px; border-right: 1px solid var(--border); }
+        .ms-cell:last-child { border-right: none; }
+        .ms-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--text-secondary); margin-bottom: 8px; }
+        .ms-val { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+        .ms-val.green { color: var(--green); }
+        .empty-state { text-align: center; padding: 64px 40px; color: var(--text-secondary); font-size: .9rem; }
+
+        /* ── ACCOUNT INFO ── */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
+        .info-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px 26px;
+        }
+        .info-card.full { grid-column: 1 / -1; }
+        .info-card-heading { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); margin-bottom: 18px; }
+        .info-row { margin-bottom: 14px; }
+        .info-row:last-child { margin-bottom: 0; }
+        .info-row-label { font-size: .75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 3px; }
+        .info-row-value { font-size: .9rem; color: var(--text-2); font-weight: 500; }
+        .tier-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+        .tier-table th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border); }
+        .tier-table td { font-size: .875rem; padding: 10px 0; border-bottom: 1px solid var(--border); color: var(--text-2); }
+        .tier-table tr:last-child td { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <img src="{{ url_for('static', filename='Logo.svg') }}" class="nav-logo" alt="BetterDay">
+    <div class="nav-sep"></div>
+    <span class="nav-company">{{ company_name }}</span>
+    <div class="nav-right">
+        <a href="/manager/logout" class="btn-logout">Sign out</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="page-header">
+        <div class="page-eyebrow">Manager Portal</div>
+        <div class="page-title">{{ company_name }} Meal Program</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">This week</div>
+            <div class="stat-value">{{ this_week.meal_count }}</div>
+            <div class="stat-sub">meals ordered</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">This week</div>
+            <div class="stat-value">${{ '%.2f'|format(this_week.co_spend|float) }}</div>
+            <div class="stat-sub">company subsidy</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">All time</div>
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-sub">total meals</div>
+        </div>
+        <div class="stat-card brand">
+            <div class="stat-label">All time</div>
+            <div class="stat-value">${{ '%.2f'|format(total_co_spend|float) }}</div>
+            <div class="stat-sub">total subsidized</div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-wrap">
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('orders', this)">Orders</div>
+            <div class="tab" onclick="showTab('monthly', this)">Monthly Report</div>
+            <div class="tab" onclick="showTab('account', this)">Account Details</div>
+        </div>
+    </div>
+
+    <!-- ── ORDERS TAB ── -->
+    <div class="tab-panel active" id="tab-orders">
+        <div class="section-header">
+            <div class="section-title">Order History</div>
+            {% if sorted_weeks %}
+            <select class="week-select" onchange="filterWeek(this.value)">
+                {% for w in sorted_weeks %}
+                <option value="{{ w.anchor }}">{{ w.label }}</option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
+
+        {% if sorted_weeks %}
+            {% for w in sorted_weeks %}
+            <div class="table-card week-block {% if loop.first %}active{% endif %}" id="week-{{ w.anchor }}">
+                <div class="week-summary">
+                    <div class="ws-cell">
+                        <div class="ws-label">Meals</div>
+                        <div class="ws-val">{{ w.meal_count }}</div>
+                    </div>
+                    <div class="ws-sep"></div>
+                    <div class="ws-cell">
+                        <div class="ws-label">Employees Paid</div>
+                        <div class="ws-val">${{ '%.2f'|format(w.emp_spend|float) }}</div>
+                    </div>
+                    <div class="ws-sep"></div>
+                    <div class="ws-cell">
+                        <div class="ws-label">Company Subsidized</div>
+                        <div class="ws-val green">${{ '%.2f'|format(w.co_spend|float) }}</div>
+                    </div>
+                </div>
+                {% if w.orders %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Meal</th>
+                            <th>Tier</th>
+                            <th>They Paid</th>
+                            <th>Co. Subsidy</th>
+                            <th>Delivery</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in w.orders %}
+                        <tr>
+                            <td class="td-name">{{ o.EmployeeName or '—' }}</td>
+                            <td class="td-meal">{{ o.DishName or '—' }}</td>
+                            <td>
+                                <span class="tier-badge tier-{{ (o.Tier or 'full')|lower }}">{{ o.Tier or 'Full' }}</span>
+                            </td>
+                            <td class="td-emp">${{ '%.2f'|format((o.EmployeePrice or 0)|float) }}</td>
+                            <td class="td-co">${{ '%.2f'|format((o.CompanyCoverage or 0)|float) }}</td>
+                            <td style="color:var(--text-secondary)">{{ o.DeliveryDate or '—' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ (o.Status or 'pending')|lower }}">{{ o.Status or 'Pending' }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="table-empty">No orders for this week.</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="table-card">
+            <div class="table-empty">
+                No orders yet. Once your team starts ordering, history will appear here.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── MONTHLY TAB ── -->
+    <div class="tab-panel" id="tab-monthly">
+        {% if sorted_monthly %}
+            {% for m in sorted_monthly %}
+            <div class="month-card">
+                <div class="month-header">
+                    <div class="month-name">{{ m.label }}</div>
+                    <div class="month-pill">{{ m.orders }} meal{{ 's' if m.orders != 1 else '' }}</div>
+                </div>
+                <div class="month-stats">
+                    <div class="ms-cell">
+                        <div class="ms-label">Meals Ordered</div>
+                        <div class="ms-val">{{ m.orders }}</div>
+                    </div>
+                    <div class="ms-cell">
+                        <div class="ms-label">Employees Paid</div>
+                        <div class="ms-val">${{ '%.2f'|format(m.emp_spend|float) }}</div>
+                    </div>
+                    <div class="ms-cell">
+                        <div class="ms-label">Company Subsidized</div>
+                        <div class="ms-val green">${{ '%.2f'|format(m.co_spend|float) }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty-state">No order history yet.</div>
+        {% endif %}
+    </div>
+
+    <!-- ── ACCOUNT TAB ── -->
+    <div class="tab-panel" id="tab-account">
+        <div class="info-grid">
+
+            <div class="info-card">
+                <div class="info-card-heading">Company</div>
+                <div class="info-row">
+                    <div class="info-row-label">Name</div>
+                    <div class="info-row-value">{{ company.CompanyName or '—' }}</div>
+                </div>
+                {% if company.AddressLine1 %}
+                <div class="info-row">
+                    <div class="info-row-label">Address</div>
+                    <div class="info-row-value">
+                        {{ company.AddressLine1 }}{% if company.City %}, {{ company.City }}{% endif %}{% if company.PostalCode %} {{ company.PostalCode }}{% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="info-row">
+                    <div class="info-row-label">Delivery Day</div>
+                    <div class="info-row-value">{{ company.DeliveryDay or 'Monday' }}</div>
+                </div>
+                {% if company.DeliveryInstructions %}
+                <div class="info-row">
+                    <div class="info-row-label">Delivery Notes</div>
+                    <div class="info-row-value">{{ company.DeliveryInstructions }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-heading">Contacts</div>
+                {% if company.PrimaryContactName %}
+                <div class="info-row">
+                    <div class="info-row-label">Primary Contact</div>
+                    <div class="info-row-value">{{ company.PrimaryContactName }}</div>
+                </div>
+                {% endif %}
+                {% if company.PrimaryContactEmail %}
+                <div class="info-row">
+                    <div class="info-row-label">Email</div>
+                    <div class="info-row-value">{{ company.PrimaryContactEmail }}</div>
+                </div>
+                {% endif %}
+                {% if company.PrimaryContactPhone %}
+                <div class="info-row">
+                    <div class="info-row-label">Phone</div>
+                    <div class="info-row-value">{{ company.PrimaryContactPhone }}</div>
+                </div>
+                {% endif %}
+                {% if company.BillingContactEmail %}
+                <div class="info-row">
+                    <div class="info-row-label">Billing Email</div>
+                    <div class="info-row-value">{{ company.BillingContactEmail }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="info-card full">
+                <div class="info-card-heading">Meal Subsidy Program</div>
+                <table class="tier-table">
+                    <thead>
+                        <tr>
+                            <th>Tier</th>
+                            <th>Meals / Week</th>
+                            <th>Employee Price</th>
+                            <th>Company Covers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
+                        <tr>
+                            <td><span class="tier-badge tier-free">Free</span></td>
+                            <td>{{ company.FreeMealsPerWeek }}</td>
+                            <td style="color:var(--green);font-weight:700;">$0.00</td>
+                            <td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.FreeTier_CompanySubsidy or 0)|float) }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if company.Tier1_EmployeePrice %}
+                        <tr>
+                            <td><span class="tier-badge tier-tier1">Tier 1</span></td>
+                            <td>{{ company.Tier1_Meals or '—' }}</td>
+                            <td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td>
+                            <td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if company.Tier2_EmployeePrice %}
+                        <tr>
+                            <td><span class="tier-badge tier-tier2">Tier 2</span></td>
+                            <td>{{ company.Tier2_Meals or '—' }}</td>
+                            <td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td>
+                            <td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if company.Tier3_EmployeePrice %}
+                        <tr>
+                            <td><span class="tier-badge tier-tier3">Tier 3</span></td>
+                            <td>{{ company.Tier3_Meals or '—' }}</td>
+                            <td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td>
+                            <td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function showTab(name, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+}
+
+function filterWeek(anchor) {
+    document.querySelectorAll('.week-block').forEach(el => {
+        el.classList.toggle('active', el.id === 'week-' + anchor);
+    });
+}
+</script>
+</body>
+</html>

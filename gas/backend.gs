@@ -693,6 +693,74 @@ function doPost(e) {
       if (!found) blockSheet.appendRow([data.date]);
       return ContentService.createTextOutput("Toggled");
     }
+    // ─────────────────────────────────────────
+    // GET ALL COMPANIES
+    // ─────────────────────────────────────────
+    if (data.action === "get_all_companies") {
+      var compSheet = ssHub.getSheetByName("Companies");
+      if (!compSheet) return jsonOut([]);
+      var rows = compSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var companies = [];
+      for (var i = 1; i < rows.length; i++) {
+        if (!rows[i][0]) continue;
+        var company = {};
+        headers.forEach(function(h, idx) { company[h] = rows[i][idx]; });
+        companies.push(company);
+      }
+      return jsonOut(companies);
+    }
+    // ─────────────────────────────────────────
+    // SAVE COMPANY
+    // ─────────────────────────────────────────
+    if (data.action === "save_company") {
+      var compSheet = ssHub.getSheetByName("Companies");
+      if (!compSheet) {
+        compSheet = ssHub.insertSheet("Companies");
+      }
+      var rows = compSheet.getDataRange().getValues();
+      var headers = rows.length > 0 ? rows[0] : [];
+      var fields = Object.assign({}, data);
+      delete fields.action;
+      var companyId = String(fields.CompanyID || "").trim().toUpperCase();
+      if (!companyId) return jsonOut({success: false, error: "CompanyID required"});
+      // Find existing row
+      var rowIdx = -1;
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toUpperCase() === companyId) {
+          rowIdx = i;
+          break;
+        }
+      }
+      if (rowIdx >= 0) {
+        // Update existing — also add new columns if needed
+        Object.keys(fields).forEach(function(key) {
+          if (!key) return;
+          var colIdx = headers.indexOf(key);
+          if (colIdx >= 0) {
+            compSheet.getRange(rowIdx + 1, colIdx + 1).setValue(fields[key]);
+          } else {
+            // New column — add header and value
+            var newCol = headers.length + 1;
+            compSheet.getRange(1, newCol).setValue(key);
+            compSheet.getRange(rowIdx + 1, newCol).setValue(fields[key]);
+            headers.push(key);
+          }
+        });
+      } else {
+        // New company
+        if (headers.length === 0) {
+          // Empty sheet — create headers from fields
+          var newHeaders = Object.keys(fields);
+          compSheet.appendRow(newHeaders);
+          compSheet.appendRow(newHeaders.map(function(h) { return fields[h] !== undefined ? fields[h] : ""; }));
+        } else {
+          var newRow = headers.map(function(h) { return fields[h] !== undefined ? fields[h] : ""; });
+          compSheet.appendRow(newRow);
+        }
+      }
+      return jsonOut({success: true});
+    }
     return ContentService.createTextOutput("Error: Unknown Action");
   } catch (err) {
     return ContentService.createTextOutput("Error: " + err.toString());

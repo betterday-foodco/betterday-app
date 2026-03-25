@@ -491,10 +491,111 @@ def submit_order():
 # ─────────────────────────────────────────────────────────────
 # OFFICE MANAGER PORTAL
 # ─────────────────────────────────────────────────────────────
-@app.route('/manager')
-def manager_portal():
-    """Office manager portal — company-scoped order visibility & reporting."""
-    return render_template('manager.html')
+def manager_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('manager_company_id'):
+            return redirect(url_for('manager_login'))
+        return f(*args, **kwargs)
+    return decorated
+
+
+@app.route('/manager', methods=['GET', 'POST'])
+def manager_login():
+    error = None
+    if request.method == 'POST':
+        company_id = request.form.get('company_id', '').strip().upper()
+        password   = request.form.get('password', '').strip()
+        data = _gas_post({'action': 'get_company', 'company_id': company_id}, timeout=10)
+        if data and data.get('found'):
+            company   = data.get('company', {})
+            stored_pw = str(company.get('ManagerPassword', '') or '1234')
+            if password == stored_pw:
+                session['manager_company_id']   = company_id
+                session['manager_company_name'] = company.get('CompanyName', company_id)
+                return redirect(url_for('manager_dashboard'))
+            error = 'Incorrect password.'
+        else:
+            error = 'Company not found.'
+    return render_template('manager_login.html', error=error)
+
+
+@app.route('/manager/dashboard')
+@manager_required
+def manager_dashboard():
+    company_id = session.get('manager_company_id')
+
+    data    = _gas_post({'action': 'get_company', 'company_id': company_id}, timeout=10) or {}
+    company = data.get('company', {}) if data else {}
+
+    orders = _gas_post({'action': 'get_corporate_orders', 'company_id': company_id}, timeout=15) or []
+    if not isinstance(orders, list):
+        orders = []
+
+    week_map = defaultdict(list)
+    for o in orders:
+        anchor = str(o.get('SundayAnchor', '') or '')
+        if anchor:
+            week_map[anchor].append(o)
+
+    sorted_weeks = []
+    for anchor in sorted(week_map.keys(), reverse=True):
+        try:
+            anchor_dt    = datetime.strptime(anchor, '%Y-%m-%d')
+            monday       = anchor_dt + timedelta(days=1)
+            nice_label   = f"Week of {monday.strftime('%b %d, %Y')}"
+        except Exception:
+            nice_label = anchor
+        week_orders = week_map[anchor]
+        sorted_weeks.append({
+            'anchor':     anchor,
+            'label':      nice_label,
+            'orders':     week_orders,
+            'meal_count': len(week_orders),
+            'emp_spend':  sum(float(o.get('EmployeePrice') or 0) for o in week_orders),
+            'co_spend':   sum(float(o.get('CompanyCoverage') or 0) for o in week_orders),
+        })
+
+    month_map = defaultdict(lambda: {'orders': 0, 'emp_spend': 0.0, 'co_spend': 0.0})
+    for o in orders:
+        date_str = str(o.get('DeliveryDate', '') or '')
+        if len(date_str) >= 7:
+            mk = date_str[:7]
+            month_map[mk]['orders']    += 1
+            month_map[mk]['emp_spend'] += float(o.get('EmployeePrice') or 0)
+            month_map[mk]['co_spend']  += float(o.get('CompanyCoverage') or 0)
+
+    def fmt_month(mk):
+        try:    return datetime.strptime(mk, '%Y-%m').strftime('%B %Y')
+        except: return mk
+
+    sorted_monthly = [
+        {'key': k, 'label': fmt_month(k), **v}
+        for k, v in sorted(month_map.items(), reverse=True)
+    ]
+
+    today       = datetime.now()
+    monday      = today - timedelta(days=today.weekday())
+    this_sunday = (monday - timedelta(days=1)).strftime('%Y-%m-%d')
+    this_week   = next((w for w in sorted_weeks if w['anchor'] == this_sunday),
+                       {'orders': [], 'meal_count': 0, 'emp_spend': 0.0, 'co_spend': 0.0})
+
+    return render_template('manager_dashboard.html',
+                           company=company,
+                           company_id=company_id,
+                           company_name=session.get('manager_company_name'),
+                           total_orders=len(orders),
+                           total_co_spend=sum(float(o.get('CompanyCoverage') or 0) for o in orders),
+                           this_week=this_week,
+                           sorted_weeks=sorted_weeks,
+                           sorted_monthly=sorted_monthly)
+
+
+@app.route('/manager/logout')
+def manager_logout():
+    session.pop('manager_company_id', None)
+    session.pop('manager_company_name', None)
+    return redirect(url_for('manager_login'))
 
 
 # ─────────────────────────────────────────────────────────────

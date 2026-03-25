@@ -259,6 +259,24 @@
             </div>
         </div>
 
+        <!-- PORTAL ACCESS -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="fs-icon">🔐</div>
+                <div>
+                    <div class="fs-title">Manager Portal Access</div>
+                    <div class="fs-sub">Password for the company's manager dashboard login</div>
+                </div>
+            </div>
+            <div class="field-grid field-grid-2">
+                <div class="field">
+                    <label>Portal Password</label>
+                    <input type="text" name="ManagerPassword" value="{{ company.ManagerPassword or '' }}" placeholder="1234">
+                    <span class="field-hint">Company manager uses this to log in at /manager</span>
+                </div>
+            </div>
+        </div>
+
         <!-- SUBSIDY TIERS -->
         <div class="form-section">
             <div class="form-section-header">
