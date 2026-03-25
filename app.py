@@ -568,7 +568,7 @@ def manager_dashboard():
         rec['co_total']  += co
         rec['bd_total']  += bd
 
-    all_orders = list(order_map.values())
+    all_orders = sorted(order_map.values(), key=lambda o: o['delivery_date'], reverse=True)
 
     # ── Group orders by week ───────────────────────────────────
     week_map = defaultdict(list)
@@ -685,7 +685,10 @@ def manager_dashboard():
     orders_json = json.dumps([{
         'order_id':      o['order_id'],
         'employee_name': o['employee_name'],
+        'employee_email': o.get('employee_email', ''),
         'delivery_date': o['delivery_date'],
+        'sunday_anchor': o.get('sunday_anchor', ''),
+        'status':        o.get('status', ''),
         'emp_total':     round(o['emp_total'], 2),
         'co_total':      round(o['co_total'],  2),
         'bd_total':      round(o['bd_total'],  2),
@@ -721,13 +724,15 @@ def manager_dashboard():
 @manager_required
 def manager_update_account():
     company_id = session.get('manager_company_id')
-    allowed = ['AddressLine1', 'City', 'PostalCode', 'DeliveryDay', 'DeliveryInstructions',
+    allowed = ['AddressLine1', 'City', 'PostalCode', 'DeliveryInstructions',
                'PrimaryContactName', 'PrimaryContactEmail', 'PrimaryContactPhone',
                'BillingContactEmail']
     fields = {'action': 'save_company', 'CompanyID': company_id}
     for f in allowed:
         fields[f] = request.form.get(f, '')
-    _gas_post(fields, timeout=12)
+    result = _gas_post(fields, timeout=12)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'success': bool(result and result.get('success'))})
     return redirect(url_for('manager_dashboard') + '?saved=account')
 
 
