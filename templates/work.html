@@ -370,6 +370,28 @@
     .checkout-overlay-ring { width: 60px; height: 60px; border: 5px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin .75s linear infinite; }
     .checkout-overlay-label { font-size: 1.05rem; font-weight: 800; color: #fff; }
     .checkout-overlay-sub { font-size: .82rem; color: rgba(255,255,255,.6); }
+    /* ── PAYMENT SIMULATOR ── */
+    .pay-sim-overlay { position: fixed; inset: 0; z-index: 10000; background: rgba(10,20,30,.92); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .pay-sim-card { background: #fff; border-radius: 24px; width: 100%; max-width: 400px; padding: 28px 28px 22px; box-shadow: 0 40px 100px rgba(0,0,0,.45); }
+    .pay-sim-back { background: none; border: none; color: #9aabb8; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 700; cursor: pointer; padding: 0; margin-bottom: 22px; display: block; }
+    .pay-sim-back:hover { color: var(--dark); }
+    .pay-sim-brand { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--dark); margin-bottom: 18px; }
+    .pay-sim-brand span { color: var(--primary); }
+    .pay-sim-amount { font-size: 2.6rem; font-weight: 900; color: var(--dark); line-height: 1; }
+    .pay-sim-desc { font-size: .82rem; color: #7b8c9f; margin: 4px 0 22px; }
+    .pay-sim-label { display: block; font-size: .68rem; font-weight: 700; color: #9aabb8; margin-bottom: 5px; letter-spacing: .4px; text-transform: uppercase; }
+    .pay-sim-input { width: 100%; box-sizing: border-box; padding: 11px 14px; border: 1.5px solid #dde4ea; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: .95rem; color: var(--dark); background: #f8fafc; transition: border-color .15s; outline: none; }
+    .pay-sim-input:focus { border-color: var(--primary); background: #fff; }
+    .pay-sim-field { margin-bottom: 12px; }
+    .pay-sim-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pay-sim-btn { width: 100%; padding: 15px; background: var(--dark); color: #fff; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; transition: .15s; margin-top: 6px; }
+    .pay-sim-btn:hover:not(:disabled) { background: #005a7a; transform: translateY(-1px); }
+    .pay-sim-btn:disabled { background: #9aabb8; cursor: default; transform: none; }
+    .pay-sim-processing { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 0 0; }
+    .pay-sim-spinner { width: 18px; height: 18px; border: 3px solid rgba(0,70,94,.15); border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+    .pay-sim-proc-text { font-size: .88rem; font-weight: 700; color: var(--primary); }
+    .pay-sim-footer { display: flex; align-items: center; gap: 5px; justify-content: center; font-size: .68rem; color: #b0bec8; margin-top: 14px; }
+    .pay-sim-footer strong { color: #635BFF; font-weight: 700; }
 
     /* ── INLINE BUTTON LOADING ── */
     .btn-loading { position: relative; pointer-events: none; opacity: .82; }
@@ -801,6 +823,45 @@
   <div class="checkout-overlay-ring"></div>
   <div class="checkout-overlay-label">Placing your order…</div>
   <div class="checkout-overlay-sub">Please don't close this page</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAYMENT SIMULATOR
+════════════════════════════════════════════ -->
+<div id="paymentModal" class="pay-sim-overlay hidden">
+  <div class="pay-sim-card">
+    <button class="pay-sim-back" onclick="closePaymentModal()">← Back to order</button>
+    <div class="pay-sim-brand">better<span>day</span> checkout</div>
+    <div class="pay-sim-amount" id="paySimAmount">$0.00</div>
+    <div class="pay-sim-desc" id="paySimDesc"></div>
+    <div class="pay-sim-field">
+      <label class="pay-sim-label">Card number</label>
+      <input class="pay-sim-input" id="paySimCard" type="text" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" value="4242 4242 4242 4242" autocomplete="cc-number">
+    </div>
+    <div class="pay-sim-row2">
+      <div class="pay-sim-field">
+        <label class="pay-sim-label">Expiry</label>
+        <input class="pay-sim-input" id="paySimExpiry" type="text" inputmode="numeric" maxlength="5" placeholder="MM/YY" value="12/28" autocomplete="cc-exp">
+      </div>
+      <div class="pay-sim-field">
+        <label class="pay-sim-label">CVC</label>
+        <input class="pay-sim-input" id="paySimCvc" type="text" inputmode="numeric" maxlength="3" placeholder="123" value="123" autocomplete="cc-csc">
+      </div>
+    </div>
+    <div class="pay-sim-field">
+      <label class="pay-sim-label">Cardholder name</label>
+      <input class="pay-sim-input" id="paySimName" type="text" placeholder="Jane Smith" autocomplete="cc-name">
+    </div>
+    <button class="pay-sim-btn" id="paySimBtn" onclick="submitPayment()">Pay $0.00</button>
+    <div class="pay-sim-processing hidden" id="paySimProcessing">
+      <div class="pay-sim-spinner"></div>
+      <div class="pay-sim-proc-text">Processing payment…</div>
+    </div>
+    <div class="pay-sim-footer">
+      <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="6.5" fill="#635BFF"/><path d="M5.4 9L3.2 6.8l.75-.75L5.4 7.5l3.65-3.65.75.75L5.4 9Z" fill="#fff"/></svg>
+      Powered by <strong>Stripe</strong> &nbsp;·&nbsp; 256-bit SSL
+    </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════════
@@ -1299,6 +1360,25 @@ async function apiFetch(payload) {
 }
 
 // ── ON LOAD: Check magic link token → saved session → URL pre-fill ──
+// Card number auto-format (groups of 4)
+document.addEventListener('DOMContentLoaded', () => {
+  const cardInput = document.getElementById('paySimCard');
+  if (cardInput) {
+    cardInput.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,16);
+      e.target.value = v.match(/.{1,4}/g)?.join(' ') || v;
+    });
+  }
+  const expiryInput = document.getElementById('paySimExpiry');
+  if (expiryInput) {
+    expiryInput.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,4);
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+      e.target.value = v;
+    });
+  }
+});
+
 window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
@@ -1722,18 +1802,55 @@ function closeSummary() { document.getElementById('summaryModal').classList.add(
 
 let _checkoutInProgress = false;
 async function doCheckout() {
-  if (_checkoutInProgress) return; // Hard guard — blocks any double-tap
+  if (_checkoutInProgress) return;
   _checkoutInProgress = true;
   const btn = document.getElementById('payBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Placing order…'; }
-  // Full-screen overlay locks all interaction instantly
+  const total = cart.reduce((s,i) => s+i.price, 0);
+  if (total > 0) {
+    closeSummary();
+    openPaymentModal(total);
+    return; // payment modal calls _executeCheckout() on confirm
+  }
+  await _executeCheckout();
+}
+
+function openPaymentModal(total) {
+  const c = currentCompany, emp = currentEmployee;
+  const deliveries = [...new Set(cart.map(i => weeks[i.weekIndex]?.deliveryShort))].join(', ');
+  document.getElementById('paySimAmount').textContent = '$' + total.toFixed(2);
+  document.getElementById('paySimDesc').textContent = cart.length + ' meal' + (cart.length !== 1 ? 's' : '') + ' · Delivery ' + deliveries;
+  document.getElementById('paySimBtn').textContent = 'Pay $' + total.toFixed(2);
+  document.getElementById('paySimBtn').disabled = false;
+  document.getElementById('paySimName').value = emp ? `${emp.firstName} ${emp.lastName}` : '';
+  document.getElementById('paySimProcessing').classList.add('hidden');
+  document.getElementById('paymentModal').classList.remove('hidden');
+}
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').classList.add('hidden');
+  _checkoutInProgress = false;
+  const btn = document.getElementById('payBtn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
+  document.getElementById('summaryModal').classList.remove('hidden');
+}
+
+async function submitPayment() {
+  const btn = document.getElementById('paySimBtn');
+  btn.disabled = true;
+  document.getElementById('paySimProcessing').classList.remove('hidden');
+  await new Promise(r => setTimeout(r, 1800));
+  document.getElementById('paymentModal').classList.add('hidden');
+  await _executeCheckout();
+}
+
+async function _executeCheckout() {
   document.getElementById('checkoutOverlay').classList.remove('hidden');
-  closeSummary();
 
   const c=currentCompany, emp=currentEmployee;
   const total=cart.reduce((s,i)=>s+i.price,0), fp=parseFloat(c.FullPrice)||16.99, savings=cart.length*fp-total;
   const bdPerMeal = parseFloat(c.BDCoveragePerMeal) || 0;
-  const cartSnapshot = [...cart]; // snapshot before clearing
+  const cartSnapshot = [...cart];
 
   // Reserve sequential OrderIDs from the server (one per unique delivery week)
   const anchors = [...new Set(cartSnapshot.map(i => weeks[i.weekIndex].sundayAnchor))];
@@ -1774,14 +1891,12 @@ async function doCheckout() {
     const w=weeks[wi];
     dh+=`<div class="thankyou-row"><span>Delivery</span><span>${w?.deliveryStr||''}</span></div>`;
     dh+=`<div class="thankyou-row"><span>Location</span><span>${c.FridgeLocationDescription||c.AddressLine1||''}</span></div>`;
-    // Group by meal name, build "Dish A (×3) | Dish B" style list
     const mg={}; items.forEach(i=>{const n=i.meal?.name||'Meal';mg[n]=(mg[n]||0)+1;});
     const mealLine=Object.entries(mg).map(([n,q])=>q>1?`${n} ×${q}`:n).join(' &nbsp;|&nbsp; ');
     dh+=`<div class="thankyou-row"><span>Meals (${items.length})</span><span style="text-align:right;line-height:1.5;">${mealLine}</span></div>`;
   });
   dh+=`<div class="thankyou-row" style="border-top:1px solid #e8edf2;margin-top:6px;padding-top:8px;"><span style="font-weight:800">${c.CompanyName} covered</span><span style="font-weight:800;color:var(--green)">–$${savings.toFixed(2)}</span></div><div class="thankyou-row"><span style="font-weight:800">You paid</span><span style="font-weight:800">${total>0?'$'+total.toFixed(2):'Nothing 🎉'}</span></div>`;
   document.getElementById('tyDetail').innerHTML=dh;
-  // Update local counts so tier/limit logic is correct if user orders again
   cartSnapshot.forEach(i => {
     const anchor = weeks[i.weekIndex]?.sundayAnchor;
     if (anchor) existingOrderCounts[anchor] = (existingOrderCounts[anchor] || 0) + 1;
