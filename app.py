@@ -652,13 +652,19 @@ def manager_dashboard():
             'tiers':     tiers_list,
         })
 
-    # ── This week ──────────────────────────────────────────────
-    today       = datetime.now()
-    monday_dt   = today - timedelta(days=today.weekday())
-    this_sunday = (monday_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+    # ── Active week = most recent week with orders ────────────
     empty_week  = {'orders': [], 'order_count': 0, 'meal_count': 0,
-                   'emp_spend': 0.0, 'co_spend': 0.0, 'bd_spend': 0.0}
-    this_week   = next((w for w in sorted_weeks if w['anchor'] == this_sunday), empty_week)
+                   'emp_spend': 0.0, 'co_spend': 0.0, 'bd_spend': 0.0,
+                   'label': 'Latest Week', 'anchor': ''}
+    active_week = sorted_weeks[0] if sorted_weeks else empty_week
+
+    # ── Staff participation ────────────────────────────────────
+    active_week_unique     = len(set(
+        o['employee_email'] for o in active_week['orders'] if o.get('employee_email')
+    ))
+    total_unique_employees = len(set(
+        o['employee_email'] for o in all_orders if o.get('employee_email')
+    ))
 
     # ── All-time totals ────────────────────────────────────────
     total_meals    = sum(len(o['meals'])  for o in all_orders)
@@ -681,6 +687,8 @@ def manager_dashboard():
         } for m in o['meals']],
     } for o in all_orders])
 
+    saved_tab = request.args.get('saved')
+
     return render_template('manager_dashboard.html',
                            company=company,
                            company_id=company_id,
@@ -688,10 +696,27 @@ def manager_dashboard():
                            total_meals=total_meals,
                            total_co_spend=total_co_spend,
                            total_bd_spend=total_bd_spend,
-                           this_week=this_week,
+                           active_week=active_week,
+                           active_week_unique=active_week_unique,
+                           total_unique_employees=total_unique_employees,
                            sorted_weeks=sorted_weeks,
                            sorted_monthly=sorted_monthly,
-                           orders_json=orders_json)
+                           orders_json=orders_json,
+                           saved_tab=saved_tab)
+
+
+@app.route('/manager/update-account', methods=['POST'])
+@manager_required
+def manager_update_account():
+    company_id = session.get('manager_company_id')
+    allowed = ['AddressLine1', 'City', 'PostalCode', 'DeliveryDay', 'DeliveryInstructions',
+               'PrimaryContactName', 'PrimaryContactEmail', 'PrimaryContactPhone',
+               'BillingContactEmail']
+    fields = {'action': 'save_company', 'CompanyID': company_id}
+    for f in allowed:
+        fields[f] = request.form.get(f, '')
+    _gas_post(fields, timeout=12)
+    return redirect(url_for('manager_dashboard') + '?saved=account')
 
 
 @app.route('/manager/logout')

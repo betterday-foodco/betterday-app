@@ -126,6 +126,22 @@
         .tier-table tr:last-child td { border-bottom: none; }
         .empty-state { text-align: center; padding: 60px 40px; color: var(--muted); font-size: .9rem; }
 
+        /* ── ACCOUNT EDIT ── */
+        .save-banner { background: var(--green-bg); border: 1px solid #BBF7D0; color: var(--green); padding: 12px 16px; border-radius: 10px; font-size: .875rem; font-weight: 600; margin-bottom: 18px; }
+        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 700px) { .edit-grid { grid-template-columns: 1fr; } }
+        .edit-grid .full { grid-column: 1 / -1; }
+        .edit-field { margin-bottom: 14px; }
+        .edit-field:last-child { margin-bottom: 0; }
+        .edit-field label { display: block; font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 6px; }
+        .edit-field input, .edit-field select, .edit-field textarea { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .875rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; transition: border-color .15s; }
+        .edit-field input:focus, .edit-field select:focus, .edit-field textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(0,70,94,.07); }
+        .edit-field textarea { resize: vertical; }
+        .tier-note { display: flex; gap: 14px; align-items: flex-start; background: var(--brand-light); border: 1px solid rgba(0,70,94,.12); border-radius: 10px; padding: 16px 18px; }
+        .tier-note-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .btn-save-account { padding: 12px 28px; background: var(--brand); color: white; border: none; border-radius: 10px; font-size: .9rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s; }
+        .btn-save-account:hover { background: var(--brand-mid); }
+
         /* ── INVOICE MODAL ── */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .2s; }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
@@ -178,19 +194,19 @@
     <!-- STATS -->
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label">This week</div>
-            <div class="stat-value">{{ this_week.meal_count }}</div>
-            <div class="stat-sub">meals — {{ this_week.order_count }} orders</div>
-        </div>
-        <div class="stat-card brand">
-            <div class="stat-label">This week — company covered</div>
-            <div class="stat-value">${{ '%.2f'|format(this_week.co_spend|float) }}</div>
-            <div class="stat-sub">+ ${{ '%.2f'|format(this_week.bd_spend|float) }} from BetterDay</div>
+            <div class="stat-label">{{ active_week.label }} — meals</div>
+            <div class="stat-value">{{ active_week.meal_count }}</div>
+            <div class="stat-sub">across {{ active_week.order_count }} order{{ 's' if active_week.order_count != 1 else '' }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">All time</div>
-            <div class="stat-value">{{ total_meals }}</div>
-            <div class="stat-sub">total meals ordered</div>
+            <div class="stat-label">{{ active_week.label }} — participation</div>
+            <div class="stat-value">{{ active_week_unique }}<span style="font-size:1.1rem;font-weight:600;color:var(--muted)">/{{ total_unique_employees }}</span></div>
+            <div class="stat-sub">staff ordering this week</div>
+        </div>
+        <div class="stat-card brand">
+            <div class="stat-label">{{ active_week.label }} — company spend</div>
+            <div class="stat-value">${{ '%.2f'|format(active_week.co_spend|float) }}</div>
+            <div class="stat-sub">subsidy applied this week</div>
         </div>
         <div class="stat-card bd">
             <div class="stat-label">All time — BetterDay contributed</div>
@@ -384,46 +400,114 @@
 
     <!-- ── ACCOUNT TAB ── -->
     <div class="tab-panel" id="tab-account">
-        <div class="info-grid">
-            <div class="info-card">
-                <div class="info-heading">Company</div>
-                <div class="info-row"><div class="info-lbl">Name</div><div class="info-val">{{ company.CompanyName or '—' }}</div></div>
-                {% if company.AddressLine1 %}
-                <div class="info-row"><div class="info-lbl">Address</div><div class="info-val">{{ company.AddressLine1 }}{% if company.City %}, {{ company.City }}{% endif %}{% if company.PostalCode %} {{ company.PostalCode }}{% endif %}</div></div>
-                {% endif %}
-                <div class="info-row"><div class="info-lbl">Delivery Day</div><div class="info-val">{{ company.DeliveryDay or 'Monday' }}</div></div>
-                {% if company.DeliveryInstructions %}
-                <div class="info-row"><div class="info-lbl">Delivery Notes</div><div class="info-val">{{ company.DeliveryInstructions }}</div></div>
-                {% endif %}
-            </div>
-            <div class="info-card">
-                <div class="info-heading">Contacts</div>
-                {% if company.PrimaryContactName %}<div class="info-row"><div class="info-lbl">Primary Contact</div><div class="info-val">{{ company.PrimaryContactName }}</div></div>{% endif %}
-                {% if company.PrimaryContactEmail %}<div class="info-row"><div class="info-lbl">Email</div><div class="info-val">{{ company.PrimaryContactEmail }}</div></div>{% endif %}
-                {% if company.PrimaryContactPhone %}<div class="info-row"><div class="info-lbl">Phone</div><div class="info-val">{{ company.PrimaryContactPhone }}</div></div>{% endif %}
-                {% if company.BillingContactEmail %}<div class="info-row"><div class="info-lbl">Billing Email</div><div class="info-val">{{ company.BillingContactEmail }}</div></div>{% endif %}
-            </div>
-            <div class="info-card full">
-                <div class="info-heading">Meal Subsidy Program</div>
-                <table class="tier-table">
-                    <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
-                    <tbody>
-                        {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
-                        <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.BasePrice or 0)|float) }}</td></tr>
-                        {% endif %}
-                        {% if company.Tier1_EmployeePrice %}
-                        <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
-                        {% endif %}
-                        {% if company.Tier2_EmployeePrice %}
-                        <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
-                        {% endif %}
-                        {% if company.Tier3_EmployeePrice %}
-                        <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+
+        {% if saved_tab == 'account' %}
+        <div class="save-banner">Changes saved successfully.</div>
+        {% endif %}
+
+        <!-- Read-only identity -->
+        <div class="info-card full" style="margin-bottom:14px;">
+            <div class="info-heading">Company Identity</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+                <div><div class="info-lbl">Company ID</div><div class="info-val" style="font-family:monospace;font-weight:700;letter-spacing:.5px;">{{ company.CompanyID or company_id }}</div></div>
+                <div><div class="info-lbl">Company Name</div><div class="info-val">{{ company.CompanyName or '—' }}</div></div>
+                <div><div class="info-lbl">Email Domain</div><div class="info-val">{{ company.CompanyEmailDomain or '—' }}</div></div>
             </div>
         </div>
+
+        <!-- Editable form -->
+        <form method="POST" action="/manager/update-account">
+            <div class="edit-grid">
+
+                <!-- Contacts card -->
+                <div class="info-card">
+                    <div class="info-heading">Contact Information</div>
+                    <div class="edit-field">
+                        <label>Primary Contact Name</label>
+                        <input type="text" name="PrimaryContactName" value="{{ company.PrimaryContactName or '' }}" placeholder="Jane Smith">
+                    </div>
+                    <div class="edit-field">
+                        <label>Primary Contact Email</label>
+                        <input type="email" name="PrimaryContactEmail" value="{{ company.PrimaryContactEmail or '' }}" placeholder="jane@company.com">
+                    </div>
+                    <div class="edit-field">
+                        <label>Primary Contact Phone</label>
+                        <input type="text" name="PrimaryContactPhone" value="{{ company.PrimaryContactPhone or '' }}" placeholder="403-555-0100">
+                    </div>
+                    <div class="edit-field">
+                        <label>Billing Contact Email</label>
+                        <input type="email" name="BillingContactEmail" value="{{ company.BillingContactEmail or '' }}" placeholder="billing@company.com">
+                    </div>
+                </div>
+
+                <!-- Delivery card -->
+                <div class="info-card">
+                    <div class="info-heading">Delivery Details</div>
+                    <div class="edit-field">
+                        <label>Address</label>
+                        <input type="text" name="AddressLine1" value="{{ company.AddressLine1 or '' }}" placeholder="123 Main Street">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div class="edit-field">
+                            <label>City</label>
+                            <input type="text" name="City" value="{{ company.City or '' }}" placeholder="Calgary">
+                        </div>
+                        <div class="edit-field">
+                            <label>Postal Code</label>
+                            <input type="text" name="PostalCode" value="{{ company.PostalCode or '' }}" placeholder="T2P 1J9">
+                        </div>
+                    </div>
+                    <div class="edit-field">
+                        <label>Delivery Day</label>
+                        <select name="DeliveryDay">
+                            {% for day in ['Monday','Tuesday','Wednesday','Thursday','Friday'] %}
+                            <option value="{{ day }}" {% if (company.DeliveryDay or 'Monday') == day %}selected{% endif %}>{{ day }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="edit-field">
+                        <label>Delivery Instructions</label>
+                        <textarea name="DeliveryInstructions" rows="3" placeholder="Parking, buzzer code, fridge location...">{{ company.DeliveryInstructions or '' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Tier summary + PIN note -->
+                <div class="info-card full">
+                    <div class="info-heading">Meal Subsidy Program</div>
+                    <table class="tier-table" style="margin-bottom:20px;">
+                        <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
+                        <tbody>
+                            {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
+                            <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.BasePrice or 0)|float) }}</td></tr>
+                            {% endif %}
+                            {% if company.Tier1_EmployeePrice %}
+                            <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
+                            {% endif %}
+                            {% if company.Tier2_EmployeePrice %}
+                            <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
+                            {% endif %}
+                            {% if company.Tier3_EmployeePrice %}
+                            <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <div class="tier-note">
+                        <div class="tier-note-icon">✉</div>
+                        <div>
+                            <div style="font-weight:700;font-size:.875rem;margin-bottom:3px;">Need to adjust your meal tier allocation?</div>
+                            <div style="font-size:.82rem;color:var(--muted);">Contact your BetterDay account manager to modify subsidy tiers, meal counts, or pricing. We're happy to adjust your program as your team's needs evolve.</div>
+                            <a href="mailto:hello@eatbetterday.ca" style="font-size:.82rem;font-weight:700;color:var(--brand);text-decoration:none;margin-top:6px;display:inline-block;">hello@eatbetterday.ca →</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:20px;">
+                <button type="submit" class="btn-save-account">Save Changes</button>
+            </div>
+        </form>
+
     </div>
 
 </div>
@@ -475,6 +559,16 @@ function showTab(name, el) {
     el.classList.add('active');
     document.getElementById('tab-' + name).classList.add('active');
 }
+
+// Auto-open tab from query param (e.g. after save)
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const saved = params.get('saved');
+    if (saved) {
+        const tabEl = document.querySelector(`.tab[onclick*="'${saved}'"]`);
+        if (tabEl) showTab(saved, tabEl);
+    }
+})();
 
 // ── Week filter ──
 function filterWeek(anchor) {
