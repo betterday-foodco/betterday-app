@@ -63,6 +63,27 @@ function doPost(e) {
       return jsonOut({found: false});
     }
     // ─────────────────────────────────────────
+    // GET ALL COMPANIES (lightweight list for client-side prefetch)
+    // ─────────────────────────────────────────
+    if (data.action === "get_all_companies") {
+      var compSheet = ssHub.getSheetByName("Companies");
+      if (!compSheet) return jsonOut({companies: []});
+      var rows = compSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var idIdx   = headers.indexOf("CompanyID");
+      var nameIdx = headers.indexOf("CompanyName");
+      if (idIdx < 0 || nameIdx < 0) return jsonOut({companies: []});
+      var list = [];
+      for (var i = 1; i < rows.length; i++) {
+        var id = String(rows[i][idIdx] || "").trim();
+        if (!id) continue;
+        var company = {};
+        headers.forEach(function(h, idx) { company[h] = rows[i][idx]; });
+        list.push(company);
+      }
+      return jsonOut({companies: list});
+    }
+    // ─────────────────────────────────────────
     // GET EMPLOYEE BY EMAIL
     // ─────────────────────────────────────────
     if (data.action === "get_employee_by_email") {

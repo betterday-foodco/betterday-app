@@ -957,6 +957,7 @@ let cart                = [];
 let weeks               = [];
 let activeWeekIndex     = 0;
 let menuCache           = {};
+let _companiesCache     = null; // prefetched company list [{CompanyID, CompanyName, ...}]
 let joinPin             = '';
 let existingOrderCounts = {}; // { sundayAnchor: count } — meals already placed this week
 let _prefetchedCounts   = null; // { email, counts } — hydrated before enterMenu()
@@ -1001,6 +1002,20 @@ function previewCompanyCode(input) {
   err.classList.remove('show');
   check.textContent = ''; check.classList.remove('show'); btn.disabled = true; currentCompany = null;
   if (code.length < 2) return;
+
+  // If companies are already prefetched, match instantly — no spinner, no debounce
+  if (_companiesCache) {
+    const match = _companiesCache.find(c => String(c.CompanyID).trim().toUpperCase() === code);
+    if (match) {
+      check.textContent = '✅'; check.classList.add('show'); input.classList.add('valid');
+      currentCompany = match; btn.disabled = false;
+    } else {
+      check.textContent = '❌'; check.classList.add('show'); input.classList.add('error');
+    }
+    return;
+  }
+
+  // Cache not ready yet — fall back to individual fetch with debounce
   clearTimeout(_compDebounce);
   _compDebounce = setTimeout(async () => {
     document.getElementById('companyLoadingWrap').classList.remove('hidden');
@@ -1402,6 +1417,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
   const companyCode = params.get('co'); // e.g. /work?co=BROCK&token=xxx
+
+  // 0. Prefetch all companies in background — makes code lookup instant
+  apiFetch({ action: 'get_all_companies' })
+    .then(r => { if (r?.companies) _companiesCache = r.companies; })
+    .catch(() => {});
 
   // 1. Magic link landing — highest priority
   if (token) {
