@@ -665,6 +665,16 @@ def manager_dashboard():
     total_unique_employees = len(set(
         o['employee_email'] for o in all_orders if o.get('employee_email')
     ))
+    _denom = total_unique_employees or 1
+    active_week_pct = round(active_week_unique / _denom * 100)
+    if sorted_weeks and total_unique_employees:
+        _week_pcts = [
+            len(set(o['employee_email'] for o in w['orders'] if o.get('employee_email'))) / total_unique_employees * 100
+            for w in sorted_weeks
+        ]
+        avg_participation_pct = round(sum(_week_pcts) / len(_week_pcts))
+    else:
+        avg_participation_pct = 0
 
     # ── All-time totals ────────────────────────────────────────
     total_meals    = sum(len(o['meals'])  for o in all_orders)
@@ -698,6 +708,8 @@ def manager_dashboard():
                            total_bd_spend=total_bd_spend,
                            active_week=active_week,
                            active_week_unique=active_week_unique,
+                           active_week_pct=active_week_pct,
+                           avg_participation_pct=avg_participation_pct,
                            total_unique_employees=total_unique_employees,
                            sorted_weeks=sorted_weeks,
                            sorted_monthly=sorted_monthly,

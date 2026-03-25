@@ -43,14 +43,17 @@
         .page-title { font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 32px; }
 
         /* ── STATS ROW ── */
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; }
-        @media (max-width: 720px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+        .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 36px; }
+        @media (max-width: 900px) { .stats-row { grid-template-columns: 1fr 1fr; } }
         .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
-        .stat-label { font-size: .7rem; font-weight: 600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .3px; }
-        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
-        .stat-sub { font-size: .74rem; color: var(--muted); }
-        .stat-card.brand .stat-value { color: var(--brand); }
-        .stat-card.bd .stat-value { color: var(--bd-color); }
+        .stat-label { font-size: .72rem; font-weight: 800; color: var(--text); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--brand); line-height: 1; margin-bottom: 5px; }
+        .stat-sub { font-size: .72rem; color: var(--muted); font-weight: 500; }
+        .stat-card.c-teal  .stat-value { color: var(--brand); }
+        .stat-card.c-sky   .stat-value { color: #0284c7; }
+        .stat-card.c-purple .stat-value { color: #7c3aed; }
+        .stat-card.c-bd    .stat-value { color: var(--bd-color); }
+        .stat-card.c-green .stat-value { color: var(--green); }
 
         /* ── TABS ── */
         .tabs-wrap { border-bottom: 1px solid var(--border); margin-bottom: 28px; }
@@ -193,25 +196,30 @@
 
     <!-- STATS -->
     <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-label">{{ active_week.label }} — meals</div>
+        <div class="stat-card c-teal">
+            <div class="stat-label">Total Meals</div>
             <div class="stat-value">{{ active_week.meal_count }}</div>
-            <div class="stat-sub">across {{ active_week.order_count }} order{{ 's' if active_week.order_count != 1 else '' }}</div>
+            <div class="stat-sub">this week</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">{{ active_week.label }} — participation</div>
-            <div class="stat-value">{{ active_week_unique }}<span style="font-size:1.1rem;font-weight:600;color:var(--muted)">/{{ total_unique_employees }}</span></div>
-            <div class="stat-sub">staff ordering this week</div>
+        <div class="stat-card c-sky">
+            <div class="stat-label">Staff Participation</div>
+            <div class="stat-value">{{ active_week_pct }}%</div>
+            <div class="stat-sub">this week</div>
         </div>
-        <div class="stat-card brand">
-            <div class="stat-label">{{ active_week.label }} — company spend</div>
+        <div class="stat-card c-purple">
+            <div class="stat-label">Avg Participation</div>
+            <div class="stat-value">{{ avg_participation_pct }}%</div>
+            <div class="stat-sub">all-time</div>
+        </div>
+        <div class="stat-card c-bd">
+            <div class="stat-label">Company Spend</div>
             <div class="stat-value">${{ '%.2f'|format(active_week.co_spend|float) }}</div>
-            <div class="stat-sub">subsidy applied this week</div>
+            <div class="stat-sub">this week</div>
         </div>
-        <div class="stat-card bd">
-            <div class="stat-label">All time — BetterDay contributed</div>
+        <div class="stat-card c-green">
+            <div class="stat-label">BetterDay Contribution</div>
             <div class="stat-value">${{ '%.2f'|format(total_bd_spend|float) }}</div>
-            <div class="stat-sub">invested in your team's meals</div>
+            <div class="stat-sub">all time</div>
         </div>
     </div>
 
