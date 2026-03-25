@@ -750,7 +750,10 @@ def manager_logout():
 def lander_redirect():
     """Legacy magic-link URL — redirect to /work preserving all query params."""
     qs = request.query_string.decode('utf-8')
-    return redirect('/work' + ('?' + qs if qs else ''), code=302)
+    resp = redirect('/work' + ('?' + qs if qs else ''), code=302)
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    return resp
 
 
 @app.route('/work')
