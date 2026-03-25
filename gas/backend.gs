@@ -8,22 +8,13 @@
  *
  * New sheets required in Hub spreadsheet:
  *   - Employees      : EmployeeID, CompanyID, FirstName, LastName, Email, CreatedAt, StripeCustomerID
- *   - CompanyPINs    : CompanyID, PINHash, UpdatedAt
+ *   - CompanyPINs    : CompanyID, CompanyPin, UpdatedAt
  *   - MagicTokens    : Token, Email, CompanyID, CreatedAt, UsedAt (for real email flow later)
  *
  * New column required in Companies sheet:
  *   - CompanyEmailDomain  e.g. "brockhealth.com"  (leave blank if company has no domain)
  */
 const BUFFER_SHEET_ID = "1iI6q2j7fYIcO5Da959RQeOr5BMFunP-VjsIwvNHA8Cg";
-// ── Simple hash (not cryptographic — good enough for a 4-digit PIN on low-stakes data) ──
-function simpleHash(str) {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) + str.charCodeAt(i);
-    hash = hash & hash; // convert to 32bit int
-  }
-  return Math.abs(hash).toString(16);
-}
 function doGet(e) {
   var ssHub = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ssHub.getSheetByName("Sheet1");
@@ -868,7 +859,7 @@ function getOrCreatePINSheet(ssHub) {
     sheet.setFrozenRows(1);
     sheet.getRange(1, 1, 1, 3).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
     // Add a note explaining how to set PINs
-    sheet.getRange("A1").setNote("Use the set_company_pin API action with your admin secret to add/update PINs. Never store the raw PIN here — only the hash.");
+    sheet.getRange("A1").setNote("Managers can update their PIN from the Manager Dashboard. Run setInitialPINs() once to seed all companies with a default PIN.");
   }
   return sheet;
 }
@@ -927,32 +918,4 @@ function getOrCreateTokenSheet(ssHub) {
     sheet.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
   }
   return sheet;
-}
-// ══════════════════════════════════════════
-// UTILITY: Run this once manually to set a company PIN
-// Extensions > Apps Script > Run > setInitialPINs
-// ══════════════════════════════════════════
-function setInitialPINs() {
-  var ssHub = SpreadsheetApp.getActiveSpreadsheet();
-  var pinSheet = getOrCreatePINSheet(ssHub);
-  // ── ADD YOUR COMPANIES AND INITIAL PINs HERE ──
-  var pins = [
-    { companyId: "BROCK", pin: "1234" },  // ← Change these!
-    // { companyId: "FORD",  pin: "5678" },
-  ];
-  pins.forEach(function(entry) {
-    var rows = pinSheet.getDataRange().getValues();
-    var hash = simpleHash(entry.pin);
-    var found = false;
-    for (var i = 1; i < rows.length; i++) {
-      if (String(rows[i][0]).trim().toUpperCase() === entry.companyId.toUpperCase()) {
-        pinSheet.getRange(i + 1, 2).setValue(hash);
-        pinSheet.getRange(i + 1, 3).setValue(new Date());
-        found = true; break;
-      }
-    }
-    if (!found) pinSheet.appendRow([entry.companyId, hash, new Date()]);
-    Logger.log("Set PIN for " + entry.companyId + " → hash: " + hash);
-  });
-  Logger.log("Done. Check CompanyPINs sheet.");
 }
