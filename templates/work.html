@@ -414,6 +414,11 @@
     .order-btn-view:hover { background: #e4e9f0; }
     .order-btn-swap { background: var(--green); color: #fff; }
     .order-btn-swap:hover { filter: brightness(1.07); }
+    .orders-pagination { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 0 4px; }
+    .pg-btn { background: var(--dark); color: #fff; border: none; border-radius: 10px; padding: 8px 16px; font-family: 'DM Sans', sans-serif; font-size: .8rem; font-weight: 700; cursor: pointer; transition: .15s; }
+    .pg-btn:disabled { background: #dde4ea; color: #aabbc8; cursor: default; }
+    .pg-btn:not(:disabled):hover { transform: translateY(-1px); }
+    .pg-info { font-size: .8rem; font-weight: 600; color: #7b8c9f; min-width: 80px; text-align: center; }
     /* ── ORDER INVOICE MODAL ── */
     .invoice-row { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid #f0f4f8; gap: 12px; }
     .invoice-row:last-child { border-bottom: none; }
@@ -830,7 +835,7 @@
     </div>
     <div class="modal-white-box" id="swapBody"></div>
     <div class="swap-cutoff" id="swapCutoffNote"></div>
-    <div style="padding:0 0 4px;"><button class="btn-back" style="margin-top:10px;" onclick="closeSwapModal()">Done ✓</button></div>
+    <div style="padding:0 0 4px;margin:0 14px;"><button class="btn-back" style="margin-top:10px;" onclick="closeSwapModal()">Done ✓</button></div>
   </div>
 </div>
 
@@ -1827,6 +1832,9 @@ function getMealImage(mealId, sundayAnchor) {
   return m?.image || '';
 }
 
+let _ordersAllKeys = [], _ordersGroups = {}, _ordersPage = 0;
+const ORDERS_PER_PAGE = 10;
+
 function renderOrderHistory(rows, company) {
   // Group by OrderID (new orders). Fall back to SundayAnchor for legacy rows without OrderID.
   const groups = {};
@@ -1841,44 +1849,71 @@ function renderOrderHistory(rows, company) {
     const db = groups[b][0].DeliveryDate || '';
     return db.localeCompare(da);
   });
-  return sortedKeys.map(key => {
-    const meals = groups[key];
-    const first = meals[0];
-    const hasOrderId = !!first.OrderID;
-    const totalPaid = meals.reduce((s, o) => s + parsePrice(o.EmployeePrice), 0);
-    const fp = parseFloat(company?.FullPrice) || 16.99;
-    const totalSaved = meals.length * fp - totalPaid;
-    const anchor = first.SundayAnchor || '';
-    const swappable = hasOrderId && isSwappable(anchor);
-    const cutoff = anchor ? getCutoff(new Date(anchor+'T12:00:00')) : null;
-    const paidStr = totalPaid === 0
-      ? `<span style="color:var(--green);font-weight:900">FREE</span>`
-      : `$${totalPaid.toFixed(2)}`;
-    const savedStr = totalSaved > 0 ? ` · saved $${totalSaved.toFixed(2)}` : '';
-    const statusBadge = (hasOrderId && swappable)
-      ? `<span class="order-status-badge order-status-open">Open</span>`
-      : '';
-    const swapBtn = hasOrderId && swappable
-      ? `<button class="order-btn-icon order-btn-swap" onclick="openSwapModal('${key}')">Swap</button>`
-      : '';
-    // Store order data in global map for modals
-    _orderCache[key] = { meals, anchor, cutoff };
-    return `<div class="order-card">
-      <div class="order-card-info">
-        <div class="order-delivery-date">${fmtDate(first.DeliveryDate)}</div>
-        <div class="order-meta">${meals.length} meal${meals.length!==1?'s':''} · ${first.CompanyName||''}</div>
+  _ordersGroups = groups;
+  _ordersAllKeys = sortedKeys;
+  _ordersPage = 0;
+  return renderOrdersPage(company);
+}
+
+function renderOrderCard(key, company) {
+  const meals = _ordersGroups[key];
+  const first = meals[0];
+  const hasOrderId = !!first.OrderID;
+  const totalPaid = meals.reduce((s, o) => s + parsePrice(o.EmployeePrice), 0);
+  const fp = parseFloat(company?.FullPrice) || 16.99;
+  const totalSaved = meals.length * fp - totalPaid;
+  const anchor = first.SundayAnchor || '';
+  const swappable = hasOrderId && isSwappable(anchor);
+  const cutoff = anchor ? getCutoff(new Date(anchor+'T12:00:00')) : null;
+  const paidStr = totalPaid === 0
+    ? `<span style="color:var(--green);font-weight:900">FREE</span>`
+    : `$${totalPaid.toFixed(2)}`;
+  const savedStr = totalSaved > 0 ? ` · saved $${totalSaved.toFixed(2)}` : '';
+  const statusBadge = (hasOrderId && swappable)
+    ? `<span class="order-status-badge order-status-open">Open</span>`
+    : '';
+  const swapBtn = hasOrderId && swappable
+    ? `<button class="order-btn-icon order-btn-swap" onclick="openSwapModal('${key}')">Swap</button>`
+    : '';
+  _orderCache[key] = { meals, anchor, cutoff };
+  return `<div class="order-card">
+    <div class="order-card-info">
+      <div class="order-delivery-date">${fmtDate(first.DeliveryDate)}</div>
+      <div class="order-meta">${meals.length} meal${meals.length!==1?'s':''} · ${first.CompanyName||''}</div>
+    </div>
+    <div class="order-card-right">
+      <div class="order-price-block">
+        <div class="order-paid-amt">${paidStr}</div>
+        ${savedStr?`<div class="order-saved-line">${savedStr}</div>`:''}
       </div>
-      <div class="order-card-right">
-        <div class="order-price-block">
-          <div class="order-paid-amt">${paidStr}</div>
-          ${savedStr?`<div class="order-saved-line">${savedStr}</div>`:''}
-        </div>
-        ${statusBadge}
-        <button class="order-btn-icon order-btn-view" onclick="openOrderInvoice('${key}')">View</button>
-        ${swapBtn}
-      </div>
-    </div>`;
-  }).join('');
+      ${statusBadge}
+      <button class="order-btn-icon order-btn-view" onclick="openOrderInvoice('${key}')">View</button>
+      ${swapBtn}
+    </div>
+  </div>`;
+}
+
+function renderOrdersPage(company) {
+  const total = _ordersAllKeys.length;
+  const start = _ordersPage * ORDERS_PER_PAGE;
+  const end = Math.min(start + ORDERS_PER_PAGE, total);
+  const cardsHtml = _ordersAllKeys.slice(start, end).map(k => renderOrderCard(k, company)).join('');
+  const paginationHtml = total > ORDERS_PER_PAGE
+    ? `<div class="orders-pagination">
+        <button class="pg-btn" onclick="changeOrdersPage(-1)" ${_ordersPage===0?'disabled':''}>← Prev 10</button>
+        <span class="pg-info">${start+1}–${end} of ${total}</span>
+        <button class="pg-btn" onclick="changeOrdersPage(1)" ${end>=total?'disabled':''}>Next 10 →</button>
+      </div>`
+    : '';
+  return cardsHtml + paginationHtml;
+}
+
+function changeOrdersPage(dir) {
+  const maxPage = Math.ceil(_ordersAllKeys.length / ORDERS_PER_PAGE) - 1;
+  _ordersPage = Math.max(0, Math.min(_ordersPage + dir, maxPage));
+  const list = document.getElementById('profileOrdersList');
+  list.innerHTML = renderOrdersPage(currentCompany);
+  list.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── ORDER INVOICE MODAL ──
