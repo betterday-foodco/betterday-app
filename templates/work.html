@@ -139,7 +139,8 @@
     .user-name { font-size: .82rem; font-weight: 700; color: #fff; }
     .logout-btn { font-size: .72rem; color: rgba(255,255,255,.45); cursor: pointer; border: none; background: transparent; font-family: 'DM Sans', sans-serif; padding: 0; margin-left: 2px; font-weight: 600; }
     .logout-btn:hover { color: rgba(255,255,255,.9); }
-    .week-tabs-bar { background: var(--dark); border-top: 1px solid rgba(255,255,255,.08); padding: 0 24px; display: flex; position: sticky; top: 0; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,.2); overflow-x: auto; }
+    .week-tabs-row { background: var(--dark); border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: stretch; position: sticky; top: 0; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+    .week-tabs-bar { display: flex; overflow-x: auto; padding: 0 0 0 24px; flex: 1; min-width: 0; }
     .week-tabs-bar::-webkit-scrollbar { display: none; }
     .week-tab { padding: 14px 20px; font-size: .82rem; font-weight: 700; color: rgba(255,255,255,.5); cursor: pointer; border: none; background: transparent; font-family: 'DM Sans', sans-serif; border-bottom: 3px solid transparent; white-space: nowrap; transition: .15s; }
     .week-tab:hover { color: rgba(255,255,255,.8); }
@@ -150,21 +151,15 @@
     .tab-badge-open   { background: rgba(39,174,96,.25); color: #5fe49a; }
     .tab-badge-closed { background: rgba(231,76,60,.2);  color: #ff8a80; }
     .tab-badge-next   { background: rgba(78,162,253,.2); color: #7cc4ff; }
-    .pricing-banner { background: #fff3e8; border-bottom: 2px solid rgba(0,70,94,.07); padding: 10px 24px; }
-    .pricing-banner-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap; }
-    .pricing-left { display: flex; align-items: center; gap: 0; flex-wrap: wrap; flex: 1; min-width: 0; }
+    .inline-pricing { display: flex; align-items: center; padding: 0 20px; flex-shrink: 0; gap: 0; border-left: 1px solid rgba(255,255,255,.1); }
+    .pricing-left { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; min-width: 0; }
     .pricing-company-block { display: flex; flex-direction: column; align-items: flex-start; flex-shrink: 0; gap: 1px; }
-    .pricing-company  { font-size: .88rem; font-weight: 900; color: var(--dark); white-space: nowrap; line-height: 1.2; }
-    .pricing-plan-label { font-size: .62rem; font-weight: 600; color: #9aabbb; white-space: nowrap; letter-spacing: .3px; line-height: 1.2; }
-    .pricing-vsep { display: inline-block; width: 1px; height: 13px; background: #c5d0d9; vertical-align: middle; margin: 0 10px; flex-shrink: 0; }
-    .pricing-tier     { font-size: .88rem; color: #50657a; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-    .pricing-tier strong { color: var(--dark); }
-    .pricing-delivery { margin-left: auto; font-size: .82rem; font-weight: 700; color: var(--primary); }
-    @media (max-width: 900px) {
-      .pricing-left { flex-wrap: nowrap; overflow: hidden; }
-      .pricing-tier { font-size: .8rem; }
-      .pricing-banner { padding: 8px 14px; }
-    }
+    .pricing-company  { font-size: .8rem; font-weight: 900; color: #fff; white-space: nowrap; line-height: 1.2; }
+    .pricing-plan-label { font-size: .58rem; font-weight: 600; color: rgba(255,255,255,.4); white-space: nowrap; letter-spacing: .3px; line-height: 1.2; }
+    .pricing-vsep { display: inline-block; width: 1px; height: 13px; background: rgba(255,255,255,.2); vertical-align: middle; margin: 0 10px; flex-shrink: 0; }
+    .pricing-tier { font-size: .8rem; color: rgba(255,255,255,.65); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .pricing-tier strong { color: #fff; }
+    @media (max-width: 700px) { .inline-pricing { display: none; } }
     .menu-inner { max-width: 1100px; margin: 0 auto; }
     .menu-section-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #7b8c9f; margin: 20px 0 14px; display: flex; align-items: center; gap: 10px; }
     .menu-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(0,70,94,.1); }
@@ -678,8 +673,10 @@
         </div>
       </div>
     </div>
-    <div class="week-tabs-bar" id="weekTabsBar"></div>
-    <div class="pricing-banner"><div class="pricing-banner-inner" id="pricingBannerInner"></div></div>
+    <div class="week-tabs-row">
+      <div class="week-tabs-bar" id="weekTabsBar"></div>
+      <div class="inline-pricing" id="pricingBannerInner"></div>
+    </div>
     <div class="menu-body">
       <div class="menu-scroll"><div class="menu-inner" id="menuInner"></div></div>
       <!-- DESKTOP SIDE CART -->
@@ -1360,7 +1357,7 @@ function toYMD(d) { return d.toISOString().split('T')[0]; }
 function computeWeeks() {
   const now = new Date(); weeks = [];
   const firstSunday = getSundayAnchor(now);
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     const sun = new Date(firstSunday); sun.setDate(sun.getDate() + 7*i);
     const cutoff   = getCutoff(sun);
     const delivery = getDeliveryMonday(sun);
@@ -1400,15 +1397,12 @@ function buildPricingBanner() {
     : '';
   const tiersHtml = tiers.map((t,i)=>(i>0?'<span class="pricing-vsep"></span>':'')+`<span class="pricing-tier">${t}</span>`).join('');
   document.getElementById('pricingBannerInner').innerHTML=
-    `<div class="pricing-left">`+
-      `<div class="pricing-company-block">`+
-        `<span class="pricing-plan-label">Employer Subsidy Plan</span>`+
-        `<span class="pricing-company">${c.CompanyName}</span>`+
-      `</div>`+
-      `<span class="pricing-vsep" style="height:30px;margin:0 14px"></span>`+
-      tiersHtml+orderedHtml+
+    `<div class="pricing-company-block">`+
+      `<span class="pricing-plan-label">Employer Subsidy Plan</span>`+
+      `<span class="pricing-company">${c.CompanyName}</span>`+
     `</div>`+
-    `<span id="pricingToggleSlot" style="flex-shrink:0"></span>`;
+    `<span class="pricing-vsep" style="height:30px;margin:0 14px"></span>`+
+    tiersHtml+orderedHtml;
 }
 
 function buildWeekTabs() {
