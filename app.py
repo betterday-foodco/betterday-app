@@ -62,6 +62,8 @@ def admin_logout():
 @app.route('/api/gas', methods=['POST'])
 def gas_proxy():
     payload = request.get_json(force=True) or {}
+    if payload.get('action') == 'create_magic_token':
+        print(f"[DEBUG] GAS URL in use: {GOOGLE_SCRIPT_URL}", flush=True)
     try:
         r = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=15)
         return jsonify(r.json()), r.status_code
