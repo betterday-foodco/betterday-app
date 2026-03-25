@@ -9,10 +9,10 @@
     <style>
         :root {
             --brand: #00465e;
-            --brand-light: #E8F2F5;
+            --brand-mid: #005878;
             --text: #222222;
             --text-2: #484848;
-            --text-secondary: #717171;
+            --muted: #717171;
             --border: #EBEBEB;
             --bg: #F7F7F7;
             --white: #FFFFFF;
@@ -20,202 +20,152 @@
             --green-bg: #F0FBF0;
             --blue-bg: #EFF6FF;
             --blue: #1D4ED8;
+            --bd-color: #0077A3;
+            --bd-bg: #E8F4FA;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
         /* ── NAV ── */
-        .nav {
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            padding: 0 40px;
-            height: 62px;
-            display: flex;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        .nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 40px; height: 62px; display: flex; align-items: center; position: sticky; top: 0; z-index: 200; }
         .nav-logo { height: 22px; margin-right: 20px; opacity: .9; }
         .nav-sep { width: 1px; height: 20px; background: var(--border); margin-right: 20px; }
         .nav-company { font-weight: 700; font-size: .9rem; color: var(--text); }
         .nav-right { margin-left: auto; }
-        .btn-logout {
-            font-size: .82rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-decoration: none;
-            padding: 7px 16px;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            transition: .15s;
-        }
+        .btn-logout { font-size: .82rem; font-weight: 600; color: var(--muted); text-decoration: none; padding: 7px 16px; border: 1px solid var(--border); border-radius: 20px; transition: .15s; }
         .btn-logout:hover { border-color: var(--text-2); color: var(--text); }
 
         /* ── CONTAINER ── */
-        .container { max-width: 1080px; margin: 0 auto; padding: 40px 40px 80px; }
+        .container { max-width: 1120px; margin: 0 auto; padding: 40px 40px 80px; }
 
         /* ── PAGE HEADER ── */
-        .page-header { margin-bottom: 32px; }
-        .page-eyebrow { font-size: .72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
-        .page-title { font-size: 1.55rem; font-weight: 700; color: var(--text); }
+        .page-eyebrow { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+        .page-title { font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 32px; }
 
         /* ── STATS ROW ── */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            margin-bottom: 36px;
-        }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; }
         @media (max-width: 720px) { .stats-row { grid-template-columns: 1fr 1fr; } }
-        .stat-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px 22px;
-        }
-        .stat-label { font-size: .72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .3px; }
-        .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
-        .stat-sub { font-size: .75rem; color: var(--text-secondary); }
+        .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+        .stat-label { font-size: .7rem; font-weight: 600; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .3px; }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
+        .stat-sub { font-size: .74rem; color: var(--muted); }
         .stat-card.brand .stat-value { color: var(--brand); }
+        .stat-card.bd .stat-value { color: var(--bd-color); }
 
         /* ── TABS ── */
-        .tabs-wrap { margin-bottom: 28px; border-bottom: 1px solid var(--border); }
-        .tabs { display: flex; gap: 0; }
-        .tab {
-            padding: 13px 22px;
-            font-size: .875rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
-            transition: color .15s;
-            user-select: none;
-        }
+        .tabs-wrap { border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+        .tabs { display: flex; }
+        .tab { padding: 13px 22px; font-size: .875rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s; user-select: none; }
         .tab:hover { color: var(--text); }
         .tab.active { color: var(--brand); border-bottom-color: var(--brand); }
-
-        /* ── TAB PANELS ── */
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
         /* ── SECTION HEADER ── */
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-        .section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
-
-        /* ── WEEK SELECTOR ── */
-        .week-select {
-            padding: 9px 13px;
-            border: 1.5px solid var(--border);
-            border-radius: 9px;
-            font-size: .85rem;
-            font-family: 'DM Sans', sans-serif;
-            color: var(--text);
-            background: var(--white);
-            outline: none;
-            cursor: pointer;
-            min-width: 200px;
-        }
+        .section-title { font-size: 1rem; font-weight: 700; }
+        .week-select { padding: 9px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .85rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; cursor: pointer; min-width: 200px; }
         .week-select:focus { border-color: var(--brand); }
 
-        /* ── TABLE ── */
-        .table-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-        .table-empty { padding: 56px 40px; text-align: center; color: var(--text-secondary); font-size: .9rem; }
+        /* ── WEEK BLOCK ── */
         .week-block { display: none; }
         .week-block.active { display: block; }
+
+        /* ── SUMMARY BAR ── */
+        .summary-bar { display: flex; background: #FAFAFA; border: 1px solid var(--border); border-radius: 14px 14px 0 0; border-bottom: none; overflow: hidden; }
+        .sb-cell { padding: 14px 18px; flex: 1; border-right: 1px solid var(--border); }
+        .sb-cell:last-child { border-right: none; }
+        .sb-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; color: var(--muted); margin-bottom: 4px; }
+        .sb-val { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .sb-val.green { color: var(--green); }
+        .sb-val.bd { color: var(--bd-color); }
+
+        /* ── TABLE ── */
+        .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 0 0 14px 14px; overflow: hidden; }
+        .table-wrap.no-bar { border-radius: 14px; }
+        .table-empty { padding: 56px 40px; text-align: center; color: var(--muted); font-size: .9rem; }
         table { width: 100%; border-collapse: collapse; }
         thead { background: #FAFAFA; }
         thead tr { border-bottom: 1px solid var(--border); }
-        th {
-            text-align: left;
-            padding: 12px 18px;
-            font-size: .68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-        }
-        td { padding: 14px 18px; font-size: .875rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-2); }
+        th { text-align: left; padding: 11px 16px; font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); white-space: nowrap; }
+        td { padding: 13px 16px; font-size: .875rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-2); }
         tbody tr:last-child td { border-bottom: none; }
-        tbody tr:hover { background: #FAFAFA; }
+        tbody tr.clickable { cursor: pointer; transition: background .1s; }
+        tbody tr.clickable:hover { background: #FAFAFA; }
         .td-name { font-weight: 600; color: var(--text); }
-        .td-meal { color: var(--text-secondary); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .td-emp { font-weight: 600; }
-        .td-co { font-weight: 600; color: var(--green); }
+        .td-co  { font-weight: 600; color: var(--green); }
+        .td-bd  { font-weight: 600; color: var(--bd-color); }
+        .td-action { color: var(--muted); font-size: .8rem; white-space: nowrap; }
 
         /* ── BADGES ── */
-        .tier-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .7rem; font-weight: 700; text-transform: capitalize; }
-        .tier-free { background: var(--green-bg); color: var(--green); }
+        .tier-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: .68rem; font-weight: 700; text-transform: capitalize; }
+        .tier-free  { background: var(--green-bg); color: var(--green); }
         .tier-tier1, .tier-tier2, .tier-tier3 { background: var(--blue-bg); color: var(--blue); }
-        .tier-full { background: #F3F4F6; color: #6B7280; }
-        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .7rem; font-weight: 600; background: #F3F4F6; color: #6B7280; text-transform: capitalize; }
+        .tier-full  { background: #F3F4F6; color: #6B7280; }
+        .status-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: .68rem; font-weight: 600; background: #F3F4F6; color: #6B7280; }
         .status-confirmed { background: var(--green-bg); color: var(--green); }
-        .status-pending { background: #FFF7ED; color: #C2410C; }
-
-        /* ── WEEK SUMMARY BAR ── */
-        .week-summary {
-            display: flex;
-            gap: 0;
-            border-bottom: 1px solid var(--border);
-            background: #FAFAFA;
-        }
-        .ws-cell { padding: 14px 18px; font-size: .8rem; }
-        .ws-label { color: var(--text-secondary); font-weight: 600; margin-bottom: 2px; }
-        .ws-val { font-weight: 700; color: var(--text); font-size: .95rem; }
-        .ws-val.green { color: var(--green); }
-        .ws-sep { width: 1px; background: var(--border); align-self: stretch; margin: 10px 0; }
 
         /* ── MONTHLY ── */
-        .month-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-        .month-header {
-            padding: 18px 22px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border);
-        }
-        .month-name { font-size: 1rem; font-weight: 700; color: var(--text); }
-        .month-pill { font-size: .78rem; font-weight: 600; color: var(--text-secondary); background: #F3F4F6; padding: 4px 12px; border-radius: 20px; }
-        .month-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; }
-        .ms-cell { padding: 20px 22px; border-right: 1px solid var(--border); }
+        .month-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
+        .month-header { padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+        .month-name { font-size: 1rem; font-weight: 700; }
+        .month-pill { font-size: .78rem; font-weight: 600; color: var(--muted); background: #F3F4F6; padding: 4px 12px; border-radius: 20px; }
+        .month-stats { display: grid; grid-template-columns: repeat(4, 1fr); }
+        .ms-cell { padding: 18px 22px; border-right: 1px solid var(--border); }
         .ms-cell:last-child { border-right: none; }
-        .ms-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--text-secondary); margin-bottom: 8px; }
-        .ms-val { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+        .ms-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; color: var(--muted); margin-bottom: 8px; }
+        .ms-val { font-size: 1.2rem; font-weight: 700; color: var(--text); }
         .ms-val.green { color: var(--green); }
-        .empty-state { text-align: center; padding: 64px 40px; color: var(--text-secondary); font-size: .9rem; }
+        .ms-val.bd { color: var(--bd-color); }
 
         /* ── ACCOUNT INFO ── */
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         @media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
-        .info-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 24px 26px;
-        }
+        .info-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 24px 26px; }
         .info-card.full { grid-column: 1 / -1; }
-        .info-card-heading { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text-secondary); margin-bottom: 18px; }
-        .info-row { margin-bottom: 14px; }
+        .info-heading { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 18px; }
+        .info-row { margin-bottom: 13px; }
         .info-row:last-child { margin-bottom: 0; }
-        .info-row-label { font-size: .75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 3px; }
-        .info-row-value { font-size: .9rem; color: var(--text-2); font-weight: 500; }
-        .tier-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
-        .tier-table th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-secondary); padding: 6px 0; border-bottom: 1px solid var(--border); }
+        .info-lbl { font-size: .74rem; font-weight: 600; color: var(--muted); margin-bottom: 3px; }
+        .info-val { font-size: .9rem; color: var(--text-2); font-weight: 500; }
+        .tier-table { width: 100%; border-collapse: collapse; }
+        .tier-table th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border); }
         .tier-table td { font-size: .875rem; padding: 10px 0; border-bottom: 1px solid var(--border); color: var(--text-2); }
         .tier-table tr:last-child td { border-bottom: none; }
+        .empty-state { text-align: center; padding: 60px 40px; color: var(--muted); font-size: .9rem; }
+
+        /* ── INVOICE MODAL ── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal { background: var(--white); border-radius: 20px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); transform: translateY(12px); transition: transform .2s; }
+        .modal-overlay.open .modal { transform: translateY(0); }
+        .modal-header { padding: 24px 28px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
+        .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+        .modal-sub { font-size: .82rem; color: var(--muted); margin-top: 3px; }
+        .modal-close { background: #F3F4F6; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 16px; }
+        .modal-close:hover { background: var(--border); }
+        .modal-body { padding: 24px 28px; }
+        .invoice-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+        .im-cell .im-label { font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px; }
+        .im-cell .im-val { font-size: .9rem; font-weight: 600; color: var(--text); }
+        .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        .invoice-table th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); padding: 8px 0; border-bottom: 1.5px solid var(--border); }
+        .invoice-table td { padding: 11px 0; font-size: .875rem; border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: top; }
+        .invoice-table tr:last-child td { border-bottom: none; }
+        .invoice-table .td-r { text-align: right; font-weight: 600; }
+        .invoice-table .subsidy-green { color: var(--green); font-weight: 700; }
+        .invoice-totals { background: #FAFAFA; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+        .it-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: .88rem; }
+        .it-row.total { font-weight: 700; font-size: .95rem; padding-top: 10px; margin-top: 6px; border-top: 1.5px solid var(--border); }
+        .it-label { color: var(--text-2); }
+        .it-val { font-weight: 600; }
+        .it-val.green { color: var(--green); }
+        .modal-footer { padding: 18px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+        .btn-print { padding: 11px 22px; background: var(--brand); color: white; border: none; border-radius: 10px; font-size: .875rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s; }
+        .btn-print:hover { background: var(--brand-mid); }
+        .btn-close-modal { padding: 11px 18px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 10px; font-size: .875rem; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+        .btn-close-modal:hover { border-color: var(--text-2); color: var(--text); }
     </style>
 </head>
 <body>
@@ -231,32 +181,30 @@
 
 <div class="container">
 
-    <div class="page-header">
-        <div class="page-eyebrow">Manager Portal</div>
-        <div class="page-title">{{ company_name }} Meal Program</div>
-    </div>
+    <div class="page-eyebrow">Manager Portal</div>
+    <div class="page-title">{{ company_name }} Meal Program</div>
 
     <!-- STATS -->
     <div class="stats-row">
         <div class="stat-card">
             <div class="stat-label">This week</div>
             <div class="stat-value">{{ this_week.meal_count }}</div>
-            <div class="stat-sub">meals ordered</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">This week</div>
-            <div class="stat-value">${{ '%.2f'|format(this_week.co_spend|float) }}</div>
-            <div class="stat-sub">company subsidy</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">All time</div>
-            <div class="stat-value">{{ total_orders }}</div>
-            <div class="stat-sub">total meals</div>
+            <div class="stat-sub">meals — {{ this_week.order_count }} orders</div>
         </div>
         <div class="stat-card brand">
+            <div class="stat-label">This week — company covered</div>
+            <div class="stat-value">${{ '%.2f'|format(this_week.co_spend|float) }}</div>
+            <div class="stat-sub">+ ${{ '%.2f'|format(this_week.bd_spend|float) }} from BetterDay</div>
+        </div>
+        <div class="stat-card">
             <div class="stat-label">All time</div>
-            <div class="stat-value">${{ '%.2f'|format(total_co_spend|float) }}</div>
-            <div class="stat-sub">total subsidized</div>
+            <div class="stat-value">{{ total_meals }}</div>
+            <div class="stat-sub">total meals ordered</div>
+        </div>
+        <div class="stat-card bd">
+            <div class="stat-label">All time — total program value</div>
+            <div class="stat-value">${{ '%.2f'|format((total_co_spend + total_bd_spend)|float) }}</div>
+            <div class="stat-sub">${{ '%.2f'|format(total_co_spend|float) }} co. · ${{ '%.2f'|format(total_bd_spend|float) }} BD</div>
         </div>
     </div>
 
@@ -283,51 +231,64 @@
         </div>
 
         {% if sorted_weeks %}
-            {% for w in sorted_weeks %}
-            <div class="table-card week-block {% if loop.first %}active{% endif %}" id="week-{{ w.anchor }}">
-                <div class="week-summary">
-                    <div class="ws-cell">
-                        <div class="ws-label">Meals</div>
-                        <div class="ws-val">{{ w.meal_count }}</div>
-                    </div>
-                    <div class="ws-sep"></div>
-                    <div class="ws-cell">
-                        <div class="ws-label">Employees Paid</div>
-                        <div class="ws-val">${{ '%.2f'|format(w.emp_spend|float) }}</div>
-                    </div>
-                    <div class="ws-sep"></div>
-                    <div class="ws-cell">
-                        <div class="ws-label">Company Subsidized</div>
-                        <div class="ws-val green">${{ '%.2f'|format(w.co_spend|float) }}</div>
-                    </div>
+        {% for w in sorted_weeks %}
+        <div class="week-block {% if loop.first %}active{% endif %}" id="week-{{ w.anchor }}">
+
+            <div class="summary-bar">
+                <div class="sb-cell">
+                    <div class="sb-label">Orders</div>
+                    <div class="sb-val">{{ w.order_count }}</div>
                 </div>
+                <div class="sb-cell">
+                    <div class="sb-label">Meals</div>
+                    <div class="sb-val">{{ w.meal_count }}</div>
+                </div>
+                <div class="sb-cell">
+                    <div class="sb-label">Employees Paid</div>
+                    <div class="sb-val">${{ '%.2f'|format(w.emp_spend|float) }}</div>
+                </div>
+                <div class="sb-cell">
+                    <div class="sb-label">Company Covered</div>
+                    <div class="sb-val green">${{ '%.2f'|format(w.co_spend|float) }}</div>
+                </div>
+                <div class="sb-cell">
+                    <div class="sb-label">BetterDay Contributed</div>
+                    <div class="sb-val bd">${{ '%.2f'|format(w.bd_spend|float) }}</div>
+                </div>
+                <div class="sb-cell">
+                    <div class="sb-label">Total Value</div>
+                    <div class="sb-val">${{ '%.2f'|format((w.emp_spend + w.co_spend + w.bd_spend)|float) }}</div>
+                </div>
+            </div>
+
+            <div class="table-wrap">
                 {% if w.orders %}
                 <table>
                     <thead>
                         <tr>
                             <th>Employee</th>
-                            <th>Meal</th>
-                            <th>Tier</th>
+                            <th>Meals</th>
                             <th>They Paid</th>
-                            <th>Co. Subsidy</th>
+                            <th>Co. Covered</th>
+                            <th>BD Contributed</th>
                             <th>Delivery</th>
                             <th>Status</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for o in w.orders %}
-                        <tr>
-                            <td class="td-name">{{ o.EmployeeName or '—' }}</td>
-                            <td class="td-meal">{{ o.DishName or '—' }}</td>
+                        <tr class="clickable" onclick="openInvoice('{{ o.order_id }}')">
+                            <td class="td-name">{{ o.employee_name or '—' }}</td>
+                            <td>{{ o.meals|length }} meal{{ 's' if o.meals|length != 1 else '' }}</td>
+                            <td class="td-emp">${{ '%.2f'|format(o.emp_total|float) }}</td>
+                            <td class="td-co">${{ '%.2f'|format(o.co_total|float) }}</td>
+                            <td class="td-bd">${{ '%.2f'|format(o.bd_total|float) }}</td>
+                            <td style="color:var(--muted)">{{ o.delivery_date or '—' }}</td>
                             <td>
-                                <span class="tier-badge tier-{{ (o.Tier or 'full')|lower }}">{{ o.Tier or 'Full' }}</span>
+                                <span class="status-badge status-{{ (o.status or 'pending')|lower }}">{{ o.status or 'Pending' }}</span>
                             </td>
-                            <td class="td-emp">${{ '%.2f'|format((o.EmployeePrice or 0)|float) }}</td>
-                            <td class="td-co">${{ '%.2f'|format((o.CompanyCoverage or 0)|float) }}</td>
-                            <td style="color:var(--text-secondary)">{{ o.DeliveryDate or '—' }}</td>
-                            <td>
-                                <span class="status-badge status-{{ (o.Status or 'pending')|lower }}">{{ o.Status or 'Pending' }}</span>
-                            </td>
+                            <td class="td-action">View →</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -336,12 +297,12 @@
                 <div class="table-empty">No orders for this week.</div>
                 {% endif %}
             </div>
-            {% endfor %}
+
+        </div>
+        {% endfor %}
         {% else %}
-        <div class="table-card">
-            <div class="table-empty">
-                No orders yet. Once your team starts ordering, history will appear here.
-            </div>
+        <div class="table-wrap no-bar">
+            <div class="table-empty">No orders yet. Once your team starts ordering, history will appear here.</div>
         </div>
         {% endif %}
     </div>
@@ -349,28 +310,32 @@
     <!-- ── MONTHLY TAB ── -->
     <div class="tab-panel" id="tab-monthly">
         {% if sorted_monthly %}
-            {% for m in sorted_monthly %}
-            <div class="month-card">
-                <div class="month-header">
-                    <div class="month-name">{{ m.label }}</div>
-                    <div class="month-pill">{{ m.orders }} meal{{ 's' if m.orders != 1 else '' }}</div>
+        {% for m in sorted_monthly %}
+        <div class="month-card">
+            <div class="month-header">
+                <div class="month-name">{{ m.label }}</div>
+                <div class="month-pill">{{ m.meals }} meal{{ 's' if m.meals != 1 else '' }} · {{ m.orders }} order{{ 's' if m.orders != 1 else '' }}</div>
+            </div>
+            <div class="month-stats">
+                <div class="ms-cell">
+                    <div class="ms-label">Meals</div>
+                    <div class="ms-val">{{ m.meals }}</div>
                 </div>
-                <div class="month-stats">
-                    <div class="ms-cell">
-                        <div class="ms-label">Meals Ordered</div>
-                        <div class="ms-val">{{ m.orders }}</div>
-                    </div>
-                    <div class="ms-cell">
-                        <div class="ms-label">Employees Paid</div>
-                        <div class="ms-val">${{ '%.2f'|format(m.emp_spend|float) }}</div>
-                    </div>
-                    <div class="ms-cell">
-                        <div class="ms-label">Company Subsidized</div>
-                        <div class="ms-val green">${{ '%.2f'|format(m.co_spend|float) }}</div>
-                    </div>
+                <div class="ms-cell">
+                    <div class="ms-label">Employees Paid</div>
+                    <div class="ms-val">${{ '%.2f'|format(m.emp_spend|float) }}</div>
+                </div>
+                <div class="ms-cell">
+                    <div class="ms-label">Company Covered</div>
+                    <div class="ms-val green">${{ '%.2f'|format(m.co_spend|float) }}</div>
+                </div>
+                <div class="ms-cell">
+                    <div class="ms-label">BD Contributed</div>
+                    <div class="ms-val bd">${{ '%.2f'|format(m.bd_spend|float) }}</div>
                 </div>
             </div>
-            {% endfor %}
+        </div>
+        {% endfor %}
         {% else %}
         <div class="empty-state">No order history yet.</div>
         {% endif %}
@@ -379,115 +344,90 @@
     <!-- ── ACCOUNT TAB ── -->
     <div class="tab-panel" id="tab-account">
         <div class="info-grid">
-
             <div class="info-card">
-                <div class="info-card-heading">Company</div>
-                <div class="info-row">
-                    <div class="info-row-label">Name</div>
-                    <div class="info-row-value">{{ company.CompanyName or '—' }}</div>
-                </div>
+                <div class="info-heading">Company</div>
+                <div class="info-row"><div class="info-lbl">Name</div><div class="info-val">{{ company.CompanyName or '—' }}</div></div>
                 {% if company.AddressLine1 %}
-                <div class="info-row">
-                    <div class="info-row-label">Address</div>
-                    <div class="info-row-value">
-                        {{ company.AddressLine1 }}{% if company.City %}, {{ company.City }}{% endif %}{% if company.PostalCode %} {{ company.PostalCode }}{% endif %}
-                    </div>
-                </div>
+                <div class="info-row"><div class="info-lbl">Address</div><div class="info-val">{{ company.AddressLine1 }}{% if company.City %}, {{ company.City }}{% endif %}{% if company.PostalCode %} {{ company.PostalCode }}{% endif %}</div></div>
                 {% endif %}
-                <div class="info-row">
-                    <div class="info-row-label">Delivery Day</div>
-                    <div class="info-row-value">{{ company.DeliveryDay or 'Monday' }}</div>
-                </div>
+                <div class="info-row"><div class="info-lbl">Delivery Day</div><div class="info-val">{{ company.DeliveryDay or 'Monday' }}</div></div>
                 {% if company.DeliveryInstructions %}
-                <div class="info-row">
-                    <div class="info-row-label">Delivery Notes</div>
-                    <div class="info-row-value">{{ company.DeliveryInstructions }}</div>
-                </div>
+                <div class="info-row"><div class="info-lbl">Delivery Notes</div><div class="info-val">{{ company.DeliveryInstructions }}</div></div>
                 {% endif %}
             </div>
-
             <div class="info-card">
-                <div class="info-card-heading">Contacts</div>
-                {% if company.PrimaryContactName %}
-                <div class="info-row">
-                    <div class="info-row-label">Primary Contact</div>
-                    <div class="info-row-value">{{ company.PrimaryContactName }}</div>
-                </div>
-                {% endif %}
-                {% if company.PrimaryContactEmail %}
-                <div class="info-row">
-                    <div class="info-row-label">Email</div>
-                    <div class="info-row-value">{{ company.PrimaryContactEmail }}</div>
-                </div>
-                {% endif %}
-                {% if company.PrimaryContactPhone %}
-                <div class="info-row">
-                    <div class="info-row-label">Phone</div>
-                    <div class="info-row-value">{{ company.PrimaryContactPhone }}</div>
-                </div>
-                {% endif %}
-                {% if company.BillingContactEmail %}
-                <div class="info-row">
-                    <div class="info-row-label">Billing Email</div>
-                    <div class="info-row-value">{{ company.BillingContactEmail }}</div>
-                </div>
-                {% endif %}
+                <div class="info-heading">Contacts</div>
+                {% if company.PrimaryContactName %}<div class="info-row"><div class="info-lbl">Primary Contact</div><div class="info-val">{{ company.PrimaryContactName }}</div></div>{% endif %}
+                {% if company.PrimaryContactEmail %}<div class="info-row"><div class="info-lbl">Email</div><div class="info-val">{{ company.PrimaryContactEmail }}</div></div>{% endif %}
+                {% if company.PrimaryContactPhone %}<div class="info-row"><div class="info-lbl">Phone</div><div class="info-val">{{ company.PrimaryContactPhone }}</div></div>{% endif %}
+                {% if company.BillingContactEmail %}<div class="info-row"><div class="info-lbl">Billing Email</div><div class="info-val">{{ company.BillingContactEmail }}</div></div>{% endif %}
             </div>
-
             <div class="info-card full">
-                <div class="info-card-heading">Meal Subsidy Program</div>
+                <div class="info-heading">Meal Subsidy Program</div>
                 <table class="tier-table">
-                    <thead>
-                        <tr>
-                            <th>Tier</th>
-                            <th>Meals / Week</th>
-                            <th>Employee Price</th>
-                            <th>Company Covers</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
                     <tbody>
                         {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
-                        <tr>
-                            <td><span class="tier-badge tier-free">Free</span></td>
-                            <td>{{ company.FreeMealsPerWeek }}</td>
-                            <td style="color:var(--green);font-weight:700;">$0.00</td>
-                            <td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.FreeTier_CompanySubsidy or 0)|float) }}</td>
-                        </tr>
+                        <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.BasePrice or 0)|float) }}</td></tr>
                         {% endif %}
                         {% if company.Tier1_EmployeePrice %}
-                        <tr>
-                            <td><span class="tier-badge tier-tier1">Tier 1</span></td>
-                            <td>{{ company.Tier1_Meals or '—' }}</td>
-                            <td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td>
-                            <td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td>
-                        </tr>
+                        <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
                         {% endif %}
                         {% if company.Tier2_EmployeePrice %}
-                        <tr>
-                            <td><span class="tier-badge tier-tier2">Tier 2</span></td>
-                            <td>{{ company.Tier2_Meals or '—' }}</td>
-                            <td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td>
-                            <td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td>
-                        </tr>
+                        <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
                         {% endif %}
                         {% if company.Tier3_EmployeePrice %}
-                        <tr>
-                            <td><span class="tier-badge tier-tier3">Tier 3</span></td>
-                            <td>{{ company.Tier3_Meals or '—' }}</td>
-                            <td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td>
-                            <td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td>
-                        </tr>
+                        <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
                         {% endif %}
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 
 </div>
 
+<!-- ── INVOICE MODAL ── -->
+<div class="modal-overlay" id="invoiceOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" id="invoiceModal">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title" id="modalTitle">Order Details</div>
+                <div class="modal-sub" id="modalSub"></div>
+            </div>
+            <button class="modal-close" onclick="closeInvoice()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="invoice-meta" id="invoiceMeta"></div>
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th style="width:60%">Meal</th>
+                        <th style="text-align:right">Emp. Price</th>
+                        <th style="text-align:right">Subsidy Applied</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceMeals"></tbody>
+            </table>
+            <div class="invoice-totals" id="invoiceTotals"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-close-modal" onclick="closeInvoice()">Close</button>
+            <button class="btn-print" onclick="printReceipt()">Print Receipt</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── EMBEDDED ORDER DATA ── -->
 <script>
+const ORDERS = {{ orders_json | safe }};
+const COMPANY_NAME = {{ company_name | tojson }};
+const COMPANY_ADDR = [
+    {{ (company.AddressLine1 or '') | tojson }},
+    {{ (company.City or '') | tojson }}
+].filter(Boolean).join(', ');
+
+// ── Tab switching ──
 function showTab(name, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -495,10 +435,144 @@ function showTab(name, el) {
     document.getElementById('tab-' + name).classList.add('active');
 }
 
+// ── Week filter ──
 function filterWeek(anchor) {
     document.querySelectorAll('.week-block').forEach(el => {
         el.classList.toggle('active', el.id === 'week-' + anchor);
     });
+}
+
+// ── Invoice modal ──
+let currentOrder = null;
+
+function openInvoice(orderId) {
+    const order = ORDERS.find(o => o.order_id === orderId);
+    if (!order) return;
+    currentOrder = order;
+
+    document.getElementById('modalTitle').textContent = order.employee_name || 'Order Details';
+    document.getElementById('modalSub').textContent = 'Order #' + order.order_id + ' · Delivery: ' + (order.delivery_date || '—');
+
+    // Meta grid
+    document.getElementById('invoiceMeta').innerHTML = `
+        <div class="im-cell"><div class="im-label">Employee</div><div class="im-val">${order.employee_name || '—'}</div></div>
+        <div class="im-cell"><div class="im-label">Order ID</div><div class="im-val">${order.order_id}</div></div>
+        <div class="im-cell"><div class="im-label">Delivery Date</div><div class="im-val">${order.delivery_date || '—'}</div></div>
+        <div class="im-cell"><div class="im-label">Meals</div><div class="im-val">${order.meals.length} meal${order.meals.length !== 1 ? 's' : ''}</div></div>
+    `;
+
+    // Meal rows
+    document.getElementById('invoiceMeals').innerHTML = order.meals.map(m => `
+        <tr>
+            <td>${m.dish_name || '—'}</td>
+            <td class="td-r">${m.emp_price === 0 ? '<span style="color:var(--muted)">$0.00</span>' : '$' + m.emp_price.toFixed(2)}</td>
+            <td class="td-r subsidy-green">$${m.total_subsidy.toFixed(2)}</td>
+        </tr>
+    `).join('');
+
+    // Totals
+    const totalSubsidy = order.co_total + order.bd_total;
+    document.getElementById('invoiceTotals').innerHTML = `
+        <div class="it-row"><span class="it-label">Employee paid</span><span class="it-val">$${order.emp_total.toFixed(2)}</span></div>
+        <div class="it-row"><span class="it-label">Total subsidy coverage</span><span class="it-val green">$${totalSubsidy.toFixed(2)}</span></div>
+        <div class="it-row total"><span class="it-label">Total meal value</span><span class="it-val">$${(order.emp_total + totalSubsidy).toFixed(2)}</span></div>
+    `;
+
+    document.getElementById('invoiceOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeInvoice() {
+    document.getElementById('invoiceOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+    if (e.target === document.getElementById('invoiceOverlay')) closeInvoice();
+}
+
+// ── Print receipt (opens new window with clean receipt) ──
+function printReceipt() {
+    if (!currentOrder) return;
+    const o = currentOrder;
+    const totalSubsidy = o.co_total + o.bd_total;
+    const totalValue   = o.emp_total + totalSubsidy;
+
+    const mealsHTML = o.meals.map(m => `
+        <tr>
+            <td>${m.dish_name || 'Meal'}</td>
+            <td class="r">${m.emp_price === 0 ? '—' : '$' + m.emp_price.toFixed(2)}</td>
+            <td class="r g">$${m.total_subsidy.toFixed(2)}</td>
+        </tr>
+    `).join('');
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BetterDay Receipt — ${o.employee_name}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', -apple-system, sans-serif; color: #222; padding: 48px 52px; max-width: 640px; margin: 0 auto; }
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid #222; }
+  .co-name { font-size: 1rem; font-weight: 700; color: #222; }
+  .co-addr { font-size: .8rem; color: #717171; margin-top: 2px; }
+  .receipt-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #717171; text-align: right; }
+  .receipt-title { font-size: 1.2rem; font-weight: 700; text-align: right; margin-top: 2px; }
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .meta-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: #717171; margin-bottom: 3px; }
+  .meta-val { font-size: .9rem; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th { text-align: left; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: #717171; padding: 8px 0; border-bottom: 1.5px solid #222; }
+  td { padding: 10px 0; font-size: .9rem; border-bottom: 1px solid #EBEBEB; }
+  .r { text-align: right; font-weight: 600; }
+  .g { color: #008A05; }
+  .totals { background: #F7F7F7; border-radius: 10px; padding: 16px 18px; margin-bottom: 28px; }
+  .t-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: .9rem; }
+  .t-row.total { font-weight: 700; font-size: 1rem; padding-top: 10px; margin-top: 6px; border-top: 1.5px solid #DDDDDD; }
+  .t-label { color: #484848; }
+  .t-val.g { color: #008A05; font-weight: 700; }
+  .footer { text-align: center; font-size: .75rem; color: #717171; line-height: 1.7; border-top: 1px solid #EBEBEB; padding-top: 20px; }
+  @media print { body { padding: 24px 28px; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <div>
+    <div class="co-name">${COMPANY_NAME}</div>
+    ${COMPANY_ADDR ? `<div class="co-addr">${COMPANY_ADDR}</div>` : ''}
+  </div>
+  <div>
+    <div class="receipt-label">BetterDay Catering</div>
+    <div class="receipt-title">Meal Receipt</div>
+  </div>
+</div>
+<div class="meta-grid">
+  <div><div class="meta-label">Employee</div><div class="meta-val">${o.employee_name || '—'}</div></div>
+  <div><div class="meta-label">Order ID</div><div class="meta-val">${o.order_id}</div></div>
+  <div><div class="meta-label">Delivery Date</div><div class="meta-val">${o.delivery_date || '—'}</div></div>
+  <div><div class="meta-label">Meals</div><div class="meta-val">${o.meals.length}</div></div>
+</div>
+<table>
+  <thead><tr><th style="width:55%">Meal</th><th class="r">Employee Price</th><th class="r">Subsidy Applied</th></tr></thead>
+  <tbody>${mealsHTML}</tbody>
+</table>
+<div class="totals">
+  <div class="t-row"><span class="t-label">Employee paid</span><span class="t-val">$${o.emp_total.toFixed(2)}</span></div>
+  <div class="t-row"><span class="t-label">Total subsidy coverage</span><span class="t-val g">$${totalSubsidy.toFixed(2)}</span></div>
+  <div class="t-row total"><span class="t-label">Total meal value</span><span class="t-val">$${totalValue.toFixed(2)}</span></div>
+</div>
+<div class="footer">
+  This receipt confirms meal program coverage for the delivery date noted above.<br>
+  BetterDay Catering &nbsp;·&nbsp; eatbetterday.ca &nbsp;·&nbsp; hello@eatbetterday.ca
+</div>
+</body>
+</html>`;
+
+    const win = window.open('', '_blank', 'width=700,height=900');
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { win.focus(); win.print(); };
 }
 </script>
 </body>

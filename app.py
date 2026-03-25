@@ -523,47 +523,92 @@ def manager_login():
 @app.route('/manager/dashboard')
 @manager_required
 def manager_dashboard():
+    import json
     company_id = session.get('manager_company_id')
 
     data    = _gas_post({'action': 'get_company', 'company_id': company_id}, timeout=10) or {}
     company = data.get('company', {}) if data else {}
 
-    orders = _gas_post({'action': 'get_corporate_orders', 'company_id': company_id}, timeout=15) or []
-    if not isinstance(orders, list):
-        orders = []
+    raw = _gas_post({'action': 'get_corporate_orders', 'company_id': company_id}, timeout=15) or []
+    if not isinstance(raw, list):
+        raw = []
 
+    # ── Group individual meal rows by OrderID ──────────────────
+    order_map = {}
+    for row in raw:
+        oid = str(row.get('OrderID') or '').strip()
+        if not oid:
+            oid = f"{row.get('EmployeeEmail','anon')}-{row.get('SundayAnchor','')}"
+        if oid not in order_map:
+            order_map[oid] = {
+                'order_id':      oid,
+                'employee_name': row.get('EmployeeName', ''),
+                'employee_email': row.get('EmployeeEmail', ''),
+                'delivery_date': str(row.get('DeliveryDate', '') or ''),
+                'sunday_anchor': str(row.get('SundayAnchor', '') or ''),
+                'status':        row.get('Status', ''),
+                'meals':         [],
+                'emp_total':     0.0,
+                'co_total':      0.0,
+                'bd_total':      0.0,
+            }
+        rec  = order_map[oid]
+        emp  = float(row.get('EmployeePrice')   or 0)
+        co   = float(row.get('CompanyCoverage') or 0)
+        bd   = float(row.get('BDCoverage')      or 0)
+        rec['meals'].append({
+            'dish_name':     row.get('DishName', ''),
+            'tier':          row.get('Tier', ''),
+            'emp_price':     emp,
+            'co_coverage':   co,
+            'bd_coverage':   bd,
+            'total_subsidy': round(co + bd, 2),
+        })
+        rec['emp_total'] += emp
+        rec['co_total']  += co
+        rec['bd_total']  += bd
+
+    all_orders = list(order_map.values())
+
+    # ── Group orders by week ───────────────────────────────────
     week_map = defaultdict(list)
-    for o in orders:
-        anchor = str(o.get('SundayAnchor', '') or '')
+    for o in all_orders:
+        anchor = o['sunday_anchor']
         if anchor:
             week_map[anchor].append(o)
 
     sorted_weeks = []
     for anchor in sorted(week_map.keys(), reverse=True):
         try:
-            anchor_dt    = datetime.strptime(anchor, '%Y-%m-%d')
-            monday       = anchor_dt + timedelta(days=1)
-            nice_label   = f"Week of {monday.strftime('%b %d, %Y')}"
+            anchor_dt  = datetime.strptime(anchor, '%Y-%m-%d')
+            monday     = anchor_dt + timedelta(days=1)
+            nice_label = f"Week of {monday.strftime('%b %d, %Y')}"
         except Exception:
             nice_label = anchor
-        week_orders = week_map[anchor]
+        wo = week_map[anchor]
         sorted_weeks.append({
-            'anchor':     anchor,
-            'label':      nice_label,
-            'orders':     week_orders,
-            'meal_count': len(week_orders),
-            'emp_spend':  sum(float(o.get('EmployeePrice') or 0) for o in week_orders),
-            'co_spend':   sum(float(o.get('CompanyCoverage') or 0) for o in week_orders),
+            'anchor':      anchor,
+            'label':       nice_label,
+            'orders':      wo,
+            'order_count': len(wo),
+            'meal_count':  sum(len(o['meals']) for o in wo),
+            'emp_spend':   sum(o['emp_total'] for o in wo),
+            'co_spend':    sum(o['co_total'] for o in wo),
+            'bd_spend':    sum(o['bd_total'] for o in wo),
         })
 
-    month_map = defaultdict(lambda: {'orders': 0, 'emp_spend': 0.0, 'co_spend': 0.0})
-    for o in orders:
-        date_str = str(o.get('DeliveryDate', '') or '')
+    # ── Monthly summaries ──────────────────────────────────────
+    month_map = defaultdict(lambda: {'orders': 0, 'meals': 0,
+                                     'emp_spend': 0.0, 'co_spend': 0.0, 'bd_spend': 0.0})
+    for o in all_orders:
+        date_str = o['delivery_date']
         if len(date_str) >= 7:
             mk = date_str[:7]
             month_map[mk]['orders']    += 1
-            month_map[mk]['emp_spend'] += float(o.get('EmployeePrice') or 0)
-            month_map[mk]['co_spend']  += float(o.get('CompanyCoverage') or 0)
+            month_map[mk]['meals']     += len(o['meals'])
+            month_map[mk]['emp_spend'] += o['emp_total']
+            month_map[mk]['co_spend']  += o['co_total']
+            month_map[mk]['bd_spend']  += o['bd_total']
 
     def fmt_month(mk):
         try:    return datetime.strptime(mk, '%Y-%m').strftime('%B %Y')
@@ -574,21 +619,46 @@ def manager_dashboard():
         for k, v in sorted(month_map.items(), reverse=True)
     ]
 
+    # ── This week ──────────────────────────────────────────────
     today       = datetime.now()
-    monday      = today - timedelta(days=today.weekday())
-    this_sunday = (monday - timedelta(days=1)).strftime('%Y-%m-%d')
-    this_week   = next((w for w in sorted_weeks if w['anchor'] == this_sunday),
-                       {'orders': [], 'meal_count': 0, 'emp_spend': 0.0, 'co_spend': 0.0})
+    monday_dt   = today - timedelta(days=today.weekday())
+    this_sunday = (monday_dt - timedelta(days=1)).strftime('%Y-%m-%d')
+    empty_week  = {'orders': [], 'order_count': 0, 'meal_count': 0,
+                   'emp_spend': 0.0, 'co_spend': 0.0, 'bd_spend': 0.0}
+    this_week   = next((w for w in sorted_weeks if w['anchor'] == this_sunday), empty_week)
+
+    # ── All-time totals ────────────────────────────────────────
+    total_meals    = sum(len(o['meals'])  for o in all_orders)
+    total_co_spend = sum(o['co_total']   for o in all_orders)
+    total_bd_spend = sum(o['bd_total']   for o in all_orders)
+
+    # ── Serialize orders for JS invoice modal ─────────────────
+    orders_json = json.dumps([{
+        'order_id':      o['order_id'],
+        'employee_name': o['employee_name'],
+        'delivery_date': o['delivery_date'],
+        'emp_total':     round(o['emp_total'], 2),
+        'co_total':      round(o['co_total'],  2),
+        'bd_total':      round(o['bd_total'],  2),
+        'meals':         [{
+            'dish_name':     m['dish_name'],
+            'tier':          m['tier'],
+            'emp_price':     round(m['emp_price'],    2),
+            'total_subsidy': round(m['total_subsidy'], 2),
+        } for m in o['meals']],
+    } for o in all_orders])
 
     return render_template('manager_dashboard.html',
                            company=company,
                            company_id=company_id,
                            company_name=session.get('manager_company_name'),
-                           total_orders=len(orders),
-                           total_co_spend=sum(float(o.get('CompanyCoverage') or 0) for o in orders),
+                           total_meals=total_meals,
+                           total_co_spend=total_co_spend,
+                           total_bd_spend=total_bd_spend,
                            this_week=this_week,
                            sorted_weeks=sorted_weeks,
-                           sorted_monthly=sorted_monthly)
+                           sorted_monthly=sorted_monthly,
+                           orders_json=orders_json)
 
 
 @app.route('/manager/logout')
