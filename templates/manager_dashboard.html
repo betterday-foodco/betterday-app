@@ -64,6 +64,22 @@
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
         .tab-count { display:inline-block;background:var(--border);color:var(--text-2);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:99px;margin-left:5px;vertical-align:middle; }
+        /* ── INVOICES ── */
+        .inv-status-pending { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:99px;background:#fff3e0;color:#b56b10; }
+        .inv-status-sent    { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:99px;background:#eaf4ff;color:#1a6cb5; }
+        .inv-status-paid    { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:99px;background:#eafaf1;color:#1a7a46; }
+        .inv-amount { font-size:1rem;font-weight:800;color:var(--text); }
+        .inv-row-detail { display:none;background:var(--bg);border-top:1px solid var(--border); }
+        .inv-row-detail td { padding:16px 20px; }
+        .inv-tier-table { width:100%;border-collapse:collapse;font-size:.82rem; }
+        .inv-tier-table th { text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border); }
+        .inv-tier-table td { padding:8px 10px;border-bottom:1px solid var(--border); }
+        .inv-tier-table tr:last-child td { border-bottom:none; }
+        .inv-total-row { display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid var(--text);margin-top:8px; }
+        .inv-total-label { font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text); }
+        .inv-total-val { font-size:1.15rem;font-weight:900;color:var(--text); }
+        .btn-pdf { font-size:.75rem;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:7px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:inline-block; }
+
         .emp-badge { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px; }
         .emp-badge-company  { background:#eaf4ff;color:#1a6cb5; }
         .emp-badge-personal { background:#f3f0ff;color:#6b3fa0; }
@@ -254,6 +270,7 @@
     <div class="tabs-wrap">
         <div class="tabs">
             <div class="tab active" onclick="showTab('orders', this)">Orders</div>
+            <div class="tab" onclick="showTab('invoices', this)">Weekly Invoices <span class="tab-count">{{ invoices|length }}</span></div>
             <div class="tab" onclick="showTab('monthly', this)">Monthly Report</div>
             <div class="tab" onclick="showTab('employees', this)">Employees <span class="tab-count">{{ employees|length }}</span></div>
             <div class="tab" onclick="showTab('account', this)">Account Details</div>
@@ -526,6 +543,94 @@
 
     </div>
 
+    <!-- ── INVOICES TAB ── -->
+    <div class="tab-panel" id="tab-invoices">
+
+        <div class="section-header">
+            <div class="section-title">Weekly Invoices</div>
+        </div>
+
+        {% if invoices %}
+        <table class="order-table" id="invTable">
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Week Of</th>
+                    <th style="text-align:right">Meals</th>
+                    <th style="text-align:right">Employees</th>
+                    <th style="text-align:right">Company Owed</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for inv in invoices %}
+            <tr class="clickable" onclick="toggleInvDetail({{ loop.index0 }})">
+                <td style="font-weight:700;font-size:.82rem;color:var(--muted);">{{ inv.invoiceId }}</td>
+                <td style="font-weight:600;">
+                    {{ inv.weekOf | replace('-', '/') if inv.weekOf else '—' }}
+                </td>
+                <td style="text-align:right;">{{ inv.totalMeals }}</td>
+                <td style="text-align:right;">{{ inv.totalEmployees }}</td>
+                <td style="text-align:right;" class="inv-amount">${{ '%.2f' | format(inv.companyOwed | float) }}</td>
+                <td>
+                    <span class="inv-status-{{ inv.status | lower }}">{{ inv.status | capitalize }}</span>
+                </td>
+                <td style="text-align:right;white-space:nowrap;">
+                    <button class="btn-pdf" onclick="event.stopPropagation();downloadInvPDF({{ loop.index0 }})">PDF</button>
+                </td>
+            </tr>
+            <tr class="inv-row-detail" id="inv-detail-{{ loop.index0 }}">
+                <td colspan="7">
+                    <div style="max-width:520px;">
+                        {% if inv.breakdown %}
+                        <table class="inv-tier-table">
+                            <thead>
+                                <tr>
+                                    <th>Tier</th>
+                                    <th style="text-align:right">Meals</th>
+                                    <th style="text-align:right">Company Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for tier in inv.breakdown %}
+                            <tr>
+                                <td>{{ tier.tier }}</td>
+                                <td style="text-align:right;">{{ tier.meals }}</td>
+                                <td style="text-align:right;">${{ '%.2f' | format(tier.companyTotal | float) }}</td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        {% endif %}
+                        <div class="inv-total-row">
+                            <span class="inv-total-label">Total Owed by {{ company_name }}</span>
+                            <span class="inv-total-val">${{ '%.2f' | format(inv.companyOwed | float) }}</span>
+                        </div>
+                        {% if inv.status == 'paid' %}
+                        <div style="font-size:.78rem;color:var(--green);margin-top:6px;">
+                            Paid {{ inv.paidAt or '' }}{% if inv.paymentMethod %} · {{ inv.paymentMethod }}{% endif %}
+                        </div>
+                        {% endif %}
+                        {% if inv.notes %}
+                        <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">{{ inv.notes }}</div>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align:center;padding:64px 20px;color:var(--muted);">
+            <div style="font-size:2rem;margin-bottom:12px;">📋</div>
+            <div style="font-weight:600;margin-bottom:6px;">No invoices yet</div>
+            <div style="font-size:.85rem;">Invoices are generated automatically each Thursday morning after the weekly order closes.</div>
+        </div>
+        {% endif %}
+
+    </div>
+
     <!-- ── EMPLOYEES TAB ── -->
     <div class="tab-panel" id="tab-employees">
 
@@ -620,7 +725,8 @@
 
 <!-- ── EMBEDDED ORDER DATA ── -->
 <script>
-const ORDERS = {{ orders_json | safe }};
+const ORDERS       = {{ orders_json | safe }};
+const INVOICES     = {{ invoices | tojson | safe }};
 const COMPANY_NAME = {{ company_name | tojson }};
 const COMPANY_ID   = {{ (company.CompanyID or company_id) | tojson }};
 const COMPANY_ADDR = [
@@ -981,6 +1087,115 @@ async function removeEmployee(email, name, rowIndex) {
             alert(d.error || 'Could not remove employee — try again.');
         }
     } catch(e) { alert('Network error — try again.'); }
+}
+
+// ── Weekly Invoices tab ──
+function toggleInvDetail(idx) {
+    const row = document.getElementById('inv-detail-' + idx);
+    if (!row) return;
+    const open = row.style.display === 'table-row';
+    // close all
+    document.querySelectorAll('.inv-row-detail').forEach(r => r.style.display = 'none');
+    if (!open) row.style.display = 'table-row';
+}
+
+function downloadInvPDF(idx) {
+    const inv = INVOICES[idx];
+    if (!inv) return;
+
+    const fmtDate = s => s ? s.replace(/-/g, '/') : '—';
+    const fmt$ = n => '$' + (parseFloat(n) || 0).toFixed(2);
+
+    let tierRows = '';
+    (inv.breakdown || []).forEach(t => {
+        tierRows += `<tr>
+            <td>${t.tier}</td>
+            <td style="text-align:right">${t.meals}</td>
+            <td style="text-align:right">${fmt$(t.companyTotal)}</td>
+        </tr>`;
+    });
+
+    const statusColor = {pending:'#b56b10', sent:'#1a6cb5', paid:'#1a7a46'};
+    const statusBg    = {pending:'#fff3e0', sent:'#eaf4ff', paid:'#eafaf1'};
+    const st = (inv.status || 'pending').toLowerCase();
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Invoice ${inv.invoiceId}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;color:#222;padding:48px;max-width:720px;margin:0 auto;}
+  .logo{font-size:1.4rem;font-weight:800;color:#00465e;margin-bottom:4px;}
+  .logo span{color:#0077a3;}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;}
+  .inv-meta{font-size:.85rem;color:#484848;line-height:1.7;}
+  .status-badge{display:inline-block;padding:3px 12px;border-radius:99px;font-size:.75rem;font-weight:700;}
+  h2{font-size:1rem;font-weight:700;margin-bottom:14px;text-transform:uppercase;letter-spacing:.4px;color:#717171;}
+  table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+  th{text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#717171;padding:8px 10px;border-bottom:1px solid #ebebeb;}
+  td{padding:10px 10px;border-bottom:1px solid #ebebeb;font-size:.88rem;}
+  .total-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:2.5px solid #222;margin-top:4px;}
+  .total-label{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+  .total-val{font-size:1.3rem;font-weight:900;}
+  .footer{margin-top:48px;font-size:.78rem;color:#717171;border-top:1px solid #ebebeb;padding-top:16px;}
+  @media print{body{padding:24px}}
+</style></head><body>
+<div class="inv-header">
+  <div>
+    <div class="logo">Better<span>Day</span></div>
+    <div style="font-size:.78rem;color:#717171;margin-top:2px;">BetterDay Corporate</div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#717171;margin-bottom:4px;">Invoice</div>
+    <div style="font-size:1.1rem;font-weight:800;">${inv.invoiceId}</div>
+    <div style="margin-top:8px;">
+      <span class="status-badge" style="background:${statusBg[st]};color:${statusColor[st]};">${st.charAt(0).toUpperCase()+st.slice(1)}</span>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:40px;margin-bottom:36px;">
+  <div class="inv-meta">
+    <strong>Billed to</strong><br>
+    ${COMPANY_NAME}<br>
+    ${COMPANY_ADDR || ''}
+  </div>
+  <div class="inv-meta">
+    <strong>Invoice Date</strong><br>${fmtDate(inv.createdAt)}<br>
+    <strong style="display:block;margin-top:8px;">Week Of</strong>${fmtDate(inv.weekOf)}<br>
+    ${inv.status === 'paid' ? `<strong style="display:block;margin-top:8px;">Paid</strong>${fmtDate(inv.paidAt)}${inv.paymentMethod ? ' · '+inv.paymentMethod : ''}` : ''}
+  </div>
+</div>
+
+<h2>Meal Breakdown</h2>
+<table>
+  <thead><tr><th>Tier</th><th style="text-align:right">Meals</th><th style="text-align:right">Company Total</th></tr></thead>
+  <tbody>${tierRows || '<tr><td colspan="3" style="color:#717171">No breakdown available</td></tr>'}</tbody>
+</table>
+
+<div style="display:flex;gap:32px;margin-bottom:24px;font-size:.82rem;color:#484848;">
+  <div><strong style="display:block;color:#222">Total Meals</strong>${inv.totalMeals}</div>
+  <div><strong style="display:block;color:#222">Employees</strong>${inv.totalEmployees}</div>
+  <div><strong style="display:block;color:#222">Employee Paid</strong>${fmt$(inv.employeePaid)}</div>
+  <div><strong style="display:block;color:#222">BD Contributed</strong>${fmt$(inv.bdContributed)}</div>
+</div>
+
+<div class="total-row">
+  <span class="total-label">Total Owed by ${COMPANY_NAME}</span>
+  <span class="total-val">${fmt$(inv.companyOwed)}</span>
+</div>
+
+${inv.notes ? `<div style="margin-top:16px;font-size:.82rem;color:#484848;"><strong>Notes:</strong> ${inv.notes}</div>` : ''}
+
+<div class="footer">
+  Questions? Contact BetterDay at support@betterday.ca · Invoice ${inv.invoiceId}
+</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
 }
 </script>
 </body>

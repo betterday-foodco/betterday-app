@@ -673,6 +673,9 @@ def manager_dashboard():
     emp_data  = _gas_post({'action': 'get_employees', 'company_id': company_id}, timeout=10) or {}
     employees = emp_data.get('employees', [])
 
+    inv_data  = _gas_post({'action': 'get_invoices', 'company_id': company_id}, timeout=10) or {}
+    invoices  = inv_data.get('invoices', [])
+
     raw = _gas_post({'action': 'get_corporate_orders', 'company_id': company_id}, timeout=15) or []
     if not isinstance(raw, list):
         raw = []
@@ -863,6 +866,7 @@ def manager_dashboard():
                            orders_json=orders_json,
                            current_pin=current_pin,
                            employees=employees,
+                           invoices=invoices,
                            saved_tab=saved_tab)
 
 
@@ -880,6 +884,25 @@ def manager_update_account():
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({'success': bool(result and result.get('success'))})
     return redirect(url_for('manager_dashboard') + '?saved=account')
+
+
+@app.route('/manager/invoice-status', methods=['POST'])
+@manager_required
+def manager_invoice_status():
+    """Admin/manager endpoint to update invoice status."""
+    body          = request.get_json(force=True) or {}
+    invoice_id    = body.get('invoice_id', '').strip()
+    status        = body.get('status', '').strip()
+    payment_method = body.get('payment_method', '').strip()
+    notes         = body.get('notes', '').strip()
+    if not invoice_id or status not in ('pending', 'sent', 'paid'):
+        return jsonify({'success': False, 'error': 'Invalid params'}), 400
+    result = _gas_post({
+        'action': 'update_invoice_status',
+        'invoice_id': invoice_id, 'status': status,
+        'payment_method': payment_method, 'notes': notes
+    }, timeout=12)
+    return jsonify(result or {'success': False})
 
 
 @app.route('/manager/remove-employee', methods=['POST'])
