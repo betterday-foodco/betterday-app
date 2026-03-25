@@ -667,6 +667,9 @@ def manager_dashboard():
     data    = _gas_post({'action': 'get_company', 'company_id': company_id}, timeout=10) or {}
     company = data.get('company', {}) if data else {}
 
+    pin_data    = _gas_post({'action': 'get_company_pin', 'company_id': company_id}, timeout=8) or {}
+    current_pin = pin_data.get('pin', '')
+
     raw = _gas_post({'action': 'get_corporate_orders', 'company_id': company_id}, timeout=15) or []
     if not isinstance(raw, list):
         raw = []
@@ -855,6 +858,7 @@ def manager_dashboard():
                            sorted_weeks=sorted_weeks,
                            sorted_monthly=sorted_monthly,
                            orders_json=orders_json,
+                           current_pin=current_pin,
                            saved_tab=saved_tab)
 
 

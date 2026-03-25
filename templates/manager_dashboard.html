@@ -399,10 +399,32 @@
         <!-- Read-only identity -->
         <div class="info-card full" style="margin-bottom:14px;">
             <div class="info-heading">Company Identity</div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr) auto;gap:16px;align-items:center;">
                 <div><div class="info-lbl">Company ID</div><div class="info-val" style="font-family:monospace;font-weight:700;letter-spacing:.5px;">{{ company.CompanyID or company_id }}</div></div>
                 <div><div class="info-lbl">Company Name</div><div class="info-val">{{ company.CompanyName or '—' }}</div></div>
                 <div><div class="info-lbl">Email Domain</div><div class="info-val">{{ company.CompanyEmailDomain or '—' }}</div></div>
+
+                <!-- PIN display -->
+                <div>
+                    <div class="info-lbl">Employee Access PIN</div>
+                    <div id="pinDisplay" style="display:flex;align-items:center;gap:8px;">
+                        <span id="pinValue" class="info-val" style="font-family:monospace;font-weight:700;letter-spacing:2px;font-size:1rem;">{{ current_pin or '—' }}</span>
+                        <button type="button" onclick="startEditPIN()" style="font-size:.72rem;font-weight:700;color:var(--brand);background:none;border:none;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;">Edit</button>
+                    </div>
+                    <div id="pinEditRow" style="display:none;align-items:center;gap:8px;margin-top:4px;">
+                        <input id="pinInput" type="text" maxlength="20" value="{{ current_pin or '' }}"
+                               style="width:90px;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:monospace;font-weight:700;letter-spacing:2px;outline:none;">
+                        <button type="button" id="pinSaveBtn" onclick="savePIN()" style="font-size:.72rem;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:7px;padding:6px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Save</button>
+                        <button type="button" onclick="cancelEditPIN()" style="font-size:.72rem;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+                    </div>
+                    <div id="pinMsg" style="font-size:.72rem;margin-top:4px;display:none;"></div>
+                </div>
+
+                <!-- PIN hint -->
+                <div style="max-width:200px;">
+                    <div class="info-lbl">What's this?</div>
+                    <div style="font-size:.75rem;color:var(--muted);line-height:1.5;">Employees signing up with a personal email enter this PIN to verify they're on your team.</div>
+                </div>
             </div>
         </div>
 
@@ -489,19 +511,6 @@
                     </div>
                 </div>
 
-                <!-- Employee Access PIN -->
-                <div class="info-card full">
-                    <div class="info-heading">Employee Access PIN</div>
-                    <p style="font-size:.83rem;color:var(--muted);margin:0 0 14px;">Employees signing up with a personal email (Gmail, etc.) are asked for this PIN to verify they're part of your team. Keep it simple — share it with your staff however you like.</p>
-                    <div style="display:flex;gap:10px;align-items:flex-end;max-width:320px;">
-                        <div class="field-group" style="flex:1;margin:0;">
-                            <label>Access PIN</label>
-                            <input type="text" id="pinInput" placeholder="e.g. 4729" maxlength="20" style="font-size:1.1rem;font-weight:700;letter-spacing:2px;">
-                        </div>
-                        <button type="button" class="btn-outline" id="pinSaveBtn" onclick="savePIN()" style="height:44px;padding:0 18px;white-space:nowrap;">Save PIN</button>
-                    </div>
-                    <div id="pinMsg" style="font-size:.8rem;margin-top:8px;display:none;"></div>
-                </div>
 
             </div>
 
@@ -707,40 +716,39 @@ async function saveAccount(e) {
 }
 
 // ── Employee Access PIN ──
+function startEditPIN() {
+    document.getElementById('pinDisplay').style.display = 'none';
+    document.getElementById('pinEditRow').style.display = 'flex';
+    document.getElementById('pinInput').focus();
+}
+function cancelEditPIN() {
+    document.getElementById('pinEditRow').style.display = 'none';
+    document.getElementById('pinDisplay').style.display = 'flex';
+    document.getElementById('pinMsg').style.display = 'none';
+}
 async function savePIN() {
     const pin = document.getElementById('pinInput').value.trim();
     const msg = document.getElementById('pinMsg');
     const btn = document.getElementById('pinSaveBtn');
-    if (!pin) {
-        msg.style.display = 'block';
-        msg.style.color = '#c0392b';
-        msg.textContent = 'Please enter a PIN before saving.';
-        return;
-    }
-    btn.textContent = 'Saving…';
-    btn.disabled = true;
+    if (!pin) { msg.style.display='block'; msg.style.color='#c0392b'; msg.textContent='PIN cannot be empty.'; return; }
+    btn.textContent = 'Saving…'; btn.disabled = true;
     try {
         const res = await fetch('/api/gas', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ action: 'update_company_pin', company_id: COMPANY_ID, pin })
         });
         const d = await res.json();
-        msg.style.display = 'block';
         if (d.success) {
-            msg.style.color = '#008A05';
-            msg.textContent = '✓ PIN saved.';
+            document.getElementById('pinValue').textContent = pin;
+            cancelEditPIN();
         } else {
-            msg.style.color = '#c0392b';
-            msg.textContent = d.error || 'Could not save PIN — try again.';
+            msg.style.display = 'block'; msg.style.color = '#c0392b';
+            msg.textContent = d.error || 'Could not save — try again.';
         }
     } catch(e) {
-        msg.style.display = 'block';
-        msg.style.color = '#c0392b';
-        msg.textContent = 'Network error — try again.';
+        msg.style.display = 'block'; msg.style.color = '#c0392b'; msg.textContent = 'Network error — try again.';
     }
-    btn.textContent = 'Save PIN';
-    btn.disabled = false;
+    btn.textContent = 'Save'; btn.disabled = false;
 }
 
 // ── Invoice modal ──

@@ -146,6 +146,20 @@ function doPost(e) {
       return jsonOut({valid: false, error: "No PIN configured for this company"});
     }
     // ─────────────────────────────────────────
+    // GET COMPANY PIN  (called by manager dashboard on load)
+    // ─────────────────────────────────────────
+    if (data.action === "get_company_pin") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var pinSheet  = getOrCreatePINSheet(ssHub);
+      var rows      = pinSheet.getDataRange().getValues();
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toUpperCase() === companyId) {
+          return jsonOut({found: true, pin: String(rows[i][1]).trim()});
+        }
+      }
+      return jsonOut({found: false, pin: ""});
+    }
+    // ─────────────────────────────────────────
     // UPDATE COMPANY PIN  (called from manager dashboard)
     // ─────────────────────────────────────────
     if (data.action === "update_company_pin") {
