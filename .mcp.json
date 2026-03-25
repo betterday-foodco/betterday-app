@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "google-sheets": {
+      "command": "mcp-google-sheets",
+      "args": [],
+      "env": {
+        "CREDENTIALS_PATH": "/root/.config/mcp-google-sheets/credentials.json",
+        "TOKEN_PATH": "/root/.config/mcp-google-sheets/token.json"
+      }
+    }
+  }
+}
