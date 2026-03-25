@@ -1720,7 +1720,7 @@ function renderMobSheet() {
   document.getElementById('mcsItems').innerHTML=n>0?buildCartItemRows('mcs-item-row','mcs-thumb','mcs-item-name','mcs-item-meta','mcs-item-price'):'<div style="text-align:center;color:#b0c4cc;padding:16px;font-size:.82rem;">No meals added yet</div>';
   const sub=document.getElementById('mcsSubtotals');
   sub.style.display=savings>0?'':'none';
-  sub.innerHTML=`<div class="mcs-subtotal-row"><span>Full retail (${n} meal${n!==1?'s':''})</span><span>$${(n*fp).toFixed(2)}</span></div>`+(savings>0?`<div class="mcs-subtotal-row mcs-savings-row"><span>${currentCompany.CompanyName} savings</span><span>–$${savings.toFixed(2)}</span></div>`:'');
+  sub.innerHTML=`<div class="mcs-subtotal-row"><span>Full retail (${n} meal${n!==1?'s':''})</span><span>$${(n*fp).toFixed(2)}</span></div>`+(savings>0?`<div class="mcs-subtotal-row mcs-savings-row"><span>${currentCompany.CompanyName} contribution</span><span>–$${savings.toFixed(2)}</span></div>`:'');
   document.getElementById('mcsTotal').textContent='$'+total.toFixed(2);
 }
 let _mobCartOpen=false;
