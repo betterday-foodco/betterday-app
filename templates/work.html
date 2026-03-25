@@ -395,7 +395,8 @@
 
     /* ── INLINE BUTTON LOADING ── */
     .btn-loading { position: relative; pointer-events: none; opacity: .82; }
-    .btn-loading::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+    @keyframes btn-spin { from { transform: translateY(-50%) rotate(0deg); } to { transform: translateY(-50%) rotate(360deg); } }
+    .btn-loading::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: btn-spin .6s linear infinite; }
 
     /* ── PROFILE SCREEN ── */
     .profile-wrap { min-height: 100vh; background: var(--cream); display: flex; flex-direction: column; }
