@@ -491,6 +491,20 @@
                     </div>
                 </div>
 
+                <!-- Employee Access PIN -->
+                <div class="info-card full">
+                    <div class="info-heading">Employee Access PIN</div>
+                    <p style="font-size:.83rem;color:var(--muted);margin:0 0 14px;">Employees signing up with a personal email (Gmail, etc.) are asked for this PIN to verify they're part of your team. Keep it simple — share it with your staff however you like.</p>
+                    <div style="display:flex;gap:10px;align-items:flex-end;max-width:320px;">
+                        <div class="field-group" style="flex:1;margin:0;">
+                            <label>Access PIN</label>
+                            <input type="text" id="pinInput" placeholder="e.g. 4729" maxlength="20" style="font-size:1.1rem;font-weight:700;letter-spacing:2px;">
+                        </div>
+                        <button type="button" class="btn-outline" id="pinSaveBtn" onclick="savePIN()" style="height:44px;padding:0 18px;white-space:nowrap;">Save PIN</button>
+                    </div>
+                    <div id="pinMsg" style="font-size:.8rem;margin-top:8px;display:none;"></div>
+                </div>
+
             </div>
 
         </form>
@@ -540,6 +554,7 @@
 <script>
 const ORDERS = {{ orders_json | safe }};
 const COMPANY_NAME = {{ company_name | tojson }};
+const COMPANY_ID   = {{ (company.CompanyID or company_id) | tojson }};
 const COMPANY_ADDR = [
     {{ (company.AddressLine1 or '') | tojson }},
     {{ (company.City or '') | tojson }}
@@ -691,6 +706,43 @@ async function saveAccount(e) {
         btn.textContent = 'Error — try again';
         setTimeout(() => { btn.textContent = 'Save Changes'; btn.disabled = false; }, 3000);
     }
+}
+
+// ── Employee Access PIN ──
+async function savePIN() {
+    const pin = document.getElementById('pinInput').value.trim();
+    const msg = document.getElementById('pinMsg');
+    const btn = document.getElementById('pinSaveBtn');
+    if (!pin) {
+        msg.style.display = 'block';
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Please enter a PIN before saving.';
+        return;
+    }
+    btn.textContent = 'Saving…';
+    btn.disabled = true;
+    try {
+        const res = await fetch('/api/gas', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'update_company_pin', company_id: COMPANY_ID, pin })
+        });
+        const d = await res.json();
+        msg.style.display = 'block';
+        if (d.success) {
+            msg.style.color = '#008A05';
+            msg.textContent = '✓ PIN saved.';
+        } else {
+            msg.style.color = '#c0392b';
+            msg.textContent = d.error || 'Could not save PIN — try again.';
+        }
+    } catch(e) {
+        msg.style.display = 'block';
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Network error — try again.';
+    }
+    btn.textContent = 'Save PIN';
+    btn.disabled = false;
 }
 
 // ── Invoice modal ──

@@ -146,43 +146,32 @@ function doPost(e) {
       var pinSheet = getOrCreatePINSheet(ssHub);
       var rows = pinSheet.getDataRange().getValues();
       var companyId = String(data.company_id).trim().toUpperCase();
-      var incomingHash = simpleHash(String(data.pin).trim());
+      var incoming = String(data.pin).trim();
       for (var i = 1; i < rows.length; i++) {
         if (String(rows[i][0]).trim().toUpperCase() === companyId) {
-          var storedHash = String(rows[i][1]).trim();
-          if (storedHash === incomingHash) {
-            return jsonOut({valid: true});
-          } else {
-            return jsonOut({valid: false});
-          }
+          return jsonOut({valid: String(rows[i][1]).trim() === incoming});
         }
       }
-      // No PIN set for this company yet — return invalid
       return jsonOut({valid: false, error: "No PIN configured for this company"});
     }
     // ─────────────────────────────────────────
-    // SET COMPANY PIN  (admin use — call manually or via admin panel)
+    // UPDATE COMPANY PIN  (called from manager dashboard)
     // ─────────────────────────────────────────
-    if (data.action === "set_company_pin") {
-      // Require an admin secret to prevent abuse
-      if (data.admin_secret !== getAdminSecret()) {
-        return jsonOut({error: "Unauthorized"});
-      }
+    if (data.action === "update_company_pin") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var newPin    = String(data.pin || "").trim();
+      if (!newPin) return jsonOut({success: false, error: "PIN cannot be empty"});
       var pinSheet = getOrCreatePINSheet(ssHub);
       var rows = pinSheet.getDataRange().getValues();
-      var companyId = String(data.company_id).trim().toUpperCase();
-      var newHash = simpleHash(String(data.pin).trim());
-      // Update existing row if found
       for (var i = 1; i < rows.length; i++) {
         if (String(rows[i][0]).trim().toUpperCase() === companyId) {
-          pinSheet.getRange(i + 1, 2).setValue(newHash);
+          pinSheet.getRange(i + 1, 2).setValue(newPin);
           pinSheet.getRange(i + 1, 3).setValue(new Date());
-          return jsonOut({success: true, updated: true});
+          return jsonOut({success: true});
         }
       }
-      // Insert new row
-      pinSheet.appendRow([companyId, newHash, new Date()]);
-      return jsonOut({success: true, created: true});
+      pinSheet.appendRow([companyId, newPin, new Date()]);
+      return jsonOut({success: true});
     }
     // ─────────────────────────────────────────
     // CREATE MAGIC TOKEN  (called when sign-in email is requested)
