@@ -76,8 +76,14 @@ def main():
         print(f"\n  Week of {week['sunday']} (delivery {week['delivery']}):")
         for emp_idx, meal_indices in order_assignments:
             emp = EMPLOYEES[emp_idx]
-            # All meals for this employee+week share one order_id
-            order_id = f"ORD-{week['sunday'].replace('-','')}-{emp['email'].split('@')[0].replace('.','').upper()}"
+            # Reserve one order_id for this employee+week (same as real app flow)
+            res_id = gas({
+                "action":        "reserve_order_id",
+                "email":         emp["email"],
+                "sunday_anchor": week["sunday"],
+            })
+            order_id = str(res_id.get("order_id", ""))
+            print(f"    Reserved order_id {order_id} for {emp['first_name']}")
             for meal_idx in meal_indices:
                 meal = MEALS[meal_idx]
                 res = gas({
