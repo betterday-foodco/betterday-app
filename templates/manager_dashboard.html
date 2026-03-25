@@ -28,7 +28,7 @@
 
         /* ── NAV ── */
         .nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 40px; height: 62px; display: flex; align-items: center; position: sticky; top: 0; z-index: 200; }
-        .nav-logo { height: 22px; margin-right: 20px; opacity: .9; }
+        .nav-logo { height: 22px; margin-right: 20px; filter: brightness(0) saturate(100%) invert(27%) sepia(80%) saturate(500%) hue-rotate(190deg) brightness(90%); }
         .nav-sep { width: 1px; height: 20px; background: var(--border); margin-right: 20px; }
         .nav-company { font-weight: 700; font-size: .9rem; color: var(--text); }
         .nav-right { margin-left: auto; }
@@ -67,7 +67,7 @@
         /* ── SECTION HEADER ── */
         .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
         .section-title { font-size: 1rem; font-weight: 700; }
-        .week-select { padding: 9px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .85rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; cursor: pointer; min-width: 200px; }
+        .week-select { padding: 7px 11px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .76rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; cursor: pointer; min-width: 160px; }
         .week-select:focus { border-color: var(--brand); }
 
         /* ── WEEK BLOCK ── */
@@ -155,7 +155,7 @@
 
         /* ── ORDER CONTROLS ── */
         .order-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .order-search { flex: 1; min-width: 180px; padding: 9px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .875rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; transition: border-color .15s; }
+        .order-search { flex: 1; min-width: 180px; padding: 7px 11px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .76rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; transition: border-color .15s; }
         .order-search:focus { border-color: var(--brand); }
 
         /* ── PAGINATION ── */
@@ -204,15 +204,13 @@
     <img src="{{ url_for('static', filename='Logo.svg') }}" class="nav-logo" alt="BetterDay">
     <div class="nav-sep"></div>
     <span class="nav-company">{{ company_name }}</span>
+    <span style="font-size:.75rem;font-weight:600;color:var(--muted);margin-left:10px;padding-left:10px;border-left:1px solid var(--border);">Manager Portal</span>
     <div class="nav-right">
         <a href="/manager/logout" class="btn-logout">Sign out</a>
     </div>
 </nav>
 
 <div class="container">
-
-    <div class="page-eyebrow">Manager Portal</div>
-    <div class="page-title">{{ company_name }} Meal Program</div>
 
     <!-- STATS -->
     <div class="stats-row">
