@@ -63,40 +63,43 @@ def main():
 
     # 2. Submit orders — each employee orders 1–2 meals each week
     print("── Step 2: Submit orders ──")
+    # Each employee gets ONE order_id per week; multi-meal employees share it
     order_assignments = [
-        # (employee_index, meal_index)
-        (0, 0), (0, 2),   # Sarah: 2 meals
-        (1, 1),           # James: 1 meal
-        (2, 3), (2, 4),   # Priya: 2 meals
-        (3, 0),           # Dylan: 1 meal
+        # (employee_index, [meal_indices])
+        (0, [0, 2]),   # Sarah: 2 meals
+        (1, [1]),      # James: 1 meal
+        (2, [3, 4]),   # Priya: 2 meals
+        (3, [0]),      # Dylan: 1 meal
     ]
 
     for week in WEEKS:
         print(f"\n  Week of {week['sunday']} (delivery {week['delivery']}):")
-        for emp_idx, meal_idx in order_assignments:
-            emp  = EMPLOYEES[emp_idx]
-            meal = MEALS[meal_idx]
-            order_id = f"ORD-{week['sunday'].replace('-','')}-{emp['email'].split('@')[0].upper()}-{meal['id']}"
-            res = gas({
-                "action":          "submit_corporate_order",
-                "company_id":      COMPANY_ID,
-                "company_name":    COMPANY_NAME,
-                "delivery_date":   week["delivery"],
-                "sunday_anchor":   week["sunday"],
-                "employee_name":   f"{emp['first_name']} {emp['last_name']}",
-                "employee_email":  emp["email"],
-                "meal_id":         meal["id"],
-                "dish_name":       meal["name"],
-                "diet_type":       meal["diet"],
-                "tier":            meal["tier"],
-                "employee_price":  meal["emp"],
-                "company_coverage":meal["co"],
-                "bd_coverage":     meal["bd"],
-                "order_id":        order_id,
-            })
-            status = "ok" if res.get("success") else f"FAIL: {res}"
-            print(f"    {emp['first_name']:8} → {meal['name']:32} ({meal['tier']})  {status}")
-            time.sleep(0.4)
+        for emp_idx, meal_indices in order_assignments:
+            emp = EMPLOYEES[emp_idx]
+            # All meals for this employee+week share one order_id
+            order_id = f"ORD-{week['sunday'].replace('-','')}-{emp['email'].split('@')[0].replace('.','').upper()}"
+            for meal_idx in meal_indices:
+                meal = MEALS[meal_idx]
+                res = gas({
+                    "action":           "submit_corporate_order",
+                    "company_id":       COMPANY_ID,
+                    "company_name":     COMPANY_NAME,
+                    "delivery_date":    week["delivery"],
+                    "sunday_anchor":    week["sunday"],
+                    "employee_name":    f"{emp['first_name']} {emp['last_name']}",
+                    "employee_email":   emp["email"],
+                    "meal_id":          meal["id"],
+                    "dish_name":        meal["name"],
+                    "diet_type":        meal["diet"],
+                    "tier":             meal["tier"],
+                    "employee_price":   meal["emp"],
+                    "company_coverage": meal["co"],
+                    "bd_coverage":      meal["bd"],
+                    "order_id":         order_id,
+                })
+                status = "ok" if res.get("success") else f"FAIL: {res}"
+                print(f"    {emp['first_name']:8} → {meal['name']:32} ({meal['tier']})  {status}")
+                time.sleep(0.4)
 
     print()
 
