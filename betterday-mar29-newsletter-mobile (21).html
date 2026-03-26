@@ -17,6 +17,7 @@ body{margin:0;padding:0;background:#ffffff;line-height:1.2;}
 @media only screen and (max-width:620px){
   .wrapper{width:100%!important;}
   td[width="33%"]{width:50%!important;display:inline-block!important;vertical-align:top!important;box-sizing:border-box!important;}
+  td.hide-mobile{display:none!important;}
 }
 
 @media only screen and (max-width:620px) {
@@ -31,7 +32,7 @@ body{margin:0;padding:0;background:#ffffff;line-height:1.2;}
   /* Header */
   .nav-hide { display:none !important; }
   .h-logo { padding:0 0 0 20px !important; }
-  .h-nav { padding:0 20px 0 0 !important; }
+  .h-nav { padding:0 28px 0 0 !important; }
 
   /* Hero */
   .hero-img { width:100% !important; height:auto !important; max-height:280px !important; object-fit:cover !important; }
@@ -54,7 +55,7 @@ body{margin:0;padding:0;background:#ffffff;line-height:1.2;}
   .spot-pills-inline { display:block !important; }
 
   /* Hide 3rd card per row on mobile */
-  .hide-mobile { display:none !important; }
+  .hide-mobile, td.hide-mobile { display:none !important; width:0 !important; height:0 !important; overflow:hidden !important; float:none !important; }
 
   /* Menu card text sizes */
   .menu-card-td div[style*='BDSupperBold'] { font-size:11px !important; }
