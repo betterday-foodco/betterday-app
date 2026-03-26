@@ -43,11 +43,11 @@
         .page-title { font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 32px; }
 
         /* ── STATS ROW ── */
-        .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
         @media (max-width: 900px) { .stats-row { grid-template-columns: 1fr 1fr; } }
-        .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; border-left: 3px solid transparent; }
+        .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; border-left: 3px solid transparent; }
         .stat-label { font-size: .67rem; font-weight: 700; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
-        .stat-value { font-size: 1.65rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
         .stat-sub { font-size: .7rem; color: var(--muted); font-weight: 500; }
         .stat-card.c-teal  { border-left-color: var(--brand); }    .stat-card.c-teal  .stat-value { color: var(--brand); }
         .stat-card.c-sky   { border-left-color: #0284c7; }         .stat-card.c-sky   .stat-value { color: #0284c7; }
@@ -273,11 +273,6 @@
         <div class="stat-card c-green">
             <div class="stat-label">BD Contributed</div>
             <div class="stat-value">${{ '%.0f'|format(total_bd_spend|float) }}</div>
-            <div class="stat-sub">all time</div>
-        </div>
-        <div class="stat-card c-purple">
-            <div class="stat-label">Total Meals</div>
-            <div class="stat-value">{{ total_meals }}</div>
             <div class="stat-sub">all time</div>
         </div>
     </div>
