@@ -425,14 +425,14 @@
 
         <!-- Read-only identity -->
         <div class="info-card full" style="margin-bottom:14px;padding:16px 24px;">
-            <div style="display:grid;grid-template-columns:repeat(4,1fr) auto;gap:16px;align-items:start;">
+            <div style="display:grid;grid-template-columns:auto auto auto 1fr auto;gap:20px 32px;align-items:center;">
                 <div><div class="info-lbl">Company ID</div><div class="info-val" style="font-family:monospace;font-weight:700;letter-spacing:.5px;">{{ company.CompanyID or company_id }}</div></div>
                 <div><div class="info-lbl">Company Name</div><div class="info-val">{{ company.CompanyName or '—' }}</div></div>
                 <div><div class="info-lbl">Email Domain</div><div class="info-val">{{ company.CompanyEmailDomain or '—' }}</div></div>
 
                 <!-- PIN display -->
                 <div>
-                    <div class="info-lbl">Employee Access PIN</div>
+                    <div class="info-lbl">Access PIN</div>
                     <div id="pinDisplay" style="display:flex;align-items:center;gap:6px;margin-top:2px;">
                         <span id="pinValue" style="font-family:monospace;font-weight:700;letter-spacing:2px;font-size:.95rem;color:var(--text);">{{ current_pin or '—' }}</span>
                         <button type="button" onclick="startEditPIN()" style="font-size:.7rem;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:5px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;line-height:1.6;">Edit</button>
@@ -446,9 +446,9 @@
                     <div id="pinMsg" style="font-size:.7rem;margin-top:3px;display:none;"></div>
                 </div>
 
-                <!-- PIN hint — visually grouped under the PIN column -->
-                <div style="border-left:2px solid var(--border);padding-left:14px;">
-                    <div style="font-size:.72rem;color:var(--muted);line-height:1.4;">Employees signing up with a personal email enter this PIN to verify they're on your team.</div>
+                <!-- PIN hint -->
+                <div style="border-left:2px solid var(--border);padding-left:16px;">
+                    <div style="font-size:.72rem;color:var(--muted);line-height:1.5;max-width:200px;">Employees signing up with a personal email enter this PIN to verify they're on your team.</div>
                 </div>
             </div>
         </div>
