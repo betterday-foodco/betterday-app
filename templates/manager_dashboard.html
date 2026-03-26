@@ -27,13 +27,13 @@
         body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
         /* ── NAV ── */
-        .nav { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 40px; height: 62px; display: flex; align-items: center; position: sticky; top: 0; z-index: 200; }
-        .nav-logo { height: 22px; margin-right: 20px; filter: brightness(0) saturate(100%) invert(27%) sepia(80%) saturate(500%) hue-rotate(190deg) brightness(90%); }
-        .nav-sep { width: 1px; height: 20px; background: var(--border); margin-right: 20px; }
-        .nav-company { font-weight: 700; font-size: .9rem; color: var(--text); }
+        .nav { background: var(--brand-mid); border-bottom: 1px solid rgba(0,0,0,.15); padding: 0 40px; height: 62px; display: flex; align-items: center; position: sticky; top: 0; z-index: 200; }
+        .nav-logo { height: 22px; margin-right: 20px; filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(10deg) brightness(1.15); }
+        .nav-sep { width: 1px; height: 20px; background: rgba(255,255,255,.2); margin-right: 20px; }
+        .nav-company { font-weight: 700; font-size: .9rem; color: #FFF8F0; }
         .nav-right { margin-left: auto; }
-        .btn-logout { font-size: .82rem; font-weight: 600; color: var(--muted); text-decoration: none; padding: 7px 16px; border: 1px solid var(--border); border-radius: 20px; transition: .15s; }
-        .btn-logout:hover { border-color: var(--text-2); color: var(--text); }
+        .btn-logout { font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.75); text-decoration: none; padding: 7px 16px; border: 1px solid rgba(255,255,255,.25); border-radius: 20px; transition: .15s; }
+        .btn-logout:hover { border-color: rgba(255,255,255,.6); color: #fff; }
 
         /* ── CONTAINER ── */
         .container { max-width: 1120px; margin: 0 auto; padding: 40px 40px 80px; }
