@@ -237,6 +237,49 @@
         .pag-btn:disabled { opacity: .35; cursor: default; }
         .pag-btn:hover:not(:disabled) { border-color: var(--navy); box-shadow: 0 2px 6px rgba(0,49,65,.08); }
 
+        /* ═══════ OVERVIEW GRID ═══════ */
+        .overview-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+        @media (max-width: 900px) { .overview-grid { grid-template-columns: 1fr; } }
+
+        .week-co-card {
+            background: var(--card); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px;
+            box-shadow: 0 1px 4px rgba(0,49,65,.06), 0 6px 18px rgba(0,49,65,.03);
+        }
+        .week-co-name { font-size: .9rem; font-weight: 800; color: var(--dark-navy); margin-bottom: 10px; }
+        .week-co-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .week-co-stat { text-align: center; }
+        .week-co-num { display: block; font-size: 1.05rem; font-weight: 900; color: var(--dark-navy); }
+        .week-co-lbl { display: block; font-size: .55rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
+
+        .week-totals-card {
+            background: var(--dark-navy); border-radius: 14px; padding: 24px; color: #fff;
+            box-shadow: 0 2px 8px rgba(0,49,65,.12), 0 12px 32px rgba(0,49,65,.08);
+            position: sticky; top: 90px;
+        }
+        .week-totals-header { font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.4); margin-bottom: 18px; }
+        .week-total-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+            font-size: .84rem; font-weight: 600; color: rgba(255,255,255,.7);
+        }
+        .week-total-row:last-child { border-bottom: none; }
+        .wt-val { font-weight: 900; color: #fff; font-size: .95rem; }
+        .wt-total { border-top: 2px solid rgba(255,255,255,.15); margin-top: 6px; padding-top: 14px; }
+        .wt-total span:first-child { font-weight: 800; color: rgba(255,255,255,.9); }
+        .wt-total .wt-val { font-size: 1.15rem; color: var(--yellow); }
+
+        /* ═══════ EXPANDABLE SECTION ═══════ */
+        .expand-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; margin-top: 20px; cursor: pointer;
+            background: var(--card); border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0,49,65,.06); transition: .12s;
+        }
+        .expand-header:hover { box-shadow: 0 2px 8px rgba(0,49,65,.1); }
+        .expand-title { font-size: .88rem; font-weight: 800; color: var(--dark-navy); }
+        .expand-arrow { font-size: .7rem; color: var(--muted); transition: transform .2s; }
+        .expand-arrow.open { transform: rotate(180deg); }
+
         /* ═══════ INVOICE ACTIONS ═══════ */
         .inv-actions { display: flex; gap: 6px; align-items: center; }
         .inv-actions .btn-outline { font-size: .7rem; padding: 5px 12px; }
@@ -423,55 +466,61 @@
 
     <!-- ═══════ OVERVIEW TAB ═══════ -->
     <div id="tab-overview" class="tab-panel active">
-        <div class="section-header">
-            <div class="section-title">This Week — {{ active_week.label }}</div>
-        </div>
 
         {% if week_snapshot %}
-        <div class="summary-bar">
-            <div class="sb-cell c-navy"><div class="sb-label">Companies</div><div class="sb-val">{{ active_companies_week }}</div></div>
-            <div class="sb-cell c-yellow"><div class="sb-label">Meals</div><div class="sb-val">{{ active_week.meal_count }}</div></div>
-            <div class="sb-cell c-green"><div class="sb-label">Company Spend</div><div class="sb-val">${{ "%.2f"|format(active_week.co_spend) }}</div></div>
-            <div class="sb-cell c-sky"><div class="sb-label">BD Contributed</div><div class="sb-val">${{ "%.2f"|format(active_week.bd_spend) }}</div></div>
-        </div>
-        <div class="table-wrap" style="border-radius: 0 0 14px 14px;">
-            <table>
-                <thead><tr>
-                    <th>Company</th><th>Meals</th><th>Employees</th><th>Company Spend</th><th>BD Contributed</th>
-                </tr></thead>
-                <tbody>
+        <!-- Two-column grid: company breakdown left, week totals right -->
+        <div class="overview-grid">
+            <div class="overview-left">
+                <div class="section-title" style="margin-bottom:14px;">Company Breakdown</div>
                 {% for s in week_snapshot %}
-                <tr>
-                    <td class="td-name">{{ co_names.get(s.company_id, s.company_id) }}</td>
-                    <td>{{ s.meals }}</td>
-                    <td>{{ s.employee_count }}</td>
-                    <td class="td-co">${{ "%.2f"|format(s.co_spend) }}</td>
-                    <td class="td-bd">${{ "%.2f"|format(s.bd_spend) }}</td>
-                </tr>
+                <div class="week-co-card">
+                    <div class="week-co-name">{{ co_names.get(s.company_id, s.company_id) }}</div>
+                    <div class="week-co-stats">
+                        <div class="week-co-stat"><span class="week-co-num">{{ s.meals }}</span><span class="week-co-lbl">meals</span></div>
+                        <div class="week-co-stat"><span class="week-co-num">{{ s.employee_count }}</span><span class="week-co-lbl">employees</span></div>
+                        <div class="week-co-stat"><span class="week-co-num td-co">${{ "%.2f"|format(s.co_spend) }}</span><span class="week-co-lbl">company</span></div>
+                        <div class="week-co-stat"><span class="week-co-num td-bd">${{ "%.2f"|format(s.bd_spend) }}</span><span class="week-co-lbl">BD</span></div>
+                    </div>
+                </div>
                 {% endfor %}
-                </tbody>
-            </table>
+            </div>
+            <div class="overview-right">
+                <div class="week-totals-card">
+                    <div class="week-totals-header">Week Totals</div>
+                    <div class="week-total-row"><span>Companies</span><span class="wt-val">{{ active_companies_week }}</span></div>
+                    <div class="week-total-row"><span>Total Meals</span><span class="wt-val" style="color:var(--yellow);">{{ active_week.meal_count }}</span></div>
+                    <div class="week-total-row"><span>Company Spend</span><span class="wt-val" style="color:var(--green);">${{ "%.2f"|format(active_week.co_spend) }}</span></div>
+                    <div class="week-total-row"><span>BD Contributed</span><span class="wt-val" style="color:var(--bd-teal);">${{ "%.2f"|format(active_week.bd_spend) }}</span></div>
+                    <div class="week-total-row"><span>Employee Paid</span><span class="wt-val">${{ "%.2f"|format(active_week.emp_spend) }}</span></div>
+                    <div class="week-total-row wt-total"><span>Total Revenue</span><span class="wt-val">${{ "%.2f"|format(active_week.emp_spend + active_week.co_spend) }}</span></div>
+                </div>
+            </div>
         </div>
         {% else %}
         <div class="table-wrap"><div class="table-empty">No orders this week yet.</div></div>
         {% endif %}
 
-        <!-- Recent Orders -->
-        <div class="section-header" style="margin-top:28px;">
-            <div class="section-title">Recent Orders</div>
-            <input type="text" class="ctrl-input" id="recentSearch" placeholder="Search employee or order #..." oninput="filterRecent()" style="min-width:240px;">
+        <!-- Recent Orders — collapsible -->
+        <div class="expand-header" onclick="toggleRecent()">
+            <span class="expand-title">Recent Orders</span>
+            <span class="expand-arrow" id="recentArrow">&#9660;</span>
         </div>
-        <div class="table-wrap">
-            <table>
-                <thead><tr>
-                    <th>Order #</th><th>Employee</th><th>Company</th><th>Delivery</th><th>Meals</th><th>Emp Paid</th><th>Co Covered</th><th>BD</th>
-                </tr></thead>
-                <tbody id="recentBody"></tbody>
-            </table>
-            <div class="pag-row">
-                <button class="pag-btn" id="recPrev" onclick="recPage(-1)">← Prev</button>
-                <span id="recPageInfo"></span>
-                <button class="pag-btn" id="recNext" onclick="recPage(1)">Next →</button>
+        <div id="recentPanel" style="display:none;">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+                <input type="text" class="ctrl-input" id="recentSearch" placeholder="Search employee or order #..." oninput="filterRecent()" style="min-width:240px;">
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>Order #</th><th>Employee</th><th>Company</th><th>Delivery</th><th>Meals</th><th>Emp Paid</th><th>Co Covered</th><th>BD</th>
+                    </tr></thead>
+                    <tbody id="recentBody"></tbody>
+                </table>
+                <div class="pag-row">
+                    <button class="pag-btn" id="recPrev" onclick="recPage(-1)">← Prev</button>
+                    <span id="recPageInfo"></span>
+                    <button class="pag-btn" id="recNext" onclick="recPage(1)">Next →</button>
+                </div>
             </div>
         </div>
     </div>
@@ -760,6 +809,16 @@ function ordPage(dir) {
 
 // Init orders on load
 filterOrders();
+
+/* ── Toggle Recent Orders ── */
+function toggleRecent() {
+    var panel = document.getElementById('recentPanel');
+    var arrow = document.getElementById('recentArrow');
+    var open = panel.style.display !== 'none';
+    panel.style.display = open ? 'none' : 'block';
+    arrow.classList.toggle('open', !open);
+    if (!open) filterRecent();
+}
 
 /* ── Recent Orders (Overview tab) ── */
 var recFiltered = ALL_ORDERS.slice();
