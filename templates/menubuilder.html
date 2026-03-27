@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BetterDay Menu Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream:   #faebda;
+      --dark:    #00465e;
+      --primary: #4ea2fd;
+      --green:   #27ae60;
+      --red:     #e74c3c;
+      --amber:   #f39c12;
+      --yellow:  #ffd54f;
+      --radius:  16px;
+      --sidebar: 340px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #f4ede3; min-height: 100vh; color: var(--dark); }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--dark); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100;
+    }
+    .topbar h1 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; flex: 1; }
+    .topbar .week-nav { display: flex; align-items: center; gap: 10px; }
+    .topbar .week-nav button {
+      background: rgba(255,255,255,.15); border: none; color: #fff; width: 36px; height: 36px;
+      border-radius: 10px; cursor: pointer; font-size: 1.1rem; transition: background .15s;
+    }
+    .topbar .week-nav button:hover { background: rgba(255,255,255,.25); }
+    .topbar .week-label { font-weight: 700; font-size: .95rem; min-width: 180px; text-align: center; }
+    .btn-save {
+      background: var(--green); color: #fff; border: none; padding: 10px 22px;
+      border-radius: 12px; font-weight: 700; font-size: .9rem; cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .btn-save:hover { background: #219a52; }
+    .btn-save:active { transform: scale(.97); }
+    .btn-save.saving { opacity: .6; pointer-events: none; }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; min-height: calc(100vh - 68px); }
+    .sidebar {
+      width: var(--sidebar); background: #fff; border-right: 1px solid #e0d5c8;
+      display: flex; flex-direction: column; position: sticky; top: 68px;
+      height: calc(100vh - 68px); overflow: hidden;
+    }
+    .main { flex: 1; padding: 24px; overflow-y: auto; }
+
+    /* ── SIDEBAR ── */
+    .sidebar-header { padding: 16px 16px 0; }
+    .search-box {
+      width: 100%; padding: 10px 14px 10px 38px; border: 2px solid #e8f0f4;
+      border-radius: 12px; font-size: .9rem; font-family: inherit;
+      background: #f9f6f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 12px center no-repeat;
+      transition: border-color .15s;
+    }
+    .search-box:focus { outline: none; border-color: var(--primary); }
+    .filter-row { display: flex; gap: 6px; padding: 10px 16px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 5px 12px; border-radius: 20px; border: 1.5px solid #e0d5c8;
+      background: #fff; font-size: .78rem; font-weight: 700; cursor: pointer;
+      transition: all .15s; color: var(--dark);
+    }
+    .filter-btn.active { background: var(--dark); color: #fff; border-color: var(--dark); }
+    .dish-list {
+      flex: 1; overflow-y: auto; padding: 0 12px 12px;
+    }
+    .dish-card {
+      background: #f9f6f2; border: 2px solid transparent; border-radius: 14px;
+      padding: 12px; margin-bottom: 8px; cursor: grab; transition: all .15s;
+      display: flex; gap: 12px; align-items: center;
+    }
+    .dish-card:hover { border-color: var(--primary); background: #fff; }
+    .dish-card.dragging { opacity: .5; transform: scale(.97); }
+    .dish-card-img {
+      width: 56px; height: 56px; border-radius: 10px; object-fit: cover;
+      background: #e0d5c8; flex-shrink: 0;
+    }
+    .dish-card-info { flex: 1; min-width: 0; }
+    .dish-card-name { font-weight: 700; font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dish-card-meta { font-size: .75rem; color: #7b8c9f; margin-top: 2px; }
+    .dish-card-diet {
+      display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: .7rem;
+      font-weight: 700; text-transform: uppercase;
+    }
+    .diet-meat { background: #fde8e8; color: #c0392b; }
+    .diet-vegan { background: #e8f5e9; color: #27ae60; }
+    .diet-other { background: #e8f0f4; color: var(--dark); }
+    .dish-count { padding: 8px 16px; font-size: .8rem; color: #7b8c9f; font-weight: 600; border-top: 1px solid #e8f0f4; }
+
+    /* ── GRID ── */
+    .grid-container { max-width: 1200px; }
+    .grid-header {
+      display: grid; grid-template-columns: 100px repeat(5, 1fr);
+      gap: 8px; margin-bottom: 8px;
+    }
+    .grid-header-cell {
+      text-align: center; font-weight: 800; font-size: .85rem; color: var(--dark);
+      padding: 8px; background: rgba(0,70,94,.06); border-radius: 10px;
+    }
+    .grid-header-cell:first-child { background: transparent; }
+    .grid-row {
+      display: grid; grid-template-columns: 100px repeat(5, 1fr);
+      gap: 8px; margin-bottom: 8px;
+    }
+    .grid-slot-label {
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .82rem; color: var(--dark);
+      background: rgba(0,70,94,.04); border-radius: 10px; padding: 8px;
+    }
+    .grid-cell {
+      min-height: 100px; background: #fff; border: 2px dashed #d9cfc2;
+      border-radius: 14px; padding: 8px; transition: all .2s;
+      display: flex; flex-direction: column; gap: 6px;
+      position: relative;
+    }
+    .grid-cell.drag-over { border-color: var(--primary); background: rgba(78,162,253,.06); border-style: solid; }
+    .grid-cell .placed-dish {
+      background: #f0f7ff; border: 1.5px solid rgba(78,162,253,.3);
+      border-radius: 10px; padding: 8px 10px; font-size: .8rem; font-weight: 600;
+      display: flex; align-items: center; gap: 8px; position: relative;
+    }
+    .grid-cell .placed-dish img {
+      width: 36px; height: 36px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+    }
+    .grid-cell .placed-dish .dish-remove {
+      position: absolute; top: -6px; right: -6px; width: 20px; height: 20px;
+      border-radius: 50%; background: var(--red); color: #fff; border: none;
+      font-size: .7rem; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; opacity: 0; transition: opacity .15s;
+    }
+    .grid-cell .placed-dish:hover .dish-remove { opacity: 1; }
+    .placed-dish-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .placed-diet-badge { font-size: .65rem; padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+    .grid-cell .empty-hint {
+      color: #bbb; font-size: .78rem; text-align: center; padding: 20px 8px;
+      pointer-events: none;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--dark); color: #fff; padding: 12px 28px; border-radius: 14px;
+      font-weight: 700; font-size: .9rem; z-index: 999; opacity: 0;
+      transition: opacity .3s; pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,70,94,.3);
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── LOADING ── */
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(244,237,227,.9);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .spinner { width: 48px; height: 48px; border: 4px solid #e0d5c8; border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { margin-top: 16px; font-weight: 700; color: var(--dark); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; position: static; height: auto; max-height: 300px; border-right: none; border-bottom: 1px solid #e0d5c8; }
+      .main { padding: 12px; }
+      .grid-header, .grid-row { grid-template-columns: 70px repeat(5, 1fr); gap: 4px; }
+      .grid-cell { min-height: 80px; padding: 6px; }
+    }
+    @media (max-width: 600px) {
+      .grid-header, .grid-row { grid-template-columns: 50px repeat(5, 1fr); gap: 3px; }
+      .grid-header-cell { font-size: .7rem; padding: 4px; }
+      .grid-slot-label { font-size: .7rem; }
+      .placed-dish img { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading dish masterlist...</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <h1>Menu Builder</h1>
+  <div class="week-nav">
+    <button onclick="changeWeek(-1)" title="Previous week">&#8592;</button>
+    <span class="week-label" id="weekLabel"></span>
+    <button onclick="changeWeek(1)" title="Next week">&#8594;</button>
+  </div>
+  <button class="btn-save" id="btnSave" onclick="saveMenuState()">Save Menu</button>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR: Dish Palette -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <input type="text" class="search-box" id="searchBox" placeholder="Search dishes..." oninput="filterDishes()">
+    </div>
+    <div class="filter-row" id="filterRow">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+      <button class="filter-btn" data-filter="Meat" onclick="setFilter('Meat')">Meat</button>
+      <button class="filter-btn" data-filter="Vegan" onclick="setFilter('Vegan')">Vegan</button>
+    </div>
+    <div class="dish-count" id="dishCount">Loading...</div>
+    <div class="dish-list" id="dishList"></div>
+  </div>
+
+  <!-- MAIN: Weekly Grid -->
+  <div class="main">
+    <div class="grid-container" id="gridContainer"></div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api/gas';
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const SLOTS = ['Meat 1', 'Meat 2', 'Meat 3', 'Vegan 1', 'Vegan 2', 'Vegan 3'];
+
+let ALL_DISHES = [];
+let currentFilter = 'all';
+let currentWeekOffset = 0;
+let gridState = {}; // { "Monday|Meat 1": {id, name, diet, image}, ... }
+
+// ── API HELPER ──
+async function apiFetch(payload) {
+  const r = await fetch(API, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  return r.json();
+}
+
+// ── WEEK MATH ──
+function getWeekMonday(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() - d.getDay() + 1 + (offset * 7)); // Monday
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function getSundayAnchor(offset) {
+  const mon = getWeekMonday(offset);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() - 1);
+  return sun.toISOString().split('T')[0];
+}
+
+function formatWeekLabel(offset) {
+  const mon = getWeekMonday(offset);
+  const fri = new Date(mon);
+  fri.setDate(mon.getDate() + 4);
+  const fmt = d => d.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+  return `${fmt(mon)} - ${fmt(fri)}, ${fri.getFullYear()}`;
+}
+
+// ── INIT ──
+async function init() {
+  try {
+    const data = await apiFetch({action: 'get_all_dishes'});
+    ALL_DISHES = data.dishes || [];
+    renderDishList();
+    renderGrid();
+    updateWeekLabel();
+    await loadMenuState();
+  } catch(e) {
+    console.error('Init error:', e);
+    showToast('Failed to load dishes - check console');
+  }
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+// ── DISH LIST (Sidebar) ──
+function renderDishList() {
+  const q = document.getElementById('searchBox').value.toLowerCase().trim();
+  const list = document.getElementById('dishList');
+  let filtered = ALL_DISHES;
+
+  if (currentFilter !== 'all') {
+    filtered = filtered.filter(d => (d.diet || '').toLowerCase() === currentFilter.toLowerCase());
+  }
+  if (q) {
+    filtered = filtered.filter(d =>
+      d.name.toLowerCase().includes(q) ||
+      (d.tags || '').toLowerCase().includes(q) ||
+      (d.id || '').toLowerCase().includes(q) ||
+      (d.cuisine || '').toLowerCase().includes(q)
+    );
+  }
+
+  document.getElementById('dishCount').textContent = `${filtered.length} dishes`;
+
+  list.innerHTML = filtered.map(d => `
+    <div class="dish-card" draggable="true"
+         data-id="${d.id}" data-name="${esc(d.name)}" data-diet="${esc(d.diet)}" data-image="${esc(d.image)}"
+         ondragstart="onDragStart(event)" ondragend="onDragEnd(event)">
+      ${d.image ? `<img class="dish-card-img" src="${esc(d.image)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '<div class="dish-card-img"></div>'}
+      <div class="dish-card-info">
+        <div class="dish-card-name" title="${esc(d.name)}">${esc(d.name)}</div>
+        <div class="dish-card-meta">
+          <span class="dish-card-diet ${dietClass(d.diet)}">${esc(d.diet || 'N/A')}</span>
+          ${d.cal ? ` &middot; ${d.cal} cal` : ''}
+          ${d.id ? ` &middot; ${esc(d.id)}` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterDishes() { renderDishList(); }
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+  renderDishList();
+}
+
+// ── GRID ──
+function renderGrid() {
+  const container = document.getElementById('gridContainer');
+
+  // Header row
+  let html = '<div class="grid-header"><div class="grid-header-cell"></div>';
+  DAYS.forEach(d => { html += `<div class="grid-header-cell">${d}</div>`; });
+  html += '</div>';
+
+  // Slot rows
+  SLOTS.forEach(slot => {
+    html += '<div class="grid-row">';
+    html += `<div class="grid-slot-label">${slot}</div>`;
+    DAYS.forEach(day => {
+      const key = `${day}|${slot}`;
+      const dish = gridState[key];
+      html += `<div class="grid-cell" data-key="${key}"
+                    ondragover="onDragOver(event)" ondragleave="onDragLeave(event)"
+                    ondrop="onDrop(event)">`;
+      if (dish) {
+        html += placedDishHTML(dish, key);
+      } else {
+        html += '<div class="empty-hint">Drop dish here</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function placedDishHTML(dish, key) {
+  return `<div class="placed-dish">
+    ${dish.image ? `<img src="${esc(dish.image)}" alt="" onerror="this.style.display='none'">` : ''}
+    <span class="placed-dish-name" title="${esc(dish.name)}">${esc(dish.name)}</span>
+    <span class="placed-diet-badge ${dietClass(dish.diet)}">${esc(dish.diet || '')}</span>
+    <button class="dish-remove" onclick="removeDish('${key}')" title="Remove">&times;</button>
+  </div>`;
+}
+
+// ── DRAG & DROP ──
+let dragData = null;
+
+function onDragStart(e) {
+  const card = e.target.closest('.dish-card');
+  dragData = {
+    id: card.dataset.id,
+    name: card.dataset.name,
+    diet: card.dataset.diet,
+    image: card.dataset.image
+  };
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'copy';
+}
+
+function onDragEnd(e) {
+  e.target.closest('.dish-card')?.classList.remove('dragging');
+  dragData = null;
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  const cell = e.currentTarget;
+  cell.classList.remove('drag-over');
+  if (!dragData) return;
+
+  const key = cell.dataset.key;
+  gridState[key] = { ...dragData };
+  renderGrid();
+  showToast(`${dragData.name} placed`);
+}
+
+function removeDish(key) {
+  delete gridState[key];
+  renderGrid();
+}
+
+// ── WEEK NAVIGATION ──
+function changeWeek(dir) {
+  currentWeekOffset += dir;
+  updateWeekLabel();
+  gridState = {};
+  renderGrid();
+  loadMenuState();
+}
+
+function updateWeekLabel() {
+  document.getElementById('weekLabel').textContent = formatWeekLabel(currentWeekOffset);
+}
+
+// ── SAVE / LOAD ──
+async function saveMenuState() {
+  const btn = document.getElementById('btnSave');
+  btn.classList.add('saving');
+  btn.textContent = 'Saving...';
+
+  const weekOf = getSundayAnchor(currentWeekOffset);
+  const entries = [];
+  Object.entries(gridState).forEach(([key, dish]) => {
+    const [day, slot] = key.split('|');
+    entries.push({
+      day, slot,
+      dish_id: dish.id,
+      dish_name: dish.name,
+      diet: dish.diet
+    });
+  });
+
+  try {
+    await apiFetch({
+      action: 'save_menu_state',
+      week_of: weekOf,
+      entries: entries,
+      saved_by: 'Chef'
+    });
+    showToast(`Menu saved! (${entries.length} dishes)`);
+  } catch(e) {
+    console.error('Save error:', e);
+    showToast('Save failed - please try again');
+  }
+
+  btn.classList.remove('saving');
+  btn.textContent = 'Save Menu';
+}
+
+async function loadMenuState() {
+  const weekOf = getSundayAnchor(currentWeekOffset);
+  try {
+    const data = await apiFetch({action: 'load_menu_state', week_of: weekOf});
+    const entries = data.entries || [];
+    gridState = {};
+    entries.forEach(e => {
+      const key = `${e.day}|${e.slot}`;
+      // Try to find the full dish info from ALL_DISHES
+      const fullDish = ALL_DISHES.find(d => d.id === e.dish_id);
+      gridState[key] = {
+        id: e.dish_id,
+        name: e.dish_name,
+        diet: e.diet,
+        image: fullDish ? fullDish.image : ''
+      };
+    });
+    renderGrid();
+    if (entries.length > 0) {
+      showToast(`Loaded ${entries.length} dishes for this week`);
+    }
+  } catch(e) {
+    console.error('Load error:', e);
+  }
+}
+
+// ── HELPERS ──
+function esc(s) {
+  if (!s) return '';
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function dietClass(diet) {
+  if (!diet) return 'diet-other';
+  const d = diet.toLowerCase();
+  if (d.includes('meat') || d.includes('chicken') || d.includes('beef') || d.includes('pork') || d.includes('fish')) return 'diet-meat';
+  if (d.includes('vegan') || d.includes('plant')) return 'diet-vegan';
+  return 'diet-other';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── GO ──
+init();
+</script>
+</body>
+</html>

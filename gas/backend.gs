@@ -697,6 +697,98 @@ function doPost(e) {
       return jsonOut({meat: meatMenu, vegan: veganMenu});
     }
     // ─────────────────────────────────────────
+    // GET ALL DISHES  (Menu Builder — full 7.1 masterlist)
+    // ─────────────────────────────────────────
+    if (data.action === "get_all_dishes") {
+      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+      var masterSheet = ssBuffer.getSheetByName("7.1 Dish Masterlist");
+      var masterRows  = masterSheet.getDataRange().getValues();
+      var dishes = [];
+      for (var m = 1; m < masterRows.length; m++) {
+        var dId = String(masterRows[m][0]).trim();
+        if (!dId || !dId.startsWith("#")) continue;
+        var name = String(masterRows[m][2] || "").trim();
+        if (!name) continue;
+        dishes.push({
+          id:          dId,
+          name:        name,
+          diet:        masterRows[m][3] || "",
+          category:    masterRows[m][1] || "",
+          image:       masterRows[m][21] || "",
+          description: masterRows[m][23] || "",
+          cal:         masterRows[m][24] || "",
+          protein:     masterRows[m][25] || "",
+          carbs:       masterRows[m][26] || "",
+          fat:         masterRows[m][27] || "",
+          tags:        masterRows[m][32] || "",
+          allergens:   masterRows[m][4] || "",
+          cuisine:     masterRows[m][5] || ""
+        });
+      }
+      return jsonOut({dishes: dishes});
+    }
+    // ─────────────────────────────────────────
+    // SAVE MENU STATE  (Menu Builder → "Menu Builder State" tab)
+    // ─────────────────────────────────────────
+    if (data.action === "save_menu_state") {
+      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+      var stateSheet = ssBuffer.getSheetByName("Menu Builder State");
+      if (!stateSheet) {
+        stateSheet = ssBuffer.insertSheet("Menu Builder State");
+        stateSheet.appendRow(["SavedAt", "WeekOf", "Day", "MealSlot", "DishID", "DishName", "Diet", "SavedBy"]);
+      }
+      // Clear previous entries for this week
+      var weekOf = data.week_of || "";
+      if (weekOf) {
+        var existingRows = stateSheet.getDataRange().getValues();
+        for (var r = existingRows.length - 1; r >= 1; r--) {
+          if (String(existingRows[r][1]).trim() === weekOf) {
+            stateSheet.deleteRow(r + 1);
+          }
+        }
+      }
+      // Write new entries
+      var entries = data.entries || [];
+      var now = new Date();
+      var savedBy = data.saved_by || "Chef";
+      for (var e = 0; e < entries.length; e++) {
+        var entry = entries[e];
+        stateSheet.appendRow([
+          now,
+          weekOf,
+          entry.day || "",
+          entry.slot || "",
+          entry.dish_id || "",
+          entry.dish_name || "",
+          entry.diet || "",
+          savedBy
+        ]);
+      }
+      return jsonOut({success: true, saved: entries.length});
+    }
+    // ─────────────────────────────────────────
+    // LOAD MENU STATE  (Menu Builder — read saved grid)
+    // ─────────────────────────────────────────
+    if (data.action === "load_menu_state") {
+      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+      var stateSheet = ssBuffer.getSheetByName("Menu Builder State");
+      if (!stateSheet) return jsonOut({entries: []});
+      var rows = stateSheet.getDataRange().getValues();
+      var weekOf = data.week_of || "";
+      var entries = [];
+      for (var i = 1; i < rows.length; i++) {
+        if (weekOf && String(rows[i][1]).trim() !== weekOf) continue;
+        entries.push({
+          day:       rows[i][2],
+          slot:      rows[i][3],
+          dish_id:   rows[i][4],
+          dish_name: rows[i][5],
+          diet:      rows[i][6]
+        });
+      }
+      return jsonOut({entries: entries});
+    }
+    // ─────────────────────────────────────────
     // ALL LEGACY ACTIONS — UNCHANGED
     // ─────────────────────────────────────────
     if (data.action === "get_profile_data") {
