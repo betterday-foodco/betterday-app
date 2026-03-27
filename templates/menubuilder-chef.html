@@ -82,19 +82,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sc-settings-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);font-size:9px;font-weight:600;padding:6px 10px;border-radius:var(--r);cursor:pointer;transition:all .12s;white-space:nowrap;display:flex;align-items:center;gap:4px}
 .sc-settings-btn:hover{background:rgba(255,255,255,.15);color:white}
 /* Settings dropdown panel */
-.sc-settings-panel{display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--g200);border-top:2px solid var(--navy);box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:25;max-height:400px;overflow-y:auto;border-radius:0 0 8px 8px}
+.sc-settings-panel{display:none;position:absolute;top:100%;left:0;right:0;background:#f8f9fb;border:1px solid var(--g200);border-top:3px solid var(--navy);box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:25;max-height:600px;overflow-y:auto;border-radius:0 0 8px 8px}
 .sc-settings-panel.open{display:block}
-.sc-settings-title{font-size:11px;font-weight:800;color:var(--g900);padding:12px 14px 6px;text-transform:uppercase;letter-spacing:.04em}
-.sc-settings-grid{display:grid;grid-template-columns:1fr auto auto auto;gap:0;padding:0 10px 10px;align-items:center}
-.sc-settings-row{display:contents}
-.sc-settings-cat{font-size:10px;font-weight:600;color:var(--g700);padding:5px 4px;border-bottom:1px solid var(--g100)}
-.sc-settings-hdr{font-size:8px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em;padding:4px 4px 6px;text-align:center}
-.sc-settings-cell{padding:4px;text-align:center;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:center}
-.sc-settings-input{width:36px;padding:3px 4px;border:var(--bd);border-radius:4px;font-size:11px;font-weight:700;text-align:center;font-family:inherit;outline:none;color:var(--g900)}
-.sc-settings-input:focus{border-color:var(--sky)}
-.sc-settings-input:disabled{background:var(--g50);color:var(--g300);border-color:var(--g100)}
-.sc-settings-toggle{width:14px;height:14px;accent-color:var(--navy);cursor:pointer}
-.sc-settings-divider{grid-column:1/-1;height:1px;background:var(--g200);margin:4px 0}
+.sc-settings-panel *{text-transform:none !important;letter-spacing:normal !important}
+.sc-settings-title{font-size:12px;font-weight:700;color:var(--navy);padding:10px 12px 2px}
+/* Settings table */
+.sc-settings-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.sc-settings-tbl th{font-size:10px;font-weight:600;color:var(--g500);padding:4px 8px 4px;text-align:center;border-bottom:1px solid var(--g200);background:#f0f1f4}
+.sc-settings-tbl th:first-child{text-align:left;padding-left:12px}
+.sc-settings-tbl td{padding:4px 8px;border-bottom:1px solid var(--g100);vertical-align:middle}
+.sc-settings-tbl td:first-child{padding-left:12px;font-weight:600;font-size:11px;color:var(--g900)}
+.sc-settings-tbl td:not(:first-child){text-align:center}
+.sc-settings-tbl tr.row-odd td{background:white}
+.sc-settings-tbl tr.row-even td{background:#f0f2f5}
+.sc-settings-tbl tr:hover td{background:#e8ecf2 !important}
+.sc-settings-desc{font-size:9px;color:var(--g400);padding:4px 12px;line-height:1.35;font-weight:400}
+.sc-settings-divider-row td{padding:0;height:4px;border-bottom:2px solid var(--g200);background:#f8f9fb !important}
+/* Stepper */
+.sc-stepper{display:inline-flex;align-items:center;border:1px solid var(--g200);border-radius:5px;overflow:hidden;background:white;height:22px}
+.sc-stepper-btn{width:20px;height:22px;border:none;background:var(--g50);color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s;user-select:none;line-height:1;flex-shrink:0;padding:0}
+.sc-stepper-btn:hover{background:var(--sky);color:white}
+.sc-stepper-val{width:28px;text-align:center;font-size:11px;font-weight:700;color:var(--g900);border:none;border-left:1px solid var(--g200);border-right:1px solid var(--g200);height:22px;font-family:inherit;outline:none;background:white;padding:0}
+.sc-stepper-val:focus{background:#e8f4ff}
+/* Add button */
+.sc-add-btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;border:none;border-radius:5px;background:var(--sky);height:22px;padding:0 10px;cursor:pointer;font-size:9px;font-weight:600;color:white;transition:all .12s;white-space:nowrap}
+.sc-add-btn:hover{background:var(--navy)}
+/* Required count */
+.sc-req-wrap{display:inline-flex;align-items:center;gap:4px}
+.sc-req-label{font-size:9px;color:var(--g400);font-weight:400}
 /* Inline meat/plant display in header */
 .sc-hdr-diet{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:white;padding:3px 8px;border-radius:4px}
 .sc-hdr-diet.meat{background:var(--meat-hdr)}
@@ -158,7 +173,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sc-diet-target{font-size:8px;font-weight:600;opacity:.8}
 
 /* ── Meal column cell ── */
-.dnd-col-cell{border-right:var(--bd);border-bottom:var(--bd);padding:6px;display:flex;flex-direction:column}
+.dnd-col-cell{border-right:var(--bd);border-bottom:var(--bd);padding:6px;display:flex;flex-direction:column;background:#e8eaed}
 .dnd-col-cell:last-child{border-right:none}
 
 /* ── Card wrap (banner + card) ── */
@@ -200,16 +215,45 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-card.pinned-card .dnd-card-actions{display:none !important}
 .dnd-card-wrap .dnd-card-rm,.dnd-card-wrap .dnd-card-dup{display:none !important}
 
-/* ── Consecutive duplicate grouping (purple) ── */
-.dnd-col-cell.dup-first{background:#d8ccfc;border-bottom:none;padding-bottom:0;border-radius:0}
-.dnd-col-cell.dup-mid{background:#d8ccfc;border-bottom:none;padding-bottom:0;padding-top:0;border-radius:0}
-.dnd-col-cell.dup-last{background:#d8ccfc;padding-top:0;border-radius:0}
-.dnd-col-cell.dup-first .dnd-card,.dnd-col-cell.dup-mid .dnd-card,.dnd-col-cell.dup-last .dnd-card{background:white}
-.dnd-col-cell.dup-first .dnd-card-actions,.dnd-col-cell.dup-mid .dnd-card-actions{display:none !important}
+/* ── Consecutive duplicate grouping — visually merged card ── */
+/* Remove cell borders between ALL merged cells so card crosses over */
+.dnd-col-cell.dup-first,.dnd-col-cell.dup-mid{border-bottom:none !important}
 
-/* Duplicate SKU warning — pastel pink background behind card */
-.dnd-col-cell.sku-duplicate{background:#ffb3d9 !important}
-.dnd-col-cell.sku-duplicate .dnd-card{background:white}
+/* FIRST: banner + name, card fills cell and extends into next */
+.dnd-col-cell.dup-first{padding-bottom:0}
+.dnd-col-cell.dup-first .dnd-card-wrap{margin-bottom:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
+.dnd-col-cell.dup-first .dnd-card{border-bottom:none;border-radius:6px 6px 0 0;margin-bottom:0;flex:1;height:auto}
+.dnd-col-cell.dup-first .dnd-banner{border-radius:6px 6px 0 0}
+
+/* MID: card shell continues left/right borders, fills cell height */
+.dnd-col-cell.dup-mid{padding:0 6px}
+.dnd-col-cell.dup-mid .dnd-card-wrap{margin:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
+.dnd-col-cell.dup-mid .dnd-banner{display:none}
+.dnd-col-cell.dup-mid .dnd-card{border-top:none;border-bottom:none;border-radius:0;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab}
+.dnd-col-cell.dup-mid .dnd-card-name,.dnd-col-cell.dup-mid .dnd-card-id{display:none}
+
+/* LAST: card shell closes with bottom border + radius */
+.dnd-col-cell.dup-last{padding:0 6px 6px}
+.dnd-col-cell.dup-last .dnd-card-wrap{margin:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
+.dnd-col-cell.dup-last .dnd-banner{display:none}
+.dnd-col-cell.dup-last .dnd-card{border-top:none;border-radius:0 0 6px 6px;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab}
+.dnd-col-cell.dup-last .dnd-card-name,.dnd-col-cell.dup-last .dnd-card-id{display:none}
+
+/* Action buttons (+/×) at BOTTOM of each cell in a merged chain, on hover */
+.dnd-col-cell.dup-first .dnd-card-actions,
+.dnd-col-cell.dup-mid .dnd-card-actions,
+.dnd-col-cell.dup-last .dnd-card-actions{display:none;position:absolute;bottom:0;top:auto;left:0;right:0;height:16px;z-index:10;border-radius:0}
+.dnd-col-cell.dup-first:hover .dnd-card-actions,
+.dnd-col-cell.dup-mid:hover .dnd-card-actions,
+.dnd-col-cell.dup-last:hover .dnd-card-actions{display:flex}
+.dnd-col-cell.dup-last .dnd-card-actions{border-radius:0 0 6px 6px}
+
+/* Frequency-based: 1st=light neon blue, 2nd=dark neon blue, 3rd=royal blue, 4th+=navy */
+.dnd-col-cell.freq-1{background:#b3ecff !important}
+.dnd-col-cell.freq-2{background:#00bfff !important}
+.dnd-col-cell.freq-3{background:#4169e1 !important}
+.dnd-col-cell.freq-4{background:#003141 !important}
+.dnd-col-cell.freq-1 .dnd-card,.dnd-col-cell.freq-2 .dnd-card,.dnd-col-cell.freq-3 .dnd-card,.dnd-col-cell.freq-4 .dnd-card{background:white}
 
 /* Empty/hole slots */
 .dnd-slot-empty{height:62px;border:1.5px dashed var(--g200);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:4px}
@@ -292,7 +336,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <div class="main">
   <div class="topbar">
     <div class="bc">Menu Builder</div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-ghost" id="undo-btn" onclick="undo()" disabled title="Undo (Ctrl+Z)">↩ Undo</button>
+      <button class="btn-ghost" id="redo-btn" onclick="redo()" disabled title="Redo (Ctrl+Y)">↪ Redo</button>
       <button class="btn-ghost">⬇ Export</button>
       <button class="btn-save">Save</button>
     </div>
@@ -300,7 +346,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <div class="page-head">
     <div>
       <div class="page-title">Menu Builder</div>
-      <div style="font-size:12px;color:var(--g400);margin-top:2px">Rotation queues auto-advance every Sunday · <span id="wi-info" style="color:var(--navy);font-weight:600"></span></div>
+      <div style="font-size:12px;color:var(--g400);margin-top:2px">Weekly menu schedule · <span id="wi-info" style="color:var(--navy);font-weight:600"></span></div>
     </div>
   </div>
 
@@ -711,53 +757,76 @@ function getScRange(key){return scRanges[key]||{max:null,minOn:false,min:null};}
 function isOutOfRange(key,val){
   const r=getScRange(key);
   if(r.max!==null && val>r.max) return true;
-  if(r.minOn && r.min!==null && val<r.min) return true;
+  if(r.min!==null && val<r.min) return true;
   return false;
 }
 function toggleScSettings(){
   scSettingsOpen=!scSettingsOpen;
   renderDnDGrid();
 }
-function setScMax(key,val){scRanges[key].max=val===''?null:parseInt(val);renderDnDGrid();}
-function setScMin(key,val){scRanges[key].min=val===''?null:parseInt(val);renderDnDGrid();}
-function toggleScMinOn(key,on){scRanges[key].minOn=on;if(!on)scRanges[key].min=null;renderDnDGrid();}
+function setScMax(key,val){const n=val===''?null:parseInt(val);scRanges[key].max=(n===0?null:n);const p=document.querySelector('.sc-settings-panel');if(p)p.innerHTML=buildSettingsInner();}
+function setScMin(key,val){const n=val===''?null:parseInt(val);scRanges[key].min=(n===0?null:n);scRanges[key].minOn=n!==null&&n!==0;const p=document.querySelector('.sc-settings-panel');if(p)p.innerHTML=buildSettingsInner();}
 
-function buildSettingsPanel(){
-  let html=`<div class="sc-settings-panel open" onclick="event.stopPropagation()">
-    <div class="sc-settings-title">Scorecard Ranges</div>
-    <div class="sc-settings-grid">
-      <div class="sc-settings-hdr" style="text-align:left">Category</div>
-      <div class="sc-settings-hdr">Max</div>
-      <div class="sc-settings-hdr">Min</div>
-      <div class="sc-settings-hdr">On</div>`;
 
-  // Regular stat rows
-  const statKeys=[...SC_GRID_ROW1.map(c=>c.key),...SC_GRID_ROW2.map(c=>c.key)];
-  statKeys.forEach(k=>{
+function _stepper(key,type){
+  const r=getScRange(key);
+  const val=type==='max'?r.max:r.min;
+  const lbl=type==='max'?'+ max':'+ min';
+  if(val===null||val===0){
+    return `<button class="sc-add-btn" onclick="event.preventDefault();scStep('${key}','${type}',1)">${lbl}</button>`;
+  }
+  const fn=type==='max'?'setScMax':'setScMin';
+  return `<div class="sc-stepper"><button class="sc-stepper-btn" onclick="event.preventDefault();scStep('${key}','${type}',-1)">−</button><input class="sc-stepper-val" type="text" inputmode="numeric" value="${val}" onchange="${fn}('${key}',this.value)"/><button class="sc-stepper-btn" onclick="event.preventDefault();scStep('${key}','${type}',1)">+</button></div>`;
+}
+function scStep(key,type,delta){
+  const r=getScRange(key);
+  let cur=type==='max'?r.max:r.min;
+  if(cur===null) cur=0;
+  const nv=Math.max(0,cur+delta);
+  if(nv===0){if(type==='max')r.max=null;else{r.min=null;r.minOn=false;}}
+  else{if(type==='max')r.max=nv;else{r.min=nv;r.minOn=true;}}
+  const p=document.querySelector('.sc-settings-panel');
+  if(p)p.innerHTML=buildSettingsInner();
+}
+function setScReq(key,val){
+  const n=val===''?null:parseInt(val);
+  scRanges[key].max=n;scRanges[key].min=n;scRanges[key].minOn=n!==null;
+  const p=document.querySelector('.sc-settings-panel');
+  if(p)p.innerHTML=buildSettingsInner();
+}
+function buildSettingsInner(){
+  let h=`<div class="sc-settings-title">Set min / max</div>`;
+
+  // Meat/Plant — single "required per week" input
+  h+=`<table class="sc-settings-tbl"><tbody>`;
+  h+=`<tr><td colspan="3" class="sc-settings-desc" style="padding:4px 12px 6px">Meat and plant dish targets per week. The count flashes red if it doesn't match.</td></tr>`;
+  ['mt','pl'].forEach((k,i)=>{
     const r=getScRange(k);
-    const lbl=SC_ALL_LABELS[k]||k;
-    html+=`<div class="sc-settings-cat">${lbl}</div>
-      <div class="sc-settings-cell"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.max!==null?r.max:''}" placeholder="—" onchange="setScMax('${k}',this.value)"/></div>
-      <div class="sc-settings-cell"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.min!==null?r.min:''}" placeholder="—" ${!r.minOn?'disabled':''} onchange="setScMin('${k}',this.value)"/></div>
-      <div class="sc-settings-cell"><input class="sc-settings-toggle" type="checkbox" ${r.minOn?'checked':''} onchange="toggleScMinOn('${k}',this.checked)"/></div>`;
+    const lbl=k==='mt'?'Meat dishes':'Plant dishes';
+    const val=r.max!==null?r.max:'';
+    const accent=k==='mt'?'var(--meat-hdr)':'var(--vegan-hdr)';
+    h+=`<tr><td style="border-left:3px solid ${accent}">${lbl}</td><td colspan="2" style="text-align:center"><div class="sc-req-wrap"><div class="sc-stepper"><button class="sc-stepper-btn" onclick="event.preventDefault();setScReq('${k}',${(r.max||1)-1})">−</button><input class="sc-stepper-val" type="text" inputmode="numeric" value="${val}" placeholder="—" onchange="setScReq('${k}',this.value)"/><button class="sc-stepper-btn" onclick="event.preventDefault();setScReq('${k}',${(r.max||0)+1})">+</button></div><span class="sc-req-label">per week</span></div></td></tr>`;
   });
 
   // Divider
-  html+=`<div class="sc-settings-divider"></div>`;
+  h+=`<tr class="sc-settings-divider-row"><td colspan="3"></td></tr>`;
 
-  // Meat/Plant rows (highlighted)
-  ['mt','pl'].forEach(k=>{
-    const r=getScRange(k);
-    const lbl=k==='mt'?'Meat Dishes':'Plant Dishes';
-    const bg=k==='mt'?'var(--meat-bg)':'#e2f5dc';
-    html+=`<div class="sc-settings-cat" style="background:${bg};font-weight:700">${lbl}</div>
-      <div class="sc-settings-cell" style="background:${bg}"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.max!==null?r.max:''}" placeholder="—" onchange="setScMax('${k}',this.value)"/></div>
-      <div class="sc-settings-cell" style="background:${bg}"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.min!==null?r.min:''}" placeholder="—" ${!r.minOn?'disabled':''} onchange="setScMin('${k}',this.value)"/></div>
-      <div class="sc-settings-cell" style="background:${bg}"><input class="sc-settings-toggle" type="checkbox" ${r.minOn?'checked':''} onchange="toggleScMinOn('${k}',this.checked)"/></div>`;
+  // Description + category header
+  h+=`<tr><td colspan="3" class="sc-settings-desc" style="padding:4px 12px 2px">Set limits per category. The cell turns red when it goes above max or below min. Without limits, cells shade naturally — darker red means a higher count.</td></tr>`;
+  h+=`<tr><th style="text-align:left;padding-left:12px">Category</th><th>Max</th><th>Min</th></tr>`;
+
+  // Category rows
+  const statKeys=[...SC_GRID_ROW1.map(c=>c.key),...SC_GRID_ROW2.map(c=>c.key)];
+  statKeys.forEach((k)=>{
+    const lbl=SC_ALL_LABELS[k]||k;
+    h+=`<tr><td>${lbl}</td><td>${_stepper(k,'max')}</td><td>${_stepper(k,'min')}</td></tr>`;
   });
 
-  html+=`</div></div>`;
-  return html;
+  h+=`</tbody></table>`;
+  return h;
+}
+function buildSettingsPanel(){
+  return `<div class="sc-settings-panel open" onclick="event.stopPropagation()">${buildSettingsInner()}</div>`;
 }
 const COL_COLORS = ['#9f3a38','#dc2626','#e04994','#003141','#2d5fa6','#4EA2FD','#2d7a4f','#0d9488','#7c3aed','#d97706','#475569','#92400e'];
 const PICKER_COLORS = ['#9f3a38','#2d5fa6','#2d7a4f','#0d9488','#7c3aed','#d97706'];
@@ -770,6 +839,50 @@ function initDnDGrid(){
     window.dndGrid[col.id] = q.map(item=>item.dishId);
   });
 }
+
+// ── Undo / Redo ──
+const undoStack=[];
+const redoStack=[];
+function _snapshot(){
+  return JSON.parse(JSON.stringify({grid:window.dndGrid,toggles:dndToggles,pinned:dndPinnedCols}));
+}
+function _restore(snap){
+  window.dndGrid=snap.grid;
+  dndToggles=snap.toggles||{};
+  dndPinnedCols=snap.pinned||{};
+  dndRemoveHole();dndTrimRows();
+}
+function saveUndoState(){
+  undoStack.push(_snapshot());
+  if(undoStack.length>50) undoStack.shift();
+  redoStack.length=0;
+  updateUndoButtons();
+}
+function undo(){
+  if(!undoStack.length) return;
+  redoStack.push(_snapshot());
+  _restore(undoStack.pop());
+  updateUndoButtons();
+  renderDnDGrid();
+}
+function redo(){
+  if(!redoStack.length) return;
+  undoStack.push(_snapshot());
+  _restore(redoStack.pop());
+  updateUndoButtons();
+  renderDnDGrid();
+}
+function updateUndoButtons(){
+  const ub=document.getElementById('undo-btn');
+  const rb=document.getElementById('redo-btn');
+  if(ub) ub.disabled=!undoStack.length;
+  if(rb) rb.disabled=!redoStack.length;
+}
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){e.preventDefault();undo();}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.key==='z'&&e.shiftKey))){e.preventDefault();redo();}
+});
 
 function getMaxRows(){
   let max=0;
@@ -794,6 +907,7 @@ function toggleDiet(dishId, side){
   const t=dndToggles[dishId];
   if(side==='meat' && !t.meatOff && t.plantOff){showToggleWarning();return;}
   if(side==='plant' && !t.plantOff && t.meatOff){showToggleWarning();return;}
+  saveUndoState();
   if(side==='meat') t.meatOff=!t.meatOff;
   else t.plantOff=!t.plantOff;
   renderDnDGrid();
@@ -810,6 +924,7 @@ function showToggleWarning(){
 function togglePin(colId){
   const arr=window.dndGrid[colId]||[];
   if(arr.length>1 && !dndPinnedCols[colId]) return; // can't pin if >1 dish
+  saveUndoState();
   if(dndPinnedCols[colId]) delete dndPinnedCols[colId];
   else dndPinnedCols[colId]=true;
   renderDnDGrid();
@@ -831,6 +946,7 @@ function deleteCol(colId){
   const arr=window.dndGrid[colId]||[];
   const count=arr.filter(d=>d&&d!==HOLE).length;
   if(count>0 && !confirm(`Delete column with ${count} dishes? They'll return to unassigned.`)) return;
+  saveUndoState();
   delete window.dndGrid[colId];
   delete dndPinnedCols[colId];
   const idx=COLUMNS.findIndex(c=>c.id===colId);
@@ -838,6 +954,7 @@ function deleteCol(colId){
   autoLock();
 }
 function addColumn(){
+  saveUndoState();
   const id='col-'+Date.now();
   COLUMNS.push({id,name:'New Column',short:'NEW',color:'#475569'});
   window.dndGrid[id]=[];
@@ -898,6 +1015,7 @@ function colDrop(e,targetColId){
   const toIdx=COLUMNS.findIndex(c=>c.id===targetColId);
   if(fromIdx<0||toIdx<0){colDragEnd(e);return;}
   // Reorder COLUMNS array
+  saveUndoState();
   const [moved]=COLUMNS.splice(fromIdx,1);
   COLUMNS.splice(toIdx,0,moved);
   colDragId=null;
@@ -1005,7 +1123,7 @@ function buildDnDHTML(){
   html+=`<div class="dnd-hdr-cell sc-hdr" style="position:sticky;left:0;z-index:11">
     <div class="dnd-sc-hdr-left"><span class="dnd-sc-hdr-title">Scorecard</span></div>
     <div class="sc-hdr-btns">
-      <button class="sc-settings-btn" onclick="event.stopPropagation();toggleScSettings()">⚙ Settings</button>
+      <button class="sc-settings-btn" onclick="event.stopPropagation();toggleScSettings()">⚙ Set Min/Max</button>
       <button class="dnd-unassigned-btn" onclick="toggleDnDDrawer()">▾ View All Meals</button>
     </div>
     ${scSettingsOpen?buildSettingsPanel():''}
@@ -1029,23 +1147,24 @@ function buildDnDHTML(){
     <div style="font-size:14px;cursor:pointer;color:var(--g500)" onclick="addColumn()" title="Add column">+</div>
   </div>`;
 
-  // ── Global duplicate detection: find dishes in multiple columns ──
-  // Count how many DIFFERENT columns each dish appears in (exclude pinned ghost rows)
-  const globalSkuCols={};  // dishId -> Set of colIds where it actually exists (not pinned)
-  COLUMNS.forEach(col=>{
-    const arr=window.dndGrid[col.id]||[];
-    const seen=new Set(); // track unique dishes in this column (ignore consecutive dups)
-    arr.forEach(did=>{
-      if(did&&did!==HOLE&&!seen.has(did)){
-        seen.add(did);
-        if(!globalSkuCols[did]) globalSkuCols[did]=new Set();
-        globalSkuCols[did].add(col.id);
-      }
+  // ── Frequency tracking: count each dish occurrence scanning top-to-bottom, left-to-right ──
+  // Build a map of (dishId) -> ordered list of {row, colIdx} positions
+  const dishPositions={};  // dishId -> [{row, colIdx}, ...]
+  for(let rr=0;rr<numRows;rr++){
+    COLUMNS.forEach((col,ci)=>{
+      const arr=window.dndGrid[col.id]||[];
+      let did=arr[rr]||null;
+      if(!did||did===HOLE) return;
+      if(!dishPositions[did]) dishPositions[did]=[];
+      dishPositions[did].push({row:rr,colIdx:ci});
     });
-  });
-  const globalDupSkus=new Set();
-  Object.entries(globalSkuCols).forEach(([did,cols])=>{
-    if(cols.size>1) globalDupSkus.add(did);
+  }
+  // Build lookup: "row,colIdx" -> occurrence number (1-based)
+  const freqLookup={};  // "row,colIdx" -> 1,2,3,4...
+  Object.values(dishPositions).forEach(positions=>{
+    positions.forEach((pos,idx)=>{
+      freqLookup[pos.row+','+pos.colIdx]=idx+1;
+    });
   });
 
   // ── Data rows ──
@@ -1117,30 +1236,22 @@ function buildDnDHTML(){
       else if(sameAsPrev) cellDup=' dup-last';
       else if(sameAsNext) cellDup=' dup-first';
 
-      // Global duplicate: dish exists in a DIFFERENT column somewhere on the grid
-      // But DON'T show green if this cell is part of a consecutive vertical group (purple takes priority)
-      const isInConsecutiveGroup=cellDup!==''; // dup-first, dup-mid, or dup-last
-      const isGlobalDup=dishId&&dishId!==HOLE&&!isPinned&&globalDupSkus.has(dishId)&&!isInConsecutiveGroup;
-
-      // Also check: same dish in same column but NOT consecutive (gap between them) → green
-      let isSameColGap=false;
+      // Frequency-based coloring (after purple consecutive logic)
+      // Only color dishes that appear 2+ times total; single-appearance stays white
+      const isInConsecutiveGroup=cellDup!=='';
+      let freqClass='';
       if(dishId&&dishId!==HOLE&&!isPinned&&!isInConsecutiveGroup){
-        // Check if this dish appears elsewhere in the same column non-consecutively
-        let foundElsewhere=false;
-        for(let rr=0;rr<arr.length;rr++){
-          if(rr===r) continue;
-          if(arr[rr]===dishId){
-            // Check if it's NOT adjacent
-            if(Math.abs(rr-r)>1){foundElsewhere=true;break;}
-            // If adjacent, only flag if there's a different dish between them (shouldn't happen if consecutive)
-          }
+        const totalAppearances=(dishPositions[dishId]||[]).length;
+        if(totalAppearances>=2){
+          const occ=freqLookup[r+','+ci]||1;
+          if(occ>=4) freqClass=' freq-4';
+          else if(occ===3) freqClass=' freq-3';
+          else if(occ===2) freqClass=' freq-2';
+          else freqClass=' freq-1'; // 1st of a multi-appearance dish
         }
-        if(foundElsewhere) isSameColGap=true;
       }
 
-      const showDupWarning=isGlobalDup||isSameColGap;
-
-      html+=`<div class="dnd-col-cell${isHole?' dnd-hole':''}${cellDup}${showDupWarning?' sku-duplicate':''}" style="grid-column:${ci+2}" data-row="${r}" data-col="${col.id}">`;
+      html+=`<div class="dnd-col-cell${isHole?' dnd-hole':''}${cellDup}${freqClass}" style="grid-column:${ci+2}" data-row="${r}" data-col="${col.id}">`;
       if(isHole){
         html+=`<div class="dnd-slot-hole"></div>`;
       } else if(dishId){
@@ -1248,6 +1359,7 @@ function setupDnDEvents(){
     e.preventDefault();
     const dishId=e.dataTransfer.getData('dishId');
     if(!dishId) return;
+    saveUndoState();
     dndReplaceHole(dishId);
     dndDrag={};dndSnapshot=null;
     dndRemoveHole();dndTrimRows();renderDnDGrid();
@@ -1264,6 +1376,7 @@ function setupDnDEvents(){
       e.stopPropagation();
       const card=dup.closest('.dnd-card');
       const r=parseInt(card.dataset.row);const colId=card.dataset.col;const dishId=card.dataset.dishId;
+      saveUndoState();
       dndInsertAt(colId,r+1,dishId);
       renderDnDGrid();return;
     }
@@ -1272,6 +1385,7 @@ function setupDnDEvents(){
       e.stopPropagation();
       const card=rm.closest('.dnd-card');
       const r=parseInt(card.dataset.row);const colId=card.dataset.col;const dishId=card.dataset.dishId;
+      saveUndoState();
       dndRemoveAndCompact(colId,r);
       // Clear toggle on remove
       delete dndToggles[dishId];
@@ -1520,6 +1634,7 @@ function renderPairList(filter){
 
 function assignPair(plantId){
   if(!pairModalMeatId)return;
+  saveUndoState();
   OMNI_PAIRS[pairModalMeatId]=plantId;
   OMNI_REVERSE[plantId]=pairModalMeatId;
   closePairModal();renderDnDGrid();
