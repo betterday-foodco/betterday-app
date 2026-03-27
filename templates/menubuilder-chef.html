@@ -1132,7 +1132,7 @@ function buildDnDHTML(){
     html+=`<div class="dnd-hdr-cell" style="background:${col.color||'#475569'};grid-column:${ci+2}" data-col-id="${col.id}" ${colUnlocked?'draggable="true" ondragstart="colDragStart(event,\''+col.id+'\')" ondragover="colDragOver(event,\''+col.id+'\')" ondrop="colDrop(event,\''+col.id+'\')" ondragend="colDragEnd(event)"':''}>
       ${colUnlocked?`<input class="col-name-input" value="${col.short||col.name}" onchange="renameCol('${col.id}',this.value)" onclick="event.stopPropagation()" ondragstart="event.stopPropagation()"/>`:(col.short||col.name)}
       ${canPin?`<button class="dnd-pin-btn${pinned?' pinned':''}" onclick="togglePin('${col.id}')" title="${pinned?'Unpin':'Pin'}">∞</button>`:''}
-      <div class="col-edit-dot" style="background:${col.color||'#475569'};border-color:rgba(255,255,255,.5)" onclick="event.stopPropagation();showColorPicker('${col.id}',this)" ondragstart="event.preventDefault();event.stopPropagation()" onmousedown="event.stopPropagation()" draggable="false"></div>
+      <div class="col-edit-dot" style="background:${col.color||'#475569'};border-color:rgba(255,255,255,.5)" onclick="event.stopPropagation();event.preventDefault();showColorPicker('${col.id}',this)" ondragstart="event.preventDefault();event.stopPropagation();return false" onmousedown="event.stopPropagation();event.preventDefault()" draggable="false"></div>
       <button class="col-del-btn" onclick="event.stopPropagation();deleteCol('${col.id}')">×</button>
     </div>`;
   });
