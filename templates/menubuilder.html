@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetterDay Kitchen — Menu Builder</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#003141;--yellow:#FFC600;--sky:#4EA2FD;--green:#6BBD52;
+  --sw:200px;
+  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g700:#374151;--g900:#111827;
+  --bd:1px solid #e5e7eb;--r:6px;--rlg:10px;
+  --meat-hdr:#9f3a38;--meat-bg:#fff0f0;--meat-bdr:#f4a8a6;--meat-col:#c0514f;
+  --omni-hdr:#2d5fa6;--omni-bg:#eff5ff;--omni-bdr:#93b8f0;--omni-col:#3d72c4;
+  --vegan-hdr:#2d7a4f;--vegan-bg:#f0faf4;--vegan-bdr:#7ecba0;--vegan-col:#3a9460;
+  --col-w:128px;
+}
+/* ── APP SHELL ── */
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--g900);background:var(--g50);display:flex;height:100vh;overflow:hidden;max-width:100vw}
+.sidebar{width:var(--sw);background:white;border-right:var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow:hidden}
+.sl{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:var(--bd)}
+.lb{width:32px;height:32px;background:var(--yellow);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy)}
+.sn{flex:1;padding:8px 0;overflow-y:auto;overflow-x:hidden}
+.ni{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:var(--g500);cursor:pointer;text-decoration:none;transition:background .12s,color .12s}
+.ni:hover{background:var(--g50);color:var(--g900)}
+.ni.active{background:#fff0f0;color:var(--meat-hdr);font-weight:500}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.ni.active svg{opacity:1}
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;max-width:calc(100vw - var(--sw))}
+.topbar{background:white;border-bottom:var(--bd);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:50;overflow:hidden}
+.bc{font-size:13px;color:var(--g400)}
+.btn-save{background:var(--green);color:white;border:none;padding:8px 20px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
+.btn-save:hover{background:#5aa843}
+.btn-ghost{background:white;border:var(--bd);padding:7px 14px;border-radius:var(--r);font-size:12px;color:var(--g500);cursor:pointer}
+.btn-ghost:hover{background:var(--g50)}
+.page-head{padding:12px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;overflow:hidden}
+.page-title{font-size:22px;font-weight:800;color:var(--g900);letter-spacing:-.01em}
+
+/* ══ DND WRAP ══ */
+.dnd-wrap{flex:1;min-height:0;margin:0 24px;border:var(--bd);border-radius:var(--rlg);background:white;overflow:auto;position:relative}
+
+/* ── Overlay dish pool drawer ── */
+.dnd-drawer{position:absolute;top:0;left:0;bottom:0;width:380px;background:white;border-right:2px solid var(--navy);box-shadow:4px 0 20px rgba(0,0,0,.15);z-index:20;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .25s ease}
+.dnd-drawer.open{transform:translateX(0)}
+.dnd-drawer-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:var(--bd);flex-shrink:0;background:var(--navy);color:white}
+.dnd-drawer-title{font-size:13px;font-weight:700}
+.dnd-drawer-close{background:none;border:none;color:rgba(255,255,255,.7);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1}
+.dnd-drawer-close:hover{color:white}
+.dnd-drawer-search{padding:8px 10px;border-bottom:var(--bd);flex-shrink:0}
+.dnd-drawer-search input{width:100%;padding:6px 10px;border:var(--bd);border-radius:var(--r);font-size:12px;outline:none;font-family:inherit}
+.dnd-drawer-cols{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;overflow:hidden;min-height:0}
+.dnd-drawer-col{display:flex;flex-direction:column;border-right:var(--bd);overflow:hidden}
+.dnd-drawer-col:last-child{border-right:none}
+.dnd-drawer-col-body{flex:1;overflow-y:auto;padding:4px 4px 20px}
+.pool-col-hdr{padding:7px 8px 5px;flex-shrink:0}
+.pool-col-hdr.meat{background:var(--meat-bg);border-bottom:1px solid var(--meat-bdr)}
+.pool-col-hdr.omni{background:var(--omni-bg);border-bottom:1px solid var(--omni-bdr)}
+.pool-col-hdr.vegan{background:var(--vegan-bg);border-bottom:1px solid var(--vegan-bdr)}
+.pool-col-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.pool-col-lbl.meat{color:var(--meat-hdr)}.pool-col-lbl.omni{color:var(--omni-hdr)}.pool-col-lbl.vegan{color:var(--vegan-hdr)}
+.pool-col-cnt{font-size:9px;color:var(--g400);margin-top:1px}
+.dish-card{background:white;border:var(--bd);border-radius:var(--r);padding:6px 8px;margin-bottom:4px;cursor:grab;user-select:none;transition:box-shadow .12s,transform .1s}
+.dish-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);transform:translateY(-1px)}
+.dish-card.dragging{opacity:.3}
+.dc-name{font-size:11px;font-weight:600;color:var(--g900);line-height:1.3}
+.dc-id{font-size:9px;color:var(--g400);font-family:monospace;margin-top:1px}
+
+/* ── CSS Grid layout ── */
+.dnd-grid{display:grid;width:max-content}
+.dnd-hdr-cell{padding:7px 10px;text-align:center;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:white;position:sticky;top:0;z-index:10;min-height:44px;display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(255,255,255,.15);position:relative}
+.dnd-hdr-cell:last-child{border-right:none}
+.dnd-hdr-cell.sc-hdr{background:var(--navy);justify-content:space-between;padding:7px 12px}
+.dnd-sc-hdr-left{display:flex;align-items:center;gap:6px}
+.dnd-sc-hdr-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+/* View All Meals button */
+.dnd-unassigned-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);font-size:9px;font-weight:600;padding:6px 14px;border-radius:var(--r);cursor:pointer;transition:all .12s;white-space:nowrap;display:flex;align-items:center;gap:5px;line-height:1.2;text-align:center}
+.dnd-unassigned-btn:hover{background:rgba(255,255,255,.15);color:white}
+/* Scorecard header buttons bar */
+.sc-hdr-btns{display:flex;align-items:center;gap:6px;margin-left:auto}
+/* Settings button */
+.sc-settings-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);font-size:9px;font-weight:600;padding:6px 10px;border-radius:var(--r);cursor:pointer;transition:all .12s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.sc-settings-btn:hover{background:rgba(255,255,255,.15);color:white}
+/* Settings dropdown panel */
+.sc-settings-panel{display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--g200);border-top:2px solid var(--navy);box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:25;max-height:400px;overflow-y:auto;border-radius:0 0 8px 8px}
+.sc-settings-panel.open{display:block}
+.sc-settings-title{font-size:11px;font-weight:800;color:var(--g900);padding:12px 14px 6px;text-transform:uppercase;letter-spacing:.04em}
+.sc-settings-grid{display:grid;grid-template-columns:1fr auto auto auto;gap:0;padding:0 10px 10px;align-items:center}
+.sc-settings-row{display:contents}
+.sc-settings-cat{font-size:10px;font-weight:600;color:var(--g700);padding:5px 4px;border-bottom:1px solid var(--g100)}
+.sc-settings-hdr{font-size:8px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.05em;padding:4px 4px 6px;text-align:center}
+.sc-settings-cell{padding:4px;text-align:center;border-bottom:1px solid var(--g100);display:flex;align-items:center;justify-content:center}
+.sc-settings-input{width:36px;padding:3px 4px;border:var(--bd);border-radius:4px;font-size:11px;font-weight:700;text-align:center;font-family:inherit;outline:none;color:var(--g900)}
+.sc-settings-input:focus{border-color:var(--sky)}
+.sc-settings-input:disabled{background:var(--g50);color:var(--g300);border-color:var(--g100)}
+.sc-settings-toggle{width:14px;height:14px;accent-color:var(--navy);cursor:pointer}
+.sc-settings-divider{grid-column:1/-1;height:1px;background:var(--g200);margin:4px 0}
+/* Inline meat/plant display in header */
+.sc-hdr-diet{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:white;padding:3px 8px;border-radius:4px}
+.sc-hdr-diet.meat{background:var(--meat-hdr)}
+.sc-hdr-diet.plant{background:#2D6A4F}
+/* Pin button */
+.dnd-pin-btn{position:absolute;top:4px;right:4px;background:none;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.5);font-size:9px;width:18px;height:18px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;line-height:1}
+.dnd-pin-btn:hover{background:rgba(255,255,255,.15);color:white}
+.dnd-pin-btn.pinned{background:#4EA2FD;color:white;border-color:#4EA2FD}
+/* Column header editable state */
+.dnd-hdr-cell .col-name-input{background:transparent;border:none;border-bottom:1px dashed rgba(255,255,255,.4);color:white;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:center;width:80%;outline:none;font-family:inherit;padding:2px 0}
+/* Lock/unlock toggle */
+.col-lock-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);font-size:11px;width:24px;height:24px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.col-lock-btn:hover{background:rgba(255,255,255,.15);color:white}
+.col-lock-btn.unlocked{background:rgba(255,198,0,.2);border-color:rgba(255,198,0,.4);color:var(--yellow)}
+/* Column edit controls (visible when unlocked) */
+.col-edit-dot{display:none;position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;border:1px solid rgba(255,255,255,.3);cursor:pointer;transition:all .12s}
+.col-edit-dot:hover{transform:translateX(-50%) scale(1.3)}
+.col-del-btn{display:none;position:absolute;top:2px;right:2px;background:rgba(0,0,0,.3);border:none;color:rgba(255,255,255,.7);font-size:9px;width:14px;height:14px;border-radius:50%;cursor:pointer;line-height:1;align-items:center;justify-content:center}
+.col-del-btn:hover{background:rgba(220,38,38,.8);color:white}
+.col-unlocked .col-edit-dot{display:block}
+.col-unlocked .col-del-btn{display:flex}
+.col-unlocked .dnd-hdr-cell:not(.sc-hdr):not(.add-col-hdr){cursor:grab;outline:1px dashed rgba(255,255,255,.3);outline-offset:-2px}
+/* Add column header */
+.add-col-hdr{background:var(--g300) !important;cursor:pointer !important;min-width:40px;width:40px;border:none}
+.add-col-hdr:hover{background:var(--g400) !important}
+/* Color picker popup */
+.color-picker-popup{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);padding:8px;z-index:30;margin-bottom:4px}
+.color-picker-popup.open{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.color-swatch{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:all .1s}
+.color-swatch:hover{transform:scale(1.15);border-color:var(--navy)}
+
+/* ── Scorecard cell ── */
+.dnd-sc-cell{border-right:var(--bd);border-bottom:var(--bd);background:white;min-width:380px;width:380px;position:sticky;left:0;z-index:5}
+.dnd-sc-cell.has-shadow{box-shadow:6px 0 16px rgba(0,0,0,.1)}
+.dnd-sc-inner{display:flex;flex-direction:column;height:100%}
+.dnd-sc-wk-hdr{display:flex;align-items:center;gap:5px;padding:4px 8px;background:#1a5568;color:white;flex-shrink:0}
+.dnd-sc-wk-hdr .sc-wk-num{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;opacity:.6}
+.dnd-sc-wk-hdr .sc-wk-date{font-size:10px;font-weight:700}
+.sc-wk-badge{font-size:7px;font-weight:700;padding:1px 5px;border-radius:20px;white-space:nowrap}
+.sc-wk-badge.cur{background:var(--green);color:white}
+.dnd-sc-wk-hdr .sc-wk-ps{margin-left:auto;display:flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px}
+.dnd-sc-wk-hdr .sc-wk-ps-lbl{font-size:7px;opacity:.7;text-transform:uppercase;letter-spacing:.04em}
+.sc-swap-btn{font-size:8px;font-weight:700;padding:2px 8px;border:1px solid rgba(255,255,255,.25);border-radius:20px;background:transparent;color:rgba(255,255,255,.8);cursor:pointer;transition:all .12s;white-space:nowrap;margin-left:4px}
+.sc-swap-btn:hover{background:rgba(255,255,255,.15);color:white}
+/* Scorecard grid — 7 cols: 6 stats + diet */
+.dnd-sc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;padding:3px 6px;flex:1;align-content:center}
+.sc-tile{border-radius:3px;padding:2px 2px 1px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.sc-tile-lbl{font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sc-tile-val{font-size:11px;font-weight:800;line-height:1}
+.dnd-sc-incomplete{background:var(--g100);color:var(--g400);flex:1;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:6px}
+/* MT/PL diet tiles */
+.sc-diet-tile{border-radius:3px;padding:2px 2px 1px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.sc-diet-tile.meat-count{background:var(--meat-hdr)}
+.sc-diet-tile.meat-count .sc-tile-lbl{color:rgba(255,255,255,.9);font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.sc-diet-tile.meat-count .sc-tile-val{color:#fff;font-size:11px;font-weight:800;line-height:1}
+.sc-diet-tile.plant-count{background:#2D6A4F}
+.sc-diet-tile.plant-count .sc-tile-lbl{color:rgba(255,255,255,.9);font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.sc-diet-tile.plant-count .sc-tile-val{color:#fff;font-size:11px;font-weight:800;line-height:1}
+.sc-diet-tile.mismatch{background:#ff0040 !important;animation:mismatch-flash .6s ease-in-out infinite;box-shadow:0 0 8px rgba(255,0,64,.6)}
+@keyframes mismatch-flash{0%,100%{background:#ff0040 !important;box-shadow:0 0 8px rgba(255,0,64,.6)}50%{background:#ff4d7a !important;box-shadow:0 0 16px rgba(255,0,64,.9)}}
+.sc-diet-target{font-size:8px;font-weight:600;opacity:.8}
+
+/* ── Meal column cell ── */
+.dnd-col-cell{border-right:var(--bd);border-bottom:var(--bd);padding:6px;display:flex;flex-direction:column}
+.dnd-col-cell:last-child{border-right:none}
+
+/* ── Card wrap (banner + card) ── */
+.dnd-card-wrap{display:flex;flex-direction:column;margin-bottom:4px;flex-shrink:0;position:relative}
+.dnd-card-wrap .dnd-card{margin-bottom:0;border-radius:0 0 6px 6px}
+/* Diet banner */
+.dnd-banner{display:flex;width:100%;height:16px;border-radius:6px 6px 0 0;overflow:hidden;flex-shrink:0}
+.dnd-banner-meat{background:#d4605e;flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #b84a48}
+.dnd-banner-meat .dnd-banner-id{color:#4a1514}
+.dnd-banner-vegan{background:#6bbe6a;flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #4da34c}
+.dnd-banner-vegan .dnd-banner-id{color:#1a3d1a}
+.dnd-banner-half{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;border-bottom:1px solid transparent;position:relative}
+.dnd-banner-half.meat-side{background:#d4605e;border-bottom-color:#b84a48}
+.dnd-banner-half.meat-side .dnd-banner-id{color:#4a1514}
+.dnd-banner-half.plant-side{background:#6bbe6a;border-bottom-color:#4da34c}
+.dnd-banner-half.plant-side .dnd-banner-id{color:#1a3d1a}
+.dnd-banner-half.off{background:#555 !important;border-bottom-color:#444 !important}
+.dnd-banner-half.off .dnd-banner-id{color:#999 !important;text-decoration:line-through}
+.dnd-banner-id{font-size:7px;font-weight:700;font-family:monospace;letter-spacing:.02em;line-height:1}
+.dnd-banner-half.missing{background:#00ffd5;border-bottom-color:#00e6bf;cursor:pointer}
+.dnd-banner-half.missing .dnd-banner-id{color:#003d33;font-style:italic;text-decoration:none}
+.dnd-banner-half.missing:hover{background:#33ffe0}
+
+/* ── Meal card ── */
+.dnd-card{background:white;border:1px solid var(--g200);border-radius:var(--r);padding:6px 8px 14px 10px;display:flex;flex-direction:column;gap:0;position:relative;cursor:grab;user-select:none;transition:box-shadow .12s,transform .1s;height:62px;overflow:hidden;margin-bottom:4px;flex-shrink:0}
+.dnd-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.1);transform:translateY(-1px)}
+.dnd-card.dragging{opacity:.15}
+.dnd-card.pinned-card{opacity:.5;border-style:dashed;cursor:default;background:#e8f4fd}
+.dnd-card.gluten-card{background:#ede4b5}
+.dnd-card-name{font-size:12px;font-weight:700;color:var(--g900);line-height:1.15;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.dnd-card-id{position:absolute;bottom:3px;right:7px;font-size:7px;color:var(--g300);font-family:monospace;line-height:1}
+/* Action bar inside card — split +/x */
+.dnd-card-actions{display:none;position:absolute;bottom:0;left:0;right:0;height:16px;overflow:hidden;z-index:2;border-radius:0 0 5px 5px}
+.dnd-card:hover .dnd-card-actions{display:flex}
+.dnd-action-btn{flex:1;border:none;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:filter .12s}
+.dnd-action-btn:hover{filter:brightness(.88)}
+.dnd-action-dup{background:#e8dff5;color:#7c3aed}
+.dnd-action-rm{background:var(--g200);color:var(--g500)}
+.dnd-card.pinned-card .dnd-card-actions{display:none !important}
+.dnd-card-wrap .dnd-card-rm,.dnd-card-wrap .dnd-card-dup{display:none !important}
+
+/* ── Consecutive duplicate grouping (purple) ── */
+.dnd-col-cell.dup-first{background:#d8ccfc;border-bottom:none;padding-bottom:0;border-radius:0}
+.dnd-col-cell.dup-mid{background:#d8ccfc;border-bottom:none;padding-bottom:0;padding-top:0;border-radius:0}
+.dnd-col-cell.dup-last{background:#d8ccfc;padding-top:0;border-radius:0}
+.dnd-col-cell.dup-first .dnd-card,.dnd-col-cell.dup-mid .dnd-card,.dnd-col-cell.dup-last .dnd-card{background:white}
+.dnd-col-cell.dup-first .dnd-card-actions,.dnd-col-cell.dup-mid .dnd-card-actions{display:none !important}
+
+/* Duplicate SKU warning — pastel pink background behind card */
+.dnd-col-cell.sku-duplicate{background:#ffb3d9 !important}
+.dnd-col-cell.sku-duplicate .dnd-card{background:white}
+
+/* Empty/hole slots */
+.dnd-slot-empty{height:62px;border:1.5px dashed var(--g200);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:4px}
+.dnd-slot-hole{height:62px;border:2px solid var(--sky);border-radius:var(--r);background:rgba(78,162,253,.08);flex-shrink:0;margin-bottom:4px}
+.dnd-hole{background:rgba(78,162,253,.04)}
+
+/* ── Swap Report Modal ── */
+.swap-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-start;justify-content:center;padding-top:30px;overflow-y:auto}
+.swap-modal-bg.open{display:flex}
+.swap-modal{background:white;border-radius:12px;width:960px;max-width:96vw;box-shadow:0 24px 80px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:calc(100vh - 60px);overflow:hidden}
+.swap-modal-hdr{padding:16px 20px 12px;border-bottom:var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.swap-modal-title{font-size:16px;font-weight:800;color:var(--g900)}
+.swap-modal-sub{font-size:11px;color:var(--g400);margin-top:2px}
+.swap-modal-close{background:none;border:none;font-size:20px;color:var(--g400);cursor:pointer;line-height:1;padding:2px 6px}
+.swap-tabs{display:flex;border-bottom:var(--bd);flex-shrink:0}
+.swap-tab{padding:10px 20px;font-size:12px;font-weight:600;color:var(--g400);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s}
+.swap-tab:hover{color:var(--g700)}
+.swap-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.swap-body{flex:1;overflow-y:auto;padding:16px 20px 24px}
+.swap-panel{display:none}
+.swap-panel.active{display:block}
+.swap-table{width:100%;border-collapse:collapse;font-size:11px}
+.swap-table th{background:var(--navy);color:white;padding:7px 10px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.swap-table th:first-child{border-radius:5px 0 0 0}
+.swap-table th:last-child{border-radius:0 5px 0 0}
+.swap-table td{padding:7px 10px;border-bottom:1px solid var(--g100);vertical-align:middle}
+.swap-table tr:hover td{background:var(--g50)}
+.swap-status{font-size:8px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.swap-status.direct{background:#dcfce7;color:#166534}
+.swap-status.cross{background:#fef3c7;color:#92400e}
+.swap-status.manual{background:#ede9fe;color:#5b21b6}
+.swap-status.orphan{background:#fee2e2;color:#991b1b}
+.swap-sku{font-family:monospace;font-size:10px;font-weight:600}
+.swap-sku.meat{color:var(--meat-hdr)}
+.swap-sku.plant{color:#2d7a4f}
+.swap-arrow{color:var(--g300);font-size:14px;text-align:center}
+.swap-diet-tag{font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase}
+.swap-diet-tag.meat{background:var(--meat-bg);color:var(--meat-hdr)}
+.swap-diet-tag.plant{background:#e2f5dc;color:#2d7a4f}
+.swap-override-select{font-size:10px;padding:2px 4px;border:var(--bd);border-radius:4px;font-family:inherit;max-width:160px}
+.swap-trace{font-family:monospace;font-size:11px;line-height:1.8;color:var(--g700)}
+.swap-trace-step{margin-bottom:6px;padding:6px 10px;background:var(--g50);border-radius:var(--r);border-left:3px solid var(--navy)}
+.swap-trace-step.match{border-left-color:var(--green)}
+.swap-trace-step.cross{border-left-color:#f59e0b}
+.swap-trace-step.orphan{border-left-color:#ef4444}
+
+/* ── Pair assignment modal ── */
+.pair-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.pair-modal-bg.open{display:flex}
+.pair-modal{background:white;border-radius:12px;width:360px;max-height:70vh;box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
+.pair-modal-hdr{padding:14px 18px 10px;border-bottom:var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.pair-modal-title{font-size:14px;font-weight:700;color:var(--g900)}
+.pair-modal-sub{font-size:11px;color:var(--g400);margin-top:2px}
+.pair-modal-close{background:none;border:none;font-size:18px;color:var(--g400);cursor:pointer;line-height:1;padding:2px 6px}
+.pair-modal-search{padding:8px 12px;border-bottom:var(--bd)}
+.pair-modal-search input{width:100%;padding:6px 10px;border:var(--bd);border-radius:var(--r);font-size:12px;outline:none;font-family:inherit}
+.pair-modal-list{flex:1;overflow-y:auto;padding:4px 0}
+.pair-modal-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;transition:background .1s}
+.pair-modal-item:hover{background:var(--vegan-bg)}
+.pair-modal-item-dot{width:8px;height:8px;border-radius:50%;background:var(--vegan-hdr);flex-shrink:0}
+.pair-modal-item-name{flex:1;font-size:12px;font-weight:600;color:var(--g900)}
+.pair-modal-item-id{font-size:10px;color:var(--g400);font-family:monospace}
+.pair-modal-none{padding:20px;text-align:center;color:var(--g400);font-size:12px}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sl"><div class="lb">BD</div><span style="font-weight:600;font-size:13px">BetterDay Kitchen</span></div>
+  <nav class="sn">
+    <a class="ni" href="#"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>Dashboard</a>
+    <a class="ni" href="#"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Production Plans</a>
+    <a class="ni" href="#"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>Inventory</a>
+    <a class="ni" href="#"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/><circle cx="12" cy="12" r="10" stroke-width="2"/></svg>Meal Recipes</a>
+    <a class="ni active" href="#"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Menu Builder</a>
+    <a class="ni" href="#"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"/></svg>Sub-Recipes</a>
+    <a class="ni" href="#"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>Ingredients</a>
+  </nav>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="bc">Menu Builder</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-ghost">⬇ Export</button>
+      <button class="btn-save">Save</button>
+    </div>
+  </div>
+  <div class="page-head">
+    <div>
+      <div class="page-title">Menu Builder</div>
+      <div style="font-size:12px;color:var(--g400);margin-top:2px">Rotation queues auto-advance every Sunday · <span id="wi-info" style="color:var(--navy);font-weight:600"></span></div>
+    </div>
+  </div>
+
+  <div class="dnd-wrap" id="dnd-wrap">
+    <div class="dnd-drawer" id="dnd-drawer">
+      <div class="dnd-drawer-hdr">
+        <span class="dnd-drawer-title">Unassigned Dishes</span>
+        <button class="dnd-drawer-close" onclick="toggleDnDDrawer()">×</button>
+      </div>
+      <div class="dnd-drawer-search">
+        <input type="text" placeholder="Search dishes..." id="dnd-pool-search" oninput="renderDnDPool(this.value)"/>
+      </div>
+      <div class="dnd-drawer-cols">
+        <div class="dnd-drawer-col"><div class="pool-col-hdr meat"><div class="pool-col-lbl meat">Meat</div><div class="pool-col-cnt" id="dnd-cnt-meat"></div></div><div class="dnd-drawer-col-body" id="dnd-pool-meat"></div></div>
+        <div class="dnd-drawer-col"><div class="pool-col-hdr omni"><div class="pool-col-lbl omni">Omni</div><div class="pool-col-cnt" id="dnd-cnt-omni"></div></div><div class="dnd-drawer-col-body" id="dnd-pool-omni"></div></div>
+        <div class="dnd-drawer-col"><div class="pool-col-hdr vegan"><div class="pool-col-lbl vegan">Vegan</div><div class="pool-col-cnt" id="dnd-cnt-vegan"></div></div><div class="dnd-drawer-col-body" id="dnd-pool-vegan"></div></div>
+      </div>
+    </div>
+    <div id="dnd-grid-body" style="width:100%;overflow:auto"></div>
+  </div>
+</div>
+
+<!-- Swap Report Modal -->
+<div id="swap-modal-bg" class="swap-modal-bg" onclick="if(event.target===this)closeSwapModal()">
+  <div class="swap-modal">
+    <div class="swap-modal-hdr">
+      <div><div class="swap-modal-title" id="swap-modal-title">Swap Report</div><div class="swap-modal-sub" id="swap-modal-sub"></div></div>
+      <button class="swap-modal-close" onclick="closeSwapModal()">×</button>
+    </div>
+    <div class="swap-tabs" id="swap-tabs">
+      <div class="swap-tab active" onclick="switchSwapTab('summary',this)">Summary</div>
+      <div class="swap-tab" onclick="switchSwapTab('trace',this)">How We Got Here</div>
+      <div class="swap-tab" onclick="switchSwapTab('override',this)">Override</div>
+    </div>
+    <div class="swap-body">
+      <div id="swap-summary" class="swap-panel active"></div>
+      <div id="swap-trace" class="swap-panel"></div>
+      <div id="swap-override" class="swap-panel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Pair assignment modal -->
+<div id="pair-modal-bg" class="pair-modal-bg" onclick="if(event.target===this)closePairModal()">
+  <div class="pair-modal">
+    <div class="pair-modal-hdr">
+      <div><div class="pair-modal-title">Assign Plant-Based Pair</div><div class="pair-modal-sub"></div></div>
+      <button class="pair-modal-close" onclick="closePairModal()">×</button>
+    </div>
+    <div class="pair-modal-search"><input type="text" id="pair-search" placeholder="Search plant-based dishes..." oninput="renderPairList(this.value)"/></div>
+    <div id="pair-list" class="pair-modal-list"></div>
+  </div>
+</div>
+
+<script>
+// ══ HELPERS ══
+function getLastSunday(){
+  const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d;
+}
+function getNextSunday(){
+  const d=new Date();const diff=(7-d.getDay())%7||7;d.setDate(d.getDate()+diff);return d;
+}
+
+const DISH_ATTRS = {"#556":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":1,"st":"Pasta","ps":3},"#568":{"ch":0,"tr":1,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"","ps":0},"#565":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"","ps":0},"#561":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":0,"st":"","ps":0},"#302":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":2},"#564":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":1,"st":"","ps":0},"#563":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":1,"st":"","ps":0},"#507":{"ch":0,"tr":0,"bf":1,"pk":1,"sf":0,"da":0,"gl":0,"st":"Potato","ps":1},"#560":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":1,"st":"","ps":0},"#526":{"ch":0,"tr":1,"bf":0,"pk":0,"sf":0,"da":1,"gl":1,"st":"Pasta","ps":3},"#566":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":1,"st":"","ps":0},"#562":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":1,"da":0,"gl":0,"st":"Rice","ps":0},"#567":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":0,"st":"","ps":0},"#573":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":0,"st":"","ps":0},"#54":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":2},"#396":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":1,"da":0,"gl":0,"st":"Rice","ps":4},"#574":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"","ps":0},"#575":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"","ps":0},"#537":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":0,"st":"Potato","ps":2},"#509":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":0,"st":"Potato","ps":2},"#515":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":0,"st":"Rice","ps":4},"#527":{"ch":0,"tr":1,"bf":0,"pk":0,"sf":0,"da":1,"gl":1,"st":"Pasta","ps":3},"#521":{"ch":0,"tr":1,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":3},"#508":{"ch":0,"tr":1,"bf":0,"pk":0,"sf":0,"da":1,"gl":1,"st":"Pasta","ps":3},"#489":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#80":{"ch":0,"tr":0,"bf":0,"pk":1,"sf":1,"da":1,"gl":0,"st":"Pasta","ps":1},"#475":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":0,"st":"Potato","ps":4},"#429":{"ch":0,"tr":0,"bf":1,"pk":1,"sf":0,"da":1,"gl":1,"st":"Pasta","ps":1},"#382":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":1,"st":"Potato","ps":3},"#491":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":0,"st":"Potato","ps":2},"#360":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":0,"st":"Other","ps":4},"#490":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":2},"#359":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":2},"#463":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#545":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#514":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":1,"st":"Potato","ps":2},"#466":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#358":{"ch":0,"tr":0,"bf":0,"pk":1,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#397":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#533":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":1,"st":"Pasta","ps":1},"#333":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#542":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#469":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":3},"#474":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#539":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#99":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#394":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#332":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":2},"#327":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#284":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":2},"#536":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":3},"#535":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#391":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":1},"#538":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#328":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":1},"#305":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":2},"#280":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#457":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":2},"#354":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":4},"#309":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":2},"#498":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":1},"#476":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#518":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":1,"da":0,"gl":0,"st":"Rice","ps":2},"#520":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#388":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#549":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":3},"#488":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":4},"#477":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":1,"gl":1,"st":"Potato","ps":2},"#407":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":4},"#494":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#353":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#377":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":2},"#362":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#550":{"ch":0,"tr":0,"bf":1,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":3},"#330":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#478":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":0,"st":"Potato","ps":3},"#351":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#393":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":1,"da":0,"gl":1,"st":"Pasta","ps":2},"#464":{"ch":0,"tr":1,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#414":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":1,"da":0,"gl":0,"st":"Other","ps":3},"#516":{"ch":1,"tr":0,"bf":0,"pk":0,"sf":0,"da":1,"gl":1,"st":"Other","ps":3},"#381":{"ch":0,"tr":0,"bf":0,"pk":1,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#6":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#467":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#425":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#62":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#468":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#1":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#480":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#473":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#86":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#183":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":2},"#146":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#14":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":3},"#424":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":4},"#344":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":3},"#423":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":1},"#252":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#162":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":1},"#454":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#410":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#87":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":3},"#453":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":4},"#180":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":3},"#534":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":2},"#440":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#411":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#557":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#465":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":3},"#114":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#196":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#148":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1},"#55":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#163":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#487":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":4},"#409":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#339":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":1},"#413":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":4},"#493":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":2},"#455":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#138":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#230":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Potato","ps":3},"#486":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#462":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#227":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#558":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Potato","ps":3},"#422":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#401":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#479":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#452":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#136":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":2},"#31":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#543":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":3},"#544":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#481":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":3},"#495":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":4},"#287":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":4},"#37":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":3},"#234":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":2},"#275":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":2},"#30":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":3},"#273":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Other","ps":1},"#50":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":2},"#250":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":1,"st":"Pasta","ps":1},"#441":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#278":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Potato","ps":3},"#402":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Other","ps":4},"#282":{"ch":0,"tr":0,"bf":0,"pk":0,"sf":0,"da":0,"gl":0,"st":"Rice","ps":1}};
+
+const OMNI_PAIRS = {"#556":"#557","#567":"#569","#396":"#440","#463":"#62","#545":"#6","#514":"#558","#466":"#467","#358":"#486","#397":"#425","#533":"#401","#333":"#138","#542":"#114","#469":"#468","#474":"#1","#539":"#480","#99":"#473","#394":"#86","#332":"#183","#327":"#146","#284":"#14","#536":"#344","#535":"#50","#391":"#423","#538":"#252","#328":"#162","#305":"#454","#280":"#410","#457":"#87","#354":"#453","#309":"#180","#498":"#534","#476":"#411","#518":"#465","#520":"#148","#388":"#55","#549":"#163","#488":"#487","#477":"#339","#407":"#413","#494":"#493","#353":"#455","#377":"#230","#362":"#462","#550":"#457","#330":"#422","#478":"#479","#351":"#452","#393":"#136","#464":"#31","#414":"#481","#516":"#517","#381":"#287"};
+
+const EXTRA_NAMES = {
+  '':'',
+  '#1':'Curry Club Butt’r Tofu',
+  '#6':'Bali Peanut Satay',
+  '#14':'Full Moon Party Pad Thai',
+  '#30':'Falafel Fusion Power Bowl',
+  '#31':'Twirl of the Town Spaghetti & Neat-balls',
+  '#37':'California Roll Sushi Bowl',
+  '#50':'Gobi Glaze Mongolian B’eef',
+  '#54':'NEW IMPROVEDUnder the Tuscan Sun',
+  '#55':'Pesto Party Rotini',
+  '#62':'Blackened Chick\'n Caesar Bowl',
+  '#80':'Pesto Party Bacon & Prawn Ravioli',
+  '#86':'Dreamy Tahini Shawarma Bowl',
+  '#87':'Hot Dang Veggie Hoisin Udon',
+  '#99':'Dill With It Chicken Stroganoff',
+  '#114':'Neon Night Sweet & Sour',
+  '#136':'Tuscan Blush Chick\'n Primavera',
+  '#138':'Sizzlin\' Veggie Fajita Fiesta',
+  '#146':'Flamin\' Floret Power Bowl',
+  '#148':'Peanut Paradise Yellow Thai Curry',
+  '#162':'Gringos Chili Con Queso',
+  '#163':'Pickles Be Poppin\' Power Bowl',
+  '#180':'K-Pop Veggie Glass Noodles',
+  '#183':'Finger Lickin\' Chick\'n Bowl',
+  '#196':'Opa-Licious Chick\'n Souvlaki',
+  '#227':'Spicy Sichuan Veggie Dan Dan',
+  '#230':'Smokeshow Black Bean Enchiladas',
+  '#234':'Cranberry Glazed Neatloaf',
+  '#250':'Mediterranean Pearl Coucous Power Bowl',
+  '#252':'Green Goddess Penne',
+  '#273':'Flaky-Five Samosa Platter',
+  '#275':'Dumpling Party Udon',
+  '#278':'Steak Your Claim',
+  '#280':'Herb Roasted Chicken Alfredo',
+  '#282':'Wok n\' Roll Ginger B\'eef',
+  '#284':'Full Moon Party Chicken Pad Thai',
+  '#287':'Zesty Verde Burrito Bowl',
+  '#302':'Gaucho Grill Chimichurri Sirloin',
+  '#305':'Halifax Hero Donair Bowl',
+  '#309':'K-Pop Beef Glass Noodles',
+  '#327':'Flamin\' Chicken Power Bowl',
+  '#328':'Gringos Beef Chili Con Queso',
+  '#330':'Sweet Heat Jamaican Jerk Chicken',
+  '#332':'Finger Lickin\' Chicken Bowl',
+  '#333':'Braised Beef Fajita Fiesta Bowl',
+  '#339':'Salsa Verde Smothered Veggie Burrito',
+  '#344':'Go-Go Gochujang Udon',
+  '#351':'Tiki Teriyaki Chicken Poke Bowl',
+  '#353':'Seoul-ful Korean Beef BBQ',
+  '#354':'Hulk & Harvest Power Bowl',
+  '#358':'BBQ Pulled Pork Mac Attack',
+  '#359':'Zen Garden Salmon Soba Bowl',
+  '#360':'The Ranch Hand Salad',
+  '#362':'Spice Trail Moroccan Chicken',
+  '#377':'Smokeshow Beef Enchiladas',
+  '#381':'Zesty Chorizo Burrito Bowl',
+  '#382':'Saddle Up Burger Bowl',
+  '#388':'Pesto Party Chicken Rotini',
+  '#391':'Golden Hour Chicken & Cashew Curry',
+  '#393':'Tuscan Blush Prawn Primavera',
+  '#394':'Dreamy Tahini Chicken Shawarma',
+  '#396':'Prawn Dragon Roll Sushi Bowl',
+  '#397':'Beach Bum Chicken Thai Green Curry',
+  '#401':'Tempeh Twist Bolognese',
+  '#402':'Thai Mango Crunch Power Bowl',
+  '#407':'Santa Fe Sunset Chicken Salad',
+  '#409':'Saddle Up Black Bean Burger Bowl',
+  '#410':'Herb Roasted Chick\'n Alfredo',
+  '#411':'Mango Red Thai Curry',
+  '#413':'Santa Fe Sunset Chick\'n Salad',
+  '#414':'Vietnamese Shrimp Salad Roll Remix',
+  '#422':'Sweet Heat Jamaican Jerk Tempeh',
+  '#423':'Golden Hour Cashew Curry',
+  '#424':'Get Rooted Power Bowl',
+  '#425':'Beach Bum Veggie Thai Green Curry',
+  '#429':'Roma Rollup Stuffed Cannelloni',
+  '#440':'Mango Dragon Roll Sushi Bowl',
+  '#441':'Miso Hungry Buddha Bowl',
+  '#452':'Tiki Teriyaki Tofu Poke Bowl',
+  '#453':'Hulk & Harvest Veggie Power Bowl',
+  '#454':'Halifax Hero Veggie Donair Bowl',
+  '#455':'Seoul-ful Korean Chick\'n BBQ',
+  '#457':'Hot Dang Hoisin Beef Udon',
+  '#462':'Spice Trail Moroccan Chick\'n',
+  '#463':'All Hail the Chicken Caesar',
+  '#464':'Twirl of the Town Spaghetti & Meatballs',
+  '#465':'Monkey Business Tempeh Khao Soi',
+  '#466':'Bangkok Basil Beef Pad Krapow',
+  '#467':'Bangkok Basil Tempeh Pad Krapow',
+  '#468':'Ciao Bella Bruschetta Linguine',
+  '#469':'Ciao Bella Chicken Bruschetta Linguine',
+  '#473':'Dill With It Mushroom Stroganoff',
+  '#474':'Curry Club Butter Chicken',
+  '#475':'Rockstar Reuben Hash',
+  '#476':'Mango Tango Chicken Red Thai Curry',
+  '#477':'Salsa Verde Smothered Burrito',
+  '#478':'The Corn Star Cajun Chicken',
+  '#479':'The Corn Star Cajun Soy Curls',
+  '#480':'Curry Hut Tikka Masala',
+  '#481':'Vietnamese Tofu Salad Roll Remix',
+  '#486':'Smoky BBQ Mac Attack',
+  '#487':'Ruby Pistachio Power Bowl',
+  '#488':'Ruby Pistachio & Chicken Power Bowl',
+  '#489':'Maple Menagerie Salmon Harvest',
+  '#490':'Winner Winner, Chicken Dinner',
+  '#491':'Straight Outta Philly',
+  '#493':'Savanna Peanut Curry',
+  '#494':'Savanna Peanut Chicken Curry',
+  '#495':'Zen Garden Glazed Tofu Soba',
+  '#498':'Keepin\' It Irie Jamaican Chicken Curry',
+  '#507':'Kabayan Kaldereta Beef Stew',
+  '#508':'Mama Mia Meatball Orzo',
+  '#509':'Casanova Chicken Parm',
+  '#514':'Ballin’ In Gravy Swedish Meatballs',
+  '#515':'Flex Mex Taco Salad',
+  '#516':'Winter Berry Power Bowl',
+  '#518':'Monkey Business Prawn Khao Soi',
+  '#520':'Peanut Paradise Yellow Thai Chicken Curry',
+  '#521':'Jade Curry Noodles with Turkey Meatballs',
+  '#526':'NEW IMPROVED Zesty Zaatar Kofta Mezze',
+  '#527':'Grand Bazaar Turkish Pasta',
+  '#533':'Bolognese-y Does It',
+  '#534':'Keepin\' It Irie Jamaican Tempeh Curry',
+  '#535':'Gobi Glaze Mongolian Beef',
+  '#536':'Go-Go Gochujang Beef Udon',
+  '#537':'Backroads Honey Hot Glazed Chicken',
+  '#538':'Green Goddess Chicken Penne',
+  '#539':'Curry Hut Chicken Tikka Masala',
+  '#542':'Chicken Neon Night Sweet & Sour',
+  '#543':'Veggie Jade Curry Noodles',
+  '#544':'Veggie Machu Pichu Picnic',
+  '#545':'Bali Belly Peanut Chicken Satay',
+  '#549':'Pickles Be Poppin\' Chicken Power Bowl',
+  '#550':'Spicy Sichuan Beef Dan Dan',
+  '#556':'Mardi Gras Cajun Chicken Linguini',
+  '#557':'Mardi Gras Cajun Linguini',
+  '#558':'Swedish Vegan Neatball',
+  '#560':'Mac Daddy Burger Bowl',
+  '#561':'Athens Chicken Souvlaki',
+  '#562':'Sizzlin\' Honey Ginger Shrimp',
+  '#563':'Italiano Chopped Powerbowl',
+  '#564':'Honey Hot Mac Attack',
+  '#565':'Asian Chopped Soy Good Salad',
+  '#566':'Root & Roast Beef Stew',
+  '#567':'Chicken Shawarma Crunch Salad',
+  '#568':'Aloha Teriyaki Turkey Meatballs',
+  '#573':'Drippin’ Honey Mustard Chicken',
+  '#574':'Sticky Wok Orange Chicken',
+  '#575':'The Big Dill Chicken Bowl',
+};
+
+const ALL_DISHES = [
+  {id:'#463',name:'All Hail the Chicken Caesar',diet:'meat',type:'Omni'},
+  {id:'#568',name:'Aloha Teriyaki Turkey Meatballs',diet:'meat',type:'Meat Only'},
+  {id:'#565',name:'Asian Chopped Soy Good Salad',diet:'meat',type:'Meat Only'},
+  {id:'#561',name:'Athens Chicken Souvlaki',diet:'meat',type:'Meat Only'},
+  {id:'#358',name:'BBQ Pulled Pork Mac Attack',diet:'meat',type:'Omni'},
+  {id:'#537',name:'Backroads Honey Hot Glazed Chicken',diet:'meat',type:'Meat Only'},
+  {id:'#545',name:'Bali Belly Peanut Chicken Satay',diet:'meat',type:'Omni'},
+  {id:'#514',name:'Ballin’ In Gravy Swedish Meatballs',diet:'meat',type:'Omni'},
+  {id:'#466',name:'Bangkok Basil Beef Pad Krapow',diet:'meat',type:'Omni'},
+  {id:'#397',name:'Beach Bum Chicken Thai Green Curry',diet:'meat',type:'Omni'},
+  {id:'#533',name:'Bolognese-y Does It',diet:'meat',type:'Omni'},
+  {id:'#333',name:'Braised Beef Fajita Fiesta Bowl',diet:'meat',type:'Omni'},
+  {id:'#37',name:'California Roll Sushi Bowl',diet:'veg',type:'Vegan'},
+  {id:'#509',name:'Casanova Chicken Parm',diet:'meat',type:'Meat Only'},
+  {id:'#542',name:'Chicken Neon Night Sweet & Sour',diet:'meat',type:'Omni'},
+  {id:'#567',name:'Chicken Shawarma Crunch Salad',diet:'meat',type:'Omni'},
+  {id:'#469',name:'Ciao Bella Chicken Bruschetta Linguine',diet:'meat',type:'Omni'},
+  {id:'#234',name:'Cranberry Glazed Neatloaf',diet:'veg',type:'Vegan'},
+  {id:'#474',name:'Curry Club Butter Chicken',diet:'meat',type:'Omni'},
+  {id:'#539',name:'Curry Hut Chicken Tikka Masala',diet:'meat',type:'Omni'},
+  {id:'#99',name:'Dill With It Chicken Stroganoff',diet:'meat',type:'Omni'},
+  {id:'#394',name:'Dreamy Tahini Chicken Shawarma',diet:'meat',type:'Omni'},
+  {id:'#573',name:'Drippin’ Honey Mustard Chicken',diet:'meat',type:'Omni'},
+  {id:'#275',name:'Dumpling Party Udon',diet:'veg',type:'Vegan'},
+  {id:'#30',name:'Falafel Fusion Power Bowl',diet:'veg',type:'Vegan'},
+  {id:'#332',name:'Finger Lickin\' Chicken Bowl',diet:'meat',type:'Omni'},
+  {id:'#273',name:'Flaky-Five Samosa Platter',diet:'veg',type:'Vegan'},
+  {id:'#327',name:'Flamin\' Chicken Power Bowl',diet:'meat',type:'Omni'},
+  {id:'#515',name:'Flex Mex Taco Salad',diet:'meat',type:'Meat Only'},
+  {id:'#284',name:'Full Moon Party Chicken Pad Thai',diet:'meat',type:'Omni'},
+  {id:'#302',name:'Gaucho Grill Chimichurri Sirloin',diet:'meat',type:'Meat Only'},
+  {id:'#536',name:'Go-Go Gochujang Beef Udon',diet:'meat',type:'Omni'},
+  {id:'#535',name:'Gobi Glaze Mongolian Beef',diet:'meat',type:'Omni'},
+  {id:'#50',name:'Gobi Glaze Mongolian B’eef',diet:'veg',type:'Vegan'},
+  {id:'#391',name:'Golden Hour Chicken & Cashew Curry',diet:'meat',type:'Omni'},
+  {id:'#527',name:'Grand Bazaar Turkish Pasta',diet:'meat',type:'Meat Only'},
+  {id:'#538',name:'Green Goddess Chicken Penne',diet:'meat',type:'Omni'},
+  {id:'#328',name:'Gringos Beef Chili Con Queso',diet:'meat',type:'Omni'},
+  {id:'#305',name:'Halifax Hero Donair Bowl',diet:'meat',type:'Omni'},
+  {id:'#280',name:'Herb Roasted Chicken Alfredo',diet:'meat',type:'Omni'},
+  {id:'#564',name:'Honey Hot Mac Attack',diet:'meat',type:'Meat Only'},
+  {id:'#457',name:'Hot Dang Hoisin Beef Udon',diet:'meat',type:'Omni'},
+  {id:'#354',name:'Hulk & Harvest Power Bowl',diet:'meat',type:'Omni'},
+  {id:'#563',name:'Italiano Chopped Powerbowl',diet:'meat',type:'Meat Only'},
+  {id:'#521',name:'Jade Curry Noodles with Turkey Meatballs',diet:'meat',type:'Meat Only'},
+  {id:'#309',name:'K-Pop Beef Glass Noodles',diet:'meat',type:'Omni'},
+  {id:'#507',name:'Kabayan Kaldereta Beef Stew',diet:'meat',type:'Meat Only'},
+  {id:'#498',name:'Keepin\' It Irie Jamaican Chicken Curry',diet:'meat',type:'Omni'},
+  {id:'#560',name:'Mac Daddy Burger Bowl',diet:'meat',type:'Meat Only'},
+  {id:'#508',name:'Mama Mia Meatball Orzo',diet:'meat',type:'Meat Only'},
+  {id:'#476',name:'Mango Tango Chicken Red Thai Curry',diet:'meat',type:'Omni'},
+  {id:'#489',name:'Maple Menagerie Salmon Harvest',diet:'meat',type:'Meat Only'},
+  {id:'#556',name:'Mardi Gras Cajun Chicken Linguini',diet:'meat',type:'Omni'},
+  {id:'#250',name:'Mediterranean Pearl Coucous Power Bowl',diet:'veg',type:'Vegan'},
+  {id:'#441',name:'Miso Hungry Buddha Bowl',diet:'veg',type:'Vegan'},
+  {id:'#518',name:'Monkey Business Prawn Khao Soi',diet:'meat',type:'Omni'},
+  {id:'#526',name:'NEW IMPROVED Zesty Zaatar Kofta Mezze',diet:'meat',type:'Meat Only'},
+  {id:'#54',name:'NEW IMPROVEDUnder the Tuscan Sun',diet:'veg',type:'Vegan'},
+  {id:'#520',name:'Peanut Paradise Yellow Thai Chicken Curry',diet:'meat',type:'Omni'},
+  {id:'#80',name:'Pesto Party Bacon & Prawn Ravioli',diet:'meat',type:'Meat Only'},
+  {id:'#388',name:'Pesto Party Chicken Rotini',diet:'meat',type:'Omni'},
+  {id:'#549',name:'Pickles Be Poppin\' Chicken Power Bowl',diet:'meat',type:'Omni'},
+  {id:'#396',name:'Prawn Dragon Roll Sushi Bowl',diet:'meat',type:'Omni'},
+  {id:'#475',name:'Rockstar Reuben Hash',diet:'meat',type:'Meat Only'},
+  {id:'#429',name:'Roma Rollup Stuffed Cannelloni',diet:'meat',type:'Meat Only'},
+  {id:'#566',name:'Root & Roast Beef Stew',diet:'meat',type:'Meat Only'},
+  {id:'#488',name:'Ruby Pistachio & Chicken Power Bowl',diet:'meat',type:'Omni'},
+  {id:'#382',name:'Saddle Up Burger Bowl',diet:'meat',type:'Meat Only'},
+  {id:'#477',name:'Salsa Verde Smothered Burrito',diet:'meat',type:'Omni'},
+  {id:'#407',name:'Santa Fe Sunset Chicken Salad',diet:'meat',type:'Omni'},
+  {id:'#494',name:'Savanna Peanut Chicken Curry',diet:'meat',type:'Omni'},
+  {id:'#353',name:'Seoul-ful Korean Beef BBQ',diet:'meat',type:'Omni'},
+  {id:'#562',name:'Sizzlin\' Honey Ginger Shrimp',diet:'meat',type:'Meat Only'},
+  {id:'#377',name:'Smokeshow Beef Enchiladas',diet:'meat',type:'Omni'},
+  {id:'#362',name:'Spice Trail Moroccan Chicken',diet:'meat',type:'Omni'},
+  {id:'#550',name:'Spicy Sichuan Beef Dan Dan',diet:'meat',type:'Omni'},
+  {id:'#278',name:'Steak Your Claim',diet:'veg',type:'Vegan'},
+  {id:'#574',name:'Sticky Wok Orange Chicken',diet:'meat',type:'Omni'},
+  {id:'#491',name:'Straight Outta Philly',diet:'meat',type:'Meat Only'},
+  {id:'#330',name:'Sweet Heat Jamaican Jerk Chicken',diet:'meat',type:'Omni'},
+  {id:'#402',name:'Thai Mango Crunch Power Bowl',diet:'veg',type:'Vegan'},
+  {id:'#575',name:'The Big Dill Chicken Bowl',diet:'meat',type:'Omni'},
+  {id:'#478',name:'The Corn Star Cajun Chicken',diet:'meat',type:'Omni'},
+  {id:'#360',name:'The Ranch Hand Salad',diet:'meat',type:'Meat Only'},
+  {id:'#351',name:'Tiki Teriyaki Chicken Poke Bowl',diet:'meat',type:'Omni'},
+  {id:'#393',name:'Tuscan Blush Prawn Primavera',diet:'meat',type:'Omni'},
+  {id:'#464',name:'Twirl of the Town Spaghetti & Meatballs',diet:'meat',type:'Omni'},
+  {id:'#414',name:'Vietnamese Shrimp Salad Roll Remix',diet:'meat',type:'Omni'},
+  {id:'#490',name:'Winner Winner, Chicken Dinner',diet:'meat',type:'Meat Only'},
+  {id:'#516',name:'Winter Berry Power Bowl',diet:'meat',type:'Omni'},
+  {id:'#282',name:'Wok n\' Roll Ginger B\'eef',diet:'veg',type:'Vegan'},
+  {id:'#359',name:'Zen Garden Salmon Soba Bowl',diet:'meat',type:'Meat Only'},
+  {id:'#381',name:'Zesty Chorizo Burrito Bowl',diet:'meat',type:'Omni'},
+];
+
+const COLUMNS = [
+  {id:'sig-a',name:'Signature A',short:'SIG A',color:'#9f3a38'},
+  {id:'sig-b',name:'Signature B',short:'SIG B',color:'#9f3a38'},
+  {id:'sig-c',name:'Signature C',short:'SIG C',color:'#9f3a38'},
+  {id:'sig-d',name:'Signature D',short:'SIG D',color:'#9f3a38'},
+  {id:'wildcard-meat',name:'Wildcard Meat',short:'WILD M',color:'#9f3a38'},
+  {id:'pasta-omni',name:'Pasta Omni',short:'PASTA',color:'#2d5fa6'},
+  {id:'curry-omni',name:'Curry Omni',short:'CURRY',color:'#2d5fa6'},
+  {id:'comfort-omni',name:'Comfort Omni',short:'COMFORT',color:'#2d5fa6'},
+  {id:'asian-omni',name:'Asian Omni',short:'ASIAN',color:'#2d5fa6'},
+  {id:'powerbowl-omni',name:'Powerbowl Omni',short:'POWER',color:'#2d5fa6'},
+  {id:'grocery-omni',name:'Grocery Omni',short:'GROCERY',color:'#2d5fa6'},
+  {id:'wildcard-vegan',name:'Wildcard Vegan',short:'VEGAN',color:'#2d7a4f'},
+];
+
+const queues = {
+  'sig-a':[{dishId:'#509',repeat:1}],
+  'sig-b':[{dishId:'#305',repeat:1}],
+  'sig-c':[{dishId:'#508',repeat:1},{dishId:'#429',repeat:1},{dishId:'#489',repeat:1},{dishId:'#514',repeat:1},{dishId:'#490',repeat:1},{dishId:'#561',repeat:1},{dishId:'#563',repeat:1},{dishId:'#515',repeat:1}],
+  'sig-d':[{dishId:'#516',repeat:1},{dishId:'#526',repeat:1},{dishId:'#527',repeat:1},{dishId:'#537',repeat:1},{dishId:'#507',repeat:1},{dishId:'#360',repeat:1},{dishId:'#562',repeat:1},{dishId:'#568',repeat:1},{dishId:'#565',repeat:1}],
+  'wildcard-meat':[{dishId:'#382',repeat:1},{dishId:'#521',repeat:1},{dishId:'#394',repeat:1},{dishId:'#515',repeat:1},{dishId:'#491',repeat:1},{dishId:'#566',repeat:1},{dishId:'#560',repeat:1}],
+  'pasta-omni':[{dishId:'#99',repeat:1},{dishId:'#358',repeat:1},{dishId:'#388',repeat:1},{dishId:'#393',repeat:1},{dishId:'#533',repeat:1},{dishId:'#538',repeat:1},{dishId:'#464',repeat:1},{dishId:'#469',repeat:1}],
+  'curry-omni':[{dishId:'#474',repeat:1},{dishId:'#397',repeat:1},{dishId:'#391',repeat:1},{dishId:'#520',repeat:1},{dishId:'#498',repeat:1},{dishId:'#518',repeat:1},{dishId:'#539',repeat:1},{dishId:'#494',repeat:1}],
+  'comfort-omni':[{dishId:'#328',repeat:1},{dishId:'#327',repeat:1},{dishId:'#478',repeat:1},{dishId:'#333',repeat:1},{dishId:'#332',repeat:1},{dishId:'#330',repeat:1},{dishId:'#477',repeat:1},{dishId:'#377',repeat:1}],
+  'asian-omni':[{dishId:'#309',repeat:1},{dishId:'#466',repeat:1},{dishId:'#353',repeat:1},{dishId:'#457',repeat:1},{dishId:'#535',repeat:1},{dishId:'#536',repeat:1},{dishId:'#542',repeat:1},{dishId:'#550',repeat:1},{dishId:'#351',repeat:1}],
+  'powerbowl-omni':[{dishId:'#354',repeat:1},{dishId:'#414',repeat:1},{dishId:'#463',repeat:1},{dishId:'#488',repeat:1},{dishId:'#362',repeat:1},{dishId:'#407',repeat:1},{dishId:'#396',repeat:1},{dishId:'#545',repeat:1},{dishId:'#549',repeat:1},{dishId:'#381',repeat:1},{dishId:'#567',repeat:1},{dishId:'#516',repeat:1}],
+  'grocery-omni':[{dishId:'#476',repeat:1},{dishId:'#280',repeat:1},{dishId:'#305',repeat:1},{dishId:'#284',repeat:1},{dishId:'#514',repeat:1}],
+  'wildcard-vegan':[{dishId:'#278',repeat:1},{dishId:'#37',repeat:1},{dishId:'#30',repeat:1},{dishId:'#441',repeat:1},{dishId:'#282',repeat:1},{dishId:'#273',repeat:1},{dishId:'#250',repeat:1},{dishId:'#234',repeat:1},{dishId:'#275',repeat:1},{dishId:'#402',repeat:1}],
+};
+
+// ══ CORE HELPERS ══
+function getDish(id){return ALL_DISHES.find(d=>d.id===id)}
+function getAttrs(id){return DISH_ATTRS[id]||{ch:0,tr:0,bf:0,pk:0,sf:0,da:0,gl:0,st:'',ps:0}}
+function dndGetDish(id){const d=getDish(id);if(d)return d.name;return EXTRA_NAMES[id]||id}
+
+// Build reverse lookup for omni pairs
+const OMNI_REVERSE = {};
+Object.entries(OMNI_PAIRS).forEach(([m,p])=>{OMNI_REVERSE[p]=m});
+
+function getDietType(dishId){
+  if(OMNI_PAIRS[dishId]) return 'omni';
+  const d=getDish(dishId);
+  if(d && d.type==='Omni' && !OMNI_PAIRS[dishId]) return 'omni-missing';
+  if(d && d.diet==='veg') return 'vegan';
+  return 'meat';
+}
+
+// Scorecard helpers
+const CELL_MAX={ch:8,tr:5,bf:5,pk:5,sf:5,st_rice:5,st_pasta:5,st_potato:5,st_other:5,da:5,gl:5,peanut:5};
+function redCell(val,max){
+  if(!val) return {bg:'#ffffff',fg:'#aaa'};
+  const t=Math.min(val/max,1);
+  const L=Math.round(97-t*34);const S=Math.round(40+t*45);
+  const fg=L<75?'#5a1a1a':'#9a3030';
+  return {bg:`hsl(4,${S}%,${L}%)`,fg};
+}
+function psColor(total){
+  if(!total) return {bg:'#ffffff',fg:'#aaa'};
+  const t=Math.max(0,Math.min(1,(total-10)/20));
+  const L=Math.round(96-t*30);const S=Math.round(20+(1-t)*55);
+  const fg=L<72?'#14532d':'#166534';
+  return {bg:`hsl(142,${S}%,${L}%)`,fg};
+}
+const SC_GRID_ROW1=[{key:'ch',lbl:'Chicken'},{key:'tr',lbl:'Turkey'},{key:'bf',lbl:'Beef'},{key:'pk',lbl:'Pork'},{key:'sf',lbl:'Seafood'},{key:'da',lbl:'Dairy'}];
+const SC_GRID_ROW2=[{key:'gl',lbl:'Gluten'},{key:'peanut',lbl:'Peanut'},{key:'st_rice',lbl:'Rice'},{key:'st_pasta',lbl:'Pasta'},{key:'st_potato',lbl:'Potato'},{key:'st_other',lbl:'Other'}];
+
+// ══ GRID STATE ══
+const HOLE='__hole__';
+window.dndGrid = {}; // colId -> [dishId, dishId, ...]
+let dndPinnedCols = {};
+let dndToggles = {}; // dishId -> {meatOff, plantOff}
+let colUnlocked = false;
+let scSettingsOpen = false;
+
+// Scorecard range settings: {key: {max:number|null, minOn:bool, min:number|null}}
+const SC_ALL_KEYS = [...SC_GRID_ROW1.map(c=>c.key),...SC_GRID_ROW2.map(c=>c.key),'mt','pl'];
+const SC_ALL_LABELS = {};
+SC_GRID_ROW1.forEach(c=>{SC_ALL_LABELS[c.key]=c.lbl;});
+SC_GRID_ROW2.forEach(c=>{SC_ALL_LABELS[c.key]=c.lbl;});
+SC_ALL_LABELS['mt']='Meat';SC_ALL_LABELS['pl']='Plant';
+
+let scRanges = {};
+SC_ALL_KEYS.forEach(k=>{scRanges[k]={max:null,minOn:false,min:null};});
+
+function getScRange(key){return scRanges[key]||{max:null,minOn:false,min:null};}
+function isOutOfRange(key,val){
+  const r=getScRange(key);
+  if(r.max!==null && val>r.max) return true;
+  if(r.minOn && r.min!==null && val<r.min) return true;
+  return false;
+}
+function toggleScSettings(){
+  scSettingsOpen=!scSettingsOpen;
+  renderDnDGrid();
+}
+function setScMax(key,val){scRanges[key].max=val===''?null:parseInt(val);renderDnDGrid();}
+function setScMin(key,val){scRanges[key].min=val===''?null:parseInt(val);renderDnDGrid();}
+function toggleScMinOn(key,on){scRanges[key].minOn=on;if(!on)scRanges[key].min=null;renderDnDGrid();}
+
+function buildSettingsPanel(){
+  let html=`<div class="sc-settings-panel open" onclick="event.stopPropagation()">
+    <div class="sc-settings-title">Scorecard Ranges</div>
+    <div class="sc-settings-grid">
+      <div class="sc-settings-hdr" style="text-align:left">Category</div>
+      <div class="sc-settings-hdr">Max</div>
+      <div class="sc-settings-hdr">Min</div>
+      <div class="sc-settings-hdr">On</div>`;
+
+  // Regular stat rows
+  const statKeys=[...SC_GRID_ROW1.map(c=>c.key),...SC_GRID_ROW2.map(c=>c.key)];
+  statKeys.forEach(k=>{
+    const r=getScRange(k);
+    const lbl=SC_ALL_LABELS[k]||k;
+    html+=`<div class="sc-settings-cat">${lbl}</div>
+      <div class="sc-settings-cell"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.max!==null?r.max:''}" placeholder="—" onchange="setScMax('${k}',this.value)"/></div>
+      <div class="sc-settings-cell"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.min!==null?r.min:''}" placeholder="—" ${!r.minOn?'disabled':''} onchange="setScMin('${k}',this.value)"/></div>
+      <div class="sc-settings-cell"><input class="sc-settings-toggle" type="checkbox" ${r.minOn?'checked':''} onchange="toggleScMinOn('${k}',this.checked)"/></div>`;
+  });
+
+  // Divider
+  html+=`<div class="sc-settings-divider"></div>`;
+
+  // Meat/Plant rows (highlighted)
+  ['mt','pl'].forEach(k=>{
+    const r=getScRange(k);
+    const lbl=k==='mt'?'Meat Dishes':'Plant Dishes';
+    const bg=k==='mt'?'var(--meat-bg)':'#e2f5dc';
+    html+=`<div class="sc-settings-cat" style="background:${bg};font-weight:700">${lbl}</div>
+      <div class="sc-settings-cell" style="background:${bg}"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.max!==null?r.max:''}" placeholder="—" onchange="setScMax('${k}',this.value)"/></div>
+      <div class="sc-settings-cell" style="background:${bg}"><input class="sc-settings-input" type="number" min="0" max="99" value="${r.min!==null?r.min:''}" placeholder="—" ${!r.minOn?'disabled':''} onchange="setScMin('${k}',this.value)"/></div>
+      <div class="sc-settings-cell" style="background:${bg}"><input class="sc-settings-toggle" type="checkbox" ${r.minOn?'checked':''} onchange="toggleScMinOn('${k}',this.checked)"/></div>`;
+  });
+
+  html+=`</div></div>`;
+  return html;
+}
+const COL_COLORS = ['#9f3a38','#dc2626','#e04994','#003141','#2d5fa6','#4EA2FD','#2d7a4f','#0d9488','#7c3aed','#d97706','#475569','#92400e'];
+const PICKER_COLORS = ['#9f3a38','#2d5fa6','#2d7a4f','#0d9488','#7c3aed','#d97706'];
+
+// Init grid from queues
+function initDnDGrid(){
+  window.dndGrid = {};
+  COLUMNS.forEach(col=>{
+    const q = queues[col.id]||[];
+    window.dndGrid[col.id] = q.map(item=>item.dishId);
+  });
+}
+
+function getMaxRows(){
+  let max=0;
+  COLUMNS.forEach(col=>{
+    const arr=window.dndGrid[col.id]||[];
+    const len=arr.filter(d=>d&&d!==HOLE).length;
+    if(len>max) max=len;
+  });
+  return Math.max(max+1, 1);
+}
+
+function toggleDnDDrawer(){
+  document.getElementById('dnd-drawer').classList.toggle('open');
+}
+
+// ── Diet toggle (keyed by dishId) ──
+function getToggle(dishId){
+  return dndToggles[dishId]||{meatOff:false,plantOff:false};
+}
+function toggleDiet(dishId, side){
+  if(!dndToggles[dishId]) dndToggles[dishId]={meatOff:false,plantOff:false};
+  const t=dndToggles[dishId];
+  if(side==='meat' && !t.meatOff && t.plantOff){showToggleWarning();return;}
+  if(side==='plant' && !t.plantOff && t.meatOff){showToggleWarning();return;}
+  if(side==='meat') t.meatOff=!t.meatOff;
+  else t.plantOff=!t.plantOff;
+  renderDnDGrid();
+}
+function showToggleWarning(){
+  const el=document.createElement('div');
+  el.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#dc2626;color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;z-index:999;animation:fadeOut 2s forwards';
+  el.textContent='Cannot disable both — at least one version must be active';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2000);
+}
+
+// ── Pin ──
+function togglePin(colId){
+  const arr=window.dndGrid[colId]||[];
+  if(arr.length>1 && !dndPinnedCols[colId]) return; // can't pin if >1 dish
+  if(dndPinnedCols[colId]) delete dndPinnedCols[colId];
+  else dndPinnedCols[colId]=true;
+  renderDnDGrid();
+}
+
+// ── Column management ──
+function toggleColLock(){
+  colUnlocked=!colUnlocked;
+  renderDnDGrid();
+  if(colUnlocked) setTimeout(()=>{if(colUnlocked){colUnlocked=false;renderDnDGrid();}},15000);
+}
+function autoLock(){colUnlocked=false;renderDnDGrid();}
+function renameCol(colId,newName){
+  const col=COLUMNS.find(c=>c.id===colId);
+  if(col){col.short=newName;col.name=newName;}
+  autoLock();
+}
+function deleteCol(colId){
+  const arr=window.dndGrid[colId]||[];
+  const count=arr.filter(d=>d&&d!==HOLE).length;
+  if(count>0 && !confirm(`Delete column with ${count} dishes? They'll return to unassigned.`)) return;
+  delete window.dndGrid[colId];
+  delete dndPinnedCols[colId];
+  const idx=COLUMNS.findIndex(c=>c.id===colId);
+  if(idx>=0) COLUMNS.splice(idx,1);
+  autoLock();
+}
+function addColumn(){
+  const id='col-'+Date.now();
+  COLUMNS.push({id,name:'New Column',short:'NEW',color:'#475569'});
+  window.dndGrid[id]=[];
+  autoLock();
+}
+function setColColor(colId,color){
+  const col=COLUMNS.find(c=>c.id===colId);
+  if(col) col.color=color;
+  autoLock();
+}
+function showColorPicker(colId,btn){
+  // Close any existing pickers
+  document.querySelectorAll('.color-picker-popup').forEach(p=>p.remove());
+  const popup=document.createElement('div');
+  popup.className='color-picker-popup open';
+  popup.onclick=(e)=>e.stopPropagation(); // prevent closing on self-click
+  PICKER_COLORS.forEach(c=>{
+    const sw=document.createElement('div');
+    sw.className='color-swatch';
+    sw.style.background=c;
+    sw.onclick=(e)=>{e.stopPropagation();popup.remove();setColColor(colId,c);};
+    popup.appendChild(sw);
+  });
+  btn.parentElement.appendChild(popup);
+  // Close on outside click — delay to avoid catching the triggering click
+  requestAnimationFrame(()=>{
+    document.addEventListener('click',function h(e){
+      if(!popup.contains(e.target)){popup.remove();document.removeEventListener('click',h);}
+    });
+  });
+}
+
+// ── Column drag-to-reorder ──
+let colDragId=null;
+function colDragStart(e,colId){
+  if(!colUnlocked) return;
+  colDragId=colId;
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',colId);
+  setTimeout(()=>{
+    const cell=e.target.closest('.dnd-hdr-cell');
+    if(cell) cell.style.opacity='0.4';
+  },0);
+}
+function colDragOver(e,colId){
+  if(!colDragId||colDragId===colId) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  // Highlight drop target
+  document.querySelectorAll('.dnd-hdr-cell').forEach(c=>c.style.outline='');
+  const cell=e.target.closest('.dnd-hdr-cell');
+  if(cell) cell.style.outline='2px solid var(--yellow)';
+}
+function colDrop(e,targetColId){
+  e.preventDefault();
+  if(!colDragId||colDragId===targetColId){colDragEnd(e);return;}
+  const fromIdx=COLUMNS.findIndex(c=>c.id===colDragId);
+  const toIdx=COLUMNS.findIndex(c=>c.id===targetColId);
+  if(fromIdx<0||toIdx<0){colDragEnd(e);return;}
+  // Reorder COLUMNS array
+  const [moved]=COLUMNS.splice(fromIdx,1);
+  COLUMNS.splice(toIdx,0,moved);
+  colDragId=null;
+  renderDnDGrid();
+}
+function colDragEnd(e){
+  colDragId=null;
+  document.querySelectorAll('.dnd-hdr-cell').forEach(c=>{c.style.opacity='';c.style.outline='';});
+}
+
+// ── Drag state ──
+let dndDrag={};
+let dndSnapshot=null;
+function clearDragState(){dndDrag={};dndSnapshot=null;}
+
+// ── Grid manipulation ──
+function dndRemoveAndCompact(colId,row){
+  const arr=window.dndGrid[colId]||[];
+  if(row<arr.length) arr.splice(row,1);
+}
+function dndInsertAt(colId,row,dishId){
+  const arr=window.dndGrid[colId];
+  if(!arr) return;
+  arr.splice(row,0,dishId);
+}
+function dndRemoveHole(){
+  COLUMNS.forEach(col=>{
+    const arr=window.dndGrid[col.id]||[];
+    for(let i=arr.length-1;i>=0;i--){
+      if(arr[i]===HOLE) arr.splice(i,1);
+    }
+  });
+}
+function dndReplaceHole(dishId){
+  for(const col of COLUMNS){
+    const arr=window.dndGrid[col.id]||[];
+    const idx=arr.indexOf(HOLE);
+    if(idx>=0){arr[idx]=dishId;return true;}
+  }
+  return false;
+}
+function dndTrimRows(){
+  COLUMNS.forEach(col=>{
+    const arr=window.dndGrid[col.id]||[];
+    while(arr.length>0 && !arr[arr.length-1]) arr.pop();
+  });
+}
+
+// ── Pool rendering ──
+function renderDnDPool(filter=''){
+  const fl=filter.toLowerCase();
+  const placed=new Set();
+  COLUMNS.forEach(col=>{
+    (window.dndGrid[col.id]||[]).forEach(d=>{if(d&&d!==HOLE)placed.add(d);});
+  });
+  // Also count pinned
+  Object.entries(dndPinnedCols).forEach(([colId])=>{
+    const arr=window.dndGrid[colId]||[];
+    if(arr[0]) placed.add(arr[0]);
+  });
+  const pools={meat:[],omni:[],vegan:[]};
+  ALL_DISHES.forEach(d=>{
+    if(placed.has(d.id))return;
+    if(fl&&!d.name.toLowerCase().includes(fl)&&!d.id.includes(fl))return;
+    if(d.diet==='veg') pools.vegan.push(d);
+    else if(d.type==='Omni') pools.omni.push(d);
+    else pools.meat.push(d);
+  });
+  ['meat','omni','vegan'].forEach(t=>{
+    pools[t].sort((a,b)=>a.name.localeCompare(b.name));
+    const body=document.getElementById('dnd-pool-'+t);
+    const cnt=document.getElementById('dnd-cnt-'+t);
+    if(!body)return;
+    body.innerHTML='';
+    if(cnt) cnt.textContent=pools[t].length;
+    pools[t].forEach(d=>{
+      const card=document.createElement('div');
+      card.className='dish-card';card.draggable=true;card.dataset.dishId=d.id;
+      card.innerHTML=`<div class="dc-name">${d.name}</div><div class="dc-id">${d.id}</div>`;
+      card.addEventListener('dragstart',e=>{
+        e.dataTransfer.effectAllowed='copyMove';
+        e.dataTransfer.setData('dishId',d.id);
+        e.dataTransfer.setData('source','dnd-pool');
+        dndDrag={dishId:d.id,poolDrag:true,holeRow:-1,holeCol:null,active:false};
+        setTimeout(()=>card.classList.add('dragging'),0);
+      });
+      card.addEventListener('dragend',()=>{
+        card.classList.remove('dragging');
+        if(dndSnapshot){window.dndGrid=dndSnapshot.grid;dndSnapshot=null;}
+        dndRemoveHole();clearDragState();renderDnDGrid();
+      });
+      body.appendChild(card);
+    });
+  });
+}
+
+// ══ BUILD GRID HTML ══
+function buildDnDHTML(){
+  const numRows=getMaxRows();
+  const lastSun=getLastSunday();
+
+  let html=`<div class="dnd-grid${colUnlocked?' col-unlocked':''}" style="grid-template-columns:380px repeat(${COLUMNS.length},var(--col-w)) 40px">`;
+
+  // ── Header row ──
+  html+=`<div class="dnd-hdr-cell sc-hdr" style="position:sticky;left:0;z-index:11">
+    <div class="dnd-sc-hdr-left"><span class="dnd-sc-hdr-title">Scorecard</span></div>
+    <div class="sc-hdr-btns">
+      <button class="sc-settings-btn" onclick="event.stopPropagation();toggleScSettings()">⚙ Settings</button>
+      <button class="dnd-unassigned-btn" onclick="toggleDnDDrawer()">▾ View All Meals</button>
+    </div>
+    ${scSettingsOpen?buildSettingsPanel():''}
+  </div>`;
+
+  COLUMNS.forEach((col,ci)=>{
+    const pinned=!!dndPinnedCols[col.id];
+    const arr=window.dndGrid[col.id]||[];
+    const canPin=arr.length<=1||pinned;
+    html+=`<div class="dnd-hdr-cell" style="background:${col.color||'#475569'};grid-column:${ci+2}" data-col-id="${col.id}" ${colUnlocked?'draggable="true" ondragstart="colDragStart(event,\''+col.id+'\')" ondragover="colDragOver(event,\''+col.id+'\')" ondrop="colDrop(event,\''+col.id+'\')" ondragend="colDragEnd(event)"':''}>
+      ${colUnlocked?`<input class="col-name-input" value="${col.short||col.name}" onchange="renameCol('${col.id}',this.value)" onclick="event.stopPropagation()" ondragstart="event.stopPropagation()"/>`:(col.short||col.name)}
+      ${canPin?`<button class="dnd-pin-btn${pinned?' pinned':''}" onclick="togglePin('${col.id}')" title="${pinned?'Unpin':'Pin'}">∞</button>`:''}
+      <div class="col-edit-dot" style="background:${col.color||'#475569'};border-color:rgba(255,255,255,.5)" onclick="event.stopPropagation();showColorPicker('${col.id}',this)"></div>
+      <button class="col-del-btn" onclick="event.stopPropagation();deleteCol('${col.id}')">×</button>
+    </div>`;
+  });
+
+  // Add column + lock button header
+  html+=`<div class="dnd-hdr-cell add-col-hdr" style="grid-column:${COLUMNS.length+2};flex-direction:column;gap:2px">
+    <button class="col-lock-btn${colUnlocked?' unlocked':''}" onclick="toggleColLock()" title="${colUnlocked?'Lock columns':'Unlock to edit'}">${colUnlocked?'🔓':'🔒'}</button>
+    <div style="font-size:14px;cursor:pointer;color:var(--g500)" onclick="addColumn()" title="Add column">+</div>
+  </div>`;
+
+  // ── Global duplicate detection: find dishes in multiple columns ──
+  // Count how many DIFFERENT columns each dish appears in (exclude pinned ghost rows)
+  const globalSkuCols={};  // dishId -> Set of colIds where it actually exists (not pinned)
+  COLUMNS.forEach(col=>{
+    const arr=window.dndGrid[col.id]||[];
+    const seen=new Set(); // track unique dishes in this column (ignore consecutive dups)
+    arr.forEach(did=>{
+      if(did&&did!==HOLE&&!seen.has(did)){
+        seen.add(did);
+        if(!globalSkuCols[did]) globalSkuCols[did]=new Set();
+        globalSkuCols[did].add(col.id);
+      }
+    });
+  });
+  const globalDupSkus=new Set();
+  Object.entries(globalSkuCols).forEach(([did,cols])=>{
+    if(cols.size>1) globalDupSkus.add(did);
+  });
+
+  // ── Data rows ──
+  for(let r=0;r<numRows;r++){
+    const weekDate=new Date(lastSun);weekDate.setDate(weekDate.getDate()+r*7);
+    const dateStr=weekDate.toLocaleDateString('en-CA',{month:'short',day:'numeric'});
+    const isCurrent=r===0;
+    const stats=computeDnDWeekStats(r);
+
+    // Scorecard cell
+    html+=`<div class="dnd-sc-cell" style="position:sticky;left:0;z-index:5">`;
+    if(stats){
+      const ps=stats.ps_total;
+      const {bg:psBg,fg:psFg}=psColor(ps);
+      const mtMax=getScRange('mt').max;
+      const plMax=getScRange('pl').max;
+      const mtBad=isOutOfRange('mt',stats.mt||0);
+      const plBad=isOutOfRange('pl',stats.pl||0);
+      html+=`<div class="dnd-sc-inner">
+        <div class="dnd-sc-wk-hdr">
+          <span class="sc-wk-num">${isCurrent?'NOW':'WK '+(r+1)}</span>
+          <span class="sc-wk-date">${dateStr}</span>
+          ${isCurrent?'<span class="sc-wk-badge cur">Current</span>':''}
+          <span class="sc-wk-ps" style="background:${psBg};color:${psFg}">
+            <span class="sc-wk-ps-lbl">Portion Score</span>${ps}
+          </span>
+          ${r>0?`<button class="sc-swap-btn" onclick="showSwapReport(${r})">Swaps</button>`:''}
+        </div>
+        <div class="dnd-sc-grid">`;
+      // Row 1: proteins + dairy + MEAT count
+      SC_GRID_ROW1.forEach(cell=>{
+        const val=stats[cell.key]||0;
+        const bad=isOutOfRange(cell.key,val);
+        const {bg,fg}=bad?{bg:'#dc2626',fg:'#fff'}:redCell(val,CELL_MAX[cell.key]||5);
+        html+=`<div class="sc-tile" style="background:${bg}" title="${cell.lbl}: ${val}"><span class="sc-tile-lbl" style="color:${fg}">${cell.lbl}</span><span class="sc-tile-val" style="color:${fg}">${val}</span></div>`;
+      });
+      html+=`<div class="sc-diet-tile meat-count${mtBad?' mismatch':''}" title="Meat: ${stats.mt||0}"><span class="sc-tile-lbl">MEAT</span><span class="sc-tile-val">${stats.mt||0}${mtMax!==null?'<span class="sc-diet-target">/'+mtMax+'</span>':''}</span></div>`;
+      // Row 2: allergens/starches + PLANT count
+      SC_GRID_ROW2.forEach(cell=>{
+        const val=stats[cell.key]||0;
+        const bad=isOutOfRange(cell.key,val);
+        const {bg,fg}=bad?{bg:'#dc2626',fg:'#fff'}:redCell(val,CELL_MAX[cell.key]||5);
+        html+=`<div class="sc-tile" style="background:${bg}" title="${cell.lbl}: ${val}"><span class="sc-tile-lbl" style="color:${fg}">${cell.lbl}</span><span class="sc-tile-val" style="color:${fg}">${val}</span></div>`;
+      });
+      html+=`<div class="sc-diet-tile plant-count${plBad?' mismatch':''}" title="Plant: ${stats.pl||0}"><span class="sc-tile-lbl">PLANT</span><span class="sc-tile-val">${stats.pl||0}${plMax!==null?'<span class="sc-diet-target">/'+plMax+'</span>':''}</span></div>`;
+      html+=`</div></div>`;
+    } else {
+      html+=`<div class="dnd-sc-inner"><div class="dnd-sc-wk-hdr"><span class="sc-wk-num">WK ${r+1}</span><span class="sc-wk-date">${dateStr}</span></div><div class="dnd-sc-incomplete">Incomplete Menu</div></div>`;
+    }
+    html+=`</div>`;
+
+    // Meal cells
+    COLUMNS.forEach((col,ci)=>{
+      const arr=window.dndGrid[col.id]||[];
+      let dishId=arr[r]||null;
+      const isPinned=dndPinnedCols[col.id]&&r>0&&!dishId&&arr[0]&&arr[0]!==HOLE;
+      if(isPinned) dishId=arr[0];
+      const isHole=(dishId===HOLE);
+
+      // Consecutive duplicate detection (vertical — same column)
+      const prevId=r>0?(isPinned?arr[0]:arr[r-1]||null):null;
+      const nextRaw=arr[r+1]||null;
+      const nextPinned=dndPinnedCols[col.id]&&!nextRaw&&arr[0];
+      const nextId=nextRaw||(nextPinned?arr[0]:null);
+      const sameAsPrev=dishId&&dishId!==HOLE&&!isPinned&&prevId===dishId;
+      const sameAsNext=dishId&&dishId!==HOLE&&!isPinned&&nextId===dishId;
+      let cellDup='';
+      if(sameAsPrev&&sameAsNext) cellDup=' dup-mid';
+      else if(sameAsPrev) cellDup=' dup-last';
+      else if(sameAsNext) cellDup=' dup-first';
+
+      // Global duplicate: dish exists in a DIFFERENT column somewhere on the grid
+      // But DON'T show green if this cell is part of a consecutive vertical group (purple takes priority)
+      const isInConsecutiveGroup=cellDup!==''; // dup-first, dup-mid, or dup-last
+      const isGlobalDup=dishId&&dishId!==HOLE&&!isPinned&&globalDupSkus.has(dishId)&&!isInConsecutiveGroup;
+
+      // Also check: same dish in same column but NOT consecutive (gap between them) → green
+      let isSameColGap=false;
+      if(dishId&&dishId!==HOLE&&!isPinned&&!isInConsecutiveGroup){
+        // Check if this dish appears elsewhere in the same column non-consecutively
+        let foundElsewhere=false;
+        for(let rr=0;rr<arr.length;rr++){
+          if(rr===r) continue;
+          if(arr[rr]===dishId){
+            // Check if it's NOT adjacent
+            if(Math.abs(rr-r)>1){foundElsewhere=true;break;}
+            // If adjacent, only flag if there's a different dish between them (shouldn't happen if consecutive)
+          }
+        }
+        if(foundElsewhere) isSameColGap=true;
+      }
+
+      const showDupWarning=isGlobalDup||isSameColGap;
+
+      html+=`<div class="dnd-col-cell${isHole?' dnd-hole':''}${cellDup}${showDupWarning?' sku-duplicate':''}" style="grid-column:${ci+2}" data-row="${r}" data-col="${col.id}">`;
+      if(isHole){
+        html+=`<div class="dnd-slot-hole"></div>`;
+      } else if(dishId){
+        const d=getDish(dishId);
+        const name=d?d.name:(EXTRA_NAMES[dishId]||dishId);
+        const diet=getDietType(dishId);
+        const plantId=OMNI_PAIRS[dishId]||null;
+        const tog=getToggle(dishId);
+        const attrs=getAttrs(dishId);
+        const isGluten=attrs.gl===1;
+        const pinnedCls=isPinned?' pinned-card':'';
+        const glutenCls=isGluten&&!isPinned?' gluten-card':'';
+        const draggable=isPinned?'false':'true';
+
+        // Banner
+        html+=`<div class="dnd-card-wrap">`;
+        if(diet==='omni'&&plantId){
+          html+=`<div class="dnd-banner">
+            <div class="dnd-banner-half meat-side${tog.meatOff?' off':''}" onclick="toggleDiet('${dishId}','meat')" title="${tog.meatOff?'Enable':'Disable'} meat version"><span class="dnd-banner-id">${dishId}</span></div>
+            <div class="dnd-banner-half plant-side${tog.plantOff?' off':''}" onclick="toggleDiet('${dishId}','plant')" title="${tog.plantOff?'Enable':'Disable'} plant version"><span class="dnd-banner-id">${plantId}</span></div>
+          </div>`;
+        } else if(diet==='omni-missing'){
+          html+=`<div class="dnd-banner">
+            <div class="dnd-banner-half meat-side"><span class="dnd-banner-id">${dishId}</span></div>
+            <div class="dnd-banner-half missing" onclick="openPairModal('${dishId}')"><span class="dnd-banner-id">⚠ ???</span></div>
+          </div>`;
+        } else if(diet==='vegan'){
+          html+=`<div class="dnd-banner"><div class="dnd-banner-vegan"><span class="dnd-banner-id">${dishId}</span></div></div>`;
+        } else {
+          html+=`<div class="dnd-banner"><div class="dnd-banner-meat"><span class="dnd-banner-id">${dishId}</span></div></div>`;
+        }
+
+        html+=`<div class="dnd-card${pinnedCls}${glutenCls}" draggable="${draggable}" data-dish-id="${dishId}" data-row="${r}" data-col="${col.id}">
+          <div class="dnd-card-name">${name}</div>
+          ${!isPinned?`<div class="dnd-card-actions"><button class="dnd-action-btn dnd-action-dup" title="Duplicate">+</button><button class="dnd-action-btn dnd-action-rm" title="Remove">×</button></div>`:''}
+        </div></div>`;
+      } else {
+        html+=`<div class="dnd-slot-empty"></div>`;
+      }
+      html+=`</div>`;
+    });
+
+    // Empty cell for add-column
+    html+=`<div style="grid-column:${COLUMNS.length+2};border-bottom:var(--bd)"></div>`;
+  }
+
+  html+=`</div>`;
+  return html;
+}
+
+function renderDnDGrid(){
+  if(!Object.keys(window.dndGrid).length) initDnDGrid();
+  const container=document.getElementById('dnd-grid-body');
+  container.innerHTML=buildDnDHTML();
+  renderDnDPool(document.getElementById('dnd-pool-search')?.value||'');
+  // Shadow on scorecard
+  updateScShadow();
+}
+
+function updateScShadow(){
+  const wrap=document.getElementById('dnd-wrap');
+  const cells=document.querySelectorAll('.dnd-sc-cell');
+  const scrolled=wrap.scrollLeft>2;
+  cells.forEach(c=>c.classList.toggle('has-shadow',scrolled));
+}
+
+// ══ EVENT DELEGATION ══
+function setupDnDEvents(){
+  const container=document.getElementById('dnd-grid-body');
+  if(container._dndBound) return;
+  container._dndBound=true;
+
+  function findCell(el){while(el&&el!==container){if(el.classList&&el.classList.contains('dnd-col-cell'))return el;el=el.parentElement;}return null;}
+
+  container.addEventListener('dragstart',e=>{
+    const card=e.target.closest('.dnd-card:not(.pinned-card)');
+    if(!card) return;
+    const dishId=card.dataset.dishId;const row=parseInt(card.dataset.row);const col=card.dataset.col;
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('dishId',dishId);
+    e.dataTransfer.setData('source','dnd-grid');
+    dndDrag={dishId,fromRow:row,fromCol:col,holeRow:row,holeCol:col,active:true};
+    dndSnapshot={grid:JSON.parse(JSON.stringify(window.dndGrid))};
+    dndRemoveAndCompact(col,row);
+    const arr=window.dndGrid[col];
+    arr.splice(row,0,HOLE);
+    setTimeout(()=>{container.innerHTML=buildDnDHTML();},0);
+  });
+
+  container.addEventListener('dragover',e=>{
+    e.preventDefault();e.dataTransfer.dropEffect='move';
+    if(!dndDrag.active&&!dndDrag.poolDrag) return;
+    const cell=findCell(e.target);if(!cell) return;
+    const r=parseInt(cell.dataset.row);const colId=cell.dataset.col;
+    if(r===dndDrag.holeRow&&colId===dndDrag.holeCol) return;
+    if(dndDrag.poolDrag&&!dndSnapshot){dndSnapshot={grid:JSON.parse(JSON.stringify(window.dndGrid))};}
+    dndRemoveHole();
+    const arr=window.dndGrid[colId]||[];
+    arr.splice(r,0,HOLE);
+    dndDrag.holeRow=r;dndDrag.holeCol=colId;
+    container.innerHTML=buildDnDHTML();
+  });
+
+  container.addEventListener('drop',e=>{
+    e.preventDefault();
+    const dishId=e.dataTransfer.getData('dishId');
+    if(!dishId) return;
+    dndReplaceHole(dishId);
+    dndDrag={};dndSnapshot=null;
+    dndRemoveHole();dndTrimRows();renderDnDGrid();
+  });
+
+  container.addEventListener('dragend',e=>{
+    if(dndSnapshot){window.dndGrid=dndSnapshot.grid;dndSnapshot=null;}
+    dndRemoveHole();dndDrag={};renderDnDGrid();
+  });
+
+  container.addEventListener('click',e=>{
+    const dup=e.target.closest('.dnd-action-dup');
+    if(dup){
+      e.stopPropagation();
+      const card=dup.closest('.dnd-card');
+      const r=parseInt(card.dataset.row);const colId=card.dataset.col;const dishId=card.dataset.dishId;
+      dndInsertAt(colId,r+1,dishId);
+      renderDnDGrid();return;
+    }
+    const rm=e.target.closest('.dnd-action-rm');
+    if(rm){
+      e.stopPropagation();
+      const card=rm.closest('.dnd-card');
+      const r=parseInt(card.dataset.row);const colId=card.dataset.col;const dishId=card.dataset.dishId;
+      dndRemoveAndCompact(colId,r);
+      // Clear toggle on remove
+      delete dndToggles[dishId];
+      dndTrimRows();renderDnDGrid();return;
+    }
+  });
+
+  // Scroll shadow
+  document.getElementById('dnd-wrap').addEventListener('scroll',updateScShadow);
+
+  // Close settings panel on outside click
+  document.addEventListener('click',e=>{
+    if(scSettingsOpen && !e.target.closest('.sc-settings-panel') && !e.target.closest('.sc-settings-btn')){
+      scSettingsOpen=false;renderDnDGrid();
+    }
+  });
+}
+
+// ══ WEEK STATS ══
+function computeDnDWeekStats(rowIdx){
+  const g=window.dndGrid;
+  const s={ch:0,tr:0,bf:0,pk:0,sf:0,st_rice:0,st_pasta:0,st_potato:0,st_other:0,da:0,gl:0,peanut:0,ps_total:0,total:0,mt:0,pl:0};
+  let hasAny=false;
+  const countedMeat=new Set();
+  const countedPlant=new Set();
+
+  COLUMNS.forEach(col=>{
+    const arr=g[col.id]||[];
+    let dishId=arr[rowIdx];
+    if(!dishId||dishId===HOLE){
+      if(dndPinnedCols[col.id]&&arr[0]&&arr[0]!==HOLE) dishId=arr[0];
+      else return;
+    }
+    hasAny=true;
+    const tog=getToggle(dishId);
+    const diet=getDietType(dishId);
+    const plantId=OMNI_PAIRS[dishId]||null;
+
+    // Choose which attrs to count — deduplicate meat and plant SKUs
+    let attrId=dishId;
+    if(diet==='omni'&&plantId){
+      if(!tog.meatOff&&!countedMeat.has(dishId)){s.mt++;countedMeat.add(dishId);attrId=dishId;}
+      else if(tog.meatOff){attrId=plantId;}
+      if(!tog.plantOff&&!countedPlant.has(plantId)){s.pl++;countedPlant.add(plantId);}
+    } else if(diet==='vegan'){
+      if(!countedPlant.has(dishId)){s.pl++;countedPlant.add(dishId);}
+      attrId=dishId;
+    } else {
+      if(!tog.meatOff&&!countedMeat.has(dishId)){s.mt++;countedMeat.add(dishId);}
+      attrId=dishId;
+    }
+
+    const a=getAttrs(attrId);
+    s.total++;s.ps_total+=a.ps;
+    s.ch+=a.ch;s.tr+=a.tr;s.bf+=a.bf;s.pk+=a.pk;s.sf+=a.sf;
+    s.da+=a.da;s.gl+=a.gl;
+    const n=dndGetDish(attrId).toLowerCase();
+    if(n.includes('peanut')||n.includes('satay')) s.peanut++;
+    if(a.st==='Rice') s.st_rice++;
+    else if(a.st==='Pasta') s.st_pasta++;
+    else if(a.st==='Potato') s.st_potato++;
+    else if(a.st) s.st_other++;
+  });
+  return hasAny?s:null;
+}
+
+// ══ SWAP ENGINE ══
+function getWeekActiveSKUs(rowIdx){
+  const skus=[];const g=window.dndGrid;
+  COLUMNS.forEach(col=>{
+    const arr=g[col.id]||[];
+    let dishId=arr[rowIdx];
+    if(!dishId||dishId===HOLE){
+      if(dndPinnedCols[col.id]&&arr[0]&&arr[0]!==HOLE) dishId=arr[0];
+      else return;
+    }
+    const tog=getToggle(dishId);
+    const plantId=OMNI_PAIRS[dishId]||null;
+    const diet=getDietType(dishId);
+    if(diet==='omni'&&plantId){
+      if(!tog.meatOff) skus.push({sku:dishId,diet:'meat',colId:col.id,name:dndGetDish(dishId)});
+      if(!tog.plantOff) skus.push({sku:plantId,diet:'plant',colId:col.id,name:dndGetDish(plantId)});
+    } else if(diet==='vegan'){
+      skus.push({sku:dishId,diet:'plant',colId:col.id,name:dndGetDish(dishId)});
+    } else {
+      if(!tog.meatOff) skus.push({sku:dishId,diet:'meat',colId:col.id,name:dndGetDish(dishId)});
+    }
+  });
+  return skus;
+}
+
+function computeSwaps(fromRow,toRow){
+  const outSKUs=getWeekActiveSKUs(fromRow);
+  const inSKUs=getWeekActiveSKUs(toRow);
+  const trace=[];const swaps=[];
+  const inClaimed=new Set();const outMatched=new Set();
+
+  trace.push({type:'header',text:'Step 1: Direct Column Matches'});
+  trace.push({type:'info',text:`Comparing Week ${fromRow+1} (${outSKUs.length} SKUs) → Week ${toRow+1} (${inSKUs.length} SKUs)`});
+
+  outSKUs.forEach(out=>{
+    const match=inSKUs.find(ins=>ins.colId===out.colId&&ins.diet===out.diet&&!inClaimed.has(ins.sku));
+    if(match){
+      swaps.push({outSku:out.sku,outName:out.name,outDiet:out.diet,inSku:match.sku,inName:match.name,inDiet:match.diet,colId:out.colId,status:'direct'});
+      inClaimed.add(match.sku);outMatched.add(out.sku);
+      const cn=COLUMNS.find(c=>c.id===out.colId)?.short||out.colId;
+      trace.push({type:'match',text:`✓ ${cn} [${out.diet}]: ${out.sku} → ${match.sku}`});
+    }
+  });
+
+  const unmatchedOut=outSKUs.filter(s=>!outMatched.has(s.sku));
+  const unmatchedIn=inSKUs.filter(s=>!inClaimed.has(s.sku));
+  trace.push({type:'header',text:'Step 2: Unmatched Pool'});
+  trace.push({type:'info',text:`${unmatchedOut.length} out, ${unmatchedIn.length} in`});
+
+  trace.push({type:'header',text:'Step 3: Cross-Column Matching'});
+  ['meat','plant'].forEach(diet=>{
+    const outs=unmatchedOut.filter(s=>s.diet===diet);
+    const ins=unmatchedIn.filter(s=>s.diet===diet&&!inClaimed.has(s.sku));
+    for(let i=0;i<outs.length;i++){
+      if(i<ins.length){
+        swaps.push({outSku:outs[i].sku,outName:outs[i].name,outDiet:diet,inSku:ins[i].sku,inName:ins[i].name,inDiet:diet,colId:outs[i].colId,status:'cross'});
+        inClaimed.add(ins[i].sku);outMatched.add(outs[i].sku);
+        trace.push({type:'cross',text:`↔ Cross [${diet}]: ${outs[i].sku} → ${ins[i].sku}`});
+      } else {
+        swaps.push({outSku:outs[i].sku,outName:outs[i].name,outDiet:diet,inSku:null,inName:null,inDiet:diet,colId:outs[i].colId,status:'orphan'});
+        trace.push({type:'orphan',text:`⚠ Orphan [${diet}]: ${outs[i].sku} — no match`});
+      }
+    }
+  });
+
+  const dc=swaps.filter(s=>s.status==='direct').length;
+  const cc=swaps.filter(s=>s.status==='cross').length;
+  const oc=swaps.filter(s=>s.status==='orphan').length;
+  trace.push({type:'header',text:`Result: ${dc} direct, ${cc} cross, ${oc} orphan`});
+  return {swaps,trace,outSKUs,inSKUs};
+}
+
+let currentSwapData=null;let swapOverrides={};
+
+function showSwapReport(weekRow){
+  const fromRow=weekRow-1,toRow=weekRow;
+  const lastSun=getLastSunday();
+  const fd=new Date(lastSun);fd.setDate(fd.getDate()+fromRow*7);
+  const td=new Date(lastSun);td.setDate(td.getDate()+toRow*7);
+  document.getElementById('swap-modal-title').textContent=`Swap Report — Week ${fromRow+1} → Week ${toRow+1}`;
+  document.getElementById('swap-modal-sub').textContent=`${fd.toLocaleDateString('en-CA',{month:'short',day:'numeric'})} → ${td.toLocaleDateString('en-CA',{month:'short',day:'numeric'})}`;
+  currentSwapData=computeSwaps(fromRow,toRow);swapOverrides={};
+  renderSwapSummary();renderSwapTrace();renderSwapOverride();
+  switchSwapTab('summary',document.querySelector('.swap-tab'));
+  document.getElementById('swap-modal-bg').classList.add('open');
+}
+function closeSwapModal(){document.getElementById('swap-modal-bg').classList.remove('open');}
+function switchSwapTab(id,el){
+  document.querySelectorAll('#swap-tabs .swap-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.swap-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('swap-'+id).classList.add('active');
+}
+
+function renderSwapSummary(){
+  const {swaps}=currentSwapData;
+  if(!swaps.length){document.getElementById('swap-summary').innerHTML='<div style="color:var(--g400);padding:20px;text-align:center">No swaps.</div>';return;}
+  const finalSwaps=swaps.map(s=>swapOverrides[s.outSku]?{...s,inSku:swapOverrides[s.outSku],inName:dndGetDish(swapOverrides[s.outSku]),status:'manual'}:s);
+  let html=`<div style="display:flex;gap:12px;margin-bottom:14px;font-size:11px;font-weight:600">`;
+  const dc=finalSwaps.filter(s=>s.status==='direct').length;const cc=finalSwaps.filter(s=>s.status==='cross').length;
+  const mc=finalSwaps.filter(s=>s.status==='manual').length;const oc=finalSwaps.filter(s=>s.status==='orphan').length;
+  html+=`<span style="color:#166534">✓ ${dc} Direct</span><span style="color:#92400e">↔ ${cc} Cross</span>`;
+  if(mc) html+=`<span style="color:#5b21b6">✎ ${mc} Manual</span>`;
+  if(oc) html+=`<span style="color:#991b1b">⚠ ${oc} Orphan</span>`;
+  html+=`<span style="color:var(--g400);margin-left:auto">${finalSwaps.length} total</span></div>`;
+  html+=`<table class="swap-table"><thead><tr><th>Diet</th><th>Out</th><th>Outgoing</th><th></th><th>In</th><th>Incoming</th><th>Status</th></tr></thead><tbody>`;
+  finalSwaps.forEach(s=>{
+    html+=`<tr><td><span class="swap-diet-tag ${s.outDiet}">${s.outDiet==='meat'?'Meat':'Plant'}</span></td><td><span class="swap-sku ${s.outDiet}">${s.outSku}</span></td><td style="font-weight:600">${s.outName}</td><td class="swap-arrow">→</td><td><span class="swap-sku">${s.inSku||'—'}</span></td><td style="font-weight:600">${s.inName||'No match'}</td><td><span class="swap-status ${s.status}">${s.status==='direct'?'Direct':s.status==='cross'?'Cross':s.status==='manual'?'Manual':'⚠ Orphan'}</span></td></tr>`;
+  });
+  html+=`</tbody></table>`;
+  document.getElementById('swap-summary').innerHTML=html;
+}
+
+function renderSwapTrace(){
+  const {trace}=currentSwapData;
+  let html='<div class="swap-trace">';
+  trace.forEach(t=>{
+    if(t.type==='header') html+=`<div style="font-weight:800;color:var(--navy);margin:14px 0 6px;font-size:12px;text-transform:uppercase">${t.text}</div>`;
+    else html+=`<div class="swap-trace-step ${t.type==='match'?'match':t.type==='cross'?'cross':t.type==='orphan'?'orphan':''}">${t.text}</div>`;
+  });
+  html+='</div>';
+  document.getElementById('swap-trace').innerHTML=html;
+}
+
+function renderSwapOverride(){
+  const {swaps,inSKUs}=currentSwapData;
+  if(!swaps.length){document.getElementById('swap-override').innerHTML='<div style="color:var(--g400);padding:20px">No swaps to override.</div>';return;}
+  const avail={meat:[],plant:[]};
+  inSKUs.forEach(s=>{avail[s.diet].push({sku:s.sku,name:s.name});});
+  let html=`<table class="swap-table"><thead><tr><th>Diet</th><th>Out</th><th>Outgoing</th><th></th><th>Override</th><th>Status</th></tr></thead><tbody>`;
+  swaps.forEach(s=>{
+    const cur=swapOverrides[s.outSku]||s.inSku||'';const isOvr=!!swapOverrides[s.outSku];
+    const opts=avail[s.outDiet]||[];
+    html+=`<tr><td><span class="swap-diet-tag ${s.outDiet}">${s.outDiet==='meat'?'Meat':'Plant'}</span></td><td><span class="swap-sku">${s.outSku}</span></td><td style="font-weight:600">${s.outName}</td><td class="swap-arrow">→</td><td><select class="swap-override-select" onchange="applySwapOverride('${s.outSku}',this.value)">`;
+    if(s.inSku) html+=`<option value="${s.inSku}" ${!isOvr?'selected':''}>${s.inSku} — ${s.inName}</option>`;
+    else html+=`<option value="">— None —</option>`;
+    opts.filter(o=>o.sku!==s.inSku).forEach(o=>{html+=`<option value="${o.sku}" ${cur===o.sku?'selected':''}>${o.sku} — ${o.name}</option>`;});
+    html+=`</select></td><td><span class="swap-status ${isOvr?'manual':s.status}">${isOvr?'Manual':s.status==='direct'?'Direct':s.status==='cross'?'Cross':'Orphan'}</span></td></tr>`;
+  });
+  html+=`</tbody></table>`;
+  document.getElementById('swap-override').innerHTML=html;
+}
+
+function applySwapOverride(outSku,inSku){
+  const orig=currentSwapData.swaps.find(s=>s.outSku===outSku);
+  if(orig&&inSku===orig.inSku) delete swapOverrides[outSku];
+  else if(inSku) swapOverrides[outSku]=inSku;
+  else delete swapOverrides[outSku];
+  renderSwapSummary();renderSwapOverride();
+}
+
+// ══ PAIR MODAL ══
+let pairModalMeatId=null;
+function openPairModal(meatId){
+  pairModalMeatId=meatId;
+  const name=dndGetDish(meatId);
+  document.querySelector('.pair-modal-sub').textContent=`For: ${name} (${meatId})`;
+  renderPairList('');
+  document.getElementById('pair-search').value='';
+  document.getElementById('pair-modal-bg').classList.add('open');
+}
+function closePairModal(){document.getElementById('pair-modal-bg').classList.remove('open');pairModalMeatId=null;}
+
+function renderPairList(filter){
+  const fl=filter.toLowerCase();
+  const list=document.getElementById('pair-list');
+  let allPlant=ALL_DISHES.filter(d=>d.diet==='veg').map(d=>({...d}));
+  const existingPlantIds=new Set(Object.values(OMNI_PAIRS));
+  Object.entries(EXTRA_NAMES).forEach(([id,name])=>{
+    if(!id||allPlant.find(d=>d.id===id))return;
+    if(existingPlantIds.has(id)||OMNI_REVERSE[id]){
+      if(!fl||name.toLowerCase().includes(fl)||id.includes(fl)) allPlant.push({id,name,diet:'veg',type:'Vegan'});
+    }
+  });
+  if(fl) allPlant=allPlant.filter(d=>d.name.toLowerCase().includes(fl)||d.id.includes(fl));
+  allPlant.sort((a,b)=>a.name.localeCompare(b.name));
+  if(!allPlant.length){list.innerHTML='<div class="pair-modal-none">No plant-based dishes found</div>';return;}
+  list.innerHTML=allPlant.map(d=>`<div class="pair-modal-item" onclick="assignPair('${d.id}')"><div class="pair-modal-item-dot"></div><div class="pair-modal-item-name">${d.name}</div><div class="pair-modal-item-id">${d.id}</div></div>`).join('');
+}
+
+function assignPair(plantId){
+  if(!pairModalMeatId)return;
+  OMNI_PAIRS[pairModalMeatId]=plantId;
+  OMNI_REVERSE[plantId]=pairModalMeatId;
+  closePairModal();renderDnDGrid();
+}
+
+// ══ INIT ══
+const advInfo=getLastSunday().toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'});
+document.getElementById('wi-info').textContent='Queue as of '+advInfo;
+initDnDGrid();
+renderDnDGrid();
+setupDnDEvents();
+
+// Add fadeOut animation
+const style=document.createElement('style');
+style.textContent='@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0}}';
+document.head.appendChild(style);
+
+</script>
+</body>
+</html>
