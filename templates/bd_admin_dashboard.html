@@ -35,25 +35,59 @@
         html { scrollbar-gutter: stable; }
         body { font-family: 'DM Sans', sans-serif; background: #F3E8D8; color: var(--text); min-height: 100vh; overflow-y: scroll; }
 
-        /* ═══════ NAV ═══════ */
-        .nav {
-            background: var(--dark-navy);
-            padding: 0 40px; height: 58px;
-            display: flex; align-items: center;
-            position: sticky; top: 0; z-index: 200;
+        /* ═══════ SIDEBAR ═══════ */
+        body { display: flex; }
+        .sidebar {
+            width: 218px; background: var(--dark-navy);
+            position: fixed; top: 0; left: 0; bottom: 0; z-index: 10;
+            display: flex; flex-direction: column; padding-top: 20px;
         }
-        .nav-logo { height: 22px; margin-right: 18px; filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(10deg) brightness(1.15); }
-        .nav-sep { width: 1px; height: 18px; background: rgba(255,255,255,.15); margin-right: 18px; }
-        .nav-title { font-weight: 700; font-size: .88rem; color: var(--cream); opacity: .9; }
-        .nav-right { margin-left: auto; }
+        .sb-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; }
+        .sb-logo img { height: 20px; filter: brightness(0) invert(1) sepia(1) saturate(0.3) hue-rotate(10deg) brightness(1.6); }
+        .sb-logo-text { font-size: 13px; font-weight: 700; color: var(--cream); }
+        .sb-sec { font-size: .5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(250,235,218,.35); padding: 14px 20px 5px; }
+        .sb-div { height: 1px; background: rgba(255,255,255,.07); margin: 8px 20px; }
+        .sb-item {
+            display: flex; align-items: center; gap: 9px;
+            padding: 10px 20px; font-size: .82rem; font-weight: 600;
+            color: rgba(250,235,218,.65); cursor: pointer;
+            border-left: 3px solid transparent; transition: .12s;
+            text-decoration: none;
+        }
+        .sb-item:hover { color: var(--cream); background: rgba(255,255,255,.06); }
+        .sb-item.active { color: var(--yellow); background: rgba(253,196,1,.12); border-left-color: var(--yellow); font-weight: 800; }
+        .sb-badge { font-size: .5rem; font-weight: 800; padding: 1px 6px; border-radius: 99px; margin-left: auto; background: rgba(253,196,1,.18); color: var(--yellow); }
+
+        /* ═══════ MAIN AREA ═══════ */
+        .main { margin-left: 218px; flex: 1; min-height: 100vh; }
+
+        /* ═══════ TOP BAR ═══════ */
+        .topbar {
+            height: 52px; background: var(--dark-navy);
+            display: flex; align-items: center; padding: 0 26px; gap: 12px;
+            position: sticky; top: 0; z-index: 5;
+            box-shadow: 0 2px 12px rgba(0,0,0,.18);
+        }
+        .tb-title { font-size: .9rem; font-weight: 900; color: var(--cream); letter-spacing: -.2px; }
+        .tb-title b { color: var(--yellow); }
+        .tb-pill { font-size: .52rem; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; color: rgba(250,235,218,.35); background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 99px; padding: 2px 8px; }
+        .tb-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        .tb-week { font-size: .68rem; font-weight: 700; color: var(--yellow); background: rgba(253,196,1,.12); border: 1px solid rgba(253,196,1,.22); border-radius: 99px; padding: 4px 12px; }
+        .tb-week span { color: rgba(255,255,255,.3); margin-right: 4px; }
         .btn-logout {
-            font-size: .78rem; font-weight: 600; color: rgba(250,235,218,.7); text-decoration: none;
-            padding: 6px 16px; border: 1px solid rgba(250,235,218,.2); border-radius: 99px; transition: .15s;
+            font-size: .68rem; font-weight: 700; color: rgba(250,235,218,.4);
+            border: 1px solid rgba(250,235,218,.14); border-radius: 99px;
+            padding: 5px 14px; text-decoration: none; transition: .14s;
         }
-        .btn-logout:hover { border-color: rgba(250,235,218,.5); color: var(--cream); }
+        .btn-logout:hover { color: var(--cream); border-color: rgba(250,235,218,.4); }
+
+        @media (max-width: 1000px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+        }
 
         /* ═══════ CONTAINER ═══════ */
-        .container { max-width: 1200px; margin: 0 auto; padding: 28px 40px 80px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px 28px 80px; }
 
         /* ═══════ STAT CARDS ═══════ */
         .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 26px; }
@@ -284,83 +318,37 @@
         .inv-actions { display: flex; gap: 6px; align-items: center; }
         .inv-actions .btn-outline { font-size: .7rem; padding: 5px 12px; }
 
-        /* ═══════ LAYOUT TOGGLE ═══════ */
-        .layout-toggle {
-            display: flex; align-items: center; gap: 8px; margin-right: 20px;
-        }
-        .layout-toggle-label { font-size: .7rem; color: rgba(250,235,218,.5); font-weight: 600; }
-        .toggle-switch {
-            width: 40px; height: 22px; background: rgba(255,255,255,.15); border-radius: 99px;
-            position: relative; cursor: pointer; transition: background .2s; border: 1px solid rgba(255,255,255,.2);
-        }
-        .toggle-switch.on { background: var(--sky); border-color: var(--sky); }
-        .toggle-switch::after {
-            content: ''; position: absolute; top: 2px; left: 2px;
-            width: 16px; height: 16px; background: #fff; border-radius: 50%;
-            transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
-        }
-        .toggle-switch.on::after { transform: translateX(18px); }
-
-        /* ═══════ SIDEBAR MODE ═══════ */
-        .sidebar { display: none; }
-        body.sidebar-mode .sidebar {
-            display: flex; flex-direction: column;
-            position: fixed; top: 58px; left: 0; bottom: 0; width: 220px;
-            background: var(--card); border-right: 1px solid var(--border);
-            box-shadow: 2px 0 12px rgba(0,49,65,.04);
-            padding: 24px 0; z-index: 100;
-        }
-        body.sidebar-mode .container { margin-left: 220px; max-width: 1000px; }
-        body.sidebar-mode .tabs-wrap { display: none; }
-        body.sidebar-mode .tab-panel { display: block; min-height: auto; }
-        body.sidebar-mode .tab-panel:not(.active) { display: none; }
-
-        .sidebar-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 11px 24px; font-size: .85rem; font-weight: 600;
-            color: var(--muted); cursor: pointer; transition: .12s;
-            text-decoration: none; border-left: 3px solid transparent;
-        }
-        .sidebar-item:hover { color: var(--navy); background: #FAF6F0; }
-        .sidebar-item.active { color: var(--navy); background: var(--sky-light); border-left-color: var(--sky); font-weight: 700; }
-        .sidebar-item-icon { font-size: 1rem; width: 20px; text-align: center; }
-        .sidebar-divider { height: 1px; background: var(--border); margin: 12px 24px; }
+        /* Tabs hidden — sidebar handles navigation */
+        .tabs-wrap { display: none; }
     </style>
 </head>
 <body>
-<!-- ═══════ NAV ═══════ -->
-<nav class="nav">
-    <img src="/static/logo.png" class="nav-logo" alt="BetterDay">
-    <div class="nav-sep"></div>
-    <span class="nav-title">Admin Dashboard</span>
-    <div class="nav-right">
-        <div class="layout-toggle">
-            <span class="layout-toggle-label">Sidebar</span>
-            <div class="toggle-switch" id="layoutToggle" onclick="toggleLayout()"></div>
-        </div>
+<!-- ═══════ SIDEBAR ═══════ -->
+<aside class="sidebar">
+    <div class="sb-logo">
+        <img src="/static/logo.png" alt="BD">
+        <span class="sb-logo-text">BetterDay Kitchen</span>
+    </div>
+    <div class="sb-sec">Main</div>
+    <div class="sb-item active" data-tab="overview" onclick="sidebarNav('overview', this)">&#9632; &nbsp;Overview</div>
+    <div class="sb-item" data-tab="companies" onclick="sidebarNav('companies', this)">&#9733; &nbsp;Companies <span class="sb-badge">{{ total_companies }}</span></div>
+    <div class="sb-item" data-tab="invoices" onclick="sidebarNav('invoices', this)">&#9670; &nbsp;Invoices <span class="sb-badge">{{ invoices|length }}</span></div>
+    <div class="sb-item" data-tab="orders" onclick="sidebarNav('orders', this)">&#9776; &nbsp;Orders</div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">Settings</div>
+    <div class="sb-item" onclick="window.location='/admin-logout'">&#8594; &nbsp;Sign out</div>
+</aside>
+
+<!-- ═══════ MAIN ═══════ -->
+<div class="main">
+<div class="topbar">
+    <span class="tb-title">Better<b>Day</b></span>
+    <span class="tb-pill">Admin</span>
+    <div class="tb-right">
+        <span class="tb-week"><span>Week of </span>{{ active_week.label }}</span>
         <a href="/admin-logout" class="btn-logout">Sign out</a>
     </div>
-</nav>
-
-<!-- ═══════ SIDEBAR (hidden by default) ═══════ -->
-<aside class="sidebar">
-    <div class="sidebar-item active" onclick="sidebarNav('overview')">
-        <span class="sidebar-item-icon">&#9632;</span> Overview
-    </div>
-    <div class="sidebar-item" onclick="sidebarNav('companies')">
-        <span class="sidebar-item-icon">&#9733;</span> Companies
-    </div>
-    <div class="sidebar-item" onclick="sidebarNav('invoices')">
-        <span class="sidebar-item-icon">&#9830;</span> Invoices
-    </div>
-    <div class="sidebar-item" onclick="sidebarNav('orders')">
-        <span class="sidebar-item-icon">&#9776;</span> Orders
-    </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-item" onclick="window.location='/admin-logout'">
-        <span class="sidebar-item-icon">&#8594;</span> Sign out
-    </div>
-</aside>
+</div>
 
 <div class="container">
     <!-- ═══════ THIS WEEK ═══════ -->
@@ -683,7 +671,8 @@
             </div>
         </div>
     </div>
-</div>
+</div><!-- /container -->
+</div><!-- /main -->
 
 <script>
 const ALL_ORDERS  = {{ orders_json|safe }};
@@ -864,29 +853,14 @@ function renderRecent() {
 function recPage(dir) { recPageNum += dir; renderRecent(); }
 filterRecent();
 
-/* ── Layout Toggle ── */
-function toggleLayout() {
-    var toggle = document.getElementById('layoutToggle');
-    var isSidebar = document.body.classList.toggle('sidebar-mode');
-    toggle.classList.toggle('on', isSidebar);
-    localStorage.setItem('bd_admin_layout', isSidebar ? 'sidebar' : 'tabs');
-}
-
-function sidebarNav(id) {
+/* ── Sidebar Navigation ── */
+function sidebarNav(id, el) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active');
-    event.currentTarget.classList.add('active');
+    if (el) el.classList.add('active');
     if (id === 'orders') filterOrders();
 }
-
-// Restore layout preference
-(function() {
-    if (localStorage.getItem('bd_admin_layout') === 'sidebar') {
-        document.body.classList.add('sidebar-mode');
-        document.getElementById('layoutToggle').classList.add('on');
-    }
-})();
 </script>
 </body>
 </html>
