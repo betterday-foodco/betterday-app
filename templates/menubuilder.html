@@ -55,11 +55,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-drawer-col:last-child{border-right:none}
 .dnd-drawer-col-body{flex:1;overflow-y:auto;padding:4px 4px 20px}
 .pool-col-hdr{padding:7px 8px 5px;flex-shrink:0}
-.pool-col-hdr.meat{background:var(--meat-bg);border-bottom:1px solid var(--meat-bdr)}
-.pool-col-hdr.omni{background:var(--omni-bg);border-bottom:1px solid var(--omni-bdr)}
-.pool-col-hdr.vegan{background:var(--vegan-bg);border-bottom:1px solid var(--vegan-bdr)}
-.pool-col-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.pool-col-lbl.meat{color:var(--meat-hdr)}.pool-col-lbl.omni{color:var(--omni-hdr)}.pool-col-lbl.vegan{color:var(--vegan-hdr)}
+.pool-col-hdr.meat{background:var(--meat-hdr);border-bottom:none}
+.pool-col-hdr.omni{background:var(--omni-hdr);border-bottom:none}
+.pool-col-hdr.vegan{background:var(--vegan-hdr);border-bottom:none}
+.pool-col-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:white}
+.pool-col-lbl.meat{color:white}.pool-col-lbl.omni{color:white}.pool-col-lbl.vegan{color:white}
+.pool-col-cnt{color:rgba(255,255,255,.7)}
 .pool-col-cnt{font-size:9px;color:var(--g400);margin-top:1px}
 .dish-card{background:white;border:var(--bd);border-radius:var(--r);padding:6px 8px;margin-bottom:4px;cursor:grab;user-select:none;transition:box-shadow .12s,transform .1s}
 .dish-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);transform:translateY(-1px)}
@@ -219,7 +220,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-card.dragging{opacity:.15}
 .dnd-card.pinned-card{opacity:.5;border-style:dashed;cursor:default;background:#e8f4fd}
 /* Pinned cards in a dup chain look normal */
-.dnd-col-cell.dup-first .dnd-card.pinned-card,.dnd-col-cell.dup-mid .dnd-card.pinned-card,.dnd-col-cell.dup-last .dnd-card.pinned-card{opacity:1;border-style:solid;background:#c8b8f0;cursor:grab}
+.dnd-col-cell.dup-first .dnd-card.pinned-card,.dnd-col-cell.dup-mid .dnd-card.pinned-card,.dnd-col-cell.dup-last .dnd-card.pinned-card{opacity:1;border-style:solid;background:#c8b8f0 !important;cursor:grab}
 .dnd-card.gluten-card{background:#f5ecc6}
 /* freq-card overrides gluten */
 .dnd-card.freq-card.gluten-card{background:var(--navy) !important}
@@ -237,11 +238,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-col-cell.dup-first .dnd-card.pinned-card:hover .dnd-card-actions,.dnd-col-cell.dup-mid .dnd-card.pinned-card:hover .dnd-card-actions,.dnd-col-cell.dup-last .dnd-card.pinned-card:hover .dnd-card-actions{display:flex !important}
 .dnd-card-wrap .dnd-card-rm,.dnd-card-wrap .dnd-card-dup{display:none !important}
 
-/* ── Consecutive duplicate cells ── */
-.dnd-col-cell.dup-first .dnd-card,.dnd-col-cell.dup-mid .dnd-card,.dnd-col-cell.dup-last .dnd-card{background:#c8b8f0 !important}
-.dnd-col-cell.dup-first .dnd-card .dnd-card-name,.dnd-col-cell.dup-mid .dnd-card .dnd-card-name,.dnd-col-cell.dup-last .dnd-card .dnd-card-name{color:var(--g900)}
-/* Bridge overlay divs — placed by JS outside grid cells */
-.dup-bridge{position:absolute;background:#c8b8f0;pointer-events:none;z-index:6}
+/* ── Consecutive duplicate grouping — visually merged purple card ── */
+/* Remove cell borders between merged cells so card crosses over */
+.dnd-col-cell.dup-first,.dnd-col-cell.dup-mid{border-bottom:none !important}
+
+/* FIRST: banner + name, card fills cell and extends into next */
+.dnd-col-cell.dup-first{padding-bottom:0}
+.dnd-col-cell.dup-first .dnd-card-wrap{margin-bottom:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
+.dnd-col-cell.dup-first .dnd-card{border-bottom:none;border-radius:6px 6px 0 0;margin-bottom:0;flex:1;height:auto;background:#c8b8f0 !important}
+.dnd-col-cell.dup-first .dnd-banner{border-radius:6px 6px 0 0}
+
+/* MID: card shell continues, fills cell height */
+.dnd-col-cell.dup-mid{padding:0 6px}
+.dnd-col-cell.dup-mid .dnd-card-wrap{margin:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
+.dnd-col-cell.dup-mid .dnd-banner{display:none}
+.dnd-col-cell.dup-mid .dnd-card{border-top:none;border-bottom:none;border-radius:0;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab;background:#c8b8f0 !important}
+.dnd-col-cell.dup-mid .dnd-card-name,.dnd-col-cell.dup-mid .dnd-card-id{display:none}
+
+/* LAST: card shell closes with bottom border + radius */
+.dnd-col-cell.dup-last{padding:0 6px 6px}
+.dnd-col-cell.dup-last .dnd-card-wrap{margin:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
+.dnd-col-cell.dup-last .dnd-banner{display:none}
+.dnd-col-cell.dup-last .dnd-card{border-top:none;border-radius:0 0 6px 6px;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab;background:#c8b8f0 !important}
+.dnd-col-cell.dup-last .dnd-card-name,.dnd-col-cell.dup-last .dnd-card-id{display:none}
+
+/* Action buttons (+/x) at bottom of each cell in chain, on hover */
+.dnd-col-cell.dup-first .dnd-card-actions,
+.dnd-col-cell.dup-mid .dnd-card-actions,
+.dnd-col-cell.dup-last .dnd-card-actions{display:none;position:absolute;bottom:0;top:auto;left:0;right:0;height:16px;z-index:10;border-radius:0}
+.dnd-col-cell.dup-first:hover .dnd-card-actions,
+.dnd-col-cell.dup-mid:hover .dnd-card-actions,
+.dnd-col-cell.dup-last:hover .dnd-card-actions{display:flex}
+.dnd-col-cell.dup-last .dnd-card-actions{border-radius:0 0 6px 6px}
 
 /* ── Frequency-based blue cell shading (card always stays white) ── */
 /* All frequency cards — navy with white text + occurrence badge */
@@ -1104,7 +1132,7 @@ function buildDnDHTML(){
     html+=`<div class="dnd-hdr-cell" style="background:${col.color||'#475569'};grid-column:${ci+2}" data-col-id="${col.id}" ${colUnlocked?'draggable="true" ondragstart="colDragStart(event,\''+col.id+'\')" ondragover="colDragOver(event,\''+col.id+'\')" ondrop="colDrop(event,\''+col.id+'\')" ondragend="colDragEnd(event)"':''}>
       ${colUnlocked?`<input class="col-name-input" value="${col.short||col.name}" onchange="renameCol('${col.id}',this.value)" onclick="event.stopPropagation()" ondragstart="event.stopPropagation()"/>`:(col.short||col.name)}
       ${canPin?`<button class="dnd-pin-btn${pinned?' pinned':''}" onclick="togglePin('${col.id}')" title="${pinned?'Unpin':'Pin'}">∞</button>`:''}
-      <div class="col-edit-dot" style="background:${col.color||'#475569'};border-color:rgba(255,255,255,.5)" onclick="event.stopPropagation();showColorPicker('${col.id}',this)"></div>
+      <div class="col-edit-dot" style="background:${col.color||'#475569'};border-color:rgba(255,255,255,.5)" onclick="event.stopPropagation();showColorPicker('${col.id}',this)" ondragstart="event.preventDefault();event.stopPropagation()" onmousedown="event.stopPropagation()" draggable="false"></div>
       <button class="col-del-btn" onclick="event.stopPropagation();deleteCol('${col.id}')">×</button>
     </div>`;
   });
@@ -1284,53 +1312,6 @@ function renderDnDGrid(){
   container.innerHTML=buildDnDHTML();
   renderDnDPool(document.getElementById('dnd-pool-search')?.value||'');
   updateScShadow();
-  requestAnimationFrame(()=>placeBridges());
-}
-
-function placeBridges(){
-  // Remove old bridges
-  document.querySelectorAll('.dup-bridge').forEach(b=>b.remove());
-  const wrap=document.getElementById('dnd-grid-body');
-  if(!wrap) return;
-  const wrapRect=wrap.getBoundingClientRect();
-  const scrollLeft=wrap.scrollLeft;
-  const scrollTop=wrap.scrollTop;
-
-  // Find all dup-first and dup-mid cells — bridge from their card bottom to the next row's card top
-  const cells=wrap.querySelectorAll('.dnd-col-cell.dup-first,.dnd-col-cell.dup-mid');
-  cells.forEach(cell=>{
-    const col=cell.dataset.col;
-    const row=parseInt(cell.dataset.row);
-    // Find the next cell in the same column (row+1)
-    const nextCell=wrap.querySelector(`.dnd-col-cell[data-col="${col}"][data-row="${row+1}"]`);
-    if(!nextCell) return;
-
-    // Get the card in this cell and the card-wrap in next cell
-    const thisCard=cell.querySelector('.dnd-card');
-    const nextBanner=nextCell.querySelector('.dnd-banner');
-    const nextCard=nextCell.querySelector('.dnd-card');
-    if(!thisCard||!nextCard) return;
-
-    // Measure positions relative to the scroll container
-    const thisCardRect=thisCard.getBoundingClientRect();
-    const nextCardRect=nextCard.getBoundingClientRect();
-
-    // Bridge starts inside bottom of first card, ends past top of next card — generous overlap
-    const bridgeTop=thisCardRect.bottom - 8 - wrapRect.top + scrollTop;
-    const bridgeBottom=nextCardRect.top + 8 - wrapRect.top + scrollTop;
-    const bridgeLeft=thisCardRect.left - wrapRect.left + scrollLeft;
-    const bridgeWidth=thisCardRect.width;
-
-    if(bridgeBottom<=bridgeTop) return; // no gap to bridge
-
-    const bridge=document.createElement('div');
-    bridge.className='dup-bridge';
-    bridge.style.top=bridgeTop+'px';
-    bridge.style.left=bridgeLeft+'px';
-    bridge.style.width=bridgeWidth+'px';
-    bridge.style.height=(bridgeBottom-bridgeTop)+'px';
-    wrap.appendChild(bridge);
-  });
 }
 
 function updateScShadow(){

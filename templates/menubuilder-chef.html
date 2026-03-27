@@ -32,6 +32,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .bc{font-size:13px;color:var(--g400)}
 .btn-save{background:var(--green);color:white;border:none;padding:8px 20px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
 .btn-save:hover{background:#5aa843}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 .btn-ghost{background:white;border:var(--bd);padding:7px 14px;border-radius:var(--r);font-size:12px;color:var(--g500);cursor:pointer}
 .btn-ghost:hover{background:var(--g50)}
 .page-head{padding:12px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;overflow:hidden}
@@ -54,11 +55,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-drawer-col:last-child{border-right:none}
 .dnd-drawer-col-body{flex:1;overflow-y:auto;padding:4px 4px 20px}
 .pool-col-hdr{padding:7px 8px 5px;flex-shrink:0}
-.pool-col-hdr.meat{background:var(--meat-bg);border-bottom:1px solid var(--meat-bdr)}
-.pool-col-hdr.omni{background:var(--omni-bg);border-bottom:1px solid var(--omni-bdr)}
-.pool-col-hdr.vegan{background:var(--vegan-bg);border-bottom:1px solid var(--vegan-bdr)}
-.pool-col-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.pool-col-lbl.meat{color:var(--meat-hdr)}.pool-col-lbl.omni{color:var(--omni-hdr)}.pool-col-lbl.vegan{color:var(--vegan-hdr)}
+.pool-col-hdr.meat{background:var(--meat-hdr);border-bottom:none}
+.pool-col-hdr.omni{background:var(--omni-hdr);border-bottom:none}
+.pool-col-hdr.vegan{background:var(--vegan-hdr);border-bottom:none}
+.pool-col-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:white}
+.pool-col-lbl.meat{color:white}.pool-col-lbl.omni{color:white}.pool-col-lbl.vegan{color:white}
+.pool-col-cnt{color:rgba(255,255,255,.7)}
 .pool-col-cnt{font-size:9px;color:var(--g400);margin-top:1px}
 .dish-card{background:white;border:var(--bd);border-radius:var(--r);padding:6px 8px;margin-bottom:4px;cursor:grab;user-select:none;transition:box-shadow .12s,transform .1s}
 .dish-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1);transform:translateY(-1px)}
@@ -82,34 +84,49 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sc-settings-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);font-size:9px;font-weight:600;padding:6px 10px;border-radius:var(--r);cursor:pointer;transition:all .12s;white-space:nowrap;display:flex;align-items:center;gap:4px}
 .sc-settings-btn:hover{background:rgba(255,255,255,.15);color:white}
 /* Settings dropdown panel */
-.sc-settings-panel{display:none;position:absolute;top:100%;left:0;right:0;background:#f8f9fb;border:1px solid var(--g200);border-top:3px solid var(--navy);box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:25;max-height:600px;overflow-y:auto;border-radius:0 0 8px 8px}
+.sc-settings-panel{display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--g200);border-top:2px solid var(--navy);box-shadow:0 8px 30px rgba(0,0,0,.2);z-index:25;max-height:600px;overflow-y:auto;border-radius:0 0 8px 8px;text-transform:none;letter-spacing:normal;font-size:14px;color:var(--g900);text-align:left}
 .sc-settings-panel.open{display:block}
-.sc-settings-panel *{text-transform:none !important;letter-spacing:normal !important}
-.sc-settings-title{font-size:12px;font-weight:700;color:var(--navy);padding:10px 12px 2px}
-/* Settings table */
-.sc-settings-tbl{width:100%;border-collapse:collapse;font-size:11px}
-.sc-settings-tbl th{font-size:10px;font-weight:600;color:var(--g500);padding:4px 8px 4px;text-align:center;border-bottom:1px solid var(--g200);background:#f0f1f4}
-.sc-settings-tbl th:first-child{text-align:left;padding-left:12px}
-.sc-settings-tbl td{padding:4px 8px;border-bottom:1px solid var(--g100);vertical-align:middle}
-.sc-settings-tbl td:first-child{padding-left:12px;font-weight:600;font-size:11px;color:var(--g900)}
-.sc-settings-tbl td:not(:first-child){text-align:center}
-.sc-settings-tbl tr.row-odd td{background:white}
-.sc-settings-tbl tr.row-even td{background:#f0f2f5}
-.sc-settings-tbl tr:hover td{background:#e8ecf2 !important}
-.sc-settings-desc{font-size:9px;color:var(--g400);padding:4px 12px;line-height:1.35;font-weight:400}
-.sc-settings-divider-row td{padding:0;height:4px;border-bottom:2px solid var(--g200);background:#f8f9fb !important}
-/* Stepper */
-.sc-stepper{display:inline-flex;align-items:center;border:1px solid var(--g200);border-radius:5px;overflow:hidden;background:white;height:22px}
-.sc-stepper-btn{width:20px;height:22px;border:none;background:var(--g50);color:var(--navy);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s;user-select:none;line-height:1;flex-shrink:0;padding:0}
-.sc-stepper-btn:hover{background:var(--sky);color:white}
-.sc-stepper-val{width:28px;text-align:center;font-size:11px;font-weight:700;color:var(--g900);border:none;border-left:1px solid var(--g200);border-right:1px solid var(--g200);height:22px;font-family:inherit;outline:none;background:white;padding:0}
-.sc-stepper-val:focus{background:#e8f4ff}
-/* Add button */
-.sc-add-btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;border:none;border-radius:5px;background:var(--sky);height:22px;padding:0 10px;cursor:pointer;font-size:9px;font-weight:600;color:white;transition:all .12s;white-space:nowrap}
-.sc-add-btn:hover{background:var(--navy)}
-/* Required count */
-.sc-req-wrap{display:inline-flex;align-items:center;gap:4px}
-.sc-req-label{font-size:9px;color:var(--g400);font-weight:400}
+.sc-settings-panel *{text-transform:none;letter-spacing:normal}
+/* Meat/Plant required row */
+.sc-req-row{display:flex;align-items:center;padding:0;margin:0;height:36px}
+.sc-req-row.meat-row{background:var(--meat-hdr)}
+.sc-req-row.plant-row{background:#2d7a4f}
+.sc-req-label{flex:1;font-size:12px;font-weight:700;color:white;padding:0 14px}
+.sc-req-stepper{display:flex;align-items:center;margin-right:10px}
+.sc-req-stepper button{width:30px;height:28px;border:none;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s}
+.sc-req-stepper .req-minus{background:rgba(255,255,255,.2);color:white;border-radius:4px 0 0 4px}
+.sc-req-stepper .req-minus:hover{background:rgba(255,255,255,.35)}
+.sc-req-stepper .req-val{width:36px;height:28px;background:rgba(255,255,255,.95);color:var(--g900);font-size:13px;font-weight:700;text-align:center;border:none;font-family:inherit;outline:none;line-height:28px}
+.sc-req-stepper .req-plus{background:rgba(255,255,255,.2);color:white;border-radius:0 4px 4px 0}
+.sc-req-stepper .req-plus:hover{background:rgba(255,255,255,.35)}
+.sc-req-per{color:rgba(255,255,255,.6);font-size:10px;margin-right:12px;white-space:nowrap}
+/* Category limits section */
+.sc-limits-head{font-size:13px;font-weight:700;color:var(--g900);padding:10px 14px 2px}
+.sc-limits-desc{font-size:10px;color:var(--g400);padding:0 14px 6px;line-height:1.35}
+.sc-limits-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.sc-limits-table col.col-cat{width:auto}
+.sc-limits-table col.col-lim{width:100px}
+.sc-limits-table th{font-size:10px;font-weight:600;color:var(--g400);padding:3px 8px 4px;text-align:center;border-bottom:1px solid var(--g200)}
+.sc-limits-table th:first-child{text-align:left;padding-left:14px}
+.sc-limits-table td{padding:2px 8px;vertical-align:middle;height:26px}
+.sc-limits-table td:first-child{padding-left:14px}
+.sc-limits-table tr.alt{background:#f8f9fb}
+.sc-limits-cat{font-size:11px;font-weight:600;color:var(--g900)}
+/* Stepper buttons for max/min — fixed width to prevent layout shift */
+.sc-lim-wrap{display:inline-flex;align-items:center;width:90px;justify-content:center}
+.sc-lim-stepper{display:inline-flex;align-items:center;border-radius:5px;overflow:hidden;border:1px solid var(--g200);height:22px}
+.sc-lim-stepper button{width:18px;height:22px;border:none;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--g100);color:var(--g500);transition:background .1s}
+.sc-lim-stepper button:hover{background:var(--g200);color:var(--g700)}
+.sc-lim-stepper .lim-val{width:36px;height:22px;background:white;color:var(--g900);font-size:11px;font-weight:700;text-align:center;border:none;border-left:1px solid var(--g200);border-right:1px solid var(--g200);font-family:inherit;outline:none;line-height:22px}
+.sc-lim-clear{background:none;border:none;color:var(--g300);font-size:9px;cursor:pointer;padding:0 3px;line-height:1}
+.sc-lim-clear:hover{color:var(--g500)}
+/* Add max/min placeholder button — same width as stepper */
+.sc-lim-add{display:inline-flex;align-items:center;justify-content:center;width:76px;height:22px;border-radius:5px;border:1px solid var(--g200);background:var(--g50);color:var(--g400);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+.sc-lim-add:hover{background:var(--sky);color:white;border-color:var(--sky)}
+.sc-lim-add.max-btn{background:#fff0f0;color:var(--meat-hdr);border-color:var(--meat-bdr)}
+.sc-lim-add.max-btn:hover{background:var(--meat-hdr);color:white;border-color:var(--meat-hdr)}
+.sc-lim-add.min-btn{background:#eff5ff;color:var(--omni-hdr);border-color:var(--omni-bdr)}
+.sc-lim-add.min-btn:hover{background:var(--navy);color:white;border-color:var(--navy)}
 /* Inline meat/plant display in header */
 .sc-hdr-diet{display:flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:white;padding:3px 8px;border-radius:4px}
 .sc-hdr-diet.meat{background:var(--meat-hdr)}
@@ -142,7 +159,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .color-swatch:hover{transform:scale(1.15);border-color:var(--navy)}
 
 /* ── Scorecard cell ── */
-.dnd-sc-cell{border-right:var(--bd);border-bottom:var(--bd);background:white;min-width:380px;width:380px;position:sticky;left:0;z-index:5}
+.dnd-sc-cell{border-right:var(--bd);border-bottom:var(--bd);background:white;min-width:380px;width:380px;position:sticky;left:0;z-index:8}
 .dnd-sc-cell.has-shadow{box-shadow:6px 0 16px rgba(0,0,0,.1)}
 .dnd-sc-inner{display:flex;flex-direction:column;height:100%}
 .dnd-sc-wk-hdr{display:flex;align-items:center;gap:5px;padding:4px 8px;background:#1a5568;color:white;flex-shrink:0}
@@ -173,7 +190,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sc-diet-target{font-size:8px;font-weight:600;opacity:.8}
 
 /* ── Meal column cell ── */
-.dnd-col-cell{border-right:var(--bd);border-bottom:var(--bd);padding:6px;display:flex;flex-direction:column;background:#e8eaed}
+.dnd-col-cell{border-right:var(--bd);border-bottom:var(--bd);padding:6px;display:flex;flex-direction:column}
 .dnd-col-cell:last-child{border-right:none}
 
 /* ── Card wrap (banner + card) ── */
@@ -202,7 +219,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-card:hover{box-shadow:0 2px 10px rgba(0,0,0,.1);transform:translateY(-1px)}
 .dnd-card.dragging{opacity:.15}
 .dnd-card.pinned-card{opacity:.5;border-style:dashed;cursor:default;background:#e8f4fd}
-.dnd-card.gluten-card{background:#ede4b5}
+/* Pinned cards in a dup chain look normal */
+.dnd-col-cell.dup-first .dnd-card.pinned-card,.dnd-col-cell.dup-mid .dnd-card.pinned-card,.dnd-col-cell.dup-last .dnd-card.pinned-card{opacity:1;border-style:solid;background:#c8b8f0 !important;cursor:grab}
+.dnd-card.gluten-card{background:#f5ecc6}
+/* freq-card overrides gluten */
+.dnd-card.freq-card.gluten-card{background:var(--navy) !important}
 .dnd-card-name{font-size:12px;font-weight:700;color:var(--g900);line-height:1.15;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
 .dnd-card-id{position:absolute;bottom:3px;right:7px;font-size:7px;color:var(--g300);font-family:monospace;line-height:1}
 /* Action bar inside card — split +/x */
@@ -213,33 +234,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-action-dup{background:#e8dff5;color:#7c3aed}
 .dnd-action-rm{background:var(--g200);color:var(--g500)}
 .dnd-card.pinned-card .dnd-card-actions{display:none !important}
+.dnd-col-cell.dup-first .dnd-card.pinned-card .dnd-card-actions,.dnd-col-cell.dup-mid .dnd-card.pinned-card .dnd-card-actions,.dnd-col-cell.dup-last .dnd-card.pinned-card .dnd-card-actions{display:none}
+.dnd-col-cell.dup-first .dnd-card.pinned-card:hover .dnd-card-actions,.dnd-col-cell.dup-mid .dnd-card.pinned-card:hover .dnd-card-actions,.dnd-col-cell.dup-last .dnd-card.pinned-card:hover .dnd-card-actions{display:flex !important}
 .dnd-card-wrap .dnd-card-rm,.dnd-card-wrap .dnd-card-dup{display:none !important}
 
-/* ── Consecutive duplicate grouping — visually merged card ── */
-/* Remove cell borders between ALL merged cells so card crosses over */
+/* ── Consecutive duplicate grouping — visually merged purple card ── */
+/* Remove cell borders between merged cells so card crosses over */
 .dnd-col-cell.dup-first,.dnd-col-cell.dup-mid{border-bottom:none !important}
 
 /* FIRST: banner + name, card fills cell and extends into next */
 .dnd-col-cell.dup-first{padding-bottom:0}
 .dnd-col-cell.dup-first .dnd-card-wrap{margin-bottom:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
-.dnd-col-cell.dup-first .dnd-card{border-bottom:none;border-radius:6px 6px 0 0;margin-bottom:0;flex:1;height:auto}
+.dnd-col-cell.dup-first .dnd-card{border-bottom:none;border-radius:6px 6px 0 0;margin-bottom:0;flex:1;height:auto;background:#c8b8f0 !important}
 .dnd-col-cell.dup-first .dnd-banner{border-radius:6px 6px 0 0}
 
-/* MID: card shell continues left/right borders, fills cell height */
+/* MID: card shell continues, fills cell height */
 .dnd-col-cell.dup-mid{padding:0 6px}
 .dnd-col-cell.dup-mid .dnd-card-wrap{margin:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
 .dnd-col-cell.dup-mid .dnd-banner{display:none}
-.dnd-col-cell.dup-mid .dnd-card{border-top:none;border-bottom:none;border-radius:0;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab}
+.dnd-col-cell.dup-mid .dnd-card{border-top:none;border-bottom:none;border-radius:0;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab;background:#c8b8f0 !important}
 .dnd-col-cell.dup-mid .dnd-card-name,.dnd-col-cell.dup-mid .dnd-card-id{display:none}
 
 /* LAST: card shell closes with bottom border + radius */
 .dnd-col-cell.dup-last{padding:0 6px 6px}
 .dnd-col-cell.dup-last .dnd-card-wrap{margin:0;flex:1;display:flex;flex-direction:column;position:relative;z-index:3}
 .dnd-col-cell.dup-last .dnd-banner{display:none}
-.dnd-col-cell.dup-last .dnd-card{border-top:none;border-radius:0 0 6px 6px;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab}
+.dnd-col-cell.dup-last .dnd-card{border-top:none;border-radius:0 0 6px 6px;height:auto;min-height:0;flex:1;padding:0;margin:0;cursor:grab;background:#c8b8f0 !important}
 .dnd-col-cell.dup-last .dnd-card-name,.dnd-col-cell.dup-last .dnd-card-id{display:none}
 
-/* Action buttons (+/×) at BOTTOM of each cell in a merged chain, on hover */
+/* Action buttons (+/x) at bottom of each cell in chain, on hover */
 .dnd-col-cell.dup-first .dnd-card-actions,
 .dnd-col-cell.dup-mid .dnd-card-actions,
 .dnd-col-cell.dup-last .dnd-card-actions{display:none;position:absolute;bottom:0;top:auto;left:0;right:0;height:16px;z-index:10;border-radius:0}
@@ -248,12 +271,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .dnd-col-cell.dup-last:hover .dnd-card-actions{display:flex}
 .dnd-col-cell.dup-last .dnd-card-actions{border-radius:0 0 6px 6px}
 
-/* Frequency-based: 1st=light neon blue, 2nd=dark neon blue, 3rd=royal blue, 4th+=navy */
-.dnd-col-cell.freq-1{background:#b3ecff !important}
-.dnd-col-cell.freq-2{background:#00bfff !important}
-.dnd-col-cell.freq-3{background:#4169e1 !important}
-.dnd-col-cell.freq-4{background:#003141 !important}
-.dnd-col-cell.freq-1 .dnd-card,.dnd-col-cell.freq-2 .dnd-card,.dnd-col-cell.freq-3 .dnd-card,.dnd-col-cell.freq-4 .dnd-card{background:white}
+/* ── Frequency-based blue cell shading (card always stays white) ── */
+/* All frequency cards — navy with white text + occurrence badge */
+.dnd-card.freq-card{background:var(--navy) !important;color:white}
+.dnd-card.freq-card .dnd-card-name{color:white}
+.dnd-card.freq-card .dnd-card-id{color:rgba(255,255,255,.5)}
+/* Frequency badge — spans full cell height on right edge */
+.freq-badge{position:absolute;right:0;top:0;bottom:0;width:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:#D4A017;border-radius:0;z-index:4}
+.freq-badge-lbl{font-size:9px;font-weight:800;color:var(--navy);line-height:1}
+.freq-badge-num{font-size:22px;font-weight:900;color:var(--navy);line-height:1}
 
 /* Empty/hole slots */
 .dnd-slot-empty{height:62px;border:1.5px dashed var(--g200);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:4px}
@@ -336,17 +362,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <div class="main">
   <div class="topbar">
     <div class="bc">Menu Builder</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn-ghost" id="undo-btn" onclick="undo()" disabled title="Undo (Ctrl+Z)">↩ Undo</button>
-      <button class="btn-ghost" id="redo-btn" onclick="redo()" disabled title="Redo (Ctrl+Y)">↪ Redo</button>
+    <div style="display:flex;gap:8px">
       <button class="btn-ghost">⬇ Export</button>
-      <button class="btn-save">Save</button>
+      <button class="btn-save" onclick="saveToSheet()" id="save-btn">Save</button>
     </div>
   </div>
   <div class="page-head">
     <div>
       <div class="page-title">Menu Builder</div>
-      <div style="font-size:12px;color:var(--g400);margin-top:2px">Weekly menu schedule · <span id="wi-info" style="color:var(--navy);font-weight:600"></span></div>
+      <div style="font-size:12px;color:var(--g400);margin-top:2px">Rotation queues auto-advance every Sunday · <span id="wi-info" style="color:var(--navy);font-weight:600"></span></div>
     </div>
   </div>
 
@@ -365,7 +389,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div class="dnd-drawer-col"><div class="pool-col-hdr vegan"><div class="pool-col-lbl vegan">Vegan</div><div class="pool-col-cnt" id="dnd-cnt-vegan"></div></div><div class="dnd-drawer-col-body" id="dnd-pool-vegan"></div></div>
       </div>
     </div>
-    <div id="dnd-grid-body" style="width:100%;overflow:auto"></div>
+    <div id="dnd-grid-body" style="width:100%;overflow:auto;position:relative"></div>
   </div>
 </div>
 
@@ -751,82 +775,103 @@ SC_GRID_ROW2.forEach(c=>{SC_ALL_LABELS[c.key]=c.lbl;});
 SC_ALL_LABELS['mt']='Meat';SC_ALL_LABELS['pl']='Plant';
 
 let scRanges = {};
-SC_ALL_KEYS.forEach(k=>{scRanges[k]={max:null,minOn:false,min:null};});
+SC_ALL_KEYS.forEach(k=>{scRanges[k]={max:null,min:null};});
+// mt and pl use a single "required" value — preset defaults
+let scRequired = {mt:11, pl:7};
 
-function getScRange(key){return scRanges[key]||{max:null,minOn:false,min:null};}
+function getScRange(key){return scRanges[key]||{max:null,min:null};}
 function isOutOfRange(key,val){
   const r=getScRange(key);
   if(r.max!==null && val>r.max) return true;
   if(r.min!==null && val<r.min) return true;
   return false;
 }
+function isMtPlMismatch(key,val){
+  const req=scRequired[key];
+  if(req===null||req===undefined||req===0) return false;
+  return val!==req;
+}
 function toggleScSettings(){
   scSettingsOpen=!scSettingsOpen;
   renderDnDGrid();
 }
-function setScMax(key,val){const n=val===''?null:parseInt(val);scRanges[key].max=(n===0?null:n);const p=document.querySelector('.sc-settings-panel');if(p)p.innerHTML=buildSettingsInner();}
-function setScMin(key,val){const n=val===''?null:parseInt(val);scRanges[key].min=(n===0?null:n);scRanges[key].minOn=n!==null&&n!==0;const p=document.querySelector('.sc-settings-panel');if(p)p.innerHTML=buildSettingsInner();}
+function setScMax(key,val){scRanges[key].max=(val===''||val===null)?null:parseInt(val);renderDnDGrid();}
+function setScMin(key,val){scRanges[key].min=(val===''||val===null)?null:parseInt(val);renderDnDGrid();}
+function stepScMax(key,delta){
+  const cur=scRanges[key].max;
+  if(cur===null) scRanges[key].max=Math.max(0,delta);
+  else scRanges[key].max=Math.max(0,cur+delta);
+  renderDnDGrid();
+}
+function stepScMin(key,delta){
+  const cur=scRanges[key].min;
+  if(cur===null) scRanges[key].min=Math.max(0,delta);
+  else scRanges[key].min=Math.max(0,cur+delta);
+  renderDnDGrid();
+}
+function clearScMax(key){scRanges[key].max=null;renderDnDGrid();}
+function clearScMin(key){scRanges[key].min=null;renderDnDGrid();}
+function setRequired(key,val){scRequired[key]=(val===''||val===null)?null:parseInt(val);renderDnDGrid();}
+function stepRequired(key,delta){
+  const cur=scRequired[key];
+  if(cur===null) scRequired[key]=Math.max(0,delta);
+  else scRequired[key]=Math.max(0,cur+delta);
+  renderDnDGrid();
+}
+function clearRequired(key){scRequired[key]=null;renderDnDGrid();}
 
-
-function _stepper(key,type){
+function buildReqStepper(key, val){
+  const v=val===null?0:val;
+  return `<div class="sc-req-stepper">
+    <button class="req-minus" onclick="event.stopPropagation();stepRequired('${key}',-1)">−</button>
+    <input class="req-val" type="text" value="${v}" onchange="event.stopPropagation();setRequired('${key}',this.value)" onclick="event.stopPropagation()"/>
+    <button class="req-plus" onclick="event.stopPropagation();stepRequired('${key}',1)">+</button>
+  </div>`;
+}
+function buildLimStepper(key, type){
   const r=getScRange(key);
   const val=type==='max'?r.max:r.min;
-  const lbl=type==='max'?'+ max':'+ min';
-  if(val===null||val===0){
-    return `<button class="sc-add-btn" onclick="event.preventDefault();scStep('${key}','${type}',1)">${lbl}</button>`;
+  const setFn=type==='max'?'stepScMax':'stepScMin';
+  const clearFn=type==='max'?'clearScMax':'clearScMin';
+  const directFn=type==='max'?'setScMax':'setScMin';
+  const btnClass=type==='max'?'max-btn':'min-btn';
+  if(val===null||val===undefined){
+    return `<div class="sc-lim-wrap"><button class="sc-lim-add ${btnClass}" onclick="event.stopPropagation();${setFn}('${key}',1)">+ ${type}</button></div>`;
   }
-  const fn=type==='max'?'setScMax':'setScMin';
-  return `<div class="sc-stepper"><button class="sc-stepper-btn" onclick="event.preventDefault();scStep('${key}','${type}',-1)">−</button><input class="sc-stepper-val" type="text" inputmode="numeric" value="${val}" onchange="${fn}('${key}',this.value)"/><button class="sc-stepper-btn" onclick="event.preventDefault();scStep('${key}','${type}',1)">+</button></div>`;
-}
-function scStep(key,type,delta){
-  const r=getScRange(key);
-  let cur=type==='max'?r.max:r.min;
-  if(cur===null) cur=0;
-  const nv=Math.max(0,cur+delta);
-  if(nv===0){if(type==='max')r.max=null;else{r.min=null;r.minOn=false;}}
-  else{if(type==='max')r.max=nv;else{r.min=nv;r.minOn=true;}}
-  const p=document.querySelector('.sc-settings-panel');
-  if(p)p.innerHTML=buildSettingsInner();
-}
-function setScReq(key,val){
-  const n=val===''?null:parseInt(val);
-  scRanges[key].max=n;scRanges[key].min=n;scRanges[key].minOn=n!==null;
-  const p=document.querySelector('.sc-settings-panel');
-  if(p)p.innerHTML=buildSettingsInner();
-}
-function buildSettingsInner(){
-  let h=`<div class="sc-settings-title">Set min / max</div>`;
-
-  // Meat/Plant — single "required per week" input
-  h+=`<table class="sc-settings-tbl"><tbody>`;
-  h+=`<tr><td colspan="3" class="sc-settings-desc" style="padding:4px 12px 6px">Meat and plant dish targets per week. The count flashes red if it doesn't match.</td></tr>`;
-  ['mt','pl'].forEach((k,i)=>{
-    const r=getScRange(k);
-    const lbl=k==='mt'?'Meat dishes':'Plant dishes';
-    const val=r.max!==null?r.max:'';
-    const accent=k==='mt'?'var(--meat-hdr)':'var(--vegan-hdr)';
-    h+=`<tr><td style="border-left:3px solid ${accent}">${lbl}</td><td colspan="2" style="text-align:center"><div class="sc-req-wrap"><div class="sc-stepper"><button class="sc-stepper-btn" onclick="event.preventDefault();setScReq('${k}',${(r.max||1)-1})">−</button><input class="sc-stepper-val" type="text" inputmode="numeric" value="${val}" placeholder="—" onchange="setScReq('${k}',this.value)"/><button class="sc-stepper-btn" onclick="event.preventDefault();setScReq('${k}',${(r.max||0)+1})">+</button></div><span class="sc-req-label">per week</span></div></td></tr>`;
-  });
-
-  // Divider
-  h+=`<tr class="sc-settings-divider-row"><td colspan="3"></td></tr>`;
-
-  // Description + category header
-  h+=`<tr><td colspan="3" class="sc-settings-desc" style="padding:4px 12px 2px">Set limits per category. The cell turns red when it goes above max or below min. Without limits, cells shade naturally — darker red means a higher count.</td></tr>`;
-  h+=`<tr><th style="text-align:left;padding-left:12px">Category</th><th>Max</th><th>Min</th></tr>`;
-
-  // Category rows
-  const statKeys=[...SC_GRID_ROW1.map(c=>c.key),...SC_GRID_ROW2.map(c=>c.key)];
-  statKeys.forEach((k)=>{
-    const lbl=SC_ALL_LABELS[k]||k;
-    h+=`<tr><td>${lbl}</td><td>${_stepper(k,'max')}</td><td>${_stepper(k,'min')}</td></tr>`;
-  });
-
-  h+=`</tbody></table>`;
-  return h;
+  return `<div class="sc-lim-wrap"><div class="sc-lim-stepper">
+    <button onclick="event.stopPropagation();${setFn}('${key}',-1)">−</button>
+    <input class="lim-val" type="text" value="${val}" onchange="event.stopPropagation();${directFn}('${key}',this.value)" onclick="event.stopPropagation()"/>
+    <button onclick="event.stopPropagation();${setFn}('${key}',1)">+</button>
+  </div><button class="sc-lim-clear" onclick="event.stopPropagation();${clearFn}('${key}')" title="Clear">✕</button></div>`;
 }
 function buildSettingsPanel(){
-  return `<div class="sc-settings-panel open" onclick="event.stopPropagation()">${buildSettingsInner()}</div>`;
+  let html=`<div class="sc-settings-panel open" onclick="event.stopPropagation()">`;
+
+  // ── Meat / Plant required rows (full-width colored bars, no header needed) ──
+  ['mt','pl'].forEach(k=>{
+    const lbl=k==='mt'?'Meat dishes':'Plant dishes';
+    const rowCls=k==='mt'?'meat-row':'plant-row';
+    html+=`<div class="sc-req-row ${rowCls}">
+      <span class="sc-req-label">${lbl}</span>
+      ${buildReqStepper(k, scRequired[k])}
+      <span class="sc-req-per">per week</span>
+    </div>`;
+  });
+
+  // ── Category limits section ──
+  html+=`<div class="sc-limits-head">Set min / max</div>`;
+  html+=`<div class="sc-limits-desc">Set limits per category. The scorecard cell turns red when it goes above max or below min. Without limits, cells shade naturally — darker red means a higher count.</div>`;
+  html+=`<table class="sc-limits-table"><colgroup><col class="col-cat"/><col class="col-lim"/><col class="col-lim"/></colgroup><thead><tr><th style="text-align:left">Category</th><th>Max</th><th>Min</th></tr></thead><tbody>`;
+
+  const statKeys=[...SC_GRID_ROW1.map(c=>c.key),...SC_GRID_ROW2.map(c=>c.key)];
+  statKeys.forEach((k,i)=>{
+    const lbl=SC_ALL_LABELS[k]||k;
+    const alt=i%2===1?' class="alt"':'';
+    html+=`<tr${alt}><td><span class="sc-limits-cat">${lbl}</span></td><td style="text-align:center">${buildLimStepper(k,'max')}</td><td style="text-align:center">${buildLimStepper(k,'min')}</td></tr>`;
+  });
+
+  html+=`</tbody></table></div>`;
+  return html;
 }
 const COL_COLORS = ['#9f3a38','#dc2626','#e04994','#003141','#2d5fa6','#4EA2FD','#2d7a4f','#0d9488','#7c3aed','#d97706','#475569','#92400e'];
 const PICKER_COLORS = ['#9f3a38','#2d5fa6','#2d7a4f','#0d9488','#7c3aed','#d97706'];
@@ -839,50 +884,6 @@ function initDnDGrid(){
     window.dndGrid[col.id] = q.map(item=>item.dishId);
   });
 }
-
-// ── Undo / Redo ──
-const undoStack=[];
-const redoStack=[];
-function _snapshot(){
-  return JSON.parse(JSON.stringify({grid:window.dndGrid,toggles:dndToggles,pinned:dndPinnedCols}));
-}
-function _restore(snap){
-  window.dndGrid=snap.grid;
-  dndToggles=snap.toggles||{};
-  dndPinnedCols=snap.pinned||{};
-  dndRemoveHole();dndTrimRows();
-}
-function saveUndoState(){
-  undoStack.push(_snapshot());
-  if(undoStack.length>50) undoStack.shift();
-  redoStack.length=0;
-  updateUndoButtons();
-}
-function undo(){
-  if(!undoStack.length) return;
-  redoStack.push(_snapshot());
-  _restore(undoStack.pop());
-  updateUndoButtons();
-  renderDnDGrid();
-}
-function redo(){
-  if(!redoStack.length) return;
-  undoStack.push(_snapshot());
-  _restore(redoStack.pop());
-  updateUndoButtons();
-  renderDnDGrid();
-}
-function updateUndoButtons(){
-  const ub=document.getElementById('undo-btn');
-  const rb=document.getElementById('redo-btn');
-  if(ub) ub.disabled=!undoStack.length;
-  if(rb) rb.disabled=!redoStack.length;
-}
-// Keyboard shortcuts
-document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){e.preventDefault();undo();}
-  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.key==='z'&&e.shiftKey))){e.preventDefault();redo();}
-});
 
 function getMaxRows(){
   let max=0;
@@ -907,7 +908,6 @@ function toggleDiet(dishId, side){
   const t=dndToggles[dishId];
   if(side==='meat' && !t.meatOff && t.plantOff){showToggleWarning();return;}
   if(side==='plant' && !t.plantOff && t.meatOff){showToggleWarning();return;}
-  saveUndoState();
   if(side==='meat') t.meatOff=!t.meatOff;
   else t.plantOff=!t.plantOff;
   renderDnDGrid();
@@ -924,7 +924,6 @@ function showToggleWarning(){
 function togglePin(colId){
   const arr=window.dndGrid[colId]||[];
   if(arr.length>1 && !dndPinnedCols[colId]) return; // can't pin if >1 dish
-  saveUndoState();
   if(dndPinnedCols[colId]) delete dndPinnedCols[colId];
   else dndPinnedCols[colId]=true;
   renderDnDGrid();
@@ -946,7 +945,6 @@ function deleteCol(colId){
   const arr=window.dndGrid[colId]||[];
   const count=arr.filter(d=>d&&d!==HOLE).length;
   if(count>0 && !confirm(`Delete column with ${count} dishes? They'll return to unassigned.`)) return;
-  saveUndoState();
   delete window.dndGrid[colId];
   delete dndPinnedCols[colId];
   const idx=COLUMNS.findIndex(c=>c.id===colId);
@@ -954,7 +952,6 @@ function deleteCol(colId){
   autoLock();
 }
 function addColumn(){
-  saveUndoState();
   const id='col-'+Date.now();
   COLUMNS.push({id,name:'New Column',short:'NEW',color:'#475569'});
   window.dndGrid[id]=[];
@@ -1015,7 +1012,6 @@ function colDrop(e,targetColId){
   const toIdx=COLUMNS.findIndex(c=>c.id===targetColId);
   if(fromIdx<0||toIdx<0){colDragEnd(e);return;}
   // Reorder COLUMNS array
-  saveUndoState();
   const [moved]=COLUMNS.splice(fromIdx,1);
   COLUMNS.splice(toIdx,0,moved);
   colDragId=null;
@@ -1136,7 +1132,7 @@ function buildDnDHTML(){
     html+=`<div class="dnd-hdr-cell" style="background:${col.color||'#475569'};grid-column:${ci+2}" data-col-id="${col.id}" ${colUnlocked?'draggable="true" ondragstart="colDragStart(event,\''+col.id+'\')" ondragover="colDragOver(event,\''+col.id+'\')" ondrop="colDrop(event,\''+col.id+'\')" ondragend="colDragEnd(event)"':''}>
       ${colUnlocked?`<input class="col-name-input" value="${col.short||col.name}" onchange="renameCol('${col.id}',this.value)" onclick="event.stopPropagation()" ondragstart="event.stopPropagation()"/>`:(col.short||col.name)}
       ${canPin?`<button class="dnd-pin-btn${pinned?' pinned':''}" onclick="togglePin('${col.id}')" title="${pinned?'Unpin':'Pin'}">∞</button>`:''}
-      <div class="col-edit-dot" style="background:${col.color||'#475569'};border-color:rgba(255,255,255,.5)" onclick="event.stopPropagation();showColorPicker('${col.id}',this)"></div>
+      <div class="col-edit-dot" style="background:${col.color||'#475569'};border-color:rgba(255,255,255,.5)" onclick="event.stopPropagation();showColorPicker('${col.id}',this)" ondragstart="event.preventDefault();event.stopPropagation()" onmousedown="event.stopPropagation()" draggable="false"></div>
       <button class="col-del-btn" onclick="event.stopPropagation();deleteCol('${col.id}')">×</button>
     </div>`;
   });
@@ -1147,25 +1143,32 @@ function buildDnDHTML(){
     <div style="font-size:14px;cursor:pointer;color:var(--g500)" onclick="addColumn()" title="Add column">+</div>
   </div>`;
 
-  // ── Frequency tracking: count each dish occurrence scanning top-to-bottom, left-to-right ──
-  // Build a map of (dishId) -> ordered list of {row, colIdx} positions
-  const dishPositions={};  // dishId -> [{row, colIdx}, ...]
-  for(let rr=0;rr<numRows;rr++){
-    COLUMNS.forEach((col,ci)=>{
-      const arr=window.dndGrid[col.id]||[];
-      let did=arr[rr]||null;
-      if(!did||did===HOLE) return;
-      if(!dishPositions[did]) dishPositions[did]=[];
-      dishPositions[did].push({row:rr,colIdx:ci});
-    });
-  }
-  // Build lookup: "row,colIdx" -> occurrence number (1-based)
-  const freqLookup={};  // "row,colIdx" -> 1,2,3,4...
-  Object.values(dishPositions).forEach(positions=>{
-    positions.forEach((pos,idx)=>{
-      freqLookup[pos.row+','+pos.colIdx]=idx+1;
+  // ── Global frequency: count total appearances of each dish across entire grid ──
+  const dishFreqCount={};  // dishId -> total count of appearances
+  const dishFreqOrder={};  // dishId -> running counter for nth occurrence
+  COLUMNS.forEach(col=>{
+    const arr=window.dndGrid[col.id]||[];
+    arr.forEach(did=>{
+      if(did&&did!==HOLE){
+        dishFreqCount[did]=(dishFreqCount[did]||0)+1;
+      }
     });
   });
+  // Build occurrence map: for each (col,row), what occurrence # is this?
+  // We scan top-to-bottom, left-to-right to assign 1st, 2nd, 3rd...
+  const dishOccurrence={};  // "colId|row" -> occurrence number
+  const dishRunning={};
+  for(let rr=0;rr<getMaxRows();rr++){
+    COLUMNS.forEach(col=>{
+      const arr=window.dndGrid[col.id]||[];
+      const did=arr[rr];
+      if(did&&did!==HOLE){
+        if(!dishRunning[did]) dishRunning[did]=0;
+        dishRunning[did]++;
+        dishOccurrence[col.id+'|'+rr]=dishRunning[did];
+      }
+    });
+  }
 
   // ── Data rows ──
   for(let r=0;r<numRows;r++){
@@ -1175,14 +1178,14 @@ function buildDnDHTML(){
     const stats=computeDnDWeekStats(r);
 
     // Scorecard cell
-    html+=`<div class="dnd-sc-cell" style="position:sticky;left:0;z-index:5">`;
+    html+=`<div class="dnd-sc-cell" style="position:sticky;left:0;z-index:8">`;
     if(stats){
       const ps=stats.ps_total;
       const {bg:psBg,fg:psFg}=psColor(ps);
-      const mtMax=getScRange('mt').max;
-      const plMax=getScRange('pl').max;
-      const mtBad=isOutOfRange('mt',stats.mt||0);
-      const plBad=isOutOfRange('pl',stats.pl||0);
+      const mtReq=scRequired.mt;
+      const plReq=scRequired.pl;
+      const mtBad=isMtPlMismatch('mt',stats.mt||0);
+      const plBad=isMtPlMismatch('pl',stats.pl||0);
       html+=`<div class="dnd-sc-inner">
         <div class="dnd-sc-wk-hdr">
           <span class="sc-wk-num">${isCurrent?'NOW':'WK '+(r+1)}</span>
@@ -1201,7 +1204,7 @@ function buildDnDHTML(){
         const {bg,fg}=bad?{bg:'#dc2626',fg:'#fff'}:redCell(val,CELL_MAX[cell.key]||5);
         html+=`<div class="sc-tile" style="background:${bg}" title="${cell.lbl}: ${val}"><span class="sc-tile-lbl" style="color:${fg}">${cell.lbl}</span><span class="sc-tile-val" style="color:${fg}">${val}</span></div>`;
       });
-      html+=`<div class="sc-diet-tile meat-count${mtBad?' mismatch':''}" title="Meat: ${stats.mt||0}"><span class="sc-tile-lbl">MEAT</span><span class="sc-tile-val">${stats.mt||0}${mtMax!==null?'<span class="sc-diet-target">/'+mtMax+'</span>':''}</span></div>`;
+      html+=`<div class="sc-diet-tile meat-count${mtBad?' mismatch':''}" title="Meat: ${stats.mt||0}"><span class="sc-tile-lbl">MEAT</span><span class="sc-tile-val">${stats.mt||0}${mtReq!==null?'<span class="sc-diet-target">/'+mtReq+'</span>':''}</span></div>`;
       // Row 2: allergens/starches + PLANT count
       SC_GRID_ROW2.forEach(cell=>{
         const val=stats[cell.key]||0;
@@ -1209,7 +1212,7 @@ function buildDnDHTML(){
         const {bg,fg}=bad?{bg:'#dc2626',fg:'#fff'}:redCell(val,CELL_MAX[cell.key]||5);
         html+=`<div class="sc-tile" style="background:${bg}" title="${cell.lbl}: ${val}"><span class="sc-tile-lbl" style="color:${fg}">${cell.lbl}</span><span class="sc-tile-val" style="color:${fg}">${val}</span></div>`;
       });
-      html+=`<div class="sc-diet-tile plant-count${plBad?' mismatch':''}" title="Plant: ${stats.pl||0}"><span class="sc-tile-lbl">PLANT</span><span class="sc-tile-val">${stats.pl||0}${plMax!==null?'<span class="sc-diet-target">/'+plMax+'</span>':''}</span></div>`;
+      html+=`<div class="sc-diet-tile plant-count${plBad?' mismatch':''}" title="Plant: ${stats.pl||0}"><span class="sc-tile-lbl">PLANT</span><span class="sc-tile-val">${stats.pl||0}${plReq!==null?'<span class="sc-diet-target">/'+plReq+'</span>':''}</span></div>`;
       html+=`</div></div>`;
     } else {
       html+=`<div class="dnd-sc-inner"><div class="dnd-sc-wk-hdr"><span class="sc-wk-num">WK ${r+1}</span><span class="sc-wk-date">${dateStr}</span></div><div class="dnd-sc-incomplete">Incomplete Menu</div></div>`;
@@ -1229,29 +1232,26 @@ function buildDnDHTML(){
       const nextRaw=arr[r+1]||null;
       const nextPinned=dndPinnedCols[col.id]&&!nextRaw&&arr[0];
       const nextId=nextRaw||(nextPinned?arr[0]:null);
-      const sameAsPrev=dishId&&dishId!==HOLE&&!isPinned&&prevId===dishId;
-      const sameAsNext=dishId&&dishId!==HOLE&&!isPinned&&nextId===dishId;
+      const sameAsPrev=dishId&&dishId!==HOLE&&prevId===dishId;
+      const sameAsNext=dishId&&dishId!==HOLE&&nextId===dishId;
       let cellDup='';
       if(sameAsPrev&&sameAsNext) cellDup=' dup-mid';
       else if(sameAsPrev) cellDup=' dup-last';
       else if(sameAsNext) cellDup=' dup-first';
 
-      // Frequency-based coloring (after purple consecutive logic)
-      // Only color dishes that appear 2+ times total; single-appearance stays white
+      // Frequency detection (only for non-consecutive-group cells)
       const isInConsecutiveGroup=cellDup!=='';
-      let freqClass='';
+      let isFreqCard=false;
+      let freqOcc=0;
       if(dishId&&dishId!==HOLE&&!isPinned&&!isInConsecutiveGroup){
-        const totalAppearances=(dishPositions[dishId]||[]).length;
-        if(totalAppearances>=2){
-          const occ=freqLookup[r+','+ci]||1;
-          if(occ>=4) freqClass=' freq-4';
-          else if(occ===3) freqClass=' freq-3';
-          else if(occ===2) freqClass=' freq-2';
-          else freqClass=' freq-1'; // 1st of a multi-appearance dish
+        const totalFreq=dishFreqCount[dishId]||1;
+        if(totalFreq>=2){
+          isFreqCard=true;
+          freqOcc=dishOccurrence[col.id+'|'+r]||1;
         }
       }
 
-      html+=`<div class="dnd-col-cell${isHole?' dnd-hole':''}${cellDup}${freqClass}" style="grid-column:${ci+2}" data-row="${r}" data-col="${col.id}">`;
+      html+=`<div class="dnd-col-cell${isHole?' dnd-hole':''}${cellDup}" style="grid-column:${ci+2};${isFreqCard?'position:relative':''}" data-row="${r}" data-col="${col.id}">`;
       if(isHole){
         html+=`<div class="dnd-slot-hole"></div>`;
       } else if(dishId){
@@ -1265,6 +1265,9 @@ function buildDnDHTML(){
         const pinnedCls=isPinned?' pinned-card':'';
         const glutenCls=isGluten&&!isPinned?' gluten-card':'';
         const draggable=isPinned?'false':'true';
+
+        // Cell-level frequency badge
+        if(isFreqCard) html+=`<div class="freq-badge"><span class="freq-badge-lbl">#</span><span class="freq-badge-num">${freqOcc}</span></div>`;
 
         // Banner
         html+=`<div class="dnd-card-wrap">`;
@@ -1284,7 +1287,8 @@ function buildDnDHTML(){
           html+=`<div class="dnd-banner"><div class="dnd-banner-meat"><span class="dnd-banner-id">${dishId}</span></div></div>`;
         }
 
-        html+=`<div class="dnd-card${pinnedCls}${glutenCls}" draggable="${draggable}" data-dish-id="${dishId}" data-row="${r}" data-col="${col.id}">
+        const freqCls=isFreqCard?' freq-card':'';
+        html+=`<div class="dnd-card${pinnedCls}${glutenCls}${freqCls}" draggable="${draggable}" data-dish-id="${dishId}" data-row="${r}" data-col="${col.id}">
           <div class="dnd-card-name">${name}</div>
           ${!isPinned?`<div class="dnd-card-actions"><button class="dnd-action-btn dnd-action-dup" title="Duplicate">+</button><button class="dnd-action-btn dnd-action-rm" title="Remove">×</button></div>`:''}
         </div></div>`;
@@ -1307,7 +1311,6 @@ function renderDnDGrid(){
   const container=document.getElementById('dnd-grid-body');
   container.innerHTML=buildDnDHTML();
   renderDnDPool(document.getElementById('dnd-pool-search')?.value||'');
-  // Shadow on scorecard
   updateScShadow();
 }
 
@@ -1359,7 +1362,6 @@ function setupDnDEvents(){
     e.preventDefault();
     const dishId=e.dataTransfer.getData('dishId');
     if(!dishId) return;
-    saveUndoState();
     dndReplaceHole(dishId);
     dndDrag={};dndSnapshot=null;
     dndRemoveHole();dndTrimRows();renderDnDGrid();
@@ -1376,7 +1378,6 @@ function setupDnDEvents(){
       e.stopPropagation();
       const card=dup.closest('.dnd-card');
       const r=parseInt(card.dataset.row);const colId=card.dataset.col;const dishId=card.dataset.dishId;
-      saveUndoState();
       dndInsertAt(colId,r+1,dishId);
       renderDnDGrid();return;
     }
@@ -1385,7 +1386,6 @@ function setupDnDEvents(){
       e.stopPropagation();
       const card=rm.closest('.dnd-card');
       const r=parseInt(card.dataset.row);const colId=card.dataset.col;const dishId=card.dataset.dishId;
-      saveUndoState();
       dndRemoveAndCompact(colId,r);
       // Clear toggle on remove
       delete dndToggles[dishId];
@@ -1634,10 +1634,73 @@ function renderPairList(filter){
 
 function assignPair(plantId){
   if(!pairModalMeatId)return;
-  saveUndoState();
   OMNI_PAIRS[pairModalMeatId]=plantId;
   OMNI_REVERSE[plantId]=pairModalMeatId;
   closePairModal();renderDnDGrid();
+}
+
+// ══ GOOGLE APPS SCRIPT SYNC ══
+const GAS_URL='https://script.google.com/macros/s/AKfycbxq3luL1drUibsdP5a1atkx6tyfztn6gR90MrFHmKVP_4CKlobYWXmBxI9s4hMM3DgdkA/exec';
+
+function saveToSheet(){
+  const btn=document.getElementById('save-btn');
+  btn.textContent='Saving...';btn.disabled=true;btn.style.opacity='.7';
+  // Build dish name lookup for sheet output
+  const nameMap={};
+  ALL_DISHES.forEach(d=>{nameMap[d.id]=d.name;});
+  Object.entries(EXTRA_NAMES).forEach(([id,name])=>{if(id&&name)nameMap[id]=name;});
+  const payload={
+    action:'save_menu_state',
+    grid:JSON.stringify(window.dndGrid),
+    columns:JSON.stringify(COLUMNS),
+    queues:JSON.stringify(queues),
+    dishNames:JSON.stringify(nameMap)
+  };
+  fetch(GAS_URL,{method:'POST',body:JSON.stringify(payload)})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.success){
+        btn.textContent='Saved!';btn.style.background='#16a34a';btn.style.opacity='1';
+        btn.style.transform='scale(1.1)';btn.style.transition='all .2s';
+        setTimeout(()=>{btn.style.transform='';btn.textContent='Save';btn.style.background='';btn.disabled=false;},2000);
+      } else {
+        saveFail(btn,d.error);
+      }
+    })
+    .catch(err=>saveFail(btn,err));
+}
+
+function saveFail(btn,err){
+  btn.textContent='Failed!';btn.style.background='#dc2626';btn.style.opacity='1';
+  btn.style.animation='shake .4s ease';
+  console.error('Save failed:',err);
+  setTimeout(()=>{btn.textContent='Save';btn.style.background='';btn.style.animation='';btn.disabled=false;},3000);
+}
+
+function loadFromSheet(){
+  return fetch(GAS_URL+'?action=load_menu_state')
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.success && d.found){
+        try{
+          const grid=JSON.parse(d.grid);
+          const cols=JSON.parse(d.columns);
+          if(grid && Object.keys(grid).length){
+            window.dndGrid=grid;
+            // Restore columns if saved
+            if(cols && cols.length){
+              COLUMNS.length=0;
+              cols.forEach(c=>COLUMNS.push(c));
+            }
+            renderDnDGrid();
+            console.log('Loaded menu state from',d.timestamp);
+            return true;
+          }
+        }catch(e){console.error('Parse error:',e);}
+      }
+      return false;
+    })
+    .catch(err=>{console.error('Load failed:',err);return false;});
 }
 
 // ══ INIT ══
@@ -1646,6 +1709,12 @@ document.getElementById('wi-info').textContent='Queue as of '+advInfo;
 initDnDGrid();
 renderDnDGrid();
 setupDnDEvents();
+
+// Try loading saved state from Google Sheet
+loadFromSheet().then(loaded=>{
+  if(loaded) console.log('Menu loaded from sheet');
+  else console.log('Using default queues');
+});
 
 // Add fadeOut animation
 const style=document.createElement('style');
