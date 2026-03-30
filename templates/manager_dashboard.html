@@ -301,6 +301,7 @@
     <div class="sb-item" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees <span class="sb-badge">{{ employees|length }}</span></div>
     <div class="sb-div"></div>
     <div class="sb-sec">Settings</div>
+    <div class="sb-item" onclick="sidebarNav('mealplan', this)">&#127860; &nbsp;Meal Plan</div>
     <div class="sb-item" onclick="sidebarNav('account', this)">&#9881; &nbsp;Account Details</div>
     <div class="sb-item" onclick="window.location='/manager/logout'">&#8594; &nbsp;Sign out</div>
 </aside>
@@ -617,35 +618,6 @@
                     </div>
                 </div>
 
-                <!-- Tier summary + PIN note -->
-                <div class="info-card full">
-                    <div class="info-heading">Meal Subsidy Program</div>
-                    <table class="tier-table" style="margin-bottom:20px;">
-                        <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
-                        <tbody>
-                            {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
-                            <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.BasePrice or 0)|float) }}</td></tr>
-                            {% endif %}
-                            {% if company.Tier1_EmployeePrice %}
-                            <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
-                            {% endif %}
-                            {% if company.Tier2_EmployeePrice %}
-                            <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
-                            {% endif %}
-                            {% if company.Tier3_EmployeePrice %}
-                            <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                    <div class="tier-note">
-                        <div class="tier-note-icon">✉</div>
-                        <div>
-                            <div style="font-weight:700;font-size:.875rem;margin-bottom:3px;">Need to adjust your meal tier allocation?</div>
-                            <div style="font-size:.82rem;color:var(--muted);">Contact your BetterDay account manager to modify subsidy tiers, meal counts, or pricing. We're happy to adjust your program as your team's needs evolve.</div>
-                            <a href="mailto:hello@eatbetterday.ca" style="font-size:.82rem;font-weight:700;color:var(--brand);text-decoration:none;margin-top:6px;display:inline-block;">hello@eatbetterday.ca →</a>
-                        </div>
-                    </div>
-                </div>
 
 
             </div>
@@ -739,6 +711,78 @@
             <div style="font-size:.85rem;">Invoices are generated automatically each Thursday morning after the weekly order closes.</div>
         </div>
         {% endif %}
+
+    </div>
+
+    <!-- ── EMPLOYEES TAB ── -->
+    <!-- ── MEAL PLAN TAB ── -->
+    <div class="tab-panel" id="tab-mealplan">
+
+        <div class="section-header">
+            <div class="section-title">Your Meal Subsidy Plan</div>
+        </div>
+
+        {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' and benefit_levels %}
+        <!-- Benefit Levels view -->
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:16px;">Your company has <strong>{{ benefit_levels|length }}</strong> employee benefit level{{ 's' if benefit_levels|length > 1 else '' }}. Each level has its own meal pricing structure.</div>
+
+        {% for lv in benefit_levels %}
+        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--brand);background:rgba(0,70,94,.08);padding:3px 12px;border-radius:99px;">{{ lv.LevelName or 'Level ' ~ loop.index }}</span>
+                {% if lv.MaxMealsPerWeek %}<span style="font-size:.72rem;color:var(--muted);">Max {{ lv.MaxMealsPerWeek }} meals/week</span>{% endif %}
+            </div>
+            <table class="tier-table">
+                <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
+                <tbody>
+                    {% if lv.FreeMealsPerWeek and lv.FreeMealsPerWeek|string not in ('', '0') %}
+                    <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ lv.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((lv.FreeTier_CompanySubsidy or 0)|float) }}</td></tr>
+                    {% endif %}
+                    {% if lv.Tier1_Meals and lv.Tier1_Meals|string not in ('', '0') %}
+                    <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ lv.Tier1_Meals }}</td><td>${{ '%.2f'|format((lv.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
+                    {% endif %}
+                    {% if lv.Tier2_Meals and lv.Tier2_Meals|string not in ('', '0') %}
+                    <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ lv.Tier2_Meals }}</td><td>${{ '%.2f'|format((lv.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
+                    {% endif %}
+                    {% if lv.Tier3_Meals and lv.Tier3_Meals|string not in ('', '0') %}
+                    <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ lv.Tier3_Meals }}</td><td>${{ '%.2f'|format((lv.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <!-- Single company-wide tier view -->
+        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px;">
+            <table class="tier-table">
+                <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
+                <tbody>
+                    {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
+                    <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.BasePrice or company.FullPrice or 0)|float) }}</td></tr>
+                    {% endif %}
+                    {% if company.Tier1_EmployeePrice %}
+                    <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
+                    {% endif %}
+                    {% if company.Tier2_EmployeePrice %}
+                    <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
+                    {% endif %}
+                    {% if company.Tier3_EmployeePrice %}
+                    <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <div class="tier-note" style="margin-top:4px;">
+            <div class="tier-note-icon">✉</div>
+            <div>
+                <div style="font-weight:700;font-size:.875rem;margin-bottom:3px;">Need to adjust your meal plan?</div>
+                <div style="font-size:.82rem;color:var(--muted);">Contact your BetterDay account manager to modify subsidy tiers, meal counts, or pricing. We're happy to adjust your program as your team's needs evolve.</div>
+                <a href="mailto:hello@eatbetterday.ca" style="font-size:.82rem;font-weight:700;color:var(--brand);text-decoration:none;margin-top:6px;display:inline-block;">hello@eatbetterday.ca →</a>
+            </div>
+        </div>
 
     </div>
 
