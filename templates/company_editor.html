@@ -277,12 +277,52 @@
             </div>
         </div>
 
-        <!-- SUBSIDY TIERS -->
+        <!-- EMPLOYEE BENEFIT LEVELS -->
         <div class="form-section">
+            <div class="form-section-header">
+                <div class="fs-icon">👥</div>
+                <div>
+                    <div class="fs-title">Employee Benefit Levels</div>
+                    <div class="fs-sub">Assign different meal plans to different employee groups (General, Leadership, Executive, etc.)</div>
+                </div>
+            </div>
+            <div class="field-grid field-grid-2" style="margin-bottom:14px;">
+                <div class="field">
+                    <label style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
+                               {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}checked{% endif %}
+                               onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;">
+                        Enable Employee Benefit Levels
+                    </label>
+                    <span class="field-hint">When disabled, all employees share the same tier structure below</span>
+                </div>
+            </div>
+            <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper != 'TRUE' %}style="display:none"{% endif %}>
+                <div style="background:#f8f3ec;border-radius:10px;padding:16px 20px;margin-bottom:12px;">
+                    <div style="font-size:.8rem;font-weight:700;color:#003141;margin-bottom:8px;">How it works</div>
+                    <div style="font-size:.75rem;color:#5a7268;line-height:1.5;">
+                        Each level gets its own tier pricing structure. When an employee signs in, they see pricing based on their assigned level.
+                        You can assign levels from the Manager Portal → Employees tab, or from the admin dashboard.
+                    </div>
+                </div>
+                <div id="levelsContainer"></div>
+                <button type="button" onclick="addLevel()" style="font-size:.78rem;font-weight:700;color:#00465E;background:#fff;border:1.5px dashed #E8DFD2;border-radius:10px;padding:12px 20px;cursor:pointer;width:100%;margin-top:8px;transition:.15s;"
+                        onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">
+                    + Add Employee Level
+                </button>
+                <button type="button" onclick="saveBenefitLevels()" style="margin-top:12px;font-size:.82rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:10px;padding:12px 24px;cursor:pointer;display:block;">
+                    Save Benefit Levels
+                </button>
+                <div id="levelsSaveStatus" style="font-size:.75rem;color:#167421;margin-top:6px;display:none;">✓ Levels saved</div>
+            </div>
+        </div>
+
+        <!-- SUBSIDY TIERS (company-wide defaults — used when levels are disabled) -->
+        <div class="form-section" id="companyTiersSection">
             <div class="form-section-header">
                 <div class="fs-icon">💰</div>
                 <div>
-                    <div class="fs-title">Meal Subsidy Program</div>
+                    <div class="fs-title">Meal Subsidy Program <span id="tiersDefaultLabel" style="font-size:.65rem;color:#7A8F9C;font-weight:600;">— default for all employees</span></div>
                     <div class="fs-sub">Configure free meals, subsidised tiers, and pricing</div>
                 </div>
             </div>
@@ -557,8 +597,118 @@ function updatePreview() {
     ).join('');
 }
 
+// ══════════════════════════════════════════
+// EMPLOYEE BENEFIT LEVELS
+// ══════════════════════════════════════════
+var _benefitLevels = [];
+var _levelCounter = 0;
+
+function toggleLevelsSection(enabled) {
+  document.getElementById('levelsSection').style.display = enabled ? '' : 'none';
+  var label = document.getElementById('tiersDefaultLabel');
+  if (label) label.textContent = enabled ? '— fallback for employees without a level' : '— default for all employees';
+}
+
+function addLevel(data) {
+  _levelCounter++;
+  var id = _levelCounter;
+  var lv = data || { LevelName: '', LevelID: id, FreeMealsPerWeek: 0, Tier1_Meals: 0, Tier2_Meals: 0, Tier3_Meals: 0 };
+  var fp = parseFloat(document.getElementById('basePrice')?.value) || 16.99;
+
+  var html = `<div class="tier-row" id="level-${id}" style="border:1.5px solid #E8DFD2;border-radius:12px;padding:16px 20px;margin-bottom:10px;background:#fff;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;background:rgba(0,70,94,.08);padding:3px 10px;border-radius:99px;">Level ${id}</span>
+        <input type="text" value="${lv.LevelName||''}" placeholder="e.g. Leadership" data-field="LevelName"
+               style="font-size:.9rem;font-weight:700;border:none;border-bottom:1.5px solid #E8DFD2;padding:4px 0;outline:none;width:200px;color:#003141;">
+      </div>
+      <button type="button" onclick="removeLevel(${id})" style="font-size:.7rem;color:#B56B10;background:none;border:1px solid rgba(181,107,16,.2);border-radius:6px;padding:4px 10px;cursor:pointer;">Remove</button>
+    </div>
+    <div class="tier-fields" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <div class="field"><label style="font-size:.65rem;">Free Meals/Week</label><input type="number" value="${lv.FreeMealsPerWeek||0}" data-field="FreeMealsPerWeek" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Free BD Subsidy</label><input type="number" step="0.01" value="${lv.FreeTier_BDSubsidy||''}" data-field="FreeTier_BDSubsidy" placeholder="5.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Free Co Subsidy</label><input type="number" step="0.01" value="${lv.FreeTier_CompanySubsidy||''}" data-field="FreeTier_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
+      <div></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 1 Meals</label><input type="number" value="${lv.Tier1_Meals||0}" data-field="Tier1_Meals" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 1 Emp Price</label><input type="number" step="0.01" value="${lv.Tier1_EmployeePrice||''}" data-field="Tier1_EmployeePrice" placeholder="4.99" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 1 BD Subsidy</label><input type="number" step="0.01" value="${lv.Tier1_BDSubsidy||''}" data-field="Tier1_BDSubsidy" placeholder="5.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 1 Co Subsidy</label><input type="number" step="0.01" value="${lv.Tier1_CompanySubsidy||''}" data-field="Tier1_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 2 Meals</label><input type="number" value="${lv.Tier2_Meals||0}" data-field="Tier2_Meals" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 2 Emp Price</label><input type="number" step="0.01" value="${lv.Tier2_EmployeePrice||''}" data-field="Tier2_EmployeePrice" placeholder="7.99" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 2 BD Subsidy</label><input type="number" step="0.01" value="${lv.Tier2_BDSubsidy||''}" data-field="Tier2_BDSubsidy" placeholder="4.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 2 Co Subsidy</label><input type="number" step="0.01" value="${lv.Tier2_CompanySubsidy||''}" data-field="Tier2_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 3 Meals</label><input type="number" value="${lv.Tier3_Meals||0}" data-field="Tier3_Meals" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 3 Emp Price</label><input type="number" step="0.01" value="${lv.Tier3_EmployeePrice||''}" data-field="Tier3_EmployeePrice" placeholder="13.99" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 3 BD Subsidy</label><input type="number" step="0.01" value="${lv.Tier3_BDSubsidy||''}" data-field="Tier3_BDSubsidy" placeholder="3.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Tier 3 Co Subsidy</label><input type="number" step="0.01" value="${lv.Tier3_CompanySubsidy||''}" data-field="Tier3_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
+      <div class="field"><label style="font-size:.65rem;">Max Meals/Week</label><input type="number" value="${lv.MaxMealsPerWeek||''}" data-field="MaxMealsPerWeek" placeholder="No limit" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+      <div class="field"><label style="font-size:.65rem;">Full Price</label><input type="number" step="0.01" value="${lv.FullPrice||fp}" data-field="FullPrice" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
+    </div>
+  </div>`;
+  document.getElementById('levelsContainer').insertAdjacentHTML('beforeend', html);
+  _benefitLevels.push({ _domId: id, ...lv });
+}
+
+function removeLevel(id) {
+  var el = document.getElementById('level-' + id);
+  if (el) el.remove();
+  _benefitLevels = _benefitLevels.filter(l => l._domId !== id);
+}
+
+function collectLevelData() {
+  var levels = [];
+  document.querySelectorAll('[id^="level-"]').forEach(function(div) {
+    var lv = {};
+    div.querySelectorAll('[data-field]').forEach(function(input) {
+      var v = input.value.trim();
+      lv[input.dataset.field] = v === '' ? '' : (isNaN(Number(v)) ? v : Number(v));
+    });
+    lv.LevelID = levels.length + 1;
+    levels.push(lv);
+  });
+  return levels;
+}
+
+function saveBenefitLevels() {
+  var levels = collectLevelData();
+  var companyId = document.querySelector('[name="CompanyID"]').value.trim().toUpperCase();
+  if (!companyId) { alert('Save the company first'); return; }
+  var statusEl = document.getElementById('levelsSaveStatus');
+  statusEl.style.display = 'none';
+  fetch('/api/gas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'save_benefit_levels', company_id: companyId, levels: levels })
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      statusEl.textContent = '✓ ' + levels.length + ' level(s) saved';
+      statusEl.style.display = 'block';
+      setTimeout(() => statusEl.style.display = 'none', 4000);
+    } else {
+      alert('Error: ' + (d.error || 'Unknown'));
+    }
+  }).catch(() => alert('Network error saving levels'));
+}
+
+function loadExistingLevels() {
+  var companyId = document.querySelector('[name="CompanyID"]')?.value?.trim()?.toUpperCase();
+  if (!companyId) return;
+  fetch('/api/gas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'get_benefit_levels', company_id: companyId })
+  }).then(r => r.json()).then(d => {
+    if (d.levels && d.levels.length > 0) {
+      d.levels.forEach(lv => addLevel(lv));
+    }
+  }).catch(() => {});
+}
+
 // Init on load
-document.addEventListener('DOMContentLoaded', updatePreview);
+document.addEventListener('DOMContentLoaded', function() {
+  updatePreview();
+  if (document.getElementById('enableLevels')?.checked) loadExistingLevels();
+});
 </script>
 </body>
 </html>

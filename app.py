@@ -608,6 +608,7 @@ def manager_dashboard():
         threading.Thread(target=_fetch, args=('employees',{'action': 'get_employees',        'company_id': company_id}, 10)),
         threading.Thread(target=_fetch, args=('invoices', {'action': 'get_invoices',         'company_id': company_id}, 10)),
         threading.Thread(target=_fetch, args=('orders',   {'action': 'get_corporate_orders', 'company_id': company_id}, 15)),
+        threading.Thread(target=_fetch, args=('levels',   {'action': 'get_benefit_levels',   'company_id': company_id}, 8)),
     ]
     for t in threads: t.start()
     for t in threads: t.join()
@@ -807,6 +808,7 @@ def manager_dashboard():
                            current_pin=current_pin,
                            employees=employees,
                            invoices=invoices,
+                           benefit_levels=results.get('levels', {}).get('levels', []),
                            saved_tab=saved_tab)
 
 

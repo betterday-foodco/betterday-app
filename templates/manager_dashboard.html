@@ -757,6 +757,7 @@
                     <th>Email Type</th>
                     <th>Joined</th>
                     <th>Role</th>
+                    {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}<th>Benefit Level</th>{% endif %}
                     <th></th>
                 </tr>
             </thead>
@@ -782,13 +783,25 @@
                     <span style="color:var(--muted);font-size:.82rem;">Employee</span>
                     {% endif %}
                 </td>
+                {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}
+                <td>
+                    <select onchange="updateEmpLevel('{{ emp.email }}', this.value, this)" style="font-size:.78rem;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;">
+                        {% for lv in benefit_levels %}
+                        <option value="{{ lv.LevelName }}" {% if (emp.benefitLevel or 'General') == lv.LevelName %}selected{% endif %}>{{ lv.LevelName }}</option>
+                        {% endfor %}
+                        {% if not benefit_levels %}
+                        <option value="General" selected>General</option>
+                        {% endif %}
+                    </select>
+                </td>
+                {% endif %}
                 <td style="text-align:right;white-space:nowrap;">
                     <button class="emp-action-btn" onclick="resendLink('{{ emp.email }}', this)">Resend link</button>
                     <button class="emp-action-btn emp-remove-btn" onclick="removeEmployee('{{ emp.email }}', '{{ emp.firstName }} {{ emp.lastName }}', {{ loop.index }})">Remove</button>
                 </td>
             </tr>
             {% else %}
-            <tr><td colspan="6" style="text-align:center;padding:44px;color:var(--muted);">No employees registered yet.</td></tr>
+            <tr><td colspan="7" style="text-align:center;padding:44px;color:var(--muted);">No employees registered yet.</td></tr>
             {% endfor %}
             </tbody>
         </table>
@@ -1215,6 +1228,22 @@ async function resendLink(email, btn) {
     } catch(e) {
         btn.textContent = 'Error'; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
     }
+}
+
+async function updateEmpLevel(email, level, selectEl) {
+    try {
+        const r = await fetch('/api/gas', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({action:'update_employee_level', email:email, company_id:'{{ company.CompanyID }}', benefit_level:level})
+        });
+        const d = await r.json();
+        if (d.success) {
+            selectEl.style.borderColor = '#167421';
+            setTimeout(() => selectEl.style.borderColor = '', 2000);
+        } else {
+            alert('Error: ' + (d.error||'Unknown'));
+        }
+    } catch(e) { alert('Network error'); }
 }
 
 async function removeEmployee(email, name, rowIndex) {
