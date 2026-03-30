@@ -1710,7 +1710,7 @@ function mealCardHTML(item, weekIndex) {
   if (item.cal||item.protein) {
     macros='<div class="macros-row" style="margin-bottom:2px;">';
     if(item.cal)     macros+=`<span class="macro-chip cal">${Math.round(item.cal)} cal</span>`;
-    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g protein</span>`;
+    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g pro</span>`;
     macros+='</div>';
   }
   const desc=item.description?`<div class="meal-desc">${item.description}</div>`:'';
@@ -1736,7 +1736,7 @@ function openInfoModal(item) {
   let macros='';
   if(item.cal||item.protein||item.carbs||item.fat){
     if(item.cal)     macros+=`<span class="macro-chip cal">${Math.round(item.cal)} cal</span>`;
-    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g protein</span>`;
+    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g pro</span>`;
     if(item.carbs)   macros+=`<span class="macro-chip carb">${Math.round(item.carbs)}g carb</span>`;
     if(item.fat)     macros+=`<span class="macro-chip fat">${Math.round(item.fat)}g fat</span>`;
   }
