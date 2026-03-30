@@ -277,242 +277,140 @@
             </div>
         </div>
 
+        <!-- PRICING TIERS — compact grid -->
+        <div class="form-section" id="companyTiersSection">
+            <div class="form-section-header">
+                <div class="fs-icon">💰</div>
+                <div>
+                    <div class="fs-title">Pricing Tiers</div>
+                    <div class="fs-sub">Configure base pricing, free meals, and subsidized tiers</div>
+                </div>
+            </div>
+
+            <!-- Base pricing row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;padding:14px 18px;background:#f8f3ec;border-radius:10px;">
+                <div class="field">
+                    <label>Full Retail Price ($)</label>
+                    <input type="number" step="0.01" name="BasePrice" id="basePrice" value="{{ company.BasePrice or '16.99' }}" placeholder="16.99" oninput="updatePreview()">
+                </div>
+                <div class="field">
+                    <label>Max Meals / Employee / Week</label>
+                    <input type="number" name="MaxMealsPerEmployeePerWeek" value="{{ company.MaxMealsPerEmployeePerWeek or '' }}" placeholder="No limit">
+                </div>
+                <div class="field">
+                    <label>Allow Extra at Full Price?</label>
+                    <select name="AllowExtraAtFullPrice">
+                        <option value="TRUE" {% if company.AllowExtraAtFullPrice == 'TRUE' %}selected{% endif %}>Yes</option>
+                        <option value="FALSE" {% if company.AllowExtraAtFullPrice != 'TRUE' %}selected{% endif %}>No</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tier grid — each row is one tier, all fields inline -->
+            <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="tierGrid">
+                <thead>
+                    <tr style="border-bottom:2px solid #E8DFD2;">
+                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;width:30px;"></th>
+                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Meals</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Emp Price</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">BD Subsidy</th>
+                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Co Subsidy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
+                        <td style="padding:8px;"><input type="checkbox" id="enableFree" onchange="toggleTierRow(this)" {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string != '0' %}checked{% endif %}></td>
+                        <td style="padding:8px;font-weight:800;color:#167421;">🎁 Free</td>
+                        <td style="padding:8px;"><input type="number" name="FreeMealsPerWeek" id="freeMeals" value="{{ company.FreeMealsPerWeek or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;color:#7A8F9C;font-weight:600;">$0.00</td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_BDSubsidy" id="freeBdSubsidy" value="{{ company.FreeTier_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_CompanySubsidy" id="freeCoSubsidy" value="{{ company.FreeTier_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
+                        <td style="padding:8px;"><input type="checkbox" id="enableT1" onchange="toggleTierRow(this)" {% if company.Tier1_EmployeePrice %}checked{% endif %}></td>
+                        <td style="padding:8px;font-weight:700;color:#003141;">Tier 1</td>
+                        <td style="padding:8px;"><input type="number" name="Tier1_Meals" id="t1Meals" value="{{ company.Tier1_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_EmployeePrice" id="t1EmpPrice" value="{{ company.Tier1_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_BDSubsidy" id="t1BdSubsidy" value="{{ company.Tier1_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_CompanySubsidy" id="t1CoSubsidy" value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                    </tr>
+                    <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
+                        <td style="padding:8px;"><input type="checkbox" id="enableT2" onchange="toggleTierRow(this)" {% if company.Tier2_EmployeePrice %}checked{% endif %}></td>
+                        <td style="padding:8px;font-weight:700;color:#003141;">Tier 2</td>
+                        <td style="padding:8px;"><input type="number" name="Tier2_Meals" id="t2Meals" value="{{ company.Tier2_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_EmployeePrice" id="t2EmpPrice" value="{{ company.Tier2_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_BDSubsidy" id="t2BdSubsidy" value="{{ company.Tier2_BDSubsidy or '' }}" placeholder="4.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_CompanySubsidy" id="t2CoSubsidy" value="{{ company.Tier2_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px;"><input type="checkbox" id="enableT3" onchange="toggleTierRow(this)" {% if company.Tier3_EmployeePrice %}checked{% endif %}></td>
+                        <td style="padding:8px;font-weight:700;color:#003141;">Tier 3</td>
+                        <td style="padding:8px;"><input type="number" name="Tier3_Meals" id="t3Meals" value="{{ company.Tier3_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_EmployeePrice" id="t3EmpPrice" value="{{ company.Tier3_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_BDSubsidy" id="t3BdSubsidy" value="{{ company.Tier3_BDSubsidy or '' }}" placeholder="3.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_CompanySubsidy" id="t3CoSubsidy" value="{{ company.Tier3_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- LIVE PRICE PREVIEW -->
+            <div class="price-preview" id="pricePreview" style="margin-top:16px;">
+                <div class="price-preview-title">💡 Employee sees this pricing ladder</div>
+                <div id="previewRows"></div>
+            </div>
+        </div>
+
         <!-- EMPLOYEE BENEFIT LEVELS -->
         <div class="form-section">
             <div class="form-section-header">
                 <div class="fs-icon">👥</div>
                 <div>
                     <div class="fs-title">Employee Benefit Levels</div>
-                    <div class="fs-sub">Assign different meal plans to different employee groups (General, Leadership, Executive, etc.)</div>
+                    <div class="fs-sub">Different employee groups can get different meal allowances at each tier</div>
                 </div>
             </div>
-            <div class="field-grid field-grid-2" style="margin-bottom:14px;">
-                <div class="field">
-                    <label style="display:flex;align-items:center;gap:8px;">
-                        <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
-                               {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}checked{% endif %}
-                               onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;">
-                        Enable Employee Benefit Levels
-                    </label>
-                    <span class="field-hint">When disabled, all employees share the same tier structure below</span>
-                </div>
+            <div style="margin-bottom:14px;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;cursor:pointer;">
+                    <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
+                           {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}checked{% endif %}
+                           onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;">
+                    Enable Employee Benefit Levels
+                </label>
+                <span class="field-hint" style="margin-left:26px;">Pricing stays the same for all levels — only the number of meals at each tier changes per level.</span>
             </div>
             <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper != 'TRUE' %}style="display:none"{% endif %}>
-                <div style="background:#f8f3ec;border-radius:10px;padding:16px 20px;margin-bottom:12px;">
-                    <div style="font-size:.8rem;font-weight:700;color:#003141;margin-bottom:8px;">How it works</div>
-                    <div style="font-size:.75rem;color:#5a7268;line-height:1.5;">
-                        Each level gets its own tier pricing structure. When an employee signs in, they see pricing based on their assigned level.
-                        You can assign levels from the Manager Portal → Employees tab, or from the admin dashboard.
-                    </div>
+                <div style="background:#f8f3ec;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:.75rem;color:#5a7268;line-height:1.5;">
+                    Each level shares the same per-meal pricing above — you're only configuring <strong>how many meals</strong> each group gets at each tier.
+                    Assign levels from the Manager Portal → Employees tab.
                 </div>
-                <div id="levelsContainer"></div>
-                <button type="button" onclick="addLevel()" style="font-size:.78rem;font-weight:700;color:#00465E;background:#fff;border:1.5px dashed #E8DFD2;border-radius:10px;padding:12px 20px;cursor:pointer;width:100%;margin-top:8px;transition:.15s;"
+
+                <!-- Levels grid -->
+                <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="levelsGrid">
+                    <thead>
+                        <tr style="border-bottom:2px solid #E8DFD2;">
+                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Level Name</th>
+                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#167421;">Free Meals</th>
+                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 1</th>
+                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 2</th>
+                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 3</th>
+                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Max/Week</th>
+                            <th style="width:60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="levelsContainer"></tbody>
+                </table>
+
+                <button type="button" onclick="addLevel()" style="font-size:.78rem;font-weight:700;color:#00465E;background:#fff;border:1.5px dashed #E8DFD2;border-radius:8px;padding:10px 16px;cursor:pointer;width:100%;margin-top:8px;transition:.15s;"
                         onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">
-                    + Add Employee Level
+                    + Add Level
                 </button>
-                <button type="button" onclick="saveBenefitLevels()" style="margin-top:12px;font-size:.82rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:10px;padding:12px 24px;cursor:pointer;display:block;">
-                    Save Benefit Levels
-                </button>
-                <div id="levelsSaveStatus" style="font-size:.75rem;color:#167421;margin-top:6px;display:none;">✓ Levels saved</div>
-            </div>
-        </div>
-
-        <!-- SUBSIDY TIERS (company-wide defaults — used when levels are disabled) -->
-        <div class="form-section" id="companyTiersSection">
-            <div class="form-section-header">
-                <div class="fs-icon">💰</div>
-                <div>
-                    <div class="fs-title">Meal Subsidy Program <span id="tiersDefaultLabel" style="font-size:.65rem;color:#7A8F9C;font-weight:600;">— default for all employees</span></div>
-                    <div class="fs-sub">Configure free meals, subsidised tiers, and pricing</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+                    <button type="button" onclick="saveBenefitLevels()" style="font-size:.8rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;">
+                        Save Levels
+                    </button>
+                    <span id="levelsSaveStatus" style="font-size:.75rem;color:#167421;display:none;">✓ Saved</span>
                 </div>
-            </div>
-
-            <div class="tier-section">
-
-                <!-- Full / Base Price -->
-                <div class="tier-row">
-                    <div class="tier-row-header">
-                        <span class="tier-badge tier-badge-full">Base Pricing</span>
-                    </div>
-                    <div class="tier-fields">
-                        <div class="field">
-                            <label>Full Retail Price ($)</label>
-                            <input type="number" step="0.01" name="BasePrice" id="basePrice"
-                                   value="{{ company.BasePrice or '16.99' }}" placeholder="16.99" oninput="updatePreview()">
-                            <span class="field-hint">What BetterDay normally charges per meal</span>
-                        </div>
-                        <div class="field">
-                            <label>Max Meals / Employee / Week</label>
-                            <input type="number" name="MaxMealsPerEmployeePerWeek"
-                                   value="{{ company.MaxMealsPerEmployeePerWeek or '' }}" placeholder="No limit">
-                        </div>
-                        <div class="field">
-                            <label>Allow Extra at Full Price?</label>
-                            <select name="AllowExtraAtFullPrice">
-                                <option value="TRUE" {% if company.AllowExtraAtFullPrice == 'TRUE' %}selected{% endif %}>Yes</option>
-                                <option value="FALSE" {% if company.AllowExtraAtFullPrice != 'TRUE' %}selected{% endif %}>No</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Free Meals -->
-                <div class="tier-row">
-                    <div class="tier-row-header">
-                        <span class="tier-badge tier-badge-free">🎁 Free Meals</span>
-                        <div class="tier-toggle">
-                            <input type="checkbox" id="enableFree" onchange="toggleTier('freeFields', this.checked)"
-                                   {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string != '0' %}checked{% endif %}>
-                            <label for="enableFree">Enable free meal benefit</label>
-                        </div>
-                    </div>
-                    <div id="freeFields" {% if not company.FreeMealsPerWeek or company.FreeMealsPerWeek|string == '0' %}style="display:none"{% endif %}>
-                        <div class="tier-fields">
-                            <div class="field">
-                                <label>Free Meals Per Week</label>
-                                <input type="number" name="FreeMealsPerWeek" id="freeMeals"
-                                       value="{{ company.FreeMealsPerWeek or '' }}" placeholder="1" oninput="updatePreview()">
-                            </div>
-                            <div class="field">
-                                <label>BD Subsidy ($)</label>
-                                <input type="number" step="0.01" name="FreeTier_BDSubsidy" id="freeBdSubsidy"
-                                       value="{{ company.FreeTier_BDSubsidy or '' }}" placeholder="5.00" oninput="updatePreview()">
-                                <span class="field-hint">BetterDay's contribution per free meal</span>
-                            </div>
-                            <div class="field">
-                                <label>Company Subsidy ($)</label>
-                                <input type="number" step="0.01" name="FreeTier_CompanySubsidy"
-                                       value="{{ company.FreeTier_CompanySubsidy or '' }}" placeholder="auto" readonly
-                                       id="freeCoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
-                                <span class="field-hint">Auto = Full price − BD subsidy</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tier 1 -->
-                <div class="tier-row">
-                    <div class="tier-row-header">
-                        <span class="tier-badge tier-badge-t1">Tier 1 Subsidy</span>
-                        <div class="tier-toggle">
-                            <input type="checkbox" id="enableT1" onchange="toggleTier('t1Fields', this.checked)"
-                                   {% if company.Tier1_EmployeePrice %}checked{% endif %}>
-                            <label for="enableT1">Enable Tier 1</label>
-                        </div>
-                    </div>
-                    <div id="t1Fields" {% if not company.Tier1_EmployeePrice %}style="display:none"{% endif %}>
-                        <div class="tier-fields">
-                            <div class="field">
-                                <label>Meals in this tier</label>
-                                <input type="number" name="Tier1_Meals" id="t1Meals"
-                                       value="{{ company.Tier1_Meals or company.SubsidizedMealsPerWeek or '' }}" placeholder="4" oninput="updatePreview()">
-                            </div>
-                            <div class="field">
-                                <label>Employee Price ($)</label>
-                                <input type="number" step="0.01" name="Tier1_EmployeePrice" id="t1EmpPrice"
-                                       value="{{ company.Tier1_EmployeePrice or '' }}" placeholder="0.00" oninput="updatePreview()">
-                            </div>
-                            <div class="field">
-                                <label>BD Subsidy ($)</label>
-                                <input type="number" step="0.01" name="Tier1_BDSubsidy" id="t1BdSubsidy"
-                                       value="{{ company.Tier1_BDSubsidy or '' }}" placeholder="5.00" oninput="updatePreview()">
-                                <span class="field-hint">BetterDay's contribution per meal</span>
-                            </div>
-                            <div class="field">
-                                <label>Company Subsidy ($)</label>
-                                <input type="number" step="0.01" name="Tier1_CompanySubsidy"
-                                       value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto" readonly
-                                       id="t1CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
-                                <span class="field-hint">Auto = Full price − Employee − BD</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tier 2 -->
-                <div class="tier-row">
-                    <div class="tier-row-header">
-                        <span class="tier-badge tier-badge-t2">Tier 2 Subsidy</span>
-                        <div class="tier-toggle">
-                            <input type="checkbox" id="enableT2" onchange="toggleTier('t2Fields', this.checked)"
-                                   {% if company.Tier2_EmployeePrice %}checked{% endif %}>
-                            <label for="enableT2">Enable Tier 2</label>
-                        </div>
-                    </div>
-                    <div id="t2Fields" {% if not company.Tier2_EmployeePrice %}style="display:none"{% endif %}>
-                        <div class="tier-fields">
-                            <div class="field">
-                                <label>Meals in this tier</label>
-                                <input type="number" name="Tier2_Meals" id="t2Meals"
-                                       value="{{ company.Tier2_Meals or '' }}" placeholder="3" oninput="updatePreview()">
-                            </div>
-                            <div class="field">
-                                <label>Employee Price ($)</label>
-                                <input type="number" step="0.01" name="Tier2_EmployeePrice" id="t2EmpPrice"
-                                       value="{{ company.Tier2_EmployeePrice or '' }}" placeholder="5.99" oninput="updatePreview()">
-                            </div>
-                            <div class="field">
-                                <label>BD Subsidy ($)</label>
-                                <input type="number" step="0.01" name="Tier2_BDSubsidy" id="t2BdSubsidy"
-                                       value="{{ company.Tier2_BDSubsidy or '' }}" placeholder="4.00" oninput="updatePreview()">
-                                <span class="field-hint">BetterDay's contribution per meal</span>
-                            </div>
-                            <div class="field">
-                                <label>Company Subsidy ($)</label>
-                                <input type="number" step="0.01" name="Tier2_CompanySubsidy"
-                                       value="{{ company.Tier2_CompanySubsidy or '' }}" placeholder="auto" readonly
-                                       id="t2CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
-                                <span class="field-hint">Auto = Full price − Employee − BD</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tier 3 -->
-                <div class="tier-row">
-                    <div class="tier-row-header">
-                        <span class="tier-badge tier-badge-t3">Tier 3 Subsidy</span>
-                        <div class="tier-toggle">
-                            <input type="checkbox" id="enableT3" onchange="toggleTier('t3Fields', this.checked)"
-                                   {% if company.Tier3_EmployeePrice %}checked{% endif %}>
-                            <label for="enableT3">Enable Tier 3</label>
-                        </div>
-                    </div>
-                    <div id="t3Fields" {% if not company.Tier3_EmployeePrice %}style="display:none"{% endif %}>
-                        <div class="tier-fields">
-                            <div class="field">
-                                <label>Meals in this tier</label>
-                                <input type="number" name="Tier3_Meals" id="t3Meals"
-                                       value="{{ company.Tier3_Meals or '' }}" placeholder="2" oninput="updatePreview()">
-                            </div>
-                            <div class="field">
-                                <label>Employee Price ($)</label>
-                                <input type="number" step="0.01" name="Tier3_EmployeePrice" id="t3EmpPrice"
-                                       value="{{ company.Tier3_EmployeePrice or '' }}" placeholder="9.99" oninput="updatePreview()">
-                            </div>
-                            <div class="field">
-                                <label>BD Subsidy ($)</label>
-                                <input type="number" step="0.01" name="Tier3_BDSubsidy" id="t3BdSubsidy"
-                                       value="{{ company.Tier3_BDSubsidy or '' }}" placeholder="3.00" oninput="updatePreview()">
-                                <span class="field-hint">BetterDay's contribution per meal</span>
-                            </div>
-                            <div class="field">
-                                <label>Company Subsidy ($)</label>
-                                <input type="number" step="0.01" name="Tier3_CompanySubsidy"
-                                       value="{{ company.Tier3_CompanySubsidy or '' }}" placeholder="auto" readonly
-                                       id="t3CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
-                                <span class="field-hint">Auto = Full price − Employee − BD</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- LIVE PRICE PREVIEW -->
-            <div class="price-preview" id="pricePreview" style="margin-top:20px;">
-                <div class="price-preview-title">💡 Employee sees this pricing ladder</div>
-                <div id="previewRows"></div>
             </div>
         </div>
 
@@ -528,6 +426,7 @@
 </div>
 
 <script>
+function toggleTierRow(cb) { updatePreview(); }
 function toggleTier(fieldId, show) {
     document.getElementById(fieldId).style.display = show ? '' : 'none';
     updatePreview();
@@ -598,72 +497,48 @@ function updatePreview() {
 }
 
 // ══════════════════════════════════════════
-// EMPLOYEE BENEFIT LEVELS
+// EMPLOYEE BENEFIT LEVELS — compact grid rows
 // ══════════════════════════════════════════
-var _benefitLevels = [];
 var _levelCounter = 0;
+var _s = 'width:65px;padding:5px 6px;border:1px solid #E8DFD2;border-radius:5px;font-size:.8rem;text-align:center;font-family:inherit;';
 
 function toggleLevelsSection(enabled) {
   document.getElementById('levelsSection').style.display = enabled ? '' : 'none';
-  var label = document.getElementById('tiersDefaultLabel');
-  if (label) label.textContent = enabled ? '— fallback for employees without a level' : '— default for all employees';
 }
 
 function addLevel(data) {
   _levelCounter++;
   var id = _levelCounter;
-  var lv = data || { LevelName: '', LevelID: id, FreeMealsPerWeek: 0, Tier1_Meals: 0, Tier2_Meals: 0, Tier3_Meals: 0 };
-  var fp = parseFloat(document.getElementById('basePrice')?.value) || 16.99;
-
-  var html = `<div class="tier-row" id="level-${id}" style="border:1.5px solid #E8DFD2;border-radius:12px;padding:16px 20px;margin-bottom:10px;background:#fff;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;background:rgba(0,70,94,.08);padding:3px 10px;border-radius:99px;">Level ${id}</span>
-        <input type="text" value="${lv.LevelName||''}" placeholder="e.g. Leadership" data-field="LevelName"
-               style="font-size:.9rem;font-weight:700;border:none;border-bottom:1.5px solid #E8DFD2;padding:4px 0;outline:none;width:200px;color:#003141;">
-      </div>
-      <button type="button" onclick="removeLevel(${id})" style="font-size:.7rem;color:#B56B10;background:none;border:1px solid rgba(181,107,16,.2);border-radius:6px;padding:4px 10px;cursor:pointer;">Remove</button>
-    </div>
-    <div class="tier-fields" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
-      <div class="field"><label style="font-size:.65rem;">Free Meals/Week</label><input type="number" value="${lv.FreeMealsPerWeek||0}" data-field="FreeMealsPerWeek" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Free BD Subsidy</label><input type="number" step="0.01" value="${lv.FreeTier_BDSubsidy||''}" data-field="FreeTier_BDSubsidy" placeholder="5.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Free Co Subsidy</label><input type="number" step="0.01" value="${lv.FreeTier_CompanySubsidy||''}" data-field="FreeTier_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
-      <div></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 1 Meals</label><input type="number" value="${lv.Tier1_Meals||0}" data-field="Tier1_Meals" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 1 Emp Price</label><input type="number" step="0.01" value="${lv.Tier1_EmployeePrice||''}" data-field="Tier1_EmployeePrice" placeholder="4.99" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 1 BD Subsidy</label><input type="number" step="0.01" value="${lv.Tier1_BDSubsidy||''}" data-field="Tier1_BDSubsidy" placeholder="5.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 1 Co Subsidy</label><input type="number" step="0.01" value="${lv.Tier1_CompanySubsidy||''}" data-field="Tier1_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 2 Meals</label><input type="number" value="${lv.Tier2_Meals||0}" data-field="Tier2_Meals" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 2 Emp Price</label><input type="number" step="0.01" value="${lv.Tier2_EmployeePrice||''}" data-field="Tier2_EmployeePrice" placeholder="7.99" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 2 BD Subsidy</label><input type="number" step="0.01" value="${lv.Tier2_BDSubsidy||''}" data-field="Tier2_BDSubsidy" placeholder="4.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 2 Co Subsidy</label><input type="number" step="0.01" value="${lv.Tier2_CompanySubsidy||''}" data-field="Tier2_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 3 Meals</label><input type="number" value="${lv.Tier3_Meals||0}" data-field="Tier3_Meals" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 3 Emp Price</label><input type="number" step="0.01" value="${lv.Tier3_EmployeePrice||''}" data-field="Tier3_EmployeePrice" placeholder="13.99" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 3 BD Subsidy</label><input type="number" step="0.01" value="${lv.Tier3_BDSubsidy||''}" data-field="Tier3_BDSubsidy" placeholder="3.00" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Tier 3 Co Subsidy</label><input type="number" step="0.01" value="${lv.Tier3_CompanySubsidy||''}" data-field="Tier3_CompanySubsidy" placeholder="auto" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;background:#f8f5f0;" readonly></div>
-      <div class="field"><label style="font-size:.65rem;">Max Meals/Week</label><input type="number" value="${lv.MaxMealsPerWeek||''}" data-field="MaxMealsPerWeek" placeholder="No limit" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-      <div class="field"><label style="font-size:.65rem;">Full Price</label><input type="number" step="0.01" value="${lv.FullPrice||fp}" data-field="FullPrice" style="font-size:.85rem;padding:6px 8px;border:1px solid #E8DFD2;border-radius:6px;width:100%;"></div>
-    </div>
-  </div>`;
-  document.getElementById('levelsContainer').insertAdjacentHTML('beforeend', html);
-  _benefitLevels.push({ _domId: id, ...lv });
+  var lv = data || {};
+  var tr = document.createElement('tr');
+  tr.id = 'lvl-' + id;
+  tr.style.borderBottom = '1px solid rgba(0,49,65,.06)';
+  tr.innerHTML =
+    '<td style="padding:6px 8px;"><input type="text" value="'+(lv.LevelName||'')+'" data-field="LevelName" placeholder="e.g. Leadership" style="width:130px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;font-weight:700;color:#003141;font-family:inherit;"></td>' +
+    '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.FreeMealsPerWeek||0)+'" data-field="FreeMealsPerWeek" style="'+_s+'"></td>' +
+    '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier1_Meals||0)+'" data-field="Tier1_Meals" style="'+_s+'"></td>' +
+    '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier2_Meals||0)+'" data-field="Tier2_Meals" style="'+_s+'"></td>' +
+    '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier3_Meals||0)+'" data-field="Tier3_Meals" style="'+_s+'"></td>' +
+    '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.MaxMealsPerWeek||'')+'" data-field="MaxMealsPerWeek" placeholder="∞" style="'+_s+'"></td>' +
+    '<td style="padding:6px 8px;"><button type="button" onclick="removeLevel('+id+')" style="font-size:.65rem;color:#B56B10;background:none;border:1px solid rgba(181,107,16,.15);border-radius:5px;padding:3px 8px;cursor:pointer;">✕</button></td>';
+  // Store LevelID as a hidden data attribute
+  tr.dataset.levelId = lv.LevelID || id;
+  document.getElementById('levelsContainer').appendChild(tr);
 }
 
 function removeLevel(id) {
-  var el = document.getElementById('level-' + id);
+  var el = document.getElementById('lvl-' + id);
   if (el) el.remove();
-  _benefitLevels = _benefitLevels.filter(l => l._domId !== id);
 }
 
 function collectLevelData() {
   var levels = [];
-  document.querySelectorAll('[id^="level-"]').forEach(function(div) {
-    var lv = {};
-    div.querySelectorAll('[data-field]').forEach(function(input) {
+  document.querySelectorAll('#levelsContainer tr').forEach(function(tr, idx) {
+    var lv = { LevelID: parseInt(tr.dataset.levelId) || (idx + 1) };
+    tr.querySelectorAll('[data-field]').forEach(function(input) {
       var v = input.value.trim();
       lv[input.dataset.field] = v === '' ? '' : (isNaN(Number(v)) ? v : Number(v));
     });
-    lv.LevelID = levels.length + 1;
     levels.push(lv);
   });
   return levels;
@@ -682,12 +557,10 @@ function saveBenefitLevels() {
   }).then(r => r.json()).then(d => {
     if (d.success) {
       statusEl.textContent = '✓ ' + levels.length + ' level(s) saved';
-      statusEl.style.display = 'block';
+      statusEl.style.display = 'inline';
       setTimeout(() => statusEl.style.display = 'none', 4000);
-    } else {
-      alert('Error: ' + (d.error || 'Unknown'));
-    }
-  }).catch(() => alert('Network error saving levels'));
+    } else { alert('Error: ' + (d.error || 'Unknown')); }
+  }).catch(() => alert('Network error'));
 }
 
 function loadExistingLevels() {
@@ -698,9 +571,7 @@ function loadExistingLevels() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'get_benefit_levels', company_id: companyId })
   }).then(r => r.json()).then(d => {
-    if (d.levels && d.levels.length > 0) {
-      d.levels.forEach(lv => addLevel(lv));
-    }
+    if (d.levels && d.levels.length > 0) d.levels.forEach(lv => addLevel(lv));
   }).catch(() => {});
 }
 
