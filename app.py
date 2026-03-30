@@ -437,14 +437,20 @@ def bd_admin_dashboard():
     for o in all_orders:
         co_meal_counts[o['company_id']] += len(o['meals'])
     top_company_id = co_meal_counts.most_common(1)[0][0] if co_meal_counts else ''
+    top_company_meals = co_meal_counts.get(top_company_id, 0)
+    top_company_revenue = round(sum(o['co_total'] + o['emp_total'] for o in all_orders if o['company_id'] == top_company_id), 2)
 
     # Most popular meal
     dish_counts = Counter()
+    dish_revenue = {}
     for o in all_orders:
         for m in o['meals']:
             if m['dish_name']:
                 dish_counts[m['dish_name']] += 1
+                dish_revenue[m['dish_name']] = dish_revenue.get(m['dish_name'], 0) + m['emp_price'] + m['co_coverage']
     top_meal = dish_counts.most_common(1)[0][0] if dish_counts else '—'
+    top_meal_count = dish_counts.get(top_meal, 0)
+    top_meal_revenue = round(dish_revenue.get(top_meal, 0), 2)
     top_meal_short = top_meal[:22] + ('...' if len(top_meal) > 22 else '')
 
     # New employees this week (first-time orderers)
@@ -505,11 +511,15 @@ def bd_admin_dashboard():
         total_meals=total_meals, total_co_spend=total_co_spend, total_bd_spend=total_bd_spend,
         total_emp_spend=total_emp_spend, total_unique_employees=total_unique_employees,
         pending_invoices_value=pending_invoices_value, pending_invoices_count=pending_invoices_count,
+        paid_invoices_count=sum(1 for inv in invoices if (inv.get('status') or inv.get('Status') or '').lower() == 'paid'),
+        paid_invoices_value=round(sum(float(inv.get('companyOwed') or inv.get('CompanyOwed') or 0) for inv in invoices if (inv.get('status') or inv.get('Status') or '').lower() == 'paid'), 2),
         week_order_count=week_order_count, week_meal_count=week_meal_count,
         week_employees=week_employees, week_revenue=week_revenue,
         total_revenue=total_revenue, total_orders=total_orders, avg_order_value=avg_order_value,
         top_company=co_names.get(top_company_id, top_company_id),
-        top_meal=top_meal_short, new_employees_week=new_employees_week,
+        top_company_meals=top_company_meals, top_company_revenue=top_company_revenue,
+        top_meal=top_meal_short, top_meal_count=top_meal_count, top_meal_revenue=top_meal_revenue,
+        new_employees_week=new_employees_week,
         busiest_week=busiest_week_label, busiest_week_meals=busiest_week_meals,
         repeat_rate=repeat_rate, program_growth=program_growth,
     )
