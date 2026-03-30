@@ -332,7 +332,19 @@
                                 <label>Free Meals Per Week</label>
                                 <input type="number" name="FreeMealsPerWeek" id="freeMeals"
                                        value="{{ company.FreeMealsPerWeek or '' }}" placeholder="1" oninput="updatePreview()">
-                                <span class="field-hint">First N meals are fully covered by company</span>
+                            </div>
+                            <div class="field">
+                                <label>BD Subsidy ($)</label>
+                                <input type="number" step="0.01" name="FreeTier_BDSubsidy" id="freeBdSubsidy"
+                                       value="{{ company.FreeTier_BDSubsidy or '' }}" placeholder="5.00" oninput="updatePreview()">
+                                <span class="field-hint">BetterDay's contribution per free meal</span>
+                            </div>
+                            <div class="field">
+                                <label>Company Subsidy ($)</label>
+                                <input type="number" step="0.01" name="FreeTier_CompanySubsidy"
+                                       value="{{ company.FreeTier_CompanySubsidy or '' }}" placeholder="auto" readonly
+                                       id="freeCoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
+                                <span class="field-hint">Auto = Full price − BD subsidy</span>
                             </div>
                         </div>
                     </div>
@@ -361,11 +373,17 @@
                                        value="{{ company.Tier1_EmployeePrice or '' }}" placeholder="0.00" oninput="updatePreview()">
                             </div>
                             <div class="field">
+                                <label>BD Subsidy ($)</label>
+                                <input type="number" step="0.01" name="Tier1_BDSubsidy" id="t1BdSubsidy"
+                                       value="{{ company.Tier1_BDSubsidy or '' }}" placeholder="5.00" oninput="updatePreview()">
+                                <span class="field-hint">BetterDay's contribution per meal</span>
+                            </div>
+                            <div class="field">
                                 <label>Company Subsidy ($)</label>
                                 <input type="number" step="0.01" name="Tier1_CompanySubsidy"
-                                       value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto-calculated" readonly
+                                       value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto" readonly
                                        id="t1CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
-                                <span class="field-hint">Auto = Full price − Employee price</span>
+                                <span class="field-hint">Auto = Full price − Employee − BD</span>
                             </div>
                         </div>
                     </div>
@@ -394,10 +412,17 @@
                                        value="{{ company.Tier2_EmployeePrice or '' }}" placeholder="5.99" oninput="updatePreview()">
                             </div>
                             <div class="field">
+                                <label>BD Subsidy ($)</label>
+                                <input type="number" step="0.01" name="Tier2_BDSubsidy" id="t2BdSubsidy"
+                                       value="{{ company.Tier2_BDSubsidy or '' }}" placeholder="4.00" oninput="updatePreview()">
+                                <span class="field-hint">BetterDay's contribution per meal</span>
+                            </div>
+                            <div class="field">
                                 <label>Company Subsidy ($)</label>
                                 <input type="number" step="0.01" name="Tier2_CompanySubsidy"
                                        value="{{ company.Tier2_CompanySubsidy or '' }}" placeholder="auto" readonly
                                        id="t2CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
+                                <span class="field-hint">Auto = Full price − Employee − BD</span>
                             </div>
                         </div>
                     </div>
@@ -426,10 +451,17 @@
                                        value="{{ company.Tier3_EmployeePrice or '' }}" placeholder="9.99" oninput="updatePreview()">
                             </div>
                             <div class="field">
+                                <label>BD Subsidy ($)</label>
+                                <input type="number" step="0.01" name="Tier3_BDSubsidy" id="t3BdSubsidy"
+                                       value="{{ company.Tier3_BDSubsidy or '' }}" placeholder="3.00" oninput="updatePreview()">
+                                <span class="field-hint">BetterDay's contribution per meal</span>
+                            </div>
+                            <div class="field">
                                 <label>Company Subsidy ($)</label>
                                 <input type="number" step="0.01" name="Tier3_CompanySubsidy"
                                        value="{{ company.Tier3_CompanySubsidy or '' }}" placeholder="auto" readonly
                                        id="t3CoSubsidy" style="background:#f0f4f8;color:#7b8c9f;">
+                                <span class="field-hint">Auto = Full price − Employee − BD</span>
                             </div>
                         </div>
                     </div>
@@ -466,26 +498,35 @@ function updatePreview() {
     const free = parseInt(document.getElementById('freeMeals')?.value) || 0;
     const freeEnabled = document.getElementById('enableFree')?.checked;
 
+    const freeBd = parseFloat(document.getElementById('freeBdSubsidy')?.value) || 0;
+
     const t1En = document.getElementById('enableT1')?.checked;
     const t1m  = parseInt(document.getElementById('t1Meals')?.value) || 0;
     const t1ep = parseFloat(document.getElementById('t1EmpPrice')?.value) || 0;
+    const t1bd = parseFloat(document.getElementById('t1BdSubsidy')?.value) || 0;
 
     const t2En = document.getElementById('enableT2')?.checked;
     const t2m  = parseInt(document.getElementById('t2Meals')?.value) || 0;
     const t2ep = parseFloat(document.getElementById('t2EmpPrice')?.value) || 0;
+    const t2bd = parseFloat(document.getElementById('t2BdSubsidy')?.value) || 0;
 
     const t3En = document.getElementById('enableT3')?.checked;
     const t3m  = parseInt(document.getElementById('t3Meals')?.value) || 0;
     const t3ep = parseFloat(document.getElementById('t3EmpPrice')?.value) || 0;
+    const t3bd = parseFloat(document.getElementById('t3BdSubsidy')?.value) || 0;
 
-    // Update auto-calculated subsidy fields
-    const setSubsidy = (id, ep) => {
+    // Update auto-calculated company subsidy = Full price − Employee price − BD subsidy
+    const setSubsidy = (id, ep, bd) => {
         const el = document.getElementById(id);
-        if (el) el.value = Math.max(0, fp - ep).toFixed(2);
+        if (el) el.value = Math.max(0, fp - ep - bd).toFixed(2);
     };
-    setSubsidy('t1CoSubsidy', t1ep);
-    setSubsidy('t2CoSubsidy', t2ep);
-    setSubsidy('t3CoSubsidy', t3ep);
+    // Free tier: employee pays $0, so company = full price - BD
+    const freeCoEl = document.getElementById('freeCoSubsidy');
+    if (freeCoEl) freeCoEl.value = Math.max(0, fp - freeBd).toFixed(2);
+
+    setSubsidy('t1CoSubsidy', t1ep, t1bd);
+    setSubsidy('t2CoSubsidy', t2ep, t2bd);
+    setSubsidy('t3CoSubsidy', t3ep, t3bd);
 
     // Build preview rows
     const rows = [];
