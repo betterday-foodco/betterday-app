@@ -1292,7 +1292,7 @@ def work_submit():
 @app.route('/work/companies')
 @admin_required
 def work_companies():
-    return redirect(url_for('work_admin'))
+    return redirect(url_for('bd_admin_dashboard'))
 
 
 @app.route('/work/company/<company_id>', methods=['GET', 'POST'])
