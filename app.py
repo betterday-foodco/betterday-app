@@ -139,7 +139,7 @@ def admin_login():
     if request.method == 'POST':
         if request.form.get('password') == ADMIN_PASSWORD:
             session['admin_logged_in'] = True
-            next_url = request.args.get('next') or url_for('work_admin')
+            next_url = request.args.get('next') or url_for('bd_admin_dashboard')
             return redirect(next_url)
         error = 'Incorrect password.'
     return render_template('admin_login.html', error=error)
