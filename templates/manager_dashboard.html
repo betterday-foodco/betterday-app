@@ -68,8 +68,14 @@
         }
         .btn-logout:hover { color: #FAEBDA; border-color: rgba(250,235,218,.4); }
 
+        /* Hamburger button — hidden on desktop */
+        .hamburger { display:none;background:none;border:none;color:#FAEBDA;font-size:22px;cursor:pointer;padding:4px 8px;margin-right:4px;line-height:1 }
+        .sidebar-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:19 }
         @media (max-width: 1000px) {
-            .sidebar { display: none; }
+            .sidebar { display:none;z-index:20 }
+            .sidebar.open { display:flex }
+            .sidebar-overlay.open { display:block }
+            .hamburger { display:inline-flex }
             .main { margin-left: 0; }
         }
 
@@ -301,7 +307,9 @@
 
 <!-- ═══════ MAIN ═══════ -->
 <div class="main">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
     <span class="tb-title">Better<b>Day</b></span>
     <span class="tb-pill">Manager</span>
     <div class="tb-right">
@@ -1438,6 +1446,14 @@ ${inv.notes ? `<div style="margin-top:16px;font-size:.82rem;color:#484848;"><str
     const win = window.open('', '_blank');
     win.document.write(html);
     win.document.close();
+}
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
 }
 </script>
 </body>
