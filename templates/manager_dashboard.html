@@ -219,9 +219,12 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 
 <!-- ════════ SIDEBAR ════════ -->
 <aside class="sb">
-  <div class="sb-logo">
-    <img src="{{ url_for('static', filename='Logo.svg') }}" alt="BD" onerror="this.style.display='none'">
-    <span class="sb-logo-text">{{ company_name }}</span>
+  <div class="sb-logo" style="flex-direction:column;align-items:flex-start;gap:2px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <img src="{{ url_for('static', filename='Logo.svg') }}" alt="BD" style="height:20px;" onerror="this.style.display='none'">
+      <span style="font-size:.55rem;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.4);">FOR WORK</span>
+    </div>
+    <span class="sb-logo-text" style="font-size:11px;color:rgba(250,235,218,.6);font-weight:600;">{{ company_name }} · Manager</span>
   </div>
   <div class="sb-sec">Dashboard</div>
   <div class="ni on" onclick="sidebarNav('overview', this)">&#9632; &nbsp;Overview</div>

@@ -9,10 +9,10 @@
     <style>
         :root {
             --brand: #00465e;
-            --text: #222222;
-            --text-secondary: #717171;
-            --border: #DDDDDD;
-            --bg: #F7F7F7;
+            --text: #012030;
+            --text-secondary: #7A8F9C;
+            --border: #E8DFD2;
+            --bg: #FAEBDA;
             --white: #FFFFFF;
             --error-bg: #FEF2F2;
             --error-border: #FECACA;
@@ -39,8 +39,9 @@
             max-width: 400px;
             padding: 40px 36px;
         }
-        .logo-wrap { text-align: center; background: #00465e; margin: -40px -36px 32px; padding: 32px 36px; border-radius: 16px 16px 0 0; }
-        .logo { height: 26px; filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(10deg) brightness(1.15); }
+        .logo-wrap { text-align: center; background: #003141; margin: -40px -36px 32px; padding: 28px 36px; border-radius: 16px 16px 0 0; }
+        .logo { height: 30px; filter: brightness(0) invert(1) sepia(1) saturate(0.3) hue-rotate(10deg) brightness(1.6); display: block; margin: 0 auto 4px; }
+        .logo-tagline { font-size: .65rem; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; color: rgba(250,235,218,.5); }
         .btn-login:disabled { opacity: .65; cursor: not-allowed; transform: none; }
         .btn-spin { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; margin-right: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -114,6 +115,7 @@
 <div class="card">
     <div class="logo-wrap">
         <img src="{{ url_for('static', filename='Logo.svg') }}" class="logo" alt="BetterDay">
+        <div class="logo-tagline">FOR WORK</div>
     </div>
 
     <div class="card-title">Manager Portal</div>

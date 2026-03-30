@@ -61,27 +61,24 @@
       align-items:center;
       margin-bottom:28px;
     }
-    .logo-icon {
-      width:52px; height:52px;
-      background:var(--dark);
-      border-radius:16px;
-      display:flex; align-items:center; justify-content:center;
-      margin-bottom:10px;
-      box-shadow:0 8px 20px rgba(0,70,94,.3);
-    }
-    .logo-icon img { width:30px; height:30px; filter:brightness(0) invert(1); }
+    .logo-icon { display:none; }
+    .logo-img { height:32px; filter:brightness(0) invert(1) sepia(1) saturate(0.3) hue-rotate(10deg) brightness(1.6); margin-bottom:6px; }
     .logo-title {
-      font-family:'DM Serif Display',serif;
-      font-size:1.4rem;
-      color:var(--dark);
+      font-family:'DM Sans',sans-serif;
+      font-size:.65rem;
+      font-weight:400;
+      text-transform:uppercase;
+      letter-spacing:2px;
+      color:rgba(250,235,218,.5);
       line-height:1;
+      margin-top:2px;
     }
     .logo-sub {
-      font-size:.68rem;
-      font-weight:900;
+      font-size:.72rem;
+      font-weight:800;
       text-transform:uppercase;
-      letter-spacing:1.5px;
-      color:#a0aebb;
+      letter-spacing:1.2px;
+      color:var(--dark);
       margin-top:3px;
     }
 
@@ -172,11 +169,9 @@
   <div class="card-wrap">
     <div class="card">
       <div class="logo-wrap">
-        <div class="logo-icon">
-          <img src="{{ url_for('static', filename='Logo.svg') }}" alt="BD">
-        </div>
-        <div class="logo-title">BetterDay</div>
-        <div class="logo-sub">Admin Access</div>
+        <img src="{{ url_for('static', filename='Logo.svg') }}" alt="BetterDay" class="logo-img">
+        <div class="logo-title">FOR WORK</div>
+        <div class="logo-sub" style="margin-top:12px;">Admin Portal</div>
       </div>
 
       <div class="eyebrow">Restricted</div>
