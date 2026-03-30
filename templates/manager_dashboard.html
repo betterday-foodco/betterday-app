@@ -521,14 +521,36 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       <div class="filter-row">
         <input type="text" placeholder="Search employees&hellip;" class="filter-input" id="empSearch" oninput="filterEmployees()">
       </div>
+
+      <!-- Bulk actions bar — hidden until checkboxes are selected -->
+      <div id="bulkActionsBar" style="display:none;background:#003141;border-radius:10px;padding:12px 18px;margin-bottom:10px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:.8rem;font-weight:800;color:#FFC600;" id="bulkCount">0 selected</span>
+        <div style="width:1px;height:22px;background:rgba(255,255,255,.15);"></div>
+        {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}
+        <select id="bulkLevelSelect" style="font-size:.75rem;padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-family:inherit;cursor:pointer;">
+          <option value="">Change Level&hellip;</option>
+          {% for lv in benefit_levels %}
+          <option value="{{ lv.LevelName }}">{{ lv.LevelName }}</option>
+          {% endfor %}
+        </select>
+        <button onclick="bulkChangeLevel()" style="font-size:.72rem;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:6px;padding:5px 14px;cursor:pointer;">Apply Level</button>
+        <div style="width:1px;height:22px;background:rgba(255,255,255,.15);"></div>
+        {% endif %}
+        <button onclick="bulkResendLinks()" style="font-size:.72rem;font-weight:700;color:#7BC4FF;background:rgba(78,162,253,.1);border:1px solid rgba(78,162,253,.2);border-radius:6px;padding:5px 14px;cursor:pointer;">Resend Links</button>
+        <button onclick="bulkExportCSV()" style="font-size:.72rem;font-weight:700;color:#6BBD52;background:rgba(107,189,82,.1);border:1px solid rgba(107,189,82,.2);border-radius:6px;padding:5px 14px;cursor:pointer;">Export CSV</button>
+        <button onclick="bulkRemove()" style="font-size:.72rem;font-weight:700;color:#ff7b7b;background:rgba(255,100,100,.1);border:1px solid rgba(255,100,100,.2);border-radius:6px;padding:5px 14px;cursor:pointer;">Remove Selected</button>
+        <button onclick="clearBulkSelection()" style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px 14px;cursor:pointer;margin-left:auto;">Clear</button>
+      </div>
+
       <div class="tw">
         <table id="empTable">
-          <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Joined</th><th>Role</th>{% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}<th>Benefit Level</th>{% endif %}<th>Actions</th></tr></thead>
+          <thead><tr><th style="width:30px;"><input type="checkbox" id="selectAllEmps" onchange="toggleAllEmps(this.checked)" style="width:16px;height:16px;cursor:pointer;"></th><th>Name</th><th>Email</th><th>Type</th><th>Joined</th><th>Role</th>{% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}<th>Benefit Level</th>{% endif %}<th>Actions</th></tr></thead>
           <tbody id="empTableBody">
             {% for emp in employees %}
             {% set domain = company.CompanyEmailDomain or '' %}
             {% set is_company_email = domain and emp.email.endswith('@' + domain) %}
-            <tr id="emp-row-{{ loop.index }}">
+            <tr id="emp-row-{{ loop.index }}" data-email="{{ emp.email }}" data-name="{{ emp.firstName }} {{ emp.lastName }}">
+              <td><input type="checkbox" class="emp-check" onchange="updateBulkBar()" value="{{ emp.email }}" style="width:16px;height:16px;cursor:pointer;"></td>
               <td class="tn">{{ emp.firstName }} {{ emp.lastName }}</td>
               <td>{{ emp.email }}</td>
               <td>
@@ -1360,6 +1382,115 @@ ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><str
   carousel.addEventListener('mouseenter', function(){ clearInterval(timer); });
   carousel.addEventListener('mouseleave', function(){ timer = setInterval(function(){ goTo(current + 1); }, interval); });
 })();
+
+// ══════════════════════════════════════════
+// BULK EMPLOYEE ACTIONS
+// ══════════════════════════════════════════
+function getCheckedEmails() {
+  return Array.from(document.querySelectorAll('.emp-check:checked')).map(cb => cb.value);
+}
+function updateBulkBar() {
+  var checked = getCheckedEmails();
+  var bar = document.getElementById('bulkActionsBar');
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulkCount').textContent = checked.length + ' selected';
+  } else {
+    bar.style.display = 'none';
+  }
+  // Update select-all checkbox state
+  var all = document.querySelectorAll('.emp-check');
+  document.getElementById('selectAllEmps').checked = all.length > 0 && checked.length === all.length;
+}
+function toggleAllEmps(checked) {
+  document.querySelectorAll('.emp-check').forEach(cb => { cb.checked = checked; });
+  updateBulkBar();
+}
+function clearBulkSelection() {
+  document.querySelectorAll('.emp-check').forEach(cb => { cb.checked = false; });
+  document.getElementById('selectAllEmps').checked = false;
+  updateBulkBar();
+}
+
+async function bulkChangeLevel() {
+  var emails = getCheckedEmails();
+  var level = document.getElementById('bulkLevelSelect')?.value;
+  if (!emails.length || !level) { alert('Select employees and a level'); return; }
+  if (!confirm('Change ' + emails.length + ' employee(s) to level "' + level + '"?')) return;
+  var ok = 0;
+  for (var e of emails) {
+    try {
+      var r = await fetch('/api/gas', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({action:'update_employee_level', email:e, company_id:'{{ company.CompanyID }}', benefit_level:level}) });
+      var d = await r.json();
+      if (d.success) ok++;
+    } catch(err) {}
+  }
+  alert(ok + ' of ' + emails.length + ' updated to ' + level);
+  location.reload();
+}
+
+async function bulkResendLinks() {
+  var emails = getCheckedEmails();
+  if (!emails.length) return;
+  if (!confirm('Resend magic link to ' + emails.length + ' employee(s)?')) return;
+  var ok = 0;
+  for (var e of emails) {
+    try {
+      var r = await fetch('/manager/resend-link', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:e}) });
+      var d = await r.json();
+      if (d.success) ok++;
+    } catch(err) {}
+  }
+  alert(ok + ' of ' + emails.length + ' link(s) sent');
+  clearBulkSelection();
+}
+
+async function bulkRemove() {
+  var emails = getCheckedEmails();
+  if (!emails.length) return;
+  if (!confirm('Remove ' + emails.length + ' employee(s)? This cannot be undone.')) return;
+  var ok = 0;
+  for (var e of emails) {
+    try {
+      var r = await fetch('/manager/remove-employee', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email:e}) });
+      var d = await r.json();
+      if (d.success) {
+        ok++;
+        // Remove the row from the table
+        document.querySelectorAll('#empTableBody tr').forEach(tr => {
+          if (tr.dataset.email === e) tr.remove();
+        });
+      }
+    } catch(err) {}
+  }
+  alert(ok + ' of ' + emails.length + ' removed');
+  clearBulkSelection();
+}
+
+function bulkExportCSV() {
+  var emails = getCheckedEmails();
+  if (!emails.length) { alert('Select employees first'); return; }
+  var rows = [['Name','Email','Type','Joined','Role']];
+  document.querySelectorAll('#empTableBody tr').forEach(function(tr) {
+    if (!emails.includes(tr.dataset.email)) return;
+    var cells = tr.querySelectorAll('td');
+    rows.push([
+      cells[1]?.textContent?.trim() || '',
+      cells[2]?.textContent?.trim() || '',
+      cells[3]?.textContent?.trim() || '',
+      cells[4]?.textContent?.trim() || '',
+      cells[5]?.textContent?.trim() || ''
+    ]);
+  });
+  var csv = rows.map(r => r.map(c => '"'+c.replace(/"/g,'""')+'"').join(',')).join('\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '{{ company_name }}_employees.csv';
+  a.click();
+  clearBulkSelection();
+}
 </script>
 </body>
 </html>
