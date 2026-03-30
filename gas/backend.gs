@@ -34,6 +34,10 @@ function doPost(e) {
         if (String(rows[i][0]).trim().toUpperCase() === String(data.company_id).trim().toUpperCase()) {
           var company = {};
           headers.forEach(function(h, idx) { company[h] = rows[i][idx]; });
+          // Attach benefit levels if enabled
+          if (String(company.EnableEmployeeLevels || "").toUpperCase() === "TRUE") {
+            company.benefitLevels = _getBenefitLevels(ssHub, String(data.company_id).trim().toUpperCase());
+          }
           return jsonOut({found: true, company: company});
         }
       }
@@ -70,6 +74,7 @@ function doPost(e) {
       var email = String(data.email).trim().toLowerCase();
       var companyId = String(data.company_id).trim().toUpperCase();
       var isManagerIdx = headers.indexOf("IsManager");
+      var benefitLevelIdx = headers.indexOf("BenefitLevel");
       for (var i = 1; i < rows.length; i++) {
         var rowEmail   = String(rows[i][4]).trim().toLowerCase();
         var rowCompany = String(rows[i][1]).trim().toUpperCase();
@@ -80,7 +85,8 @@ function doPost(e) {
               firstName: rows[i][2],
               lastName:  rows[i][3],
               email:     rows[i][4],
-              isManager: isManagerIdx >= 0 && rows[i][isManagerIdx] === true
+              isManager: isManagerIdx >= 0 && rows[i][isManagerIdx] === true,
+              benefitLevel: benefitLevelIdx >= 0 ? (String(rows[i][benefitLevelIdx] || "General").trim()) : "General"
             }
           });
         }
@@ -500,7 +506,7 @@ function doPost(e) {
       var corpSheet = ssHub.getSheetByName("CorporateOrders");
       if (!corpSheet) {
         corpSheet = ssHub.insertSheet("CorporateOrders");
-        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","StripePaymentIntentID","Status","OrderID"]);
+        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","StripePaymentIntentID","Status","OrderID","EmployeeLevel"]);
       }
       corpSheet.appendRow([
         new Date(),
@@ -519,7 +525,8 @@ function doPost(e) {
         data.bd_coverage || "0.00",
         "",
         "pending",
-        data.order_id || ""
+        data.order_id || "",
+        data.employee_level || "General"
       ]);
       return jsonOut({success: true});
     }
@@ -681,6 +688,71 @@ function doPost(e) {
       meatIds.forEach(function(id)  { if(dishMap[id]) meatMenu.push( {id:id, ...dishMap[id]}); });
       veganIds.forEach(function(id) { if(dishMap[id]) veganMenu.push({id:id, ...dishMap[id]}); });
       return jsonOut({meat: meatMenu, vegan: veganMenu});
+    }
+    // ─────────────────────────────────────────
+    // GET BENEFIT LEVELS (for a company)
+    // ─────────────────────────────────────────
+    if (data.action === "get_benefit_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      return jsonOut({levels: _getBenefitLevels(ssHub, companyId)});
+    }
+    // ─────────────────────────────────────────
+    // SAVE BENEFIT LEVELS (bulk replace for a company)
+    // ─────────────────────────────────────────
+    if (data.action === "save_benefit_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      if (!companyId) return jsonOut({success: false, error: "CompanyID required"});
+      var levels = data.levels || [];
+      var sheet = ssHub.getSheetByName("BenefitLevels");
+      if (!sheet) {
+        sheet = ssHub.insertSheet("BenefitLevels");
+        sheet.appendRow(["CompanyID","LevelID","LevelName","LevelOrder","FreeMealsPerWeek","FreeTier_EmployeePrice","FreeTier_BDSubsidy","FreeTier_CompanySubsidy","Tier1_Meals","Tier1_EmployeePrice","Tier1_BDSubsidy","Tier1_CompanySubsidy","Tier2_Meals","Tier2_EmployeePrice","Tier2_BDSubsidy","Tier2_CompanySubsidy","Tier3_Meals","Tier3_EmployeePrice","Tier3_BDSubsidy","Tier3_CompanySubsidy","MaxMealsPerWeek","FullPrice"]);
+        sheet.setFrozenRows(1);
+      }
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0];
+      // Delete existing rows for this company (bottom-up to avoid index shift)
+      for (var i = rows.length - 1; i >= 1; i--) {
+        if (String(rows[i][0]).trim().toUpperCase() === companyId) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+      // Append new levels
+      levels.forEach(function(lv, idx) {
+        var row = headers.map(function(h) {
+          if (h === "CompanyID") return companyId;
+          if (h === "LevelOrder") return idx + 1;
+          return lv[h] !== undefined ? lv[h] : "";
+        });
+        sheet.appendRow(row);
+      });
+      return jsonOut({success: true});
+    }
+    // ─────────────────────────────────────────
+    // UPDATE EMPLOYEE BENEFIT LEVEL
+    // ─────────────────────────────────────────
+    if (data.action === "update_employee_level") {
+      var empSheet = getOrCreateEmployeesSheet(ssHub);
+      var rows = empSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var emailIdx = headers.indexOf("Email");
+      var coIdx = headers.indexOf("CompanyID");
+      var levelIdx = headers.indexOf("BenefitLevel");
+      if (levelIdx < 0) {
+        levelIdx = headers.length;
+        empSheet.getRange(1, levelIdx + 1).setValue("BenefitLevel");
+      }
+      var email = String(data.email || "").trim().toLowerCase();
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var newLevel = String(data.benefit_level || "General").trim();
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][emailIdx]).trim().toLowerCase() === email &&
+            String(rows[i][coIdx]).trim().toUpperCase() === companyId) {
+          empSheet.getRange(i + 1, levelIdx + 1).setValue(newLevel);
+          return jsonOut({success: true});
+        }
+      }
+      return jsonOut({success: false, error: "Employee not found"});
     }
     // ─────────────────────────────────────────
     // GET ALL COMPANIES
@@ -850,6 +922,43 @@ function doPost(e) {
     return ContentService.createTextOutput("Error: " + err.toString());
   }
 }
+// ══════════════════════════════════════════
+// BENEFIT LEVELS HELPER
+// ══════════════════════════════════════════
+function _getBenefitLevels(ssHub, companyId) {
+  var sheet = ssHub.getSheetByName("BenefitLevels");
+  if (!sheet) return [];
+  var rows = sheet.getDataRange().getValues();
+  var headers = rows[0];
+  var levels = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim().toUpperCase() !== companyId) continue;
+    var level = {};
+    headers.forEach(function(h, idx) { level[h] = rows[i][idx]; });
+    levels.push(level);
+  }
+  levels.sort(function(a, b) { return (a.LevelOrder || 0) - (b.LevelOrder || 0); });
+  return levels;
+}
+
+function _getEmployeeBenefitLevel(ssHub, companyId, email) {
+  var empSheet = ssHub.getSheetByName("Employees");
+  if (!empSheet) return "General";
+  var rows = empSheet.getDataRange().getValues();
+  var headers = rows[0];
+  var emailIdx = headers.indexOf("Email");
+  var coIdx = headers.indexOf("CompanyID");
+  var levelIdx = headers.indexOf("BenefitLevel");
+  if (emailIdx < 0 || coIdx < 0 || levelIdx < 0) return "General";
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][emailIdx]).trim().toLowerCase() === email.toLowerCase() &&
+        String(rows[i][coIdx]).trim().toUpperCase() === companyId.toUpperCase()) {
+      return String(rows[i][levelIdx] || "General").trim();
+    }
+  }
+  return "General";
+}
+
 // ══════════════════════════════════════════
 // HELPER FUNCTIONS
 // ══════════════════════════════════════════

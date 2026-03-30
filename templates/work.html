@@ -1623,14 +1623,15 @@ function setupMenu() {
 }
 
 function buildPricingBanner() {
-  const c=currentCompany; let tiers=[];
-  const free=parseInt(c.FreeMealsPerWeek)||0, t1=parseInt(c.Tier1_Meals)||0, t2=parseInt(c.Tier2_Meals)||0, t3=parseInt(c.Tier3_Meals)||0, fp=parseFloat(c.FullPrice)||16.99;
+  const src=_getPricingSource(); const c=currentCompany; let tiers=[];
+  const free=parseInt(src.FreeMealsPerWeek)||0, t1=parseInt(src.Tier1_Meals)||0, t2=parseInt(src.Tier2_Meals)||0, t3=parseInt(src.Tier3_Meals)||0, fp=parseFloat(src.FullPrice||c.FullPrice)||16.99;
   if(free>0) tiers.push({range:`Meals 1–${free}`, price:'FREE', green:true});
   let cur=free;
-  if(t1>0){tiers.push({range:`Meals ${cur+1}–${cur+t1}`, price:`$${parseFloat(c.Tier1_EmployeePrice).toFixed(2)}`});cur+=t1;}
-  if(t2>0){tiers.push({range:`Meals ${cur+1}–${cur+t2}`, price:`$${parseFloat(c.Tier2_EmployeePrice).toFixed(2)}`});cur+=t2;}
-  if(t3>0){tiers.push({range:`Meals ${cur+1}–${cur+t3}`, price:`$${parseFloat(c.Tier3_EmployeePrice).toFixed(2)}`});cur+=t3;}
-  if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) tiers.push({range:'Additional', price:`$${fp.toFixed(2)}`});
+  if(t1>0){tiers.push({range:`Meals ${cur+1}–${cur+t1}`, price:`$${parseFloat(src.Tier1_EmployeePrice).toFixed(2)}`});cur+=t1;}
+  if(t2>0){tiers.push({range:`Meals ${cur+1}–${cur+t2}`, price:`$${parseFloat(src.Tier2_EmployeePrice).toFixed(2)}`});cur+=t2;}
+  if(t3>0){tiers.push({range:`Meals ${cur+1}–${cur+t3}`, price:`$${parseFloat(src.Tier3_EmployeePrice).toFixed(2)}`});cur+=t3;}
+  const allowExtra = String(src.AllowExtraAtFullPrice||c.AllowExtraAtFullPrice||'').toUpperCase()==='TRUE';
+  if(allowExtra) tiers.push({range:'Additional', price:`$${fp.toFixed(2)}`});
   const tiersHtml = tiers.map((t,i)=>
     (i>0?'<span class="pricing-vsep"></span>':'')+
     `<span class="pricing-tier">`+
@@ -1638,9 +1639,11 @@ function buildPricingBanner() {
       `<span class="pricing-tier-price"${t.green?' style="color:#4cd97b"':''}>${t.price}</span>`+
     `</span>`
   ).join('');
+  const levelLabel = (String(c.EnableEmployeeLevels||'').toUpperCase()==='TRUE' && currentEmployee && currentEmployee.benefitLevel && currentEmployee.benefitLevel !== 'General')
+    ? currentEmployee.benefitLevel + ' Plan' : 'Employer Subsidy Plan';
   document.getElementById('pricingBannerInner').innerHTML=
     `<div class="pricing-company-block">`+
-      `<span class="pricing-plan-label">Employer Subsidy Plan</span>`+
+      `<span class="pricing-plan-label">${levelLabel}</span>`+
       `<span class="pricing-company">${c.CompanyName}</span>`+
     `</div>`+
     `<span class="pricing-vsep" style="height:30px;margin:0 14px"></span>`+
@@ -1769,16 +1772,31 @@ function filterCategory(cat) {
 function closeInfoModal() { document.getElementById('infoModalOverlay')?.remove(); }
 
 // ══════════════════════════════════════════
-// TIER PRICING
+// TIER PRICING — supports employee benefit levels
 // ══════════════════════════════════════════
+// Returns the pricing source for the current employee.
+// If EnableEmployeeLevels is TRUE and benefitLevels exist, uses the employee's level.
+// Otherwise falls back to the company-wide tier structure.
+function _getPricingSource() {
+  const c = currentCompany;
+  if (!c) return c;
+  if (String(c.EnableEmployeeLevels || '').toUpperCase() === 'TRUE' && c.benefitLevels && c.benefitLevels.length > 0) {
+    const empLevel = (currentEmployee && currentEmployee.benefitLevel) || 'General';
+    const match = c.benefitLevels.find(l => String(l.LevelName || '').trim().toLowerCase() === empLevel.toLowerCase());
+    if (match) return match;
+  }
+  return c;
+}
+
 function getTierForPosition(weekIndex, pos) {
-  const c=currentCompany; if(!c) return null;
-  const free=parseInt(c.FreeMealsPerWeek)||0, t1=parseInt(c.Tier1_Meals)||0, t2=parseInt(c.Tier2_Meals)||0, t3=parseInt(c.Tier3_Meals)||0;
+  const src = _getPricingSource(); if(!src) return null;
+  const free=parseInt(src.FreeMealsPerWeek)||0, t1=parseInt(src.Tier1_Meals)||0, t2=parseInt(src.Tier2_Meals)||0, t3=parseInt(src.Tier3_Meals)||0;
   if(pos<free)          return {tier:'free', price:0};
-  if(pos<free+t1)       return {tier:'tier1',price:parseFloat(c.Tier1_EmployeePrice)||0};
-  if(pos<free+t1+t2)    return {tier:'tier2',price:parseFloat(c.Tier2_EmployeePrice)||0};
-  if(pos<free+t1+t2+t3) return {tier:'tier3',price:parseFloat(c.Tier3_EmployeePrice)||0};
-  if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) return {tier:'full',price:parseFloat(c.FullPrice)||16.99};
+  if(pos<free+t1)       return {tier:'tier1',price:parseFloat(src.Tier1_EmployeePrice)||0};
+  if(pos<free+t1+t2)    return {tier:'tier2',price:parseFloat(src.Tier2_EmployeePrice)||0};
+  if(pos<free+t1+t2+t3) return {tier:'tier3',price:parseFloat(src.Tier3_EmployeePrice)||0};
+  const fp = parseFloat(src.FullPrice || currentCompany.FullPrice) || 16.99;
+  if(String(src.AllowExtraAtFullPrice||currentCompany.AllowExtraAtFullPrice||'').toUpperCase()==='TRUE') return {tier:'full',price:fp};
   return null;
 }
 function getTierForNextItem(wi) {
@@ -1792,13 +1810,13 @@ function recomputeTiers(wi) {
   cart.filter(i=>i.weekIndex===wi).forEach((item,idx)=>{const t=getTierForPosition(wi,offset+idx);if(t){item.tier=t.tier;item.price=t.price;}});
 }
 function getNextPriceLabel(wi) { const t=getTierForNextItem(wi); if(!t) return 'Max'; return t.tier==='free'?'FREE 🎉':'$'+t.price.toFixed(2); }
-// Returns {co, bd} subsidy split for a cart item using per-tier company columns.
-// Falls back to full remainder → company if columns not yet populated.
+// Returns {co, bd} subsidy split for a cart item using per-tier columns.
 function getCoverage(item) {
-  const c=currentCompany, fp=parseFloat(c.FullPrice)||16.99;
+  const src = _getPricingSource();
+  const fp = parseFloat(src.FullPrice || currentCompany.FullPrice) || 16.99;
   const pfx = item.tier==='free'?'FreeTier':item.tier==='tier1'?'Tier1':item.tier==='tier2'?'Tier2':item.tier==='tier3'?'Tier3':null;
   if (pfx) {
-    const co=parseFloat(c[pfx+'_CompanySubsidy']), bd=parseFloat(c[pfx+'_BDSubsidy']);
+    const co=parseFloat(src[pfx+'_CompanySubsidy']), bd=parseFloat(src[pfx+'_BDSubsidy']);
     if (!isNaN(co) && !isNaN(bd)) return {co, bd};
   }
   return {co: fp-item.price, bd: 0};
@@ -2032,7 +2050,8 @@ async function _executeCheckout() {
       employee_name:`${emp.firstName} ${emp.lastName}`, employee_email:emp.email,
       meal_id:item.mealId, dish_name:item.meal?.name||'',
       diet_type:item.meal?.diet||'', tier:item.tier, employee_price:item.price,
-      company_coverage:getCoverage(item).co.toFixed(2), bd_coverage:getCoverage(item).bd.toFixed(2)
+      company_coverage:getCoverage(item).co.toFixed(2), bd_coverage:getCoverage(item).bd.toFixed(2),
+      employee_level: (emp.benefitLevel || 'General')
     }).catch(e => { console.error('Order submit error:', e); return {success:false}; });
   });
 
