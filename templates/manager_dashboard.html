@@ -1,877 +1,748 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{ company_name }} — Manager Portal</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --brand: #00465e;
-            --brand-mid: #005878;
-            --text: #012030;
-            --text-2: #2E4A5A;
-            --muted: #7A8F9C;
-            --border: #E8DFD2;
-            --bg: #FAEBDA;
-            --white: #FFFFFF;
-            --green: #167421;
-            --green-bg: #EEFBE8;
-            --blue-bg: #E8F3FF;
-            --blue: #2d7ec4;
-            --bd-color: #0077A3;
-            --bd-bg: #E8F4FA;
-            --yellow: #FFC600;
-            --amber: #B56B10;
-            --amber-bg: #FFF3E0;
-        }
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        html{height:100%;overflow-y:scroll}
-        body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;color:var(--text);display:flex}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ company_name }} — Manager Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;overflow-y:scroll}
+body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display:flex}
 
-        /* ── SIDEBAR ── */
-        .sidebar{width:218px;background:#003141;position:fixed;top:0;left:0;bottom:0;z-index:10;display:flex;flex-direction:column;padding-top:20px;transition:transform .25s}
-        .sb-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px}
-        .sb-logo img{height:22px;filter:brightness(0) invert(1) sepia(1) saturate(0.3) hue-rotate(10deg) brightness(1.6)}
-        .sb-logo-text{font-size:13px;font-weight:700;color:#FAEBDA}
-        .sb-sec{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(250,235,218,.35);padding:14px 20px 5px}
-        .sb-div{height:1px;background:rgba(255,255,255,.07);margin:8px 20px}
-        .sb-item{display:flex;align-items:center;gap:9px;padding:10px 20px;font-size:.82rem;font-weight:600;color:rgba(250,235,218,.65);cursor:pointer;border-left:3px solid transparent;transition:.12s;text-decoration:none}
-        .sb-item:hover{color:#FAEBDA;background:rgba(255,255,255,.06)}
-        .sb-item.active{color:#FFC600;background:rgba(253,196,1,.12);border-left-color:#FFC600;font-weight:800}
-        .sb-badge{font-size:.5rem;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:auto;background:rgba(253,196,1,.18);color:#FFC600}
-        .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9}
-        @media(max-width:1000px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-overlay.open{display:block}.main{margin-left:0!important}}
+/* ════════ SIDEBAR ════════ */
+.sb{width:218px;background:#003141;position:fixed;top:0;left:0;bottom:0;z-index:10;display:flex;flex-direction:column;padding-top:20px}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px}
+.sb-logo img{height:22px;filter:brightness(0) invert(1) sepia(1) saturate(0.3) hue-rotate(10deg) brightness(1.6)}
+.sb-logo-text{font-size:13px;font-weight:700;color:#FAEBDA}
+.sb-sec{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(250,235,218,.35);padding:14px 20px 5px}
+.sb-div{height:1px;background:rgba(255,255,255,.07);margin:8px 20px}
+.ni{display:flex;align-items:center;gap:9px;padding:10px 20px;font-size:.82rem;font-weight:600;color:rgba(250,235,218,.65);cursor:pointer;border-left:3px solid transparent;transition:.12s}
+.ni:hover{color:#FAEBDA;background:rgba(255,255,255,.06)}
+.ni.on{color:#FFC600;background:rgba(253,196,1,.12);border-left-color:#FFC600;font-weight:800}
+.ni .nbdg{font-size:.5rem;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:auto;background:rgba(253,196,1,.18);color:#FFC600}
+@media(max-width:1000px){.sb{display:none}.mn{margin-left:0!important}}
 
-        /* ── MAIN AREA ── */
-        .main{margin-left:218px;flex:1;min-height:100vh}
+/* ════════ MAIN ════════ */
+.mn{margin-left:218px;flex:1;min-height:100vh}
+.tb{height:52px;background:#003141;display:flex;align-items:center;padding:0 26px;gap:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.tb-title{font-size:.9rem;font-weight:900;color:#FAEBDA;letter-spacing:-.2px}
+.tb-title b{color:#FFC600}
+.tb-pill{font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:rgba(250,235,218,.35);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:2px 8px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-out{font-size:.68rem;font-weight:700;color:rgba(250,235,218,.4);border:1px solid rgba(250,235,218,.14);border-radius:99px;padding:5px 14px;text-decoration:none;transition:.14s}
+.tb-out:hover{color:#FAEBDA;border-color:rgba(250,235,218,.4)}
+.cont{padding:24px 28px;max-width:1100px;margin:0 auto}
 
-        /* ── TOP BAR ── */
-        .topbar{height:52px;background:#003141;display:flex;align-items:center;padding:0 26px;gap:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 12px rgba(0,0,0,.18)}
-        .tb-title{font-size:.9rem;font-weight:900;color:#FAEBDA;letter-spacing:-.2px}
-        .tb-title b{color:#FFC600}
-        .tb-pill{font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:rgba(250,235,218,.35);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:2px 8px}
-        .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-        .btn-logout{font-size:.68rem;font-weight:700;color:rgba(250,235,218,.4);border:1px solid rgba(250,235,218,.14);border-radius:99px;padding:5px 14px;text-decoration:none;transition:.14s}
-        .btn-logout:hover{color:#FAEBDA;border-color:rgba(250,235,218,.4)}
-        .tb-burger{display:none;background:none;border:none;color:#FAEBDA;font-size:1.4rem;cursor:pointer;padding:4px 8px;margin-left:-8px}
-        @media(max-width:1000px){.tb-burger{display:block}}
+/* ════════ SECTION LABELS ════════ */
+.sl{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sl:first-child{margin-top:0}
+.sl::after{content:'';flex:1;height:1px;background:#E0D4C2}
 
-        /* ── CONTAINER ── */
-        .container{max-width:1100px;margin:0 auto;padding:24px 28px 80px}
+/* ════════ ROI HERO — pinned ════════ */
+.roi-hero{background:linear-gradient(135deg,#003141 0%,#00465E 100%);border-radius:16px;padding:22px 32px;margin-bottom:16px;box-shadow:0 8px 30px rgba(0,49,65,.15);position:relative;overflow:hidden}
+.roi-hero::after{content:'';position:absolute;top:-50px;right:-50px;width:250px;height:250px;background:radial-gradient(circle,rgba(255,198,0,.08) 0%,transparent 65%);pointer-events:none}
+.roi-pill{display:inline-block;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,198,0,.8);background:rgba(255,198,0,.1);border:1px solid rgba(255,198,0,.2);border-radius:99px;padding:3px 12px;margin-bottom:14px}
+.roi-grid{display:flex;align-items:center;gap:0}
+.roi-cell{display:flex;align-items:center;gap:14px;padding:0 24px;border-right:1px solid rgba(255,255,255,.1);flex-shrink:0}
+.roi-cell:first-child{padding-left:0;flex:0 0 auto}
+.roi-cell:last-child{border-right:none;padding-right:0}
+.roi-cell.hero-lead .roi-big{font-size:62px;letter-spacing:-2px}
+.roi-cell.hero-sub{flex:1 1 0}
+.roi-cell.hero-sub .roi-big{font-size:40px;letter-spacing:-1px}
+.roi-big{font-weight:900;color:#FFC600;line-height:1;flex-shrink:0}
+.roi-big .unit{font-size:22px;font-weight:800}
+.roi-right{display:flex;flex-direction:column;gap:2px}
+.roi-label{font-size:12.5px;font-weight:700;color:rgba(255,255,255,.85);line-height:1.3}
+.roi-source{font-size:8px;color:rgba(255,255,255,.25);font-style:italic;margin-top:2px;line-height:1.3}
 
-        /* ── PAGE HEADER ── */
-        .page-eyebrow { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
-        .page-title { font-size: 1.55rem; font-weight: 700; color: var(--text); margin-bottom: 32px; }
+/* ════════ TAB PANELS ════════ */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-        /* Tabs hidden — sidebar handles navigation */
-        .tabs-wrap { display: none; }
+/* ════════ WEEK + IMPACT ROW ════════ */
+.week-impact-row{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:16px;align-items:stretch}
+.week-stack{display:flex;flex-direction:column;gap:8px}
+.ws{border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:14px}
+.ws.c-purple{background:#F3EEFF;border:1px solid rgba(200,164,245,.3)}
+.ws.c-green{background:#EEFBE8;border:1px solid rgba(107,189,82,.25)}
+.ws.c-gold{background:#FFF8E8;border:1px solid rgba(212,160,41,.25)}
+.ws-val{font-size:28px;font-weight:900;line-height:1;flex-shrink:0}
+.ws-val.purple{color:#7453A2}.ws-val.green{color:#167421}.ws-val.gold{color:#b8860b}
+.ws-info{display:flex;flex-direction:column;gap:1px}
+.ws-label{font-size:12px;font-weight:800;color:#2E4A5A}
+.ws-sub{font-size:9px;color:#7A8F9C}
+.week-stack-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin-bottom:2px}
 
-        /* ── STATS ROW ── */
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
-        @media (max-width: 900px) { .stats-row { grid-template-columns: 1fr 1fr; } }
-        .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; border-left: 3px solid transparent; }
-        .stat-label { font-size: .67rem; font-weight: 700; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
-        .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 5px; }
-        .stat-sub { font-size: .7rem; color: var(--muted); font-weight: 500; }
-        .stat-card.c-teal  { border-left-color: var(--brand); }    .stat-card.c-teal  .stat-value { color: var(--brand); }
-        .stat-card.c-sky   { border-left-color: #0284c7; }         .stat-card.c-sky   .stat-value { color: #0284c7; }
-        .stat-card.c-purple{ border-left-color: #7c3aed; }         .stat-card.c-purple .stat-value { color: #7c3aed; }
-        .stat-card.c-bd    { border-left-color: var(--bd-color); } .stat-card.c-bd    .stat-value { color: var(--bd-color); }
-        .stat-card.c-green { border-left-color: var(--green); }    .stat-card.c-green .stat-value { color: var(--green); }
+/* ════════ CAROUSEL ════════ */
+.impact-carousel{position:relative;overflow:hidden;border-radius:14px;background:#fff;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04)}
+.impact-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);height:100%}
+.impact-slide{min-width:50%;display:flex;height:100%}
+.rc{border-radius:0;padding:22px 38px;display:flex;flex-direction:column;justify-content:center;flex:1;border-right:1px solid rgba(0,49,65,.05)}
+.rc:last-child{border-right:none}
+.rc.c-mint{background:#EEFBE8}.rc.c-sky{background:#E8F3FF}.rc.c-peach{background:#FFF3E0}.rc.c-lavender{background:#F3EEFF}.rc.c-cream{background:#FFF8F0}.rc.c-rose{background:#FFF0F3}
+.rc-top{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.rc-val{font-size:34px;font-weight:900;line-height:1;flex-shrink:0}
+.rc-val.green{color:#167421}.rc-val.sky{color:#2d7ec4}.rc-val.amber{color:#B56B10}.rc-val.purple{color:#7453A2}.rc-val.gold{color:#b8860b}.rc-val.rose{color:#c0506a}
+.rc-titles{display:flex;flex-direction:column;gap:1px}
+.rc-label{font-size:12px;font-weight:800;color:#2E4A5A;line-height:1.25}
+.rc-label-sub{font-size:9px;font-weight:600;color:#7A8F9C}
+.rc-desc{font-size:9.5px;color:#7A8F9C;line-height:1.4}
+.rc-source{font-size:8px;color:#B0BEC5;margin-top:4px;font-style:italic}
+.carousel-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:rgba(0,49,65,.08);border:1px solid rgba(0,49,65,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#00465E;transition:.15s;z-index:2}
+.carousel-nav:hover{background:rgba(0,49,65,.15);border-color:rgba(0,49,65,.2)}
+.carousel-nav.prev{left:8px}.carousel-nav.next{right:8px}
+.carousel-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
+.carousel-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,49,65,.15);transition:.2s}
+.carousel-dot.active{background:#00465E;width:16px;border-radius:3px}
 
-        /* ── IMPACT BANNER ── */
-        .impact-banner { background: linear-gradient(130deg, #00465e 0%, #005f7a 60%, #006e8a 100%); border-radius: 18px; padding: 26px 32px; display: flex; align-items: center; gap: 0; margin-bottom: 24px; position: relative; overflow: hidden; }
-        .impact-banner::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 65%); pointer-events:none; }
-        .impact-banner::after  { content:''; position:absolute; bottom:-80px; left:20%; width:200px; height:200px; background: radial-gradient(circle, rgba(0,180,220,.08) 0%, transparent 65%); pointer-events:none; }
-        .impact-left { flex-shrink:0; padding-right: 32px; border-right: 1px solid rgba(255,255,255,.12); }
-        .impact-eyebrow { font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,.5); margin-bottom:6px; }
-        .impact-headline { font-size:.95rem; font-weight:800; color:#fff; line-height:1.35; max-width:160px; }
-        .impact-sub { font-size:.68rem; color:rgba(255,255,255,.45); margin-top:6px; }
-        .impact-metrics { display:flex; flex:1; }
-        .impact-metric { flex:1; padding: 0 28px; border-right: 1px solid rgba(255,255,255,.1); }
-        .impact-metric:last-child { border-right:none; }
-        .impact-metric-val { font-size:2rem; font-weight:900; color:#fff; line-height:1; letter-spacing:-.5px; }
-        .impact-metric-val .unit { font-size:1.1rem; font-weight:800; vertical-align:super; font-size:.9rem; }
-        .impact-metric-lbl { font-size:.72rem; font-weight:700; color:rgba(255,255,255,.8); margin-top:5px; }
-        .impact-metric-src { font-size:.6rem; color:rgba(255,255,255,.35); margin-top:3px; font-style:italic; }
+/* ════════ SHARED: tables, search, summary bars, cards ════════ */
+.tw{background:#fff;border-radius:10px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);overflow:hidden}
+.tw table{width:100%;border-collapse:collapse}
+.tw thead{background:#F8F3EC}.tw thead tr{border-bottom:1.5px solid #E8DFD2}
+.tw th{text-align:left;padding:10px 14px;font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#00465E;white-space:nowrap}
+.tw td{padding:11px 14px;font-size:.8rem;border-bottom:1px solid rgba(0,49,65,.05);color:#2E4A5A}
+.tw tbody tr:last-child td{border-bottom:none}
+.tn{font-weight:800;color:#003141}.tg{font-weight:700;color:#167421}.ts{font-weight:700;color:#2d7ec4}
+.bdg{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.58rem;font-weight:800}
+.ba{background:#EEFBE8;color:#167421}.bp{background:#FFF3E0;color:#B56B10}.br{background:#E8F3FF;color:#2d7ec4}
+.pag{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-top:1px solid rgba(0,49,65,.07);font-size:.74rem;color:#7A8F9C}
+.pgb{font-size:.72rem;font-weight:700;color:#00465E;background:none;border:1.5px solid #E8DFD2;border-radius:7px;padding:4px 11px;cursor:pointer}
+.pgb:hover{border-color:#00465E}
+.pgb:disabled{opacity:.4;cursor:default}
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.filter-input{flex:1;padding:9px 14px;border:1px solid #E0D4C2;border-radius:8px;font-size:.82rem;font-family:inherit;background:#fff;outline:none}
+.filter-select{padding:9px 14px;border:1px solid #E0D4C2;border-radius:8px;font-size:.82rem;font-family:inherit;background:#fff;color:#003141;font-weight:700;cursor:pointer;outline:none}
+.summary-bar{display:grid;gap:1px;background:rgba(0,49,65,.06);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.summary-cell{background:#fff;padding:12px 16px}
+.summary-cell-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C}
+.summary-cell-val{font-size:20px;font-weight:900;color:#003141}
+.summary-cell-val.green{color:#167421}.summary-cell-val.sky{color:#2d7ec4}.summary-cell-val.purple{color:#7453A2}.summary-cell-val.gold{color:#b8860b}.summary-cell-val.amber{color:#B56B10}
+.card{background:#fff;border-radius:12px;padding:22px 26px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);margin-bottom:14px}
+.card-title{font-size:14px;font-weight:800;color:#003141;margin-bottom:14px}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:4px}
+.field input,.field select{width:100%;padding:9px 12px;border:1px solid #E0D4C2;border-radius:8px;font-size:.82rem;font-family:inherit;color:#003141;background:#fff;outline:none}
+.field input:focus,.field select:focus{border-color:#00465E}
+.field-ro{font-size:.85rem;font-weight:700;color:#003141;padding:9px 0}
+.btn-save{display:inline-flex;align-items:center;gap:6px;padding:9px 22px;background:#00465E;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;font-family:inherit;cursor:pointer;transition:.15s}
+.btn-save:hover{background:#003141}
+.tier-table{width:100%;border-collapse:collapse;font-size:.75rem}
+.tier-table th{text-align:left;padding:5px 10px;font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;border-bottom:1.5px solid #E8DFD2}
+.tier-table td{padding:5px 10px;border-bottom:1px solid rgba(0,49,65,.05);color:#2E4A5A}
+.tier-table tfoot td{padding:6px 10px}
+#monthlyTotalsTable td{color:rgba(255,255,255,.85)}
+#monthlyTotalsTable th{color:rgba(255,255,255,.6)}
+.tier-table .tier-free{color:#167421;font-weight:800}
+.note-box{background:#FFF8F0;border:1px solid rgba(212,160,41,.2);border-radius:10px;padding:14px 18px;font-size:.8rem;color:#5a4a2a;margin-top:14px;line-height:1.5}
 
-        /* ── TABS ── */
-        .tabs-wrap { border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-        .tabs { display: flex; }
-        .tab { padding: 13px 22px; font-size: .875rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s; user-select: none; }
-        .tab:hover { color: var(--text); }
-        .tab.active { color: var(--brand); border-bottom-color: var(--brand); }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-        .tab-count { display:inline-block;background:var(--border);color:var(--text-2);font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:99px;margin-left:5px;vertical-align:middle; }
-        /* ── INVOICES ── */
-        .inv-status-pending { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:99px;background:#fff3e0;color:#b56b10; }
-        .inv-status-sent    { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:99px;background:#eaf4ff;color:#1a6cb5; }
-        .inv-status-paid    { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:99px;background:#eafaf1;color:#1a7a46; }
-        .inv-amount { font-size:1rem;font-weight:800;color:var(--text); }
-        .inv-row-detail { display:none;background:var(--bg);border-top:1px solid var(--border); }
-        .inv-row-detail td { padding:16px 20px; }
-        .inv-tier-table { width:100%;border-collapse:collapse;font-size:.82rem; }
-        .inv-tier-table th { text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border); }
-        .inv-tier-table td { padding:8px 10px;border-bottom:1px solid var(--border); }
-        .inv-tier-table tr:last-child td { border-bottom:none; }
-        .inv-total-row { display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid var(--text);margin-top:8px; }
-        .inv-total-label { font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text); }
-        .inv-total-val { font-size:1.15rem;font-weight:900;color:var(--text); }
-        .btn-pdf { font-size:.75rem;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:7px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;display:inline-block; }
+/* ════════ ORDER DETAIL MODAL ════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,20,30,.45);backdrop-filter:blur(3px);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-card{background:#fff;border-radius:16px;width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);position:relative}
+.modal-header{background:linear-gradient(135deg,#003141,#00465E);padding:22px 28px;border-radius:16px 16px 0 0;color:#fff;display:flex;justify-content:space-between;align-items:flex-start}
+.modal-header-left h3{font-size:18px;font-weight:800;margin:0 0 4px}
+.modal-header-left .modal-sub{font-size:12px;color:rgba(255,255,255,.6)}
+.modal-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0}
+.modal-close:hover{background:rgba(255,255,255,.2)}
+.modal-body{padding:22px 28px}
+.modal-stat-row{display:flex;gap:12px;margin-bottom:18px}
+.modal-stat{flex:1;background:#F8F3EC;border-radius:8px;padding:10px 14px;text-align:center}
+.modal-stat-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C}
+.modal-stat-val{font-size:20px;font-weight:900;color:#003141;margin-top:2px}
+.modal-stat-val.green{color:#167421}.modal-stat-val.sky{color:#2d7ec4}.modal-stat-val.gold{color:#b8860b}
+.modal-meals-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:8px}
+.modal-meal-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(0,49,65,.06)}
+.modal-meal-row:last-child{border-bottom:none}
+.modal-meal-name{font-size:13px;font-weight:700;color:#003141}
+.modal-meal-diet{font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;margin-left:8px}
+.modal-meal-diet.meat{background:#FFF3E0;color:#B56B10}
+.modal-meal-diet.plant{background:#EEFBE8;color:#167421}
+.modal-meal-price{font-size:13px;font-weight:800;color:#003141}
+.modal-meal-price.free{color:#167421}
+.modal-footer{padding:14px 28px 22px;display:flex;gap:10px;justify-content:flex-end}
+.modal-btn{padding:9px 20px;border-radius:8px;font-size:.8rem;font-weight:700;font-family:inherit;cursor:pointer;transition:.12s;border:none}
+.modal-btn-print{background:#00465E;color:#fff}
+.modal-btn-print:hover{background:#003141}
+.modal-btn-close{background:transparent;color:#7A8F9C;border:1.5px solid #E0D4C2}
+.modal-btn-close:hover{border-color:#003141;color:#003141}
+/* Clickable rows */
+#orderTableBody tr{cursor:pointer;transition:background .1s}
+#orderTableBody tr:hover{background:#F8F3EC}
+.overview-orders tr{cursor:pointer;transition:background .1s}
+.overview-orders tr:hover{background:#F8F3EC}
+.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.month-card{background:#fff;border-radius:10px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.12s}
+.month-card:hover{border-color:#00465E;box-shadow:0 4px 16px rgba(0,49,65,.08)}
+.month-card-title{font-size:13px;font-weight:800;color:#003141;margin-bottom:8px}
+.month-stat{display:flex;justify-content:space-between;padding:3px 0;font-size:.78rem}
+.month-stat-label{color:#7A8F9C}.month-stat-val{font-weight:700;color:#003141}
+.month-stat-val.green{color:#167421}.month-stat-val.sky{color:#2d7ec4}
+.emp-badges{display:flex;gap:6px;margin-top:4px}
+.emp-badge{font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:99px}
+.emp-badge.company{background:#E8F3FF;color:#2d7ec4}
+.emp-badge.personal{background:#F3EEFF;color:#7453A2}
+.emp-badge.manager{background:#FFF3E0;color:#B56B10}
 
-        .emp-badge { display:inline-block;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px; }
-        .emp-badge-company  { background:#eaf4ff;color:#1a6cb5; }
-        .emp-badge-personal { background:#f3f0ff;color:#6b3fa0; }
-        .emp-badge-manager  { background:#fff3e0;color:#b56b10; }
-        .emp-action-btn { font-size:.75rem;font-weight:600;color:var(--brand);background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.12s; }
-        .emp-action-btn:hover { background:var(--bg);border-color:var(--brand); }
-        .emp-remove-btn { color:#c0392b;margin-left:6px; }
-        .emp-remove-btn:hover { background:#fff0f0;border-color:#c0392b; }
+/* ════════ INVOICE DETAIL ROWS ════════ */
+.inv-row-detail{display:none;background:#FAEBDA;border-top:1px solid #E8DFD2}
+.inv-row-detail td{padding:16px 20px}
+.inv-tier-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.inv-tier-table th{text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#7A8F9C;padding:6px 10px;border-bottom:1px solid #E8DFD2}
+.inv-tier-table td{padding:8px 10px;border-bottom:1px solid #E8DFD2}
+.inv-tier-table tr:last-child td{border-bottom:none}
+.inv-total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid #003141;margin-top:8px}
+.inv-total-label{font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#003141}
+.inv-total-val{font-size:1.15rem;font-weight:900;color:#003141}
 
-        /* ── SECTION HEADER ── */
-        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-        .section-title { font-size: 1rem; font-weight: 700; }
-        .week-select { padding: 7px 11px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .76rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; cursor: pointer; min-width: 160px; }
-        .week-select:focus { border-color: var(--brand); }
+/* ════════ SAVE STICKY ════════ */
+.save-sticky{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #E8DFD2;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;z-index:400;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.save-sticky.visible{transform:translateY(0)}
+.save-sticky-msg{font-size:.875rem;color:#2E4A5A}
+.save-sticky-msg strong{color:#003141}
+.save-sticky.saved .save-sticky-msg strong{color:#167421}
+.btn-save-sticky{padding:11px 24px;background:#00465E;color:white;border:none;border-radius:10px;font-size:.875rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s}
+.btn-save-sticky:hover:not(:disabled){background:#003141}
+.btn-save-sticky:disabled{opacity:.7;cursor:default}
 
-        /* ── WEEK BLOCK ── */
-        .week-block { display: none; }
-        .week-block.active { display: block; }
+/* ════════ MONTH BLOCK ════════ */
+.month-block{display:none}
+.month-block.active{display:block}
 
-        /* ── SUMMARY BAR ── */
-        .summary-bar { display: flex; background: #FAFAFA; border: 1px solid var(--border); border-radius: 14px 14px 0 0; border-bottom: none; overflow: hidden; }
-        .sb-cell { padding: 14px 18px; flex: 1; border-right: 1px solid var(--border); }
-        .sb-cell:last-child { border-right: none; }
-        .sb-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; color: var(--muted); margin-bottom: 4px; }
-        .sb-val { font-size: 1rem; font-weight: 700; color: var(--text); }
-        .sb-val.green { color: var(--green); }
-        .sb-val.bd { color: var(--bd-color); }
-
-        /* ── TABLE ── */
-        .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 0 0 14px 14px; overflow: hidden; }
-        .table-wrap.no-bar { border-radius: 14px; }
-        .table-empty { padding: 56px 40px; text-align: center; color: var(--muted); font-size: .9rem; }
-        table { width: 100%; border-collapse: collapse; }
-        thead { background: #F8F3EC; } thead tr { border-bottom: 1.5px solid #E8DFD2; }
-        thead tr { border-bottom: 1px solid var(--border); }
-        th { text-align: left; padding: 11px 16px; font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); white-space: nowrap; }
-        td { padding: 13px 16px; font-size: .875rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-2); }
-        tbody tr:last-child td { border-bottom: none; }
-        tbody tr.clickable { cursor: pointer; transition: background .1s; }
-        tbody tr.clickable:hover { background: #FAFAFA; }
-        .td-name { font-weight: 600; color: var(--text); }
-        .td-emp { font-weight: 600; }
-        .td-co  { font-weight: 600; color: var(--green); }
-        .td-bd  { font-weight: 600; color: var(--bd-color); }
-        .td-action { color: var(--muted); font-size: .8rem; white-space: nowrap; }
-
-        /* ── BADGES ── */
-        .tier-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: .68rem; font-weight: 700; text-transform: capitalize; }
-        .tier-free  { background: var(--green-bg); color: var(--green); }
-        .tier-tier1, .tier-tier2, .tier-tier3 { background: var(--blue-bg); color: var(--blue); }
-        .tier-full  { background: #F3F4F6; color: #6B7280; }
-        .status-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: .68rem; font-weight: 600; background: #F3F4F6; color: #6B7280; }
-        .status-confirmed { background: var(--green-bg); color: var(--green); }
-
-        /* ── MONTHLY ── */
-        .month-block { display: none; }
-        .month-block.active { display: block; }
-
-        /* ── ACCOUNT INFO ── */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        @media (max-width: 640px) { .info-grid { grid-template-columns: 1fr; } }
-        .info-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 24px 26px; }
-        .info-card.full { grid-column: 1 / -1; }
-        .info-heading { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 18px; }
-        .info-row { margin-bottom: 13px; }
-        .info-row:last-child { margin-bottom: 0; }
-        .info-lbl { font-size: .74rem; font-weight: 600; color: var(--muted); margin-bottom: 3px; }
-        .info-val { font-size: .9rem; color: var(--text-2); font-weight: 500; }
-        .tier-table { width: 100%; border-collapse: collapse; }
-        .tier-table th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border); }
-        .tier-table td { font-size: .875rem; padding: 10px 0; border-bottom: 1px solid var(--border); color: var(--text-2); }
-        .tier-table tr:last-child td { border-bottom: none; }
-        .empty-state { text-align: center; padding: 60px 40px; color: var(--muted); font-size: .9rem; }
-
-        /* ── ACCOUNT EDIT ── */
-        .save-banner { background: var(--green-bg); border: 1px solid #BBF7D0; color: var(--green); padding: 12px 16px; border-radius: 10px; font-size: .875rem; font-weight: 600; margin-bottom: 18px; }
-        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        @media (max-width: 700px) { .edit-grid { grid-template-columns: 1fr; } }
-        .edit-grid .full { grid-column: 1 / -1; }
-        .edit-field { margin-bottom: 14px; }
-        .edit-field:last-child { margin-bottom: 0; }
-        .edit-field label { display: block; font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 6px; }
-        .edit-field input, .edit-field select, .edit-field textarea { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .875rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; transition: border-color .15s; }
-        .edit-field input:focus, .edit-field select:focus, .edit-field textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(0,70,94,.07); }
-        .edit-field textarea { resize: vertical; }
-        .tier-note { display: flex; gap: 14px; align-items: flex-start; background: #faebda; border: 1px solid rgba(174,120,70,.25); border-radius: 10px; padding: 16px 18px; }
-        .tier-note-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-
-        /* ── STICKY SAVE BANNER ── */
-        .save-sticky { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--border); padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; z-index: 400; transform: translateY(100%); transition: transform .25s cubic-bezier(.4,0,.2,1); box-shadow: 0 -4px 20px rgba(0,0,0,.08); }
-        .save-sticky.visible { transform: translateY(0); }
-        .save-sticky-msg { font-size: .875rem; color: var(--text-2); }
-        .save-sticky-msg strong { color: var(--text); }
-        .save-sticky.saved .save-sticky-msg strong { color: var(--green); }
-        .btn-save-sticky { padding: 11px 24px; background: var(--brand); color: white; border: none; border-radius: 10px; font-size: .875rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s; }
-        .btn-save-sticky:hover:not(:disabled) { background: var(--brand-mid); }
-        .btn-save-sticky:disabled { opacity: .7; cursor: default; }
-
-        /* ── ORDER CONTROLS ── */
-        .order-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .order-search { flex: 1; min-width: 260px; padding: 7px 11px; border: 1.5px solid var(--border); border-radius: 9px; font-size: .76rem; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--white); outline: none; transition: border-color .15s; }
-        .order-search:focus { border-color: var(--brand); }
-
-        /* ── PAGINATION ── */
-        .pagination { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--border); background: #FAFAFA; }
-        .page-info { font-size: .8rem; color: var(--muted); flex: 1; }
-        .btn-page { padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); font-size: .82rem; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; color: var(--text-2); transition: .15s; }
-        .btn-page:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
-        .btn-page:disabled { opacity: .4; cursor: default; }
-
-        /* ── INVOICE MODAL ── */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity .2s; }
-        .modal-overlay.open { opacity: 1; pointer-events: all; }
-        .modal { background: var(--white); border-radius: 20px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); transform: translateY(12px); transition: transform .2s; }
-        .modal-overlay.open .modal { transform: translateY(0); }
-        .modal-header { padding: 24px 28px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
-        .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-        .modal-sub { font-size: .82rem; color: var(--muted); margin-top: 3px; }
-        .modal-close { background: #F3F4F6; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 16px; }
-        .modal-close:hover { background: var(--border); }
-        .modal-body { padding: 24px 28px; }
-        .invoice-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
-        .im-cell .im-label { font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px; }
-        .im-cell .im-val { font-size: .9rem; font-weight: 600; color: var(--text); }
-        .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-        .invoice-table th { text-align: left; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); padding: 8px 0; border-bottom: 1.5px solid var(--border); }
-        .invoice-table td { padding: 11px 0; font-size: .875rem; border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: top; }
-        .invoice-table tr:last-child td { border-bottom: none; }
-        .invoice-table .td-r { text-align: right; font-weight: 600; }
-        .invoice-table .subsidy-green { color: var(--green); font-weight: 700; }
-        .invoice-totals { background: #FAFAFA; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
-        .it-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: .88rem; }
-        .it-row.total { font-weight: 700; font-size: .95rem; padding-top: 10px; margin-top: 6px; border-top: 1.5px solid var(--border); }
-        .it-label { color: var(--text-2); }
-        .it-val { font-weight: 600; }
-        .it-val.green { color: var(--green); }
-        .modal-footer { padding: 18px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
-        .btn-print { padding: 11px 22px; background: var(--brand); color: white; border: none; border-radius: 10px; font-size: .875rem; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background .15s; }
-        .btn-print:hover { background: var(--brand-mid); }
-        .btn-close-modal { padding: 11px 18px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 10px; font-size: .875rem; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-        .btn-close-modal:hover { border-color: var(--text-2); color: var(--text); }
-    </style>
+/* ════════ BENEFIT LEVEL TIERS ════════ */
+.tier-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:capitalize}
+.tier-free-badge{background:#EEFBE8;color:#167421}
+.tier-tier1,.tier-tier2,.tier-tier3{background:#E8F3FF;color:#2d7ec4}
+</style>
 </head>
 <body>
 
-<!-- ═══════ SIDEBAR ═══════ -->
-<aside class="sidebar">
-    <div class="sb-logo">
-        <img src="{{ url_for('static', filename='Logo.svg') }}" alt="BD">
-        <span class="sb-logo-text">{{ company_name }}</span>
-    </div>
-    <div class="sb-sec">Dashboard</div>
-    <div class="sb-item active" onclick="sidebarNav('orders', this)">&#9776; &nbsp;Orders</div>
-    <div class="sb-item" onclick="sidebarNav('invoices', this)">&#9670; &nbsp;Invoices <span class="sb-badge">{{ invoices|length }}</span></div>
-    <div class="sb-item" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
-    <div class="sb-item" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees <span class="sb-badge">{{ employees|length }}</span></div>
-    <div class="sb-div"></div>
-    <div class="sb-sec">Settings</div>
-    <div class="sb-item" onclick="sidebarNav('mealplan', this)">&#127860; &nbsp;Meal Plan</div>
-    <div class="sb-item" onclick="sidebarNav('account', this)">&#9881; &nbsp;Account Details</div>
-    <div class="sb-item" onclick="window.location='/manager/logout'">&#8594; &nbsp;Sign out</div>
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sb">
+  <div class="sb-logo">
+    <img src="{{ url_for('static', filename='Logo.svg') }}" alt="BD" onerror="this.style.display='none'">
+    <span class="sb-logo-text">{{ company_name }}</span>
+  </div>
+  <div class="sb-sec">Dashboard</div>
+  <div class="ni on" onclick="sidebarNav('overview', this)">&#9632; &nbsp;Overview</div>
+  <div class="ni" onclick="sidebarNav('orders', this)">&#9776; &nbsp;Orders <span class="nbdg" id="ordersBadge">{{ orders_json | safe | length if orders_json else 0 }}</span></div>
+  <div class="ni" onclick="sidebarNav('invoices', this)">&#9670; &nbsp;Invoices <span class="nbdg">{{ invoices|length }}</span></div>
+  <div class="ni" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
+  <div class="ni" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees <span class="nbdg">{{ employees|length }}</span></div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">Settings</div>
+  <div class="ni" onclick="sidebarNav('mealplan', this)">&#127860; &nbsp;Meal Plan</div>
+  <div class="ni" onclick="sidebarNav('account', this)">&#9881; &nbsp;Account Details</div>
+  <div class="ni" onclick="window.location='/manager/logout'">&#8594; &nbsp;Sign out</div>
 </aside>
 
-<!-- ═══════ MAIN ═══════ -->
-<div class="sb-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-<div class="main">
-<div class="topbar">
-    <button class="tb-burger" onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
+<!-- ════════ MAIN ════════ -->
+<div class="mn">
+  <div class="tb">
     <span class="tb-title">Better<b>Day</b></span>
     <span class="tb-pill">Manager</span>
-    <div class="tb-right">
-        <a href="/manager/logout" class="btn-logout">Sign out</a>
-    </div>
-</div>
+    <div class="tb-right"><a href="/manager/logout" class="tb-out">Sign out</a></div>
+  </div>
 
-<div class="container">
+  <div class="cont">
 
-    <!-- STATS -->
-    <div class="stats-row">
-        <div class="stat-card c-teal">
-            <div class="stat-label">Meals This Week</div>
-            <div class="stat-value">{{ active_week.meal_count }}</div>
-            <div class="stat-sub">current delivery week</div>
+    <!-- ═══ ROI SNAPSHOT — always visible ═══ -->
+    <div class="roi-hero">
+      <div class="roi-pill">ROI Snapshot</div>
+      <div class="roi-grid">
+        <div class="roi-cell hero-lead">
+          <div class="roi-big">{{ total_meals }}</div>
+          <div class="roi-right"><div class="roi-label">Total meals<br>delivered</div></div>
         </div>
-        <div class="stat-card c-sky">
-            <div class="stat-label">Participation</div>
-            <div class="stat-value">{{ active_week_pct }}%</div>
-            <div class="stat-sub">this week · {{ avg_participation_pct }}% avg</div>
+        <div class="roi-cell hero-sub">
+          <div class="roi-big">{{ ((total_meals * 0.75)|int) }}<span class="unit">hrs</span></div>
+          <div class="roi-right"><div class="roi-label">Productive hours<br>kept at the office</div><div class="roi-source">45 min/meal saved<br>Fooda Workplace ROI Report</div></div>
         </div>
-        <div class="stat-card c-bd">
-            <div class="stat-label">Company Covered</div>
-            <div class="stat-value">${{ '%.0f'|format(active_week.co_spend|float) }}</div>
-            <div class="stat-sub">this week</div>
+        <div class="roi-cell hero-sub">
+          <div class="roi-big">${{ '%,.0f'|format((total_meals * 0.75 * 32)|int) }}</div>
+          <div class="roi-right"><div class="roi-label">Productivity value<br>recovered</div><div class="roi-source">Hours &times; $32/hr median salary<br>Harvard Business Review</div></div>
         </div>
-        <div class="stat-card c-green">
-            <div class="stat-label">BD Contributed</div>
-            <div class="stat-value">${{ '%.0f'|format(total_bd_spend|float) }}</div>
-            <div class="stat-sub">all time</div>
+        <div class="roi-cell hero-sub">
+          {% set annual_roi = (total_meals * 0.75 * 32 * 52 / (sorted_weeks|length if sorted_weeks else 1))|int %}
+          {% if annual_roi >= 1000 %}
+          <div class="roi-big">${{ '%,.0f'|format(annual_roi / 1000) }}K</div>
+          {% else %}
+          <div class="roi-big">${{ '%,.0f'|format(annual_roi) }}</div>
+          {% endif %}
+          <div class="roi-right"><div class="roi-label">Projected<br>annual ROI</div><div class="roi-source">Based on current pace<br>annualized over 52 weeks</div></div>
         </div>
-    </div>
-
-    <!-- IMPACT BANNER -->
-    <div class="impact-banner">
-        <div class="impact-left">
-            <div class="impact-eyebrow">Program ROI</div>
-            <div class="impact-headline">What BetterDay is doing for your team</div>
-            <div class="impact-sub">Based on {{ total_meals }} meals delivered</div>
-        </div>
-        <div class="impact-metrics">
-            <div class="impact-metric">
-                <div class="impact-metric-val">
-                    <span class="count-up" data-target="{{ (total_meals * 0.75) | int }}" data-format="number">0</span>
-                    <span class="unit"> hrs</span>
-                </div>
-                <div class="impact-metric-lbl">Kept at the office</div>
-                <div class="impact-metric-src">45 min saved per meal · Fooda ROI Report</div>
-            </div>
-            <div class="impact-metric">
-                <div class="impact-metric-val">
-                    <span class="unit">$</span><span class="count-up" data-target="{{ (total_meals * 0.75 * 32) | int }}" data-format="money">0</span>
-                </div>
-                <div class="impact-metric-lbl">Productivity value recovered</div>
-                <div class="impact-metric-src">Hours × avg salary rate · Harvard Business Review</div>
-            </div>
-            <div class="impact-metric">
-                <div class="impact-metric-val">
-                    <span class="unit">$</span><span class="count-up" data-target="{{ (total_unique_employees * 0.2 * 75000) | int }}" data-format="money">0</span>
-                </div>
-                <div class="impact-metric-lbl">Annual retention cost at stake</div>
-                <div class="impact-metric-src">1 in 5 leave yearly · $75K avg cost · Gallup</div>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <!-- TABS -->
-    <div class="tabs-wrap">
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('orders', this)">Orders</div>
-            <div class="tab" onclick="showTab('invoices', this)">Weekly Invoices <span class="tab-count">{{ invoices|length }}</span></div>
-            <div class="tab" onclick="showTab('monthly', this)">Monthly Report</div>
-            <div class="tab" onclick="showTab('employees', this)">Employees <span class="tab-count">{{ employees|length }}</span></div>
-            <div class="tab" onclick="showTab('account', this)">Account Details</div>
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: OVERVIEW                           -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="week-impact-row">
+        <div class="week-stack">
+          <div class="week-stack-title">This Week &mdash; {{ active_week.label if active_week else '' }}</div>
+          <div class="ws c-purple"><div class="ws-val purple">{{ active_week.meal_count if active_week else 0 }}</div><div class="ws-info"><div class="ws-label">Meals This Week</div><div class="ws-sub">current delivery week</div></div></div>
+          <div class="ws c-green"><div class="ws-val green">{{ active_week_pct }}%</div><div class="ws-info"><div class="ws-label">Participation</div><div class="ws-sub">this week &middot; {{ avg_participation_pct }}% avg</div></div></div>
+          <div class="ws c-gold"><div class="ws-val gold">${{ '%.0f'|format(active_week.co_spend|float) if active_week else '0' }}</div><div class="ws-info"><div class="ws-label">Company Covered</div><div class="ws-sub">this week</div></div></div>
         </div>
+        <div class="impact-carousel" id="impactCarousel">
+          <div class="impact-track" id="impactTrack">
+            <div class="impact-slide"><div class="rc c-mint"><div class="rc-top"><div class="rc-val green">20%</div><div class="rc-titles"><div class="rc-label">Productivity</div><div class="rc-label">Boost</div></div></div><div class="rc-desc">Employees who eat well at work are 20% more productive than those who skip meals or eat poorly</div><div class="rc-source">American Journal of Clinical Nutrition</div></div></div>
+            <div class="impact-slide"><div class="rc c-sky"><div class="rc-val sky">{{ avg_participation_pct }}%</div><div class="rc-titles"><div class="rc-label">Team Repeat</div><div class="rc-label">Rate</div></div></div><div class="rc-desc">Of your employees have ordered more than once &mdash; a strong signal of program adoption</div><div class="rc-source">Your BetterDay data</div></div></div>
+            <div class="impact-slide"><div class="rc c-peach"><div class="rc-top"><div class="rc-val amber">${{ '%,.0f'|format(total_unique_employees * 0.2 * 75000) if total_unique_employees else '0' }}</div><div class="rc-titles"><div class="rc-label">Retention Cost</div><div class="rc-label">At Stake</div></div></div><div class="rc-desc">1 in 5 employees leave voluntarily each year. At $75K&ndash;$120K per replacement, meal programs reduce this risk</div><div class="rc-source">Gallup Employment Report</div></div></div>
+            <div class="impact-slide"><div class="rc c-lavender"><div class="rc-top"><div class="rc-val purple">{% if employees|length > 0 %}{{ '%.1f'|format(total_meals / employees|length) }}{% else %}0{% endif %}</div><div class="rc-titles"><div class="rc-label">Avg Meals</div><div class="rc-label">per Employee</div></div></div><div class="rc-desc">Higher adoption = stronger team culture. Programs above 3 meals/person show highest engagement</div><div class="rc-source">Your BetterDay data</div></div></div>
+            <div class="impact-slide"><div class="rc c-cream"><div class="rc-top"><div class="rc-val gold">{% if employees|length > 0 %}{{ '%.1f'|format(total_meals * 0.75 / employees|length) }}{% else %}0{% endif %}<span style="font-size:16px">hrs</span></div><div class="rc-titles"><div class="rc-label">Hours Saved</div><div class="rc-label">Per Employee</div></div></div><div class="rc-desc">Time each team member didn't spend leaving for lunch &mdash; reinvested into work</div><div class="rc-source">Fooda Workplace ROI Report</div></div></div>
+            <div class="impact-slide"><div class="rc c-rose"><div class="rc-top"><div class="rc-val rose">{{ active_week.new_members if active_week and active_week.new_members is defined else '—' }}</div><div class="rc-titles"><div class="rc-label">New Members</div><div class="rc-label-sub">this week</div></div></div><div class="rc-desc">First-time orderers signal growing adoption. Steady onboarding = 40% higher retention</div><div class="rc-source">Your BetterDay data</div></div></div>
+          </div>
+          <div class="carousel-nav prev" id="carPrev">&#8249;</div>
+          <div class="carousel-nav next" id="carNext">&#8250;</div>
+          <div class="carousel-dots" id="carouselDots"></div>
+        </div>
+      </div>
+
+      <!-- Recent orders preview -->
+      <div class="sl">Recent Orders</div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Employee</th><th>Meals</th><th>They Paid</th><th>Co. Covered</th><th>BD</th><th>Delivery</th><th>Status</th></tr></thead>
+          <tbody class="overview-orders" id="overviewOrdersBody">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+        <div class="pag"><span></span><span style="font-size:.75rem;font-weight:700;color:#00465E;cursor:pointer" onclick="sidebarNav('orders', document.querySelectorAll('.sb .ni')[1])">View all orders &rarr;</span></div>
+      </div>
     </div>
 
-    <!-- ── ORDERS TAB ── -->
-    <div class="tab-panel active" id="tab-orders">
-        <div class="section-header">
-            <div class="section-title">Order History</div>
-            <div class="order-controls">
-                <input type="text" id="orderSearch" class="order-search" placeholder="Search by name or order #…" oninput="applyOrderFilters()">
-                {% if sorted_weeks %}
-                <select class="week-select" id="orderWeekFilter" onchange="applyOrderFilters()">
-                    <option value="">All Weeks</option>
-                    {% for w in sorted_weeks %}
-                    <option value="{{ w.anchor }}">{{ w.label }}</option>
-                    {% endfor %}
-                </select>
-                {% endif %}
-            </div>
-        </div>
-
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: ORDERS                             -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-orders">
+      <div class="sl" style="margin-top:0">Order History</div>
+      <div class="filter-row">
+        <input type="text" placeholder="Search by name or order #&hellip;" class="filter-input" id="orderSearch" oninput="applyOrderFilters()">
         {% if sorted_weeks %}
-        <div class="summary-bar">
-            <div class="sb-cell"><div class="sb-label">Orders</div><div class="sb-val" id="sb-orders">—</div></div>
-            <div class="sb-cell"><div class="sb-label">Meals</div><div class="sb-val" id="sb-meals">—</div></div>
-            <div class="sb-cell"><div class="sb-label">Employees Paid</div><div class="sb-val" id="sb-emp">—</div></div>
-            <div class="sb-cell"><div class="sb-label">Company Covered</div><div class="sb-val green" id="sb-co">—</div></div>
-            <div class="sb-cell"><div class="sb-label">BD Contributed</div><div class="sb-val bd" id="sb-bd">—</div></div>
-            <div class="sb-cell"><div class="sb-label">Total Value</div><div class="sb-val" id="sb-total">—</div></div>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Meals</th>
-                        <th>They Paid</th>
-                        <th>Co. Covered</th>
-                        <th>BD Contributed</th>
-                        <th>Delivery</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="orderTbody"></tbody>
-            </table>
-            <div class="pagination">
-                <div class="page-info" id="pageInfo"></div>
-                <button class="btn-page" id="btnPrev" onclick="changePage(-1)">← Prev</button>
-                <button class="btn-page" id="btnNext" onclick="changePage(1)">Next →</button>
-            </div>
-        </div>
-        {% else %}
-        <div class="table-wrap no-bar">
-            <div class="table-empty">No orders yet. Once your team starts ordering, history will appear here.</div>
-        </div>
+        <select class="filter-select" id="orderWeekFilter" onchange="applyOrderFilters()">
+          <option value="">All Weeks</option>
+          {% for w in sorted_weeks %}
+          <option value="{{ w.anchor }}">{{ w.label }}</option>
+          {% endfor %}
+        </select>
         {% endif %}
+      </div>
+      <div class="summary-bar" style="grid-template-columns:repeat(6,1fr)" id="orderSummaryBar">
+        <div class="summary-cell"><div class="summary-cell-label">Orders</div><div class="summary-cell-val" id="sumOrders">&mdash;</div></div>
+        <div class="summary-cell"><div class="summary-cell-label">Meals</div><div class="summary-cell-val purple" id="sumMeals">&mdash;</div></div>
+        <div class="summary-cell"><div class="summary-cell-label">Employees Paid</div><div class="summary-cell-val" id="sumEmpPaid">&mdash;</div></div>
+        <div class="summary-cell"><div class="summary-cell-label">Company Covered</div><div class="summary-cell-val green" id="sumCoCovered">&mdash;</div></div>
+        <div class="summary-cell"><div class="summary-cell-label">BD Contributed</div><div class="summary-cell-val sky" id="sumBD">&mdash;</div></div>
+        <div class="summary-cell"><div class="summary-cell-label">Total Value</div><div class="summary-cell-val gold" id="sumTotal">&mdash;</div></div>
+      </div>
+      {% if sorted_weeks %}
+      <div class="tw">
+        <table id="orderTable">
+          <thead><tr><th>Employee</th><th>Meals</th><th>They Paid</th><th>Co. Covered</th><th>BD Contributed</th><th>Delivery</th><th>Status</th><th></th></tr></thead>
+          <tbody id="orderTableBody"></tbody>
+        </table>
+        <div class="pag"><button class="pgb" id="btnPrev" onclick="changePage(-1)">&larr; Prev</button><span id="orderPagInfo"></span><button class="pgb" id="btnNext" onclick="changePage(1)">Next &rarr;</button></div>
+      </div>
+      {% else %}
+      <div class="tw" style="padding:56px 40px;text-align:center;color:#7A8F9C;font-size:.9rem">No orders yet. Once your team starts ordering, history will appear here.</div>
+      {% endif %}
     </div>
 
-    <!-- ── MONTHLY TAB ── -->
-    <div class="tab-panel" id="tab-monthly">
-        {% if sorted_monthly %}
-        <div class="section-header">
-            <div class="section-title">Monthly Report</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <select class="week-select" id="monthSelect" onchange="filterMonth(this.value)">
-                    {% for m in sorted_monthly %}
-                    <option value="{{ m.key }}">{{ m.label }}</option>
-                    {% endfor %}
-                </select>
-                <button class="btn-pdf" onclick="downloadMonthlyPDF()">Export PDF</button>
-            </div>
-        </div>
-
-        {% for m in sorted_monthly %}
-        <div class="month-block {% if loop.first %}active{% endif %}" id="month-{{ m.key }}">
-
-            <div class="summary-bar">
-                <div class="sb-cell">
-                    <div class="sb-label">Orders</div>
-                    <div class="sb-val">{{ m.orders }}</div>
-                </div>
-                <div class="sb-cell">
-                    <div class="sb-label">Meals</div>
-                    <div class="sb-val">{{ m.meals }}</div>
-                </div>
-                <div class="sb-cell">
-                    <div class="sb-label">Employees Paid</div>
-                    <div class="sb-val">${{ '%.2f'|format(m.emp_spend|float) }}</div>
-                </div>
-                <div class="sb-cell">
-                    <div class="sb-label">Company Covered</div>
-                    <div class="sb-val green">${{ '%.2f'|format(m.co_spend|float) }}</div>
-                </div>
-                <div class="sb-cell">
-                    <div class="sb-label">BD Contributed</div>
-                    <div class="sb-val bd">${{ '%.2f'|format(m.bd_spend|float) }}</div>
-                </div>
-                <div class="sb-cell">
-                    <div class="sb-label">Total Value</div>
-                    <div class="sb-val">${{ '%.2f'|format((m.emp_spend + m.co_spend + m.bd_spend)|float) }}</div>
-                </div>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tier</th>
-                            <th>Meals</th>
-                            <th>Staff Paid</th>
-                            <th>Company Covered</th>
-                            <th>BD Contributed</th>
-                            <th>Total Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for t in m.tiers %}
-                        <tr>
-                            <td><span class="tier-badge tier-{{ t.name|lower|replace(' ','') }}">{{ t.name }}</span></td>
-                            <td>{{ t.meals }}</td>
-                            <td>${{ '%.2f'|format(t.emp|float) }}</td>
-                            <td class="td-co">${{ '%.2f'|format(t.co|float) }}</td>
-                            <td class="td-bd">${{ '%.2f'|format(t.bd|float) }}</td>
-                            <td style="font-weight:600">${{ '%.2f'|format(t.total|float) }}</td>
-                        </tr>
-                        {% endfor %}
-                        <tr style="background:#FAFAFA;border-top:2px solid var(--border);">
-                            <td style="font-weight:700">Total</td>
-                            <td style="font-weight:700">{{ m.meals }}</td>
-                            <td style="font-weight:700">${{ '%.2f'|format(m.emp_spend|float) }}</td>
-                            <td style="font-weight:700;color:var(--green)">${{ '%.2f'|format(m.co_spend|float) }}</td>
-                            <td style="font-weight:700;color:var(--bd-color)">${{ '%.2f'|format(m.bd_spend|float) }}</td>
-                            <td style="font-weight:700">${{ '%.2f'|format((m.emp_spend + m.co_spend + m.bd_spend)|float) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-        {% endfor %}
-        {% else %}
-        <div class="empty-state">No order history yet.</div>
-        {% endif %}
-    </div>
-
-    <!-- ── ACCOUNT TAB ── -->
-    <div class="tab-panel" id="tab-account">
-
-        {% if saved_tab == 'account' %}
-        <div class="save-banner">Changes saved successfully.</div>
-        {% endif %}
-
-        <!-- Read-only identity -->
-        <div class="info-card full" style="margin-bottom:14px;padding:16px 24px;">
-            <div style="display:grid;grid-template-columns:auto auto auto 1fr;gap:20px 32px;align-items:center;">
-                <div><div class="info-lbl">Company ID</div><div class="info-val" style="font-family:monospace;font-weight:700;letter-spacing:.5px;">{{ company.CompanyID or company_id }}</div></div>
-                <div><div class="info-lbl">Company Name</div><div class="info-val">{{ company.CompanyName or '—' }}</div></div>
-                <div><div class="info-lbl">Email Domain</div><div class="info-val">{{ company.CompanyEmailDomain or '—' }}</div></div>
-
-                <!-- PIN + hint side by side -->
-                <div style="display:flex;align-items:center;gap:14px;border-left:2px solid var(--border);padding-left:20px;">
-                    <div style="flex-shrink:0;">
-                        <div class="info-lbl">Access PIN</div>
-                        <div id="pinDisplay" style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-                            <span id="pinValue" style="font-family:monospace;font-weight:700;letter-spacing:2px;font-size:.95rem;color:var(--text);">{{ current_pin or '—' }}</span>
-                            <button type="button" onclick="startEditPIN()" style="font-size:.7rem;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:5px;padding:2px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;line-height:1.6;">Edit</button>
-                        </div>
-                        <div id="pinEditRow" style="display:none;align-items:center;gap:6px;margin-top:4px;">
-                            <input id="pinInput" type="text" maxlength="20" value="{{ current_pin or '' }}"
-                                   style="width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-size:.88rem;font-family:monospace;font-weight:700;letter-spacing:2px;outline:none;">
-                            <button type="button" id="pinSaveBtn" onclick="savePIN()" style="font-size:.7rem;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:6px;padding:5px 11px;cursor:pointer;font-family:'DM Sans',sans-serif;">Save</button>
-                            <button type="button" onclick="cancelEditPIN()" style="font-size:.7rem;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
-                        </div>
-                        <div id="pinMsg" style="font-size:.7rem;margin-top:3px;display:none;"></div>
-                    </div>
-                    <div style="font-size:.72rem;color:var(--muted);line-height:1.5;">Employees signing up with a personal email enter this PIN to verify they're on your team.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Editable form -->
-        <form id="accountForm" method="POST" action="/manager/update-account" onsubmit="saveAccount(event)">
-            <div class="edit-grid">
-
-                <!-- Contacts card -->
-                <div class="info-card">
-                    <div class="info-heading">Contact Information</div>
-                    <div class="edit-field">
-                        <label>Primary Contact Name</label>
-                        <input type="text" name="PrimaryContactName" value="{{ company.PrimaryContactName or '' }}" placeholder="Jane Smith">
-                    </div>
-                    <div class="edit-field">
-                        <label>Primary Contact Email</label>
-                        <input type="email" name="PrimaryContactEmail" value="{{ company.PrimaryContactEmail or '' }}" placeholder="jane@company.com">
-                    </div>
-                    <div class="edit-field">
-                        <label>Primary Contact Phone</label>
-                        <input type="text" name="PrimaryContactPhone" value="{{ company.PrimaryContactPhone or '' }}" placeholder="403-555-0100">
-                    </div>
-                    <div class="edit-field">
-                        <label>Billing Contact Email</label>
-                        <input type="email" name="BillingContactEmail" value="{{ company.BillingContactEmail or '' }}" placeholder="billing@company.com">
-                    </div>
-                </div>
-
-                <!-- Delivery card -->
-                <div class="info-card">
-                    <div class="info-heading">Delivery Details</div>
-                    <div class="edit-field">
-                        <label>Address</label>
-                        <input type="text" name="AddressLine1" value="{{ company.AddressLine1 or '' }}" placeholder="123 Main Street">
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                        <div class="edit-field">
-                            <label>City</label>
-                            <input type="text" name="City" value="{{ company.City or '' }}" placeholder="Calgary">
-                        </div>
-                        <div class="edit-field">
-                            <label>Postal Code</label>
-                            <input type="text" name="PostalCode" value="{{ company.PostalCode or '' }}" placeholder="T2P 1J9">
-                        </div>
-                    </div>
-                    <div class="edit-field">
-                        <label>Delivery Day</label>
-                        <div style="padding:10px 13px;background:#FAFAFA;border:1.5px solid var(--border);border-radius:9px;font-size:.875rem;color:var(--text-2);">{{ company.DeliveryDay or 'Not set' }}</div>
-                        <div style="font-size:.72rem;color:var(--muted);margin-top:4px;">To change your delivery day, contact your BetterDay account manager.</div>
-                    </div>
-                    <div class="edit-field">
-                        <label>Delivery Instructions</label>
-                        <textarea name="DeliveryInstructions" rows="3" placeholder="Parking, buzzer code, fridge location...">{{ company.DeliveryInstructions or '' }}</textarea>
-                    </div>
-                </div>
-
-
-
-            </div>
-
-        </form>
-
-    </div>
-
-    <!-- ── INVOICES TAB ── -->
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: INVOICES                           -->
+    <!-- ════════════════════════════════════════ -->
     <div class="tab-panel" id="tab-invoices">
-
-        <div class="section-header">
-            <div class="section-title">Weekly Invoices</div>
-        </div>
-
-        {% if invoices %}
-        <table class="order-table" id="invTable">
-            <thead>
-                <tr>
-                    <th>Invoice #</th>
-                    <th>Week Of</th>
-                    <th style="text-align:right">Meals</th>
-                    <th style="text-align:right">Employees</th>
-                    <th style="text-align:right">Company Owed</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
+      <div class="sl" style="margin-top:0">Weekly Invoices</div>
+      {% if invoices %}
+      <div class="tw">
+        <table id="invTable">
+          <thead><tr><th>Invoice #</th><th>Week Of</th><th>Meals</th><th>Employees</th><th>Company Owed</th><th>Status</th><th></th></tr></thead>
+          <tbody>
             {% for inv in invoices %}
-            <tr class="clickable" onclick="toggleInvDetail({{ loop.index0 }})">
-                <td style="font-weight:700;font-size:.82rem;color:var(--muted);">{{ inv.invoiceId }}</td>
-                <td style="font-weight:600;">
-                    {{ inv.weekOf | replace('-', '/') if inv.weekOf else '—' }}
-                </td>
-                <td style="text-align:right;">{{ inv.totalMeals }}</td>
-                <td style="text-align:right;">{{ inv.totalEmployees }}</td>
-                <td style="text-align:right;" class="inv-amount">${{ '%.2f' | format(inv.companyOwed | float) }}</td>
-                <td>
-                    <span class="inv-status-{{ inv.status | lower }}">{{ inv.status | capitalize }}</span>
-                </td>
-                <td style="text-align:right;white-space:nowrap;">
-                    <button class="btn-pdf" onclick="event.stopPropagation();downloadInvPDF({{ loop.index0 }})">PDF</button>
-                </td>
+            <tr style="cursor:pointer" onclick="toggleInvDetail({{ loop.index0 }})">
+              <td class="tn">{{ inv.invoiceId }}</td>
+              <td>{{ inv.weekOf | replace('-', '/') if inv.weekOf else '—' }}</td>
+              <td>{{ inv.totalMeals }}</td>
+              <td>{{ inv.totalEmployees }}</td>
+              <td class="tg">${{ '%.2f' | format(inv.companyOwed | float) }}</td>
+              <td><span class="bdg {% if inv.status|lower == 'paid' %}ba{% elif inv.status|lower == 'sent' %}br{% else %}bp{% endif %}">{{ inv.status | capitalize }}</span></td>
+              <td><button class="pgb" onclick="event.stopPropagation();downloadInvPDF({{ loop.index0 }})">PDF</button></td>
             </tr>
             <tr class="inv-row-detail" id="inv-detail-{{ loop.index0 }}">
-                <td colspan="7">
-                    <div style="max-width:520px;">
-                        {% if inv.breakdown %}
-                        <table class="inv-tier-table">
-                            <thead>
-                                <tr>
-                                    <th>Tier</th>
-                                    <th style="text-align:right">Meals</th>
-                                    <th style="text-align:right">Company Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for tier in inv.breakdown %}
-                            <tr>
-                                <td>{{ tier.tier }}</td>
-                                <td style="text-align:right;">{{ tier.meals }}</td>
-                                <td style="text-align:right;">${{ '%.2f' | format(tier.companyTotal | float) }}</td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        {% endif %}
-                        <div class="inv-total-row">
-                            <span class="inv-total-label">Total Owed by {{ company_name }}</span>
-                            <span class="inv-total-val">${{ '%.2f' | format(inv.companyOwed | float) }}</span>
-                        </div>
-                        {% if inv.status == 'paid' %}
-                        <div style="font-size:.78rem;color:var(--green);margin-top:6px;">
-                            Paid {{ inv.paidAt or '' }}{% if inv.paymentMethod %} · {{ inv.paymentMethod }}{% endif %}
-                        </div>
-                        {% endif %}
-                        {% if inv.notes %}
-                        <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">{{ inv.notes }}</div>
-                        {% endif %}
-                    </div>
-                </td>
+              <td colspan="7">
+                <div style="max-width:520px;">
+                  {% if inv.breakdown %}
+                  <table class="inv-tier-table">
+                    <thead><tr><th>Tier</th><th style="text-align:right">Meals</th><th style="text-align:right">Company Total</th></tr></thead>
+                    <tbody>
+                      {% for tier in inv.breakdown %}
+                      <tr>
+                        <td>{{ tier.tier }}</td>
+                        <td style="text-align:right;">{{ tier.meals }}</td>
+                        <td style="text-align:right;">${{ '%.2f' | format(tier.companyTotal | float) }}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  {% endif %}
+                  <div class="inv-total-row">
+                    <span class="inv-total-label">Total Owed by {{ company_name }}</span>
+                    <span class="inv-total-val">${{ '%.2f' | format(inv.companyOwed | float) }}</span>
+                  </div>
+                  {% if inv.status == 'paid' %}
+                  <div style="font-size:.78rem;color:#167421;margin-top:6px;">
+                    Paid {{ inv.paidAt or '' }}{% if inv.paymentMethod %} &middot; {{ inv.paymentMethod }}{% endif %}
+                  </div>
+                  {% endif %}
+                  {% if inv.notes %}
+                  <div style="font-size:.78rem;color:#7A8F9C;margin-top:4px;">{{ inv.notes }}</div>
+                  {% endif %}
+                </div>
+              </td>
             </tr>
             {% endfor %}
-            </tbody>
+          </tbody>
         </table>
-        {% else %}
-        <div style="text-align:center;padding:64px 20px;color:var(--muted);">
-            <div style="font-size:2rem;margin-bottom:12px;">📋</div>
-            <div style="font-weight:600;margin-bottom:6px;">No invoices yet</div>
-            <div style="font-size:.85rem;">Invoices are generated automatically each Thursday morning after the weekly order closes.</div>
-        </div>
-        {% endif %}
-
+      </div>
+      {% else %}
+      <div class="tw" style="text-align:center;padding:64px 20px;color:#7A8F9C;">
+        <div style="font-weight:600;margin-bottom:6px;">No invoices yet</div>
+        <div style="font-size:.85rem;">Invoices are generated automatically each Thursday morning after the weekly order closes.</div>
+      </div>
+      {% endif %}
+      <div class="note-box" style="margin-top:14px">Invoices are generated automatically every Thursday morning after the ordering deadline closes. If you have questions about a specific invoice, contact your BetterDay account manager.</div>
     </div>
 
-    <!-- ── EMPLOYEES TAB ── -->
-    <!-- ── MEAL PLAN TAB ── -->
-    <div class="tab-panel" id="tab-mealplan">
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: MONTHLY REPORT                     -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-monthly">
+      <div class="sl" style="margin-top:0">Monthly Report</div>
+      {% if sorted_monthly %}
+      <div class="filter-row">
+        <select class="filter-select" id="monthSelect" onchange="filterMonth(this.value)">
+          {% for m in sorted_monthly %}
+          <option value="{{ m.key }}">{{ m.label }}</option>
+          {% endfor %}
+        </select>
+        <button class="pgb" onclick="downloadMonthlyPDF()">Export PDF</button>
+      </div>
 
-        <div class="section-header">
-            <div class="section-title">Your Meal Subsidy Plan</div>
-        </div>
+      {% for m in sorted_monthly %}
+      <div class="month-block {% if loop.first %}active{% endif %}" id="month-{{ m.key }}">
 
-        {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' and benefit_levels %}
-        <!-- Benefit Levels view -->
-        <div style="font-size:.85rem;color:var(--muted);margin-bottom:16px;">Your company has <strong>{{ benefit_levels|length }}</strong> employee benefit level{{ 's' if benefit_levels|length > 1 else '' }}. Each level has its own meal pricing structure.</div>
+        <!-- One unified card: weekly breakdowns + navy totals footer -->
+        <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04)">
 
-        {% for lv in benefit_levels %}
-        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:12px;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--brand);background:rgba(0,70,94,.08);padding:3px 12px;border-radius:99px;">{{ lv.LevelName or 'Level ' ~ loop.index }}</span>
-                {% if lv.MaxMealsPerWeek %}<span style="font-size:.72rem;color:var(--muted);">Max {{ lv.MaxMealsPerWeek }} meals/week</span>{% endif %}
+          <!-- White section: tier breakdown -->
+          <div style="background:#fff;padding:18px 24px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div style="font-size:12px;font-weight:800;color:#003141">{{ m.label }}</div>
+              <div style="display:flex;gap:12px;font-size:.7rem">
+                <span><span style="color:#7A8F9C">Orders:</span> <strong>{{ m.orders }}</strong></span>
+                <span><span style="color:#7A8F9C">Meals:</span> <strong style="color:#7453A2">{{ m.meals }}</strong></span>
+              </div>
             </div>
             <table class="tier-table">
-                <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
-                <tbody>
-                    {% if lv.FreeMealsPerWeek and lv.FreeMealsPerWeek|string not in ('', '0') %}
-                    <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ lv.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((lv.FreeTier_CompanySubsidy or 0)|float) }}</td></tr>
-                    {% endif %}
-                    {% if lv.Tier1_Meals and lv.Tier1_Meals|string not in ('', '0') %}
-                    <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ lv.Tier1_Meals }}</td><td>${{ '%.2f'|format((lv.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
-                    {% endif %}
-                    {% if lv.Tier2_Meals and lv.Tier2_Meals|string not in ('', '0') %}
-                    <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ lv.Tier2_Meals }}</td><td>${{ '%.2f'|format((lv.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
-                    {% endif %}
-                    {% if lv.Tier3_Meals and lv.Tier3_Meals|string not in ('', '0') %}
-                    <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ lv.Tier3_Meals }}</td><td>${{ '%.2f'|format((lv.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-        {% endfor %}
-
-        {% else %}
-        <!-- Single company-wide tier view -->
-        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px;">
-            <table class="tier-table">
-                <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
-                <tbody>
-                    {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
-                    <tr><td><span class="tier-badge tier-free">Free</span></td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:var(--green);font-weight:700;">$0.00</td><td style="color:var(--green);font-weight:700;">${{ '%.2f'|format((company.BasePrice or company.FullPrice or 0)|float) }}</td></tr>
-                    {% endif %}
-                    {% if company.Tier1_EmployeePrice %}
-                    <tr><td><span class="tier-badge tier-tier1">Tier 1</span></td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
-                    {% endif %}
-                    {% if company.Tier2_EmployeePrice %}
-                    <tr><td><span class="tier-badge tier-tier2">Tier 2</span></td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
-                    {% endif %}
-                    {% if company.Tier3_EmployeePrice %}
-                    <tr><td><span class="tier-badge tier-tier3">Tier 3</span></td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-
-        <div class="tier-note" style="margin-top:4px;">
-            <div class="tier-note-icon">✉</div>
-            <div>
-                <div style="font-weight:700;font-size:.875rem;margin-bottom:3px;">Need to adjust your meal plan?</div>
-                <div style="font-size:.82rem;color:var(--muted);">Contact your BetterDay account manager to modify subsidy tiers, meal counts, or pricing. We're happy to adjust your program as your team's needs evolve.</div>
-                <a href="mailto:hello@eatbetterday.ca" style="font-size:.82rem;font-weight:700;color:var(--brand);text-decoration:none;margin-top:6px;display:inline-block;">hello@eatbetterday.ca →</a>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ── EMPLOYEES TAB ── -->
-    <div class="tab-panel" id="tab-employees">
-
-        <div class="section-header">
-            <div class="section-title">Team Members</div>
-        </div>
-
-        <table class="order-table" id="empTable">
-            <thead>
+              <thead><tr><th>Tier</th><th>Meals</th><th>Staff Paid</th><th>Company Covered</th><th>BD Contributed</th><th>Total Value</th></tr></thead>
+              <tbody>
+                {% for t in m.tiers %}
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Email Type</th>
-                    <th>Joined</th>
-                    <th>Role</th>
-                    {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}<th>Benefit Level</th>{% endif %}
-                    <th></th>
+                  <td{% if t.name|lower == 'free' %} class="tier-free"{% endif %}>{{ t.name }}</td>
+                  <td>{{ t.meals }}</td>
+                  <td>${{ '%.2f'|format(t.emp|float) }}</td>
+                  <td class="tg">${{ '%.2f'|format(t.co|float) }}</td>
+                  <td class="ts">${{ '%.2f'|format(t.bd|float) }}</td>
+                  <td>${{ '%.2f'|format(t.total|float) }}</td>
                 </tr>
-            </thead>
-            <tbody>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr style="border-top:1.5px solid #003141;font-weight:800">
+                  <td>Total</td>
+                  <td>{{ m.meals }}</td>
+                  <td>${{ '%.2f'|format(m.emp_spend|float) }}</td>
+                  <td class="tg">${{ '%.2f'|format(m.co_spend|float) }}</td>
+                  <td class="ts">${{ '%.2f'|format(m.bd_spend|float) }}</td>
+                  <td style="font-weight:900">${{ '%.2f'|format((m.emp_spend + m.co_spend + m.bd_spend)|float) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Navy totals footer -->
+          <div style="background:linear-gradient(135deg,#003141,#00465E);padding:16px 24px;color:#fff">
+            <div style="font-size:13px;font-weight:800;color:#FFC600;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">{{ m.label }} &mdash; Monthly Totals</div>
+            <table class="tier-table" style="color:#fff" id="monthlyTotalsTable-{{ m.key }}">
+              <thead><tr><th style="color:rgba(255,255,255,.75)">Tier</th><th style="color:rgba(255,255,255,.75)">Meals</th><th style="color:rgba(255,255,255,.75)">Staff Paid</th><th style="color:rgba(255,255,255,.75)">Company Covered</th><th style="color:rgba(255,255,255,.75)">BD Contributed</th><th style="color:rgba(255,255,255,.75)">Total Value</th></tr></thead>
+              <tbody>
+                {% for t in m.tiers %}
+                <tr>
+                  <td{% if t.name|lower == 'free' %} style="color:#6BBD52;font-weight:800"{% else %} style="color:rgba(255,255,255,.85)"{% endif %}>{{ t.name }}</td>
+                  <td style="color:rgba(255,255,255,.85)">{{ t.meals }}</td>
+                  <td style="color:rgba(255,255,255,.85)">${{ '%.2f'|format(t.emp|float) }}</td>
+                  <td style="color:#6BBD52">${{ '%.2f'|format(t.co|float) }}</td>
+                  <td style="color:#7BC4FF">${{ '%.2f'|format(t.bd|float) }}</td>
+                  <td style="color:rgba(255,255,255,.85)">${{ '%.2f'|format(t.total|float) }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr style="border-top:2px solid rgba(255,255,255,.2)">
+                  <td style="font-weight:900;color:#FFC600">TOTAL</td>
+                  <td style="font-weight:900;color:#FFC600">{{ m.meals }}</td>
+                  <td style="font-weight:900;color:#fff">${{ '%.2f'|format(m.emp_spend|float) }}</td>
+                  <td style="font-weight:900;color:#6BBD52">${{ '%.2f'|format(m.co_spend|float) }}</td>
+                  <td style="font-weight:900;color:#7BC4FF">${{ '%.2f'|format(m.bd_spend|float) }}</td>
+                  <td style="font-weight:900;color:#FFC600;font-size:16px">${{ '%.2f'|format((m.emp_spend + m.co_spend + m.bd_spend)|float) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="tw" style="text-align:center;padding:60px 40px;color:#7A8F9C;font-size:.9rem;">No order history yet.</div>
+      {% endif %}
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: EMPLOYEES                          -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-employees">
+      <div class="sl" style="margin-top:0">Employees</div>
+      <div class="filter-row">
+        <input type="text" placeholder="Search employees&hellip;" class="filter-input" id="empSearch" oninput="filterEmployees()">
+      </div>
+      <div class="tw">
+        <table id="empTable">
+          <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Joined</th><th>Role</th>{% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}<th>Benefit Level</th>{% endif %}<th>Actions</th></tr></thead>
+          <tbody id="empTableBody">
             {% for emp in employees %}
             {% set domain = company.CompanyEmailDomain or '' %}
             {% set is_company_email = domain and emp.email.endswith('@' + domain) %}
             <tr id="emp-row-{{ loop.index }}">
-                <td style="font-weight:600;">{{ emp.firstName }} {{ emp.lastName }}</td>
-                <td style="color:var(--text-2);">{{ emp.email }}</td>
-                <td>
-                    {% if is_company_email %}
-                    <span class="emp-badge emp-badge-company">Company</span>
-                    {% else %}
-                    <span class="emp-badge emp-badge-personal">Personal</span>
-                    {% endif %}
-                </td>
-                <td style="color:var(--muted);font-size:.85rem;">{{ emp.createdAt or '—' }}</td>
-                <td>
-                    {% if emp.isManager %}
-                    <span class="emp-badge emp-badge-manager">Manager</span>
-                    {% else %}
-                    <span style="color:var(--muted);font-size:.82rem;">Employee</span>
-                    {% endif %}
-                </td>
-                {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}
-                <td>
-                    <select onchange="updateEmpLevel('{{ emp.email }}', this.value, this)" style="font-size:.78rem;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;">
-                        {% for lv in benefit_levels %}
-                        <option value="{{ lv.LevelName }}" {% if (emp.benefitLevel or 'General') == lv.LevelName %}selected{% endif %}>{{ lv.LevelName }}</option>
-                        {% endfor %}
-                        {% if not benefit_levels %}
-                        <option value="General" selected>General</option>
-                        {% endif %}
-                    </select>
-                </td>
+              <td class="tn">{{ emp.firstName }} {{ emp.lastName }}</td>
+              <td>{{ emp.email }}</td>
+              <td>
+                {% if is_company_email %}
+                <span class="emp-badge company">Company</span>
+                {% else %}
+                <span class="emp-badge personal">Personal</span>
                 {% endif %}
-                <td style="text-align:right;white-space:nowrap;">
-                    <button class="emp-action-btn" onclick="resendLink('{{ emp.email }}', this)">Resend link</button>
-                    <button class="emp-action-btn emp-remove-btn" onclick="removeEmployee('{{ emp.email }}', '{{ emp.firstName }} {{ emp.lastName }}', {{ loop.index }})">Remove</button>
-                </td>
+              </td>
+              <td>{{ emp.createdAt or '—' }}</td>
+              <td>
+                {% if emp.isManager %}
+                <span class="emp-badge manager">Manager</span>
+                {% else %}
+                <span style="font-size:.82rem;color:#7A8F9C">Employee</span>
+                {% endif %}
+              </td>
+              {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}
+              <td>
+                <select onchange="updateEmpLevel('{{ emp.email }}', this.value, this)" style="font-size:.78rem;padding:4px 8px;border:1px solid #E0D4C2;border-radius:6px;background:#fff;cursor:pointer;">
+                  {% for lv in benefit_levels %}
+                  <option value="{{ lv.LevelName }}" {% if (emp.benefitLevel or 'General') == lv.LevelName %}selected{% endif %}>{{ lv.LevelName }}</option>
+                  {% endfor %}
+                  {% if not benefit_levels %}
+                  <option value="General" selected>General</option>
+                  {% endif %}
+                </select>
+              </td>
+              {% endif %}
+              <td>
+                <span style="font-size:.75rem;color:#2d7ec4;font-weight:700;cursor:pointer" onclick="resendLink('{{ emp.email }}', this)">Resend link</span>
+                &middot;
+                <span style="font-size:.75rem;color:#B56B10;font-weight:700;cursor:pointer" onclick="removeEmployee('{{ emp.email }}', '{{ emp.firstName }} {{ emp.lastName }}', {{ loop.index }})">Remove</span>
+              </td>
             </tr>
             {% else %}
-            <tr><td colspan="7" style="text-align:center;padding:44px;color:var(--muted);">No employees registered yet.</td></tr>
+            <tr><td colspan="7" style="text-align:center;padding:44px;color:#7A8F9C;">No employees registered yet.</td></tr>
             {% endfor %}
-            </tbody>
+          </tbody>
         </table>
-
+      </div>
     </div>
 
-</div><!-- /container -->
-</div><!-- /main -->
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: MEAL PLAN                          -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-mealplan">
+      <div class="sl" style="margin-top:0">Your Meal Subsidy Plan</div>
 
-<!-- ── STICKY SAVE BANNER ── -->
-<div class="save-sticky" id="saveBanner">
-    <div class="save-sticky-msg"><strong id="saveBannerMsg">Unsaved changes</strong></div>
-    <button class="btn-save-sticky" id="saveBannerBtn" onclick="saveAccount()">Save Changes</button>
-</div>
+      {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' and benefit_levels %}
+      <div style="font-size:.85rem;color:#7A8F9C;margin-bottom:16px;">Your company has <strong>{{ benefit_levels|length }}</strong> employee benefit level{{ 's' if benefit_levels|length > 1 else '' }}. Each level has its own meal pricing structure.</div>
 
-<!-- ── INVOICE MODAL ── -->
-<div class="modal-overlay" id="invoiceOverlay" onclick="handleOverlayClick(event)">
-    <div class="modal" id="invoiceModal">
-        <div class="modal-header">
-            <div>
-                <div class="modal-title" id="modalTitle">Order Details</div>
-                <div class="modal-sub" id="modalSub"></div>
+      {% for lv in benefit_levels %}
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;background:rgba(0,70,94,.08);padding:3px 12px;border-radius:99px;">{{ lv.LevelName or 'Level ' ~ loop.index }}</span>
+          {% if lv.MaxMealsPerWeek %}<span style="font-size:.72rem;color:#7A8F9C;">Max {{ lv.MaxMealsPerWeek }} meals/week</span>{% endif %}
+        </div>
+        <table class="tier-table">
+          <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
+          <tbody>
+            {% if lv.FreeMealsPerWeek and lv.FreeMealsPerWeek|string not in ('', '0') %}
+            <tr><td class="tier-free">Free</td><td>{{ lv.FreeMealsPerWeek }}</td><td style="color:#167421;font-weight:700;">$0.00</td><td style="color:#167421;font-weight:700;">${{ '%.2f'|format((lv.FreeTier_CompanySubsidy or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if lv.Tier1_Meals and lv.Tier1_Meals|string not in ('', '0') %}
+            <tr><td>Tier 1</td><td>{{ lv.Tier1_Meals }}</td><td>${{ '%.2f'|format((lv.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if lv.Tier2_Meals and lv.Tier2_Meals|string not in ('', '0') %}
+            <tr><td>Tier 2</td><td>{{ lv.Tier2_Meals }}</td><td>${{ '%.2f'|format((lv.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if lv.Tier3_Meals and lv.Tier3_Meals|string not in ('', '0') %}
+            <tr><td>Tier 3</td><td>{{ lv.Tier3_Meals }}</td><td>${{ '%.2f'|format((lv.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+
+      {% else %}
+      <div class="card">
+        <table class="tier-table">
+          <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
+          <tbody>
+            {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
+            <tr><td class="tier-free">Free</td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:#167421;font-weight:700;">$0.00</td><td style="color:#167421;font-weight:700;">${{ '%.2f'|format((company.BasePrice or company.FullPrice or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if company.Tier1_EmployeePrice %}
+            <tr><td>Tier 1</td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if company.Tier2_EmployeePrice %}
+            <tr><td>Tier 2</td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if company.Tier3_EmployeePrice %}
+            <tr><td>Tier 3</td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      <div class="note-box">Need to adjust your meal plan? Contact your BetterDay account manager to modify subsidy tiers, meal counts, or pricing. <a href="mailto:hello@eatbetterday.ca" style="color:#00465E;font-weight:700">hello@eatbetterday.ca</a></div>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: ACCOUNT DETAILS                    -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-account">
+      <div class="sl" style="margin-top:0">Account Details</div>
+
+      {% if saved_tab == 'account' %}
+      <div style="background:#EEFBE8;border:1px solid #BBF7D0;color:#167421;padding:12px 16px;border-radius:10px;font-size:.875rem;font-weight:600;margin-bottom:18px;">Changes saved successfully.</div>
+      {% endif %}
+
+      <!-- Company Identity (read-only) -->
+      <div class="card">
+        <div class="card-title">Company Identity</div>
+        <div class="field-grid">
+          <div class="field"><label>Company ID</label><div class="field-ro" style="font-family:monospace;letter-spacing:.5px;">{{ company.CompanyID or company_id }}</div></div>
+          <div class="field"><label>Company Name</label><div class="field-ro">{{ company.CompanyName or '—' }}</div></div>
+          <div class="field"><label>Email Domain</label><div class="field-ro">{{ company.CompanyEmailDomain or '—' }}</div></div>
+          <div class="field"><label>Access PIN</label>
+            <div class="field-ro">
+              <span id="pinDisplay" style="display:inline-flex;align-items:center;gap:6px;">
+                <span id="pinValue" style="font-family:monospace;font-weight:700;letter-spacing:2px;">{{ current_pin or '—' }}</span>
+                <button type="button" onclick="startEditPIN()" style="font-size:.72rem;color:#2d7ec4;font-weight:700;cursor:pointer;background:none;border:none;font-family:inherit;">Edit</button>
+              </span>
+              <span id="pinEditRow" style="display:none;align-items:center;gap:6px;">
+                <input id="pinInput" type="text" maxlength="20" value="{{ current_pin or '' }}" style="width:80px;padding:5px 8px;border:1.5px solid #E0D4C2;border-radius:7px;font-size:.88rem;font-family:monospace;font-weight:700;letter-spacing:2px;outline:none;">
+                <button type="button" id="pinSaveBtn" onclick="savePIN()" style="font-size:.7rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:6px;padding:5px 11px;cursor:pointer;font-family:inherit;">Save</button>
+                <button type="button" onclick="cancelEditPIN()" style="font-size:.7rem;font-weight:600;color:#7A8F9C;background:none;border:none;cursor:pointer;font-family:inherit;">Cancel</button>
+              </span>
+              <div id="pinMsg" style="font-size:.7rem;margin-top:3px;display:none;"></div>
             </div>
-            <button class="modal-close" onclick="closeInvoice()">✕</button>
+          </div>
         </div>
-        <div class="modal-body">
-            <div class="invoice-meta" id="invoiceMeta"></div>
-            <table class="invoice-table">
-                <thead>
-                    <tr>
-                        <th style="width:60%">Meal</th>
-                        <th style="text-align:right">Emp. Price</th>
-                        <th style="text-align:right">Subsidy Applied</th>
-                    </tr>
-                </thead>
-                <tbody id="invoiceMeals"></tbody>
-            </table>
-            <div class="invoice-totals" id="invoiceTotals"></div>
+      </div>
+
+      <!-- Editable fields -->
+      <form id="accountForm" method="POST" action="/manager/update-account" onsubmit="saveAccount(event)">
+        <div class="card">
+          <div class="card-title">Contact &amp; Delivery</div>
+          <div class="field-grid">
+            <div class="field"><label>Primary Contact</label><input type="text" name="PrimaryContactName" value="{{ company.PrimaryContactName or '' }}" placeholder="Jane Smith"></div>
+            <div class="field"><label>Contact Email</label><input type="email" name="PrimaryContactEmail" value="{{ company.PrimaryContactEmail or '' }}" placeholder="jane@company.com"></div>
+            <div class="field"><label>Contact Phone</label><input type="text" name="PrimaryContactPhone" value="{{ company.PrimaryContactPhone or '' }}" placeholder="403-555-0100"></div>
+            <div class="field"><label>Billing Email</label><input type="email" name="BillingContactEmail" value="{{ company.BillingContactEmail or '' }}" placeholder="billing@company.com"></div>
+            <div class="field"><label>Address</label><input type="text" name="AddressLine1" value="{{ company.AddressLine1 or '' }}" placeholder="123 Main Street"></div>
+            <div class="field"><label>City</label><input type="text" name="City" value="{{ company.City or '' }}" placeholder="Calgary"></div>
+            <div class="field"><label>Postal Code</label><input type="text" name="PostalCode" value="{{ company.PostalCode or '' }}" placeholder="T2P 1J9"></div>
+            <div class="field"><label>Delivery Day</label><div class="field-ro">{{ company.DeliveryDay or 'Not set' }} <span style="font-size:.7rem;color:#7A8F9C">(contact BetterDay to change)</span></div></div>
+            <div class="field" style="grid-column:span 2"><label>Delivery Instructions</label><input type="text" name="DeliveryInstructions" value="{{ company.DeliveryInstructions or '' }}" placeholder="e.g. Leave with reception on 3rd floor"></div>
+          </div>
+          <div style="margin-top:16px"><button class="btn-save" type="button" onclick="saveAccount()">Save Changes</button></div>
         </div>
-        <div class="modal-footer">
-            <button class="btn-close-modal" onclick="closeInvoice()">Close</button>
-            <button class="btn-print" onclick="printReceipt()">Print Receipt</button>
-        </div>
+      </form>
+
+      <!-- Tier structure (read-only) -->
+      <div class="card">
+        <div class="card-title">Meal Subsidy Tiers</div>
+        <table class="tier-table">
+          <thead><tr><th>Tier</th><th>Meals/Week</th><th>Employee Pays</th><th>Company Covers</th><th>BD Contributes</th></tr></thead>
+          <tbody>
+            {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
+            <tr><td class="tier-free">Free</td><td>{{ company.FreeMealsPerWeek }}</td><td>$0.00</td><td>${{ '%.2f'|format((company.BasePrice or company.FullPrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.BDContribution or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if company.Tier1_EmployeePrice %}
+            <tr><td>Tier 1</td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_BDContribution or company.BDContribution or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if company.Tier2_EmployeePrice %}
+            <tr><td>Tier 2</td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_BDContribution or company.BDContribution or 0)|float) }}</td></tr>
+            {% endif %}
+            {% if company.Tier3_EmployeePrice %}
+            <tr><td>Tier 3</td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_BDContribution or company.BDContribution or 0)|float) }}</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+        <div class="note-box">Need to adjust your meal tier allocation? Contact your BetterDay account manager at <a href="mailto:hello@eatbetterday.ca" style="color:#00465E;font-weight:700">hello@eatbetterday.ca</a></div>
+      </div>
     </div>
+
+  </div><!-- /cont -->
+</div><!-- /mn -->
+
+<!-- ════════ STICKY SAVE BANNER ════════ -->
+<div class="save-sticky" id="saveBanner">
+  <div class="save-sticky-msg"><strong id="saveBannerMsg">Unsaved changes</strong></div>
+  <button class="btn-save-sticky" id="saveBannerBtn" onclick="saveAccount()">Save Changes</button>
 </div>
 
-<!-- ── EMBEDDED ORDER DATA ── -->
+<!-- ════════ ORDER DETAIL MODAL ════════ -->
+<div class="modal-overlay" id="orderModal" onclick="if(event.target===this)closeOrderModal()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h3 id="modalTitle">Order Summary</h3>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeOrderModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-stat-row" id="modalStats">
+        <div class="modal-stat"><div class="modal-stat-label">Meals</div><div class="modal-stat-val" id="modalMeals">0</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">They Paid</div><div class="modal-stat-val" id="modalEmpPaid">$0</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">Co. Covered</div><div class="modal-stat-val green" id="modalCoCovered">$0</div></div>
+        <div class="modal-stat"><div class="modal-stat-label">BD Contributed</div><div class="modal-stat-val sky" id="modalBD">$0</div></div>
+      </div>
+      <div class="modal-meals-title">Meal Details</div>
+      <div id="modalMealList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-close" onclick="closeOrderModal()">Close</button>
+      <button class="modal-btn modal-btn-print" onclick="printOrderPDF()">Print PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ EMBEDDED ORDER DATA ════════ -->
 <script>
 const ORDERS       = {{ orders_json | safe }};
 const INVOICES     = {{ invoices | tojson | safe }};
@@ -885,433 +756,398 @@ const COMPANY_ADDR = [
     {{ (company.City or '') | tojson }}
 ].filter(Boolean).join(', ');
 
-// ── Impact banner count-up ──
-(function() {
-    function fmt(n, format) {
-        if (format === 'money') {
-            if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
-            if (n >= 1000)    return (n/1000).toFixed(0) + 'K';
-            return n.toLocaleString();
-        }
-        return n.toLocaleString();
-    }
-    function countUp(el, target, duration) {
-        const start = performance.now();
-        const format = el.dataset.format || 'number';
-        ;(function update(now) {
-            const p = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - p, 3);
-            el.textContent = fmt(Math.round(eased * target), format);
-            if (p < 1) requestAnimationFrame(update);
-        })(performance.now());
-    }
-    window.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.count-up').forEach(function(el) {
-            const target = parseInt(el.dataset.target, 10) || 0;
-            setTimeout(function() { countUp(el, target, 1400); }, 300);
-        });
-    });
-})();
-
-// ── Tab switching (via sidebar) ──
-function showTab(name, el) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    if (el) el.classList.add('active');
-    document.getElementById('tab-' + name).classList.add('active');
-}
+// ═══ SIDEBAR NAV ═══
 function sidebarNav(name, el) {
-    document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    if (el) el.classList.add('active');
-    document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('on');
+  const panel = document.getElementById('tab-' + name);
+  if (panel) panel.classList.add('active');
 }
 
-// Auto-open tab from query param (e.g. after save)
+// Auto-open tab from query param
 (function() {
-    const params = new URLSearchParams(window.location.search);
-    const saved = params.get('saved');
-    if (saved) {
-        const sbItem = document.querySelector(`.sb-item[onclick*="'${saved}'"]`);
-        if (sbItem) sidebarNav(saved, sbItem);
-    }
+  const params = new URLSearchParams(window.location.search);
+  const saved = params.get('saved');
+  if (saved) {
+    const items = document.querySelectorAll('.sb .ni');
+    const map = {overview:0, orders:1, invoices:2, monthly:3, employees:4, mealplan:6, account:7};
+    if (map[saved] !== undefined && items[map[saved]]) sidebarNav(saved, items[map[saved]]);
+  }
 })();
 
-// ── Month filter ──
-function filterMonth(key) {
-    document.querySelectorAll('.month-block').forEach(el => {
-        el.classList.toggle('active', el.id === 'month-' + key);
-    });
+// ═══ ORDER DETAIL MODAL ═══
+var _currentOrderData = null;
+
+function openOrderModal(order) {
+  if (typeof order === 'string') {
+    // Called with orderId
+    order = ORDERS.find(o => o.order_id === order);
+    if (!order) return;
+  }
+  _currentOrderData = order;
+
+  document.getElementById('modalTitle').textContent = (order.employee_name || order.name || 'Order') + "'s Order";
+  document.getElementById('modalSub').textContent = 'Delivery ' + (order.delivery_date || order.week || '—') + ' · ' + (order.status || 'Pending');
+  document.getElementById('modalMeals').textContent = order.meals.length;
+  document.getElementById('modalEmpPaid').textContent = '$' + (order.emp_total || 0).toFixed(2);
+  document.getElementById('modalCoCovered').textContent = '$' + (order.co_total || 0).toFixed(2);
+  document.getElementById('modalBD').textContent = '$' + (order.bd_total || 0).toFixed(2);
+
+  var html = '';
+  var tierLabels = {free:'FREE', tier1:'Tier 1', tier2:'Tier 2', tier3:'Tier 3'};
+  (order.meals || []).forEach(function(m) {
+    var dietClass = (m.diet || m.diet_type || '').toLowerCase().indexOf('plant') >= 0 ? 'plant' : 'meat';
+    var dietLabel = dietClass === 'plant' ? 'Plant' : 'Meat';
+    var price = m.price !== undefined ? m.price : m.emp_price || 0;
+    var priceStr = price > 0 ? '$' + parseFloat(price).toFixed(2) : 'FREE';
+    var priceClass = price > 0 ? '' : ' free';
+    var dishName = m.dish || m.dish_name || 'Meal';
+    var tier = m.tier || '';
+    html += '<div class="modal-meal-row">'
+      + '<div><span class="modal-meal-name">' + dishName + '</span><span class="modal-meal-diet ' + dietClass + '">' + dietLabel + '</span></div>'
+      + '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:10px;color:#7A8F9C">' + (tierLabels[tier] || tier) + '</span><span class="modal-meal-price' + priceClass + '">' + priceStr + '</span></div>'
+      + '</div>';
+  });
+  document.getElementById('modalMealList').innerHTML = html;
+  document.getElementById('orderModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-// ── Order history: search, filter, paginate ──
+function closeOrderModal() {
+  document.getElementById('orderModal').classList.remove('open');
+  document.body.style.overflow = '';
+  _currentOrderData = null;
+}
+
+function printOrderPDF() {
+  if (!_currentOrderData) return;
+  var d = _currentOrderData;
+  var tierLabels = {free:'FREE', tier1:'Tier 1', tier2:'Tier 2', tier3:'Tier 3'};
+  var mealRows = '';
+  (d.meals || []).forEach(function(m) {
+    var price = m.price !== undefined ? m.price : m.emp_price || 0;
+    var priceStr = price > 0 ? '$' + parseFloat(price).toFixed(2) : 'FREE';
+    var diet = (m.diet || m.diet_type || '').toLowerCase().indexOf('plant') >= 0 ? 'Plant-Based' : 'Meat';
+    var dishName = m.dish || m.dish_name || 'Meal';
+    var tier = m.tier || '';
+    mealRows += '<tr><td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px">' + dishName + '</td>'
+      + '<td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:11px;color:#888">' + diet + '</td>'
+      + '<td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:11px;color:#888">' + (tierLabels[tier] || tier) + '</td>'
+      + '<td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;font-weight:700;text-align:right">' + priceStr + '</td></tr>';
+  });
+  var coNum = d.co_total || 0;
+  var bdNum = d.bd_total || 0;
+  var totalSubsidy = '$' + (coNum + bdNum).toFixed(2);
+  var empPaid = '$' + (d.emp_total || 0).toFixed(2);
+  var name = d.employee_name || d.name || 'Employee';
+  var delivery = d.delivery_date || d.week || '—';
+
+  var w = window.open('', '_blank');
+  w.document.write('<!DOCTYPE html><html><head><title>Order - ' + name + '</title>'
+    + '<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:40px;max-width:600px;margin:0 auto}'
+    + 'table{width:100%;border-collapse:collapse}@media print{body{padding:20px}}</style></head><body>'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #003141">'
+    + '<div><div style="font-size:20px;font-weight:900;color:#003141">BetterDay</div><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px">Order Summary</div></div>'
+    + '<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:#003141">' + name + '</div><div style="font-size:11px;color:#888">Delivery ' + delivery + '</div></div></div>'
+    + '<div style="display:flex;gap:12px;margin-bottom:20px">'
+    + '<div style="flex:1;background:#f8f3ec;border-radius:8px;padding:10px 14px;text-align:center"><div style="font-size:9px;font-weight:800;text-transform:uppercase;color:#888">Meals</div><div style="font-size:20px;font-weight:900">' + d.meals.length + '</div></div>'
+    + '<div style="flex:1;background:#f8f3ec;border-radius:8px;padding:10px 14px;text-align:center"><div style="font-size:9px;font-weight:800;text-transform:uppercase;color:#888">You Paid</div><div style="font-size:20px;font-weight:900">' + empPaid + '</div></div>'
+    + '<div style="flex:1;background:#f8f3ec;border-radius:8px;padding:10px 14px;text-align:center"><div style="font-size:9px;font-weight:800;text-transform:uppercase;color:#888">Subsidy Applied</div><div style="font-size:20px;font-weight:900;color:#167421">' + totalSubsidy + '</div></div></div>'
+    + '<table><thead><tr><th style="text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #ddd">Dish</th>'
+    + '<th style="text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #ddd">Diet</th>'
+    + '<th style="text-align:left;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #ddd">Tier</th>'
+    + '<th style="text-align:right;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #ddd">Price</th></tr></thead>'
+    + '<tbody>' + mealRows + '</tbody></table>'
+    + '<div style="margin-top:20px;padding-top:12px;border-top:2px solid #003141;display:flex;justify-content:space-between">'
+    + '<span style="font-size:13px;font-weight:800;color:#003141">TOTAL PAID</span><span style="font-size:20px;font-weight:900;color:#003141">' + empPaid + '</span></div>'
+    + '<div style="margin-top:6px;display:flex;justify-content:space-between"><span style="font-size:11px;color:#888">Total subsidy applied</span><span style="font-size:13px;font-weight:700;color:#167421">' + totalSubsidy + '</span></div>'
+    + '<div style="margin-top:40px;text-align:center;font-size:10px;color:#bbb">BetterDay for Work &middot; betterday.ca</div>'
+    + '<script>window.onload=function(){window.print()}<\/script></body></html>');
+  w.document.close();
+}
+
+// ═══ ORDER HISTORY: search, filter, paginate ═══
 let _orderSearch = '';
 let _orderWeek = '';
 let _orderPage = 1;
 const ORDER_PAGE_SIZE = 25;
 
 function getFilteredOrders() {
-    const q = _orderSearch;
-    return ORDERS.filter(o => {
-        const matchSearch = !q ||
-            (o.employee_name || '').toLowerCase().includes(q) ||
-            o.order_id.toLowerCase().includes(q);
-        const matchWeek = !_orderWeek || o.sunday_anchor === _orderWeek;
-        return matchSearch && matchWeek;
-    });
+  const q = _orderSearch;
+  return ORDERS.filter(o => {
+    const matchSearch = !q ||
+      (o.employee_name || '').toLowerCase().includes(q) ||
+      o.order_id.toLowerCase().includes(q);
+    const matchWeek = !_orderWeek || o.sunday_anchor === _orderWeek;
+    return matchSearch && matchWeek;
+  });
 }
 
 function applyOrderFilters() {
-    _orderSearch = (document.getElementById('orderSearch')?.value || '').toLowerCase().trim();
-    _orderWeek   = document.getElementById('orderWeekFilter')?.value || '';
-    _orderPage   = 1;
-    renderOrderTable();
+  _orderSearch = (document.getElementById('orderSearch')?.value || '').toLowerCase().trim();
+  _orderWeek   = document.getElementById('orderWeekFilter')?.value || '';
+  _orderPage   = 1;
+  renderOrderTable();
 }
 
 function renderOrderTable() {
-    const filtered = getFilteredOrders();
-    const total = filtered.length;
-    const start = (_orderPage - 1) * ORDER_PAGE_SIZE;
-    const page  = filtered.slice(start, start + ORDER_PAGE_SIZE);
+  const filtered = getFilteredOrders();
+  const total = filtered.length;
+  const start = (_orderPage - 1) * ORDER_PAGE_SIZE;
+  const page  = filtered.slice(start, start + ORDER_PAGE_SIZE);
 
-    // Summary bar
-    const s = filtered.reduce((a, o) => {
-        a.orders++; a.meals += o.meals.length;
-        a.emp += o.emp_total; a.co += o.co_total; a.bd += o.bd_total;
-        return a;
-    }, {orders: 0, meals: 0, emp: 0, co: 0, bd: 0});
-    document.getElementById('sb-orders').textContent = s.orders;
-    document.getElementById('sb-meals').textContent  = s.meals;
-    document.getElementById('sb-emp').textContent    = '$' + s.emp.toFixed(2);
-    document.getElementById('sb-co').textContent     = '$' + s.co.toFixed(2);
-    document.getElementById('sb-bd').textContent     = '$' + s.bd.toFixed(2);
-    document.getElementById('sb-total').textContent  = '$' + (s.emp + s.co + s.bd).toFixed(2);
+  // Summary bar
+  const s = filtered.reduce((a, o) => {
+    a.orders++; a.meals += o.meals.length;
+    a.emp += o.emp_total; a.co += o.co_total; a.bd += o.bd_total;
+    return a;
+  }, {orders: 0, meals: 0, emp: 0, co: 0, bd: 0});
+  document.getElementById('sumOrders').textContent = s.orders;
+  document.getElementById('sumMeals').textContent  = s.meals;
+  document.getElementById('sumEmpPaid').textContent    = '$' + s.emp.toFixed(2);
+  document.getElementById('sumCoCovered').textContent  = '$' + s.co.toFixed(2);
+  document.getElementById('sumBD').textContent         = '$' + s.bd.toFixed(2);
+  document.getElementById('sumTotal').textContent      = '$' + (s.emp + s.co + s.bd).toFixed(2);
 
-    // Table rows
-    const tbody = document.getElementById('orderTbody');
-    if (!page.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:44px;color:var(--muted);font-size:.9rem;">No orders match your search.</td></tr>`;
-    } else {
-        tbody.innerHTML = page.map(o => `
-            <tr class="clickable" onclick="openInvoice(${JSON.stringify(o.order_id)})">
-                <td class="td-name">${o.employee_name || '—'}</td>
-                <td>${o.meals.length} meal${o.meals.length !== 1 ? 's' : ''}</td>
-                <td class="td-emp">$${o.emp_total.toFixed(2)}</td>
-                <td class="td-co">$${o.co_total.toFixed(2)}</td>
-                <td class="td-bd">$${o.bd_total.toFixed(2)}</td>
-                <td style="color:var(--muted)">${o.delivery_date || '—'}</td>
-                <td><span class="status-badge status-${(o.status||'pending').toLowerCase()}">${o.status||'Pending'}</span></td>
-                <td class="td-action">View →</td>
-            </tr>
-        `).join('');
-    }
+  // Table rows
+  const tbody = document.getElementById('orderTableBody');
+  if (!tbody) return;
+  if (!page.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:44px;color:#7A8F9C;font-size:.9rem;">No orders match your search.</td></tr>';
+  } else {
+    tbody.innerHTML = page.map(o => {
+      const statusClass = (o.status || '').toLowerCase() === 'confirmed' ? 'ba' : 'bp';
+      return `<tr onclick="openOrderModal('${o.order_id}')">
+        <td class="tn">${o.employee_name || '—'}</td>
+        <td>${o.meals.length}</td>
+        <td>$${o.emp_total.toFixed(2)}</td>
+        <td class="tg">$${o.co_total.toFixed(2)}</td>
+        <td class="ts">$${o.bd_total.toFixed(2)}</td>
+        <td>${o.delivery_date || '—'}</td>
+        <td><span class="bdg ${statusClass}">${o.status || 'Pending'}</span></td>
+        <td style="font-size:.75rem;color:#00465E;font-weight:700">View &rarr;</td>
+      </tr>`;
+    }).join('');
+  }
 
-    // Pagination
-    const totalPages = Math.ceil(total / ORDER_PAGE_SIZE) || 1;
-    const dispStart  = total === 0 ? 0 : start + 1;
-    const dispEnd    = Math.min(_orderPage * ORDER_PAGE_SIZE, total);
-    document.getElementById('pageInfo').textContent = total === 0 ? 'No orders' : `${dispStart}–${dispEnd} of ${total} orders`;
-    document.getElementById('btnPrev').disabled = _orderPage <= 1;
-    document.getElementById('btnNext').disabled = _orderPage >= totalPages;
+  // Pagination
+  const totalPages = Math.ceil(total / ORDER_PAGE_SIZE) || 1;
+  const dispStart  = total === 0 ? 0 : start + 1;
+  const dispEnd    = Math.min(_orderPage * ORDER_PAGE_SIZE, total);
+  const pagInfo = document.getElementById('orderPagInfo');
+  if (pagInfo) pagInfo.textContent = total === 0 ? 'No orders' : dispStart + '\u2013' + dispEnd + ' of ' + total + ' orders';
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  if (btnPrev) btnPrev.disabled = _orderPage <= 1;
+  if (btnNext) btnNext.disabled = _orderPage >= totalPages;
 }
 
 function changePage(delta) {
-    const totalPages = Math.ceil(getFilteredOrders().length / ORDER_PAGE_SIZE) || 1;
-    _orderPage = Math.max(1, Math.min(_orderPage + delta, totalPages));
-    renderOrderTable();
-    window.scrollTo({top: 0, behavior: 'smooth'});
+  const totalPages = Math.ceil(getFilteredOrders().length / ORDER_PAGE_SIZE) || 1;
+  _orderPage = Math.max(1, Math.min(_orderPage + delta, totalPages));
+  renderOrderTable();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ═══ OVERVIEW: recent orders (first 5) ═══
+function renderOverviewOrders() {
+  const tbody = document.getElementById('overviewOrdersBody');
+  if (!tbody || !ORDERS.length) return;
+  const recent = ORDERS.slice(0, 5);
+  tbody.innerHTML = recent.map(o => {
+    const statusClass = (o.status || '').toLowerCase() === 'confirmed' ? 'ba' : 'bp';
+    return `<tr onclick="openOrderModal('${o.order_id}')">
+      <td class="tn">${o.employee_name || '—'}</td>
+      <td>${o.meals.length}</td>
+      <td>$${o.emp_total.toFixed(2)}</td>
+      <td class="tg">$${o.co_total.toFixed(2)}</td>
+      <td class="ts">$${o.bd_total.toFixed(2)}</td>
+      <td>${o.delivery_date || '—'}</td>
+      <td><span class="bdg ${statusClass}">${o.status || 'Pending'}</span></td>
+    </tr>`;
+  }).join('');
 }
 
 // Initial render
-if (document.getElementById('orderTbody')) renderOrderTable();
+renderOverviewOrders();
+if (document.getElementById('orderTableBody')) renderOrderTable();
 
-// ── Account: sticky dirty-state save banner ──
+// Update sidebar badge with real count
+(function() {
+  const badge = document.getElementById('ordersBadge');
+  if (badge) badge.textContent = ORDERS.length;
+})();
+
+// ═══ MONTH FILTER ═══
+function filterMonth(key) {
+  document.querySelectorAll('.month-block').forEach(el => {
+    el.classList.toggle('active', el.id === 'month-' + key);
+  });
+}
+
+// ═══ EMPLOYEE SEARCH ═══
+function filterEmployees() {
+  const q = (document.getElementById('empSearch')?.value || '').toLowerCase();
+  document.querySelectorAll('#empTableBody tr[id^="emp-row-"]').forEach(tr => {
+    const text = tr.textContent.toLowerCase();
+    tr.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+}
+
+// ═══ ACCOUNT: sticky dirty-state save banner ═══
 let _formDirty = false;
 const _accountForm = document.getElementById('accountForm');
 if (_accountForm) {
-    _accountForm.addEventListener('input', () => {
-        if (!_formDirty) {
-            _formDirty = true;
-            document.getElementById('saveBanner').classList.add('visible');
-        }
-    });
+  _accountForm.addEventListener('input', () => {
+    if (!_formDirty) {
+      _formDirty = true;
+      document.getElementById('saveBanner').classList.add('visible');
+    }
+  });
 }
 
 async function saveAccount(e) {
-    if (e) e.preventDefault();
-    const btn = document.getElementById('saveBannerBtn');
-    const msg = document.getElementById('saveBannerMsg');
-    btn.textContent = 'Saving…';
-    btn.disabled = true;
-    try {
-        const res = await fetch('/manager/update-account', {
-            method: 'POST',
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
-            body: new FormData(document.getElementById('accountForm'))
-        });
-        if (res.ok) {
-            _formDirty = false;
-            btn.textContent = '✓ Saved';
-            msg.textContent = 'All changes saved';
-            document.getElementById('saveBanner').classList.add('saved');
-            setTimeout(() => {
-                document.getElementById('saveBanner').classList.remove('visible', 'saved');
-                btn.textContent = 'Save Changes';
-                btn.disabled = false;
-                msg.textContent = 'Unsaved changes';
-            }, 2500);
-        } else { throw new Error(); }
-    } catch {
-        btn.textContent = 'Error — try again';
-        setTimeout(() => { btn.textContent = 'Save Changes'; btn.disabled = false; }, 3000);
-    }
+  if (e) e.preventDefault();
+  const btn = document.getElementById('saveBannerBtn');
+  const msg = document.getElementById('saveBannerMsg');
+  btn.textContent = 'Saving\u2026';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/manager/update-account', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+      body: new FormData(document.getElementById('accountForm'))
+    });
+    if (res.ok) {
+      _formDirty = false;
+      btn.textContent = '\u2713 Saved';
+      msg.textContent = 'All changes saved';
+      document.getElementById('saveBanner').classList.add('saved');
+      setTimeout(() => {
+        document.getElementById('saveBanner').classList.remove('visible', 'saved');
+        btn.textContent = 'Save Changes';
+        btn.disabled = false;
+        msg.textContent = 'Unsaved changes';
+      }, 2500);
+    } else { throw new Error(); }
+  } catch {
+    btn.textContent = 'Error \u2014 try again';
+    setTimeout(() => { btn.textContent = 'Save Changes'; btn.disabled = false; }, 3000);
+  }
 }
 
-// ── Employee Access PIN ──
+// ═══ EMPLOYEE ACCESS PIN ═══
 function startEditPIN() {
-    document.getElementById('pinDisplay').style.display = 'none';
-    document.getElementById('pinEditRow').style.display = 'flex';
-    document.getElementById('pinInput').focus();
+  document.getElementById('pinDisplay').style.display = 'none';
+  document.getElementById('pinEditRow').style.display = 'inline-flex';
+  document.getElementById('pinInput').focus();
 }
 function cancelEditPIN() {
-    document.getElementById('pinEditRow').style.display = 'none';
-    document.getElementById('pinDisplay').style.display = 'flex';
-    document.getElementById('pinMsg').style.display = 'none';
+  document.getElementById('pinEditRow').style.display = 'none';
+  document.getElementById('pinDisplay').style.display = 'inline-flex';
+  document.getElementById('pinMsg').style.display = 'none';
 }
 async function savePIN() {
-    const pin = document.getElementById('pinInput').value.trim();
-    const msg = document.getElementById('pinMsg');
-    const btn = document.getElementById('pinSaveBtn');
-    if (!pin) { msg.style.display='block'; msg.style.color='#c0392b'; msg.textContent='PIN cannot be empty.'; return; }
-    btn.textContent = 'Saving…'; btn.disabled = true;
-    try {
-        const res = await fetch('/api/gas', {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ action: 'update_company_pin', company_id: COMPANY_ID, pin })
-        });
-        const d = await res.json();
-        if (d.success) {
-            document.getElementById('pinValue').textContent = pin;
-            cancelEditPIN();
-        } else {
-            msg.style.display = 'block'; msg.style.color = '#c0392b';
-            msg.textContent = d.error || 'Could not save — try again.';
-        }
-    } catch(e) {
-        msg.style.display = 'block'; msg.style.color = '#c0392b'; msg.textContent = 'Network error — try again.';
+  const pin = document.getElementById('pinInput').value.trim();
+  const msg = document.getElementById('pinMsg');
+  const btn = document.getElementById('pinSaveBtn');
+  if (!pin) { msg.style.display = 'block'; msg.style.color = '#c0392b'; msg.textContent = 'PIN cannot be empty.'; return; }
+  btn.textContent = 'Saving\u2026'; btn.disabled = true;
+  try {
+    const res = await fetch('/api/gas', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'update_company_pin', company_id: COMPANY_ID, pin })
+    });
+    const d = await res.json();
+    if (d.success) {
+      document.getElementById('pinValue').textContent = pin;
+      cancelEditPIN();
+    } else {
+      msg.style.display = 'block'; msg.style.color = '#c0392b';
+      msg.textContent = d.error || 'Could not save \u2014 try again.';
     }
-    btn.textContent = 'Save'; btn.disabled = false;
+  } catch(e) {
+    msg.style.display = 'block'; msg.style.color = '#c0392b'; msg.textContent = 'Network error \u2014 try again.';
+  }
+  btn.textContent = 'Save'; btn.disabled = false;
 }
 
-// ── Invoice modal ──
-let currentOrder = null;
-
-function openInvoice(orderId) {
-    const order = ORDERS.find(o => o.order_id === orderId);
-    if (!order) return;
-    currentOrder = order;
-
-    document.getElementById('modalTitle').textContent = order.employee_name || 'Order Details';
-    document.getElementById('modalSub').textContent = 'Order #' + order.order_id + ' · Delivery: ' + (order.delivery_date || '—');
-
-    // Meta grid
-    document.getElementById('invoiceMeta').innerHTML = `
-        <div class="im-cell"><div class="im-label">Employee</div><div class="im-val">${order.employee_name || '—'}</div></div>
-        <div class="im-cell"><div class="im-label">Order ID</div><div class="im-val">${order.order_id}</div></div>
-        <div class="im-cell"><div class="im-label">Delivery Date</div><div class="im-val">${order.delivery_date || '—'}</div></div>
-        <div class="im-cell"><div class="im-label">Meals</div><div class="im-val">${order.meals.length} meal${order.meals.length !== 1 ? 's' : ''}</div></div>
-    `;
-
-    // Meal rows
-    document.getElementById('invoiceMeals').innerHTML = order.meals.map(m => `
-        <tr>
-            <td>${m.dish_name || '—'}</td>
-            <td class="td-r">${m.emp_price === 0 ? '<span style="color:var(--muted)">$0.00</span>' : '$' + m.emp_price.toFixed(2)}</td>
-            <td class="td-r subsidy-green">$${m.total_subsidy.toFixed(2)}</td>
-        </tr>
-    `).join('');
-
-    // Totals
-    const totalSubsidy = order.co_total + order.bd_total;
-    document.getElementById('invoiceTotals').innerHTML = `
-        <div class="it-row"><span class="it-label">Employee paid</span><span class="it-val">$${order.emp_total.toFixed(2)}</span></div>
-        <div class="it-row"><span class="it-label">Total subsidy coverage</span><span class="it-val green">$${totalSubsidy.toFixed(2)}</span></div>
-        <div class="it-row total"><span class="it-label">Total meal value</span><span class="it-val">$${(order.emp_total + totalSubsidy).toFixed(2)}</span></div>
-    `;
-
-    document.getElementById('invoiceOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeInvoice() {
-    document.getElementById('invoiceOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-function handleOverlayClick(e) {
-    if (e.target === document.getElementById('invoiceOverlay')) closeInvoice();
-}
-
-// ── Print receipt (opens new window with clean receipt) ──
-function printReceipt() {
-    if (!currentOrder) return;
-    const o = currentOrder;
-    const totalSubsidy = o.co_total + o.bd_total;
-    const totalValue   = o.emp_total + totalSubsidy;
-
-    const mealsHTML = o.meals.map(m => `
-        <tr>
-            <td>${m.dish_name || 'Meal'}</td>
-            <td class="r">${m.emp_price === 0 ? '—' : '$' + m.emp_price.toFixed(2)}</td>
-            <td class="r g">$${m.total_subsidy.toFixed(2)}</td>
-        </tr>
-    `).join('');
-
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>BetterDay Receipt — ${o.employee_name}</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', -apple-system, sans-serif; color: #222; padding: 48px 52px; max-width: 640px; margin: 0 auto; }
-  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid #222; }
-  .co-name { font-size: 1rem; font-weight: 700; color: #222; }
-  .co-addr { font-size: .8rem; color: #717171; margin-top: 2px; }
-  .receipt-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #717171; text-align: right; }
-  .receipt-title { font-size: 1.2rem; font-weight: 700; text-align: right; margin-top: 2px; }
-  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
-  .meta-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: #717171; margin-bottom: 3px; }
-  .meta-val { font-size: .9rem; font-weight: 600; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-  th { text-align: left; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: #717171; padding: 8px 0; border-bottom: 1.5px solid #222; }
-  td { padding: 10px 0; font-size: .9rem; border-bottom: 1px solid #EBEBEB; }
-  .r { text-align: right; font-weight: 600; }
-  .g { color: #008A05; }
-  .totals { background: #F7F7F7; border-radius: 10px; padding: 16px 18px; margin-bottom: 28px; }
-  .t-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: .9rem; }
-  .t-row.total { font-weight: 700; font-size: 1rem; padding-top: 10px; margin-top: 6px; border-top: 1.5px solid #DDDDDD; }
-  .t-label { color: #484848; }
-  .t-val.g { color: #008A05; font-weight: 700; }
-  .footer { text-align: center; font-size: .75rem; color: #717171; line-height: 1.7; border-top: 1px solid #EBEBEB; padding-top: 20px; }
-  @media print { body { padding: 24px 28px; } }
-</style>
-</head>
-<body>
-<div class="top">
-  <div>
-    <div class="co-name">${COMPANY_NAME}</div>
-    ${COMPANY_ADDR ? `<div class="co-addr">${COMPANY_ADDR}</div>` : ''}
-  </div>
-  <div>
-    <div class="receipt-label">BetterDay Catering</div>
-    <div class="receipt-title">Meal Receipt</div>
-  </div>
-</div>
-<div class="meta-grid">
-  <div><div class="meta-label">Employee</div><div class="meta-val">${o.employee_name || '—'}</div></div>
-  <div><div class="meta-label">Order ID</div><div class="meta-val">${o.order_id}</div></div>
-  <div><div class="meta-label">Delivery Date</div><div class="meta-val">${o.delivery_date || '—'}</div></div>
-  <div><div class="meta-label">Meals</div><div class="meta-val">${o.meals.length}</div></div>
-</div>
-<table>
-  <thead><tr><th style="width:55%">Meal</th><th class="r">Employee Price</th><th class="r">Subsidy Applied</th></tr></thead>
-  <tbody>${mealsHTML}</tbody>
-</table>
-<div class="totals">
-  <div class="t-row"><span class="t-label">Employee paid</span><span class="t-val">$${o.emp_total.toFixed(2)}</span></div>
-  <div class="t-row"><span class="t-label">Total subsidy coverage</span><span class="t-val g">$${totalSubsidy.toFixed(2)}</span></div>
-  <div class="t-row total"><span class="t-label">Total meal value</span><span class="t-val">$${totalValue.toFixed(2)}</span></div>
-</div>
-<div class="footer">
-  This receipt confirms meal program coverage for the delivery date noted above.<br>
-  BetterDay Catering &nbsp;·&nbsp; eatbetterday.ca &nbsp;·&nbsp; hello@eatbetterday.ca
-</div>
-</body>
-</html>`;
-
-    const win = window.open('', '_blank', 'width=700,height=900');
-    win.document.write(html);
-    win.document.close();
-    win.onload = () => { win.focus(); win.print(); };
-}
-
-// ── Employees tab ──
+// ═══ EMPLOYEES TAB ═══
 async function resendLink(email, btn) {
-    const orig = btn.textContent;
-    btn.textContent = 'Sending…'; btn.disabled = true;
-    try {
-        const r = await fetch('/manager/resend-link', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({email})
-        });
-        const d = await r.json();
-        btn.textContent = d.success ? 'Sent ✓' : 'Failed';
-        setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
-    } catch(e) {
-        btn.textContent = 'Error'; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
-    }
+  const orig = btn.textContent;
+  btn.textContent = 'Sending\u2026'; btn.disabled = true;
+  try {
+    const r = await fetch('/manager/resend-link', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email})
+    });
+    const d = await r.json();
+    btn.textContent = d.success ? 'Sent \u2713' : 'Failed';
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2500);
+  } catch(e) {
+    btn.textContent = 'Error'; setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+  }
 }
 
 async function updateEmpLevel(email, level, selectEl) {
-    try {
-        const r = await fetch('/api/gas', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({action:'update_employee_level', email:email, company_id:'{{ company.CompanyID }}', benefit_level:level})
-        });
-        const d = await r.json();
-        if (d.success) {
-            selectEl.style.borderColor = '#167421';
-            setTimeout(() => selectEl.style.borderColor = '', 2000);
-        } else {
-            alert('Error: ' + (d.error||'Unknown'));
-        }
-    } catch(e) { alert('Network error'); }
+  try {
+    const r = await fetch('/api/gas', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'update_employee_level', email:email, company_id: COMPANY_ID, benefit_level:level})
+    });
+    const d = await r.json();
+    if (d.success) {
+      selectEl.style.borderColor = '#167421';
+      setTimeout(() => selectEl.style.borderColor = '', 2000);
+    } else {
+      alert('Error: ' + (d.error || 'Unknown'));
+    }
+  } catch(e) { alert('Network error'); }
 }
 
 async function removeEmployee(email, name, rowIndex) {
-    if (!confirm(`Remove ${name} from your team?\n\nThey will no longer be able to sign in. This cannot be undone.`)) return;
-    try {
-        const r = await fetch('/manager/remove-employee', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({email})
-        });
-        const d = await r.json();
-        if (d.success) {
-            const row = document.getElementById('emp-row-' + rowIndex);
-            if (row) row.remove();
-            // Update tab count
-            const tbody = document.querySelector('#empTable tbody');
-            const remaining = tbody ? tbody.querySelectorAll('tr[id^="emp-row-"]').length : 0;
-            document.querySelectorAll('.tab-count').forEach(el => el.textContent = remaining);
-        } else {
-            alert(d.error || 'Could not remove employee — try again.');
-        }
-    } catch(e) { alert('Network error — try again.'); }
+  if (!confirm('Remove ' + name + ' from your team?\n\nThey will no longer be able to sign in. This cannot be undone.')) return;
+  try {
+    const r = await fetch('/manager/remove-employee', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email})
+    });
+    const d = await r.json();
+    if (d.success) {
+      const row = document.getElementById('emp-row-' + rowIndex);
+      if (row) row.remove();
+      const tbody = document.querySelector('#empTable tbody');
+      const remaining = tbody ? tbody.querySelectorAll('tr[id^="emp-row-"]').length : 0;
+      document.querySelectorAll('.nbdg').forEach((el, i) => { if (i === 4) el.textContent = remaining; });
+    } else {
+      alert(d.error || 'Could not remove employee \u2014 try again.');
+    }
+  } catch(e) { alert('Network error \u2014 try again.'); }
 }
 
-// ── Monthly Report PDF ──
+// ═══ MONTHLY REPORT PDF ═══
 function downloadMonthlyPDF() {
-    const key = document.getElementById('monthSelect')?.value;
-    const m   = MONTHLY.find(x => x.key === key) || MONTHLY[0];
-    if (!m) return;
+  const key = document.getElementById('monthSelect')?.value;
+  const m   = MONTHLY.find(x => x.key === key) || MONTHLY[0];
+  if (!m) return;
 
-    const fmt$ = n => '$' + (parseFloat(n) || 0).toFixed(2);
-    const addr = [COMPANY_ADDR_LINE1, COMPANY_CITY].filter(Boolean).join(', ');
-    const total = (parseFloat(m.emp_spend)||0) + (parseFloat(m.co_spend)||0) + (parseFloat(m.bd_spend)||0);
+  const fmt$ = n => '$' + (parseFloat(n) || 0).toFixed(2);
+  const addr = [COMPANY_ADDR_LINE1, COMPANY_CITY].filter(Boolean).join(', ');
+  const total = (parseFloat(m.emp_spend)||0) + (parseFloat(m.co_spend)||0) + (parseFloat(m.bd_spend)||0);
 
-    const tierRows = (m.tiers || []).map(t => `
-        <tr>
-            <td>${t.name}</td>
-            <td style="text-align:right">${t.meals}</td>
-            <td style="text-align:right">${fmt$(t.emp)}</td>
-            <td style="text-align:right">${fmt$(t.co)}</td>
-            <td style="text-align:right">${fmt$(t.bd)}</td>
-            <td style="text-align:right;font-weight:600">${fmt$(t.total)}</td>
-        </tr>`).join('');
+  const tierRows = (m.tiers || []).map(t => `
+    <tr>
+      <td>${t.name}</td>
+      <td style="text-align:right">${t.meals}</td>
+      <td style="text-align:right">${fmt$(t.emp)}</td>
+      <td style="text-align:right">${fmt$(t.co)}</td>
+      <td style="text-align:right">${fmt$(t.bd)}</td>
+      <td style="text-align:right;font-weight:600">${fmt$(t.total)}</td>
+    </tr>`).join('');
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>Monthly Report — ${m.label} — ${COMPANY_NAME}</title>
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Monthly Report \u2014 ${m.label} \u2014 ${COMPANY_NAME}</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
@@ -1344,19 +1180,16 @@ function downloadMonthlyPDF() {
     <div class="report-title">${m.label}</div>
   </div>
 </div>
-
 <div class="meta">
   <div><strong>Company</strong><br>${COMPANY_NAME}${addr ? '<br>'+addr : ''}</div>
   <div><strong>Generated</strong><br>${new Date().toLocaleDateString('en-CA')}</div>
 </div>
-
 <div class="stats">
   <div class="stat"><div class="stat-lbl">Total Orders</div><div class="stat-val">${m.orders}</div></div>
   <div class="stat"><div class="stat-lbl">Total Meals</div><div class="stat-val">${m.meals}</div></div>
   <div class="stat"><div class="stat-lbl">Company Covered</div><div class="stat-val green">${fmt$(m.co_spend)}</div></div>
   <div class="stat"><div class="stat-lbl">BD Contributed</div><div class="stat-val blue">${fmt$(m.bd_spend)}</div></div>
 </div>
-
 <h2>Breakdown by Tier</h2>
 <table>
   <thead><tr>
@@ -1379,56 +1212,53 @@ function downloadMonthlyPDF() {
     </tr>
   </tbody>
 </table>
-
 <div class="footer">
-  BetterDay Corporate · ${COMPANY_NAME} · ${m.label} Monthly Report · Generated ${new Date().toLocaleDateString('en-CA')}
+  BetterDay Corporate \u00b7 ${COMPANY_NAME} \u00b7 ${m.label} Monthly Report \u00b7 Generated ${new Date().toLocaleDateString('en-CA')}
 </div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
 
-    const win = window.open('', '_blank');
-    win.document.write(html);
-    win.document.close();
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
 }
 
-// ── Weekly Invoices tab ──
+// ═══ INVOICE DETAIL ═══
 function toggleInvDetail(idx) {
-    const row = document.getElementById('inv-detail-' + idx);
-    if (!row) return;
-    const open = row.style.display === 'table-row';
-    // close all
-    document.querySelectorAll('.inv-row-detail').forEach(r => r.style.display = 'none');
-    if (!open) row.style.display = 'table-row';
+  const row = document.getElementById('inv-detail-' + idx);
+  if (!row) return;
+  const open = row.style.display === 'table-row';
+  document.querySelectorAll('.inv-row-detail').forEach(r => r.style.display = 'none');
+  if (!open) row.style.display = 'table-row';
 }
 
 function downloadInvPDF(idx) {
-    const inv = INVOICES[idx];
-    if (!inv) return;
+  const inv = INVOICES[idx];
+  if (!inv) return;
 
-    const fmtDate = s => s ? s.replace(/-/g, '/') : '—';
-    const fmt$ = n => '$' + (parseFloat(n) || 0).toFixed(2);
+  const fmtDate = s => s ? s.replace(/-/g, '/') : '\u2014';
+  const fmt$ = n => '$' + (parseFloat(n) || 0).toFixed(2);
 
-    let tierRows = '';
-    (inv.breakdown || []).forEach(t => {
-        tierRows += `<tr>
-            <td>${t.tier}</td>
-            <td style="text-align:right">${t.meals}</td>
-            <td style="text-align:right">${fmt$(t.companyTotal)}</td>
-        </tr>`;
-    });
+  let tierRows = '';
+  (inv.breakdown || []).forEach(t => {
+    tierRows += `<tr>
+      <td>${t.tier}</td>
+      <td style="text-align:right">${t.meals}</td>
+      <td style="text-align:right">${fmt$(t.companyTotal)}</td>
+    </tr>`;
+  });
 
-    const statusColor = {pending:'#b56b10', sent:'#1a6cb5', paid:'#1a7a46'};
-    const statusBg    = {pending:'#fff3e0', sent:'#eaf4ff', paid:'#eafaf1'};
-    const st = (inv.status || 'pending').toLowerCase();
+  const statusColor = {pending:'#b56b10', sent:'#1a6cb5', paid:'#1a7a46'};
+  const statusBg    = {pending:'#fff3e0', sent:'#eaf4ff', paid:'#eafaf1'};
+  const st = (inv.status || 'pending').toLowerCase();
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Invoice ${inv.invoiceId}</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'DM Sans',sans-serif;color:#222;padding:48px;max-width:720px;margin:0 auto;}
-  .logo{font-size:1.4rem;font-weight:800;color:#00465e;margin-bottom:4px;}
-  .logo span{color:#0077a3;}
+  .logo{font-size:1.4rem;font-weight:800;color:#00465e;margin-bottom:4px;}.logo span{color:#0077a3;}
   .inv-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;}
   .inv-meta{font-size:.85rem;color:#484848;line-height:1.7;}
   .status-badge{display:inline-block;padding:3px 12px;border-radius:99px;font-size:.75rem;font-weight:700;}
@@ -1455,7 +1285,6 @@ function downloadInvPDF(idx) {
     </div>
   </div>
 </div>
-
 <div style="display:flex;gap:40px;margin-bottom:36px;">
   <div class="inv-meta">
     <strong>Billed to</strong><br>
@@ -1465,48 +1294,69 @@ function downloadInvPDF(idx) {
   <div class="inv-meta">
     <strong>Invoice Date</strong><br>${fmtDate(inv.createdAt)}<br>
     <strong style="display:block;margin-top:8px;">Week Of</strong>${fmtDate(inv.weekOf)}<br>
-    ${inv.status === 'paid' ? `<strong style="display:block;margin-top:8px;">Paid</strong>${fmtDate(inv.paidAt)}${inv.paymentMethod ? ' · '+inv.paymentMethod : ''}` : ''}
+    ${inv.status === 'paid' ? '<strong style="display:block;margin-top:8px;">Paid</strong>' + fmtDate(inv.paidAt) + (inv.paymentMethod ? ' \u00b7 ' + inv.paymentMethod : '') : ''}
   </div>
 </div>
-
 <h2>Meal Breakdown</h2>
 <table>
   <thead><tr><th>Tier</th><th style="text-align:right">Meals</th><th style="text-align:right">Company Total</th></tr></thead>
   <tbody>${tierRows || '<tr><td colspan="3" style="color:#717171">No breakdown available</td></tr>'}</tbody>
 </table>
-
 <div style="display:flex;gap:32px;margin-bottom:24px;font-size:.82rem;color:#484848;">
   <div><strong style="display:block;color:#222">Total Meals</strong>${inv.totalMeals}</div>
   <div><strong style="display:block;color:#222">Employees</strong>${inv.totalEmployees}</div>
   <div><strong style="display:block;color:#222">Employee Paid</strong>${fmt$(inv.employeePaid)}</div>
   <div><strong style="display:block;color:#222">BD Contributed</strong>${fmt$(inv.bdContributed)}</div>
 </div>
-
 <div class="total-row">
   <span class="total-label">Total Owed by ${COMPANY_NAME}</span>
   <span class="total-val">${fmt$(inv.companyOwed)}</span>
 </div>
-
-${inv.notes ? `<div style="margin-top:16px;font-size:.82rem;color:#484848;"><strong>Notes:</strong> ${inv.notes}</div>` : ''}
-
+${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><strong>Notes:</strong> ' + inv.notes + '</div>' : ''}
 <div class="footer">
-  Questions? Contact BetterDay at support@betterday.ca · Invoice ${inv.invoiceId}
+  Questions? Contact BetterDay at support@betterday.ca \u00b7 Invoice ${inv.invoiceId}
 </div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
 
-    const win = window.open('', '_blank');
-    win.document.write(html);
-    win.document.close();
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
 }
-function toggleSidebar(){
-  document.querySelector('.sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
-}
-function closeSidebar(){
-  document.querySelector('.sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-}
+
+// ═══ CAROUSEL ═══
+(function(){
+  var track = document.getElementById('impactTrack');
+  var dotsWrap = document.getElementById('carouselDots');
+  if (!track || !dotsWrap) return;
+  var slides = track.querySelectorAll('.impact-slide');
+  var total = slides.length;
+  var maxIdx = total - 2;
+  if (maxIdx < 0) return;
+  var current = 0;
+  var interval = 5000;
+
+  function goTo(idx){
+    if(idx < 0) idx = maxIdx; if(idx > maxIdx) idx = 0;
+    current = idx;
+    track.style.transform = 'translateX(-' + (current * 50) + '%)';
+    dotsWrap.querySelectorAll('.carousel-dot').forEach(function(d, i){ d.className = 'carousel-dot' + (i === current ? ' active' : ''); });
+  }
+  for(var i = 0; i <= maxIdx; i++){
+    var d = document.createElement('div');
+    d.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+    d.dataset.idx = i;
+    d.addEventListener('click', function(){ goTo(parseInt(this.dataset.idx)); resetTimer(); });
+    dotsWrap.appendChild(d);
+  }
+  document.getElementById('carPrev').addEventListener('click', function(){ goTo(current - 1); resetTimer(); });
+  document.getElementById('carNext').addEventListener('click', function(){ goTo(current + 1); resetTimer(); });
+  var timer = setInterval(function(){ goTo(current + 1); }, interval);
+  function resetTimer(){ clearInterval(timer); timer = setInterval(function(){ goTo(current + 1); }, interval); }
+  var carousel = document.getElementById('impactCarousel');
+  carousel.addEventListener('mouseenter', function(){ clearInterval(timer); });
+  carousel.addEventListener('mouseleave', function(){ timer = setInterval(function(){ goTo(current + 1); }, interval); });
+})();
 </script>
 </body>
 </html>
