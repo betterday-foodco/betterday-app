@@ -117,12 +117,12 @@
             <div class="field-grid field-grid-3">
                 <div class="field">
                     <label>Company ID *</label>
-                    <input type="text" name="CompanyID" value="{{ company.CompanyID or '' }}" placeholder="e.g. BROCK" style="text-transform:uppercase;font-weight:800;letter-spacing:1px;" required>
+                    <input type="text" name="CompanyID" value="{{ company.CompanyID or '' }}" placeholder="e.g. ACME" style="text-transform:uppercase;font-weight:800;letter-spacing:1px;" required>
                     <span class="field-hint">Short unique code used in the employee portal</span>
                 </div>
                 <div class="field">
                     <label>Company Name *</label>
-                    <input type="text" name="CompanyName" value="{{ company.CompanyName or '' }}" placeholder="Brock Health" required>
+                    <input type="text" name="CompanyName" value="{{ company.CompanyName or '' }}" placeholder="Company Name" required>
                 </div>
                 <div class="field">
                     <label>Status</label>
@@ -249,8 +249,8 @@
             <div class="field-grid field-grid-2" style="margin-top:14px;">
                 <div class="field">
                     <label>Invoice Prefix</label>
-                    <input type="text" name="InvoicePrefix" value="{{ company.InvoicePrefix or '' }}" placeholder="BD-BROCK">
-                    <span class="field-hint">Used on invoice numbers e.g. BD-BROCK-0001</span>
+                    <input type="text" name="InvoicePrefix" value="{{ company.InvoicePrefix or '' }}" placeholder="BD-ACME">
+                    <span class="field-hint">Used on invoice numbers e.g. BD-ACME-0001</span>
                 </div>
                 <div class="field">
                     <label>Billing Reference / PO Number</label>
