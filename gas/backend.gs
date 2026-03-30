@@ -16,26 +16,12 @@
  */
 const BUFFER_SHEET_ID = "1iI6q2j7fYIcO5Da959RQeOr5BMFunP-VjsIwvNHA8Cg";
 function doGet(e) {
-  var ssHub = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ssHub.getSheetByName("Sheet1");
-  var data = sheet.getDataRange().getValues();
-  if (e && e.parameter && e.parameter.action === "get_bookings") {
-    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-  }
-  var takenDates = [];
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][0]) {
-      var date = new Date(data[i][0]);
-      takenDates.push(Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd"));
-    }
-  }
-  return ContentService.createTextOutput(JSON.stringify(takenDates)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({status: "ok"})).setMimeType(ContentService.MimeType.JSON);
 }
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var ssHub = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet1 = ssHub.getSheetByName("Sheet1");
     // ─────────────────────────────────────────
     // GET COMPANY
     // ─────────────────────────────────────────
@@ -695,95 +681,6 @@ function doPost(e) {
       meatIds.forEach(function(id)  { if(dishMap[id]) meatMenu.push( {id:id, ...dishMap[id]}); });
       veganIds.forEach(function(id) { if(dishMap[id]) veganMenu.push({id:id, ...dishMap[id]}); });
       return jsonOut({meat: meatMenu, vegan: veganMenu});
-    }
-    // ─────────────────────────────────────────
-    // ALL LEGACY ACTIONS — UNCHANGED
-    // ─────────────────────────────────────────
-    if (data.action === "get_profile_data") {
-      var s1Rows = sheet1.getDataRange().getValues();
-      var bookingData = {};
-      for (var i = 1; i < s1Rows.length; i++) {
-        var rDate = Utilities.formatDate(new Date(s1Rows[i][0]), Session.getScriptTimeZone(), "yyyy-MM-dd");
-        if (s1Rows[i][2] == data.school && rDate == data.date) {
-          bookingData = { contact: s1Rows[i][1], address: s1Rows[i][3], staff_count: s1Rows[i][4], lunch_hours: s1Rows[i][5], notes: s1Rows[i][6], status: s1Rows[i][7], email: s1Rows[i][8] || "" };
-          break;
-        }
-      }
-      var orderSheet = ssHub.getSheetByName("TeacherOrders");
-      var orders = [];
-      if (orderSheet) {
-        var oRows = orderSheet.getDataRange().getValues();
-        for (var j = 1; j < oRows.length; j++) {
-          var oDate = oRows[j][2];
-          if (oDate instanceof Date) oDate = Utilities.formatDate(oDate, Session.getScriptTimeZone(), "yyyy-MM-dd");
-          if (oRows[j][1] == data.school && oDate == data.date)
-            orders.push({ teacher: oRows[j][3], meal_id: oRows[j][4], dish_name: oRows[j][5] || "", diet: oRows[j][6] || "" });
-        }
-      }
-      bookingData.orders = orders;
-      return jsonOut(bookingData);
-    }
-    if (data.action === "update_booking") {
-      var rows = sheet1.getDataRange().getValues();
-      for (var i = 1; i < rows.length; i++) {
-        var rDate = Utilities.formatDate(new Date(rows[i][0]), Session.getScriptTimeZone(), "yyyy-MM-dd");
-        if (rows[i][2] == data.school && rDate == data.date) {
-          sheet1.getRange(i + 1, 8).setValue(data.status);
-          sheet1.getRange(i + 1, 9).setValue(data.email);
-          return ContentService.createTextOutput("Update Success");
-        }
-      }
-      return ContentService.createTextOutput("Error: Booking not found");
-    }
-    if (data.action === "submit_teacher_order") {
-      var orderSheet = ssHub.getSheetByName("TeacherOrders");
-      if (!orderSheet) {
-        orderSheet = ssHub.insertSheet("TeacherOrders");
-        orderSheet.appendRow(["Timestamp","School","Delivery Date","Teacher Name","Meal ID","Dish Name","Diet Type"]);
-      }
-      orderSheet.appendRow([new Date(), data.school, data.delivery_date, data.name, data.meal_id, data.dish_name || ("Dish #" + data.meal_id), data.diet || "Unknown"]);
-      return ContentService.createTextOutput("Order Success");
-    }
-    if (data.action === "book_principal") {
-      sheet1.appendRow([data.date, data.contact_name, data.school_name, data.address, data.staff_count, data.lunch_time, data.delivery_notes, "🆕 New Booking", data.email]);
-      return ContentService.createTextOutput("Booking Success");
-    }
-    if (data.action === "get_all_orders") {
-      var orderSheet = ssHub.getSheetByName("TeacherOrders");
-      var orders = [];
-      if (orderSheet) {
-        var rows = orderSheet.getDataRange().getValues();
-        for (var i = 1; i < rows.length; i++) {
-          var d = rows[i][2];
-          if (Object.prototype.toString.call(d) === "[object Date]") d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
-          orders.push({ school: rows[i][1], date: d, meal_id: rows[i][4], dish_name: rows[i][5] || "", diet: rows[i][6] || "" });
-        }
-      }
-      return jsonOut(orders);
-    }
-    if (data.action === "get_blocked_dates") {
-      var blockSheet = ssHub.getSheetByName("BlockedDates");
-      if (!blockSheet) return jsonOut([]);
-      var bRows = blockSheet.getDataRange().getValues();
-      var blocked = [];
-      for (var i = 1; i < bRows.length; i++) {
-        var d = bRows[i][0];
-        if (d) blocked.push(Object.prototype.toString.call(d) === "[object Date]" ? Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd") : String(d).trim());
-      }
-      return jsonOut(blocked);
-    }
-    if (data.action === "toggle_block_date") {
-      var blockSheet = ssHub.getSheetByName("BlockedDates");
-      if (!blockSheet) { blockSheet = ssHub.insertSheet("BlockedDates"); blockSheet.appendRow(["Blocked Date"]); }
-      var bRows = blockSheet.getDataRange().getValues();
-      var found = false;
-      for (var i = 1; i < bRows.length; i++) {
-        var d = bRows[i][0];
-        var dStr = Object.prototype.toString.call(d) === "[object Date]" ? Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd") : String(d).trim();
-        if (dStr === data.date) { blockSheet.deleteRow(i + 1); found = true; break; }
-      }
-      if (!found) blockSheet.appendRow([data.date]);
-      return ContentService.createTextOutput("Toggled");
     }
     // ─────────────────────────────────────────
     // GET ALL COMPANIES
