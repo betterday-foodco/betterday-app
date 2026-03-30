@@ -169,7 +169,7 @@
                 {% if inv.company_info.BillingContactName %}<strong>{{ inv.company_info.BillingContactName }}</strong><br>{% endif %}
                 {% if inv.company_info.BillingContactEmail %}{{ inv.company_info.BillingContactEmail }}<br>{% endif %}
                 {% if inv.company_info.AddressLine1 %}{{ inv.company_info.AddressLine1 }}{% if inv.company_info.AddressLine2 %}, {{ inv.company_info.AddressLine2 }}{% endif %}<br>{% endif %}
-                {% if inv.company_info.City %}{{ inv.company_info.City }}{% if inv.company_info.ProvinceState %}, {{ inv.company_info.ProvinceState }}{% endif %}{% if inv.company_info.PostalCode %} {{ inv.company_info.PostalCode }}{% endif %}{% endif %}
+                {% if inv.company_info.City %}{{ inv.company_info.City }}{% if inv.company_info.Province %}, {{ inv.company_info.Province }}{% endif %}{% if inv.company_info.PostalCode %} {{ inv.company_info.PostalCode }}{% endif %}{% endif %}
             </div>
         </div>
     </div>
