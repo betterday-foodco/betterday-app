@@ -50,6 +50,8 @@ GOOGLE_SCRIPT_URL = os.environ.get(
 APP_BASE_URL    = os.environ.get('APP_BASE_URL', 'https://betterday-app.onrender.com')
 ADMIN_PASSWORD  = os.environ.get('ADMIN_PASSWORD',   'betterday2024')
 HELCIM_API_TOKEN = os.environ.get('HELCIM_API_TOKEN', '')
+SMTP_EMAIL       = os.environ.get('SMTP_EMAIL', '')
+SMTP_PASSWORD    = os.environ.get('SMTP_PASSWORD', '')
 app.secret_key  = os.environ.get('FLASK_SECRET_KEY', 'bd-dev-secret-change-in-prod')
 
 logging.basicConfig(level=logging.WARNING)
@@ -58,6 +60,67 @@ log = logging.getLogger(__name__)
 # ─────────────────────────────────────────────────────────────
 # MAGIC LINK TOKEN STORE  (Flask-side, bypasses GAS verify_magic_token)
 # ─────────────────────────────────────────────────────────────
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+def _send_email(to_email, subject, html_body, plain_body=None):
+    """Send an email via Gmail SMTP. Returns True on success."""
+    if not SMTP_EMAIL or not SMTP_PASSWORD:
+        log.warning('SMTP not configured — skipping email to %s', to_email)
+        return False
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['From'] = f'BetterDay <{SMTP_EMAIL}>'
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        if plain_body:
+            msg.attach(MIMEText(plain_body, 'plain'))
+        msg.attach(MIMEText(html_body, 'html'))
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=10) as server:
+            server.starttls()
+            server.login(SMTP_EMAIL, SMTP_PASSWORD)
+            server.sendmail(SMTP_EMAIL, to_email, msg.as_string())
+        log.info('Email sent to %s', to_email)
+        return True
+    except Exception as ex:
+        log.warning('SMTP email failed to %s: %s', to_email, ex)
+        return False
+
+
+def _build_magic_link_email(sign_in_url, header_bg='#4ea2fd', header_label='FOR WORK',
+                            btn_text='Sign in to BetterDay →', btn_bg='#4ea2fd'):
+    """Build the branded magic-link HTML email body."""
+    logo_url = f'{APP_BASE_URL}/static/Cream%20Logo.png'
+    return (
+        "<!DOCTYPE html><html><body style='margin:0;padding:0;background:#f4ede3;"
+        "font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",sans-serif;'>"
+        "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'>"
+        "<tr><td align='center'>"
+        "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>"
+        f"<tr><td style='background:{header_bg};border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>"
+        f"<img src='{logo_url}' alt='BetterDay' style='height:36px;' />"
+        f"<div style='font-size:.65rem;color:rgba(255,255,255,.75);letter-spacing:2px;"
+        f"text-transform:uppercase;margin-top:6px;'>{header_label}</div>"
+        "</td></tr>"
+        "<tr><td style='background:#ffffff;padding:36px 32px 28px;'>"
+        "<p style='font-size:1.15rem;font-weight:800;color:#0d2030;margin:0 0 10px;'>"
+        "Your sign-in link is ready</p>"
+        "<p style='font-size:.9rem;color:#50657a;line-height:1.65;margin:0 0 28px;'>"
+        "Click the button below to sign in — no password needed. "
+        "This link expires in <strong>15 minutes</strong> and can only be used once.</p>"
+        f"<a href='{sign_in_url}' style='display:block;background:{btn_bg};color:#ffffff;"
+        "text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;"
+        f"font-weight:700;font-size:1rem;letter-spacing:0.2px;'>{btn_text}</a>"
+        "</td></tr>"
+        "<tr><td style='background:#f9f5f0;border-radius:0 0 16px 16px;padding:20px 32px;"
+        "border-top:1px solid #e8e0d5;'>"
+        "<p style='font-size:.75rem;color:#9aabb8;margin:0;line-height:1.6;'>"
+        "If you didn't request this, you can safely ignore it — your account is secure.<br>"
+        "Questions? Reply to this email.</p>"
+        "</td></tr></table></td></tr></table></body></html>"
+    )
+
 _token_store      = {}   # token → {email, company_id, created_at, used}
 _token_store_lock = threading.Lock()
 _TOKEN_TTL        = 900  # 15 minutes
@@ -198,14 +261,32 @@ def clear_cache():
 def gas_proxy():
     payload = request.get_json(force=True) or {}
 
-    # ── create_magic_token: Flask generates + stores token; GAS just sends the email ──
+    # ── create_magic_token: Flask generates token, sends email via SMTP, stores in GAS async ──
     if payload.get('action') == 'create_magic_token':
         token      = secrets.token_hex(32)
         company_id = str(payload.get('company_id', '')).strip().upper()
         email      = str(payload.get('email', '')).strip().lower()
+        sign_in_url = f"{APP_BASE_URL}/work?token={token}&co={company_id}"
         _store_magic_token(token, email, company_id)
+
+        # Send email directly from Flask (fast — no GAS dependency)
+        html_body = _build_magic_link_email(sign_in_url)
+        email_sent = _send_email(email, 'Your BetterDay sign-in link', html_body,
+                                  plain_body=f'Sign in here: {sign_in_url}\n\nExpires in 15 minutes.')
+        if email_sent:
+            # Store token in GAS in the background (for audit trail only — not blocking)
+            def _bg_store():
+                try:
+                    _gas_post({'action': 'create_magic_token', 'email': email,
+                               'company_id': company_id, 'token_override': token,
+                               'sign_in_url': sign_in_url, 'skip_email': True}, timeout=15)
+                except Exception:
+                    pass
+            threading.Thread(target=_bg_store, daemon=True).start()
+            return jsonify({'success': True})
+        # SMTP not configured or failed — fall through to GAS to send email
         payload['token_override'] = token
-        payload['sign_in_url'] = f"{APP_BASE_URL}/work?token={token}&co={company_id}"
+        payload['sign_in_url'] = sign_in_url
 
     # ── verify_magic_token: Flask checks its own store (fast, no GAS round-trip) ──
     elif payload.get('action') == 'verify_magic_token':
