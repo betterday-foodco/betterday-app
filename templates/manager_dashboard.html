@@ -220,13 +220,12 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 
 <!-- ════════ SIDEBAR ════════ -->
 <aside class="sb">
-  <div class="sb-logo" style="display:flex;align-items:center;gap:10px;padding:0 20px 24px;">
+  <div class="sb-logo" style="display:flex;align-items:center;gap:10px;padding:0 20px 16px;">
     <img src="{{ url_for('static', filename='Cream Logo.png') }}" alt="BD" style="height:32px;" onerror="this.style.display='none'">
-    <div style="display:flex;flex-direction:column;gap:1px;">
-      <span style="font-size:.6rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.45);">FOR WORK</span>
-      <span style="font-size:11px;font-weight:700;color:#FAEBDA;">{{ company_name }}</span>
-    </div>
+    <span style="font-size:.6rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.45);">FOR WORK</span>
   </div>
+  <div style="padding:0 20px 4px;font-size:1.05rem;font-weight:800;color:#FFC600;letter-spacing:.3px;line-height:1.2;">{{ company_name }}</div>
+  <div style="padding:0 20px 18px;font-size:.65rem;color:rgba(250,235,218,.35);font-weight:600;">Manager Portal</div>
   <div class="sb-sec">Dashboard</div>
   <div class="ni on" onclick="sidebarNav('overview', this)">&#9632; &nbsp;Overview</div>
   <div class="ni" onclick="sidebarNav('orders', this)">&#9776; &nbsp;Orders <span class="nbdg" id="ordersBadge">{{ orders_json | safe | length if orders_json else 0 }}</span></div>
