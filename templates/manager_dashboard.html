@@ -220,12 +220,12 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 
 <!-- ════════ SIDEBAR ════════ -->
 <aside class="sb">
-  <div class="sb-logo" style="flex-direction:column;align-items:flex-start;gap:2px;">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <img src="{{ url_for('static', filename='Cream Logo.png') }}" alt="BD" style="height:20px;" onerror="this.style.display='none'">
-      <span style="font-size:.55rem;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.4);">FOR WORK</span>
+  <div class="sb-logo" style="display:flex;align-items:center;gap:10px;padding:0 20px 24px;">
+    <img src="{{ url_for('static', filename='Cream Logo.png') }}" alt="BD" style="height:32px;" onerror="this.style.display='none'">
+    <div style="display:flex;flex-direction:column;gap:1px;">
+      <span style="font-size:.6rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.45);">FOR WORK</span>
+      <span style="font-size:11px;font-weight:700;color:#FAEBDA;">{{ company_name }}</span>
     </div>
-    <span class="sb-logo-text" style="font-size:11px;color:rgba(250,235,218,.6);font-weight:600;">{{ company_name }} · Manager</span>
   </div>
   <div class="sb-sec">Dashboard</div>
   <div class="ni on" onclick="sidebarNav('overview', this)">&#9632; &nbsp;Overview</div>
@@ -243,8 +243,6 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 <!-- ════════ MAIN ════════ -->
 <div class="mn">
   <div class="tb">
-    <span class="tb-title">Better<b>Day</b></span>
-    <span class="tb-pill">Manager</span>
     <div class="tb-right"><a href="/manager/logout" class="tb-out">Sign out</a></div>
   </div>
 
