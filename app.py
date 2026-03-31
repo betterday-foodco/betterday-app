@@ -32,6 +32,14 @@ def money_filter(s):
     except (TypeError, ValueError):
         return '0.00'
 
+@app.template_filter('commafy')
+def commafy_filter(s):
+    """Format a number with commas: 90000 → 90,000."""
+    try:
+        return '{:,.0f}'.format(float(s))
+    except (TypeError, ValueError):
+        return '0'
+
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────
