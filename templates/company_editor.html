@@ -149,6 +149,7 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
       <button type="button" class="tab-btn active" onclick="switchTab('details', this)">Company Details</button>
       <button type="button" class="tab-btn" onclick="switchTab('delivery', this)">Delivery Details</button>
       <button type="button" class="tab-btn" onclick="switchTab('subsidy', this)">Subsidy Structure</button>
+      <button type="button" class="tab-btn" onclick="switchTab('billing', this)">Billing &amp; Payments</button>
     </div>
 
     <form method="POST">
@@ -339,7 +340,127 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
 
         </div><!-- /tab-delivery -->
 
-        <!-- ════════ TAB 3: SUBSIDY STRUCTURE ════════ -->
+        <!-- ════════ TAB 3: BILLING & PAYMENTS ════════ -->
+        <div id="tab-billing" class="tab-panel">
+
+            <div class="form-section">
+                <div class="sec-label">BILLING CYCLE</div>
+                <div class="field-grid field-grid-2">
+                    <div class="field">
+                        <label>Invoice Frequency</label>
+                        <select name="BillingCycle">
+                            <option value="weekly" {{ 'selected' if company.BillingCycle == 'weekly' }}>Weekly — invoice each delivery</option>
+                            <option value="biweekly" {{ 'selected' if company.BillingCycle == 'biweekly' }}>Bi-weekly — every 2 weeks</option>
+                            <option value="monthly" {{ 'selected' if company.BillingCycle == 'monthly' }}>Monthly — aggregate all deliveries</option>
+                        </select>
+                        <span class="field-hint">How often an invoice is generated for this company</span>
+                    </div>
+                    <div class="field">
+                        <label>Payment Terms</label>
+                        <select name="PaymentTerms">
+                            <option value="due-on-receipt" {{ 'selected' if company.PaymentTerms == 'due-on-receipt' }}>Due on receipt</option>
+                            <option value="net-15" {{ 'selected' if company.PaymentTerms == 'net-15' }}>Net 15</option>
+                            <option value="net-30" {{ 'selected' if company.PaymentTerms == 'net-30' }}>Net 30</option>
+                            <option value="net-45" {{ 'selected' if company.PaymentTerms == 'net-45' }}>Net 45</option>
+                            <option value="net-60" {{ 'selected' if company.PaymentTerms == 'net-60' }}>Net 60</option>
+                        </select>
+                        <span class="field-hint">When payment is due after invoice is sent</span>
+                    </div>
+                </div>
+                <div class="field-grid field-grid-2" style="margin-top:14px;">
+                    <div class="field">
+                        <label>Overdue Threshold (days)</label>
+                        <input type="number" name="OverdueDays" value="{{ company.OverdueDays or 15 }}" min="1" max="90" style="max-width:120px;">
+                        <span class="field-hint">Days past due date before flagged as overdue</span>
+                    </div>
+                    <div class="field">
+                        <label>Monthly Statement Day</label>
+                        <input type="number" name="MonthlyStatementDay" value="{{ company.MonthlyStatementDay or 1 }}" min="1" max="28" style="max-width:120px;">
+                        <span class="field-hint">Day of month to generate statements (1 = 1st)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-top:20px;">
+                <div class="sec-label">PAYMENT COLLECTION</div>
+                <div class="field-grid field-grid-2">
+                    <div class="field">
+                        <label>Collection Method</label>
+                        <select name="CollectionMethod">
+                            <option value="auto-eft" {{ 'selected' if company.CollectionMethod == 'auto-eft' }}>Auto EFT/ACH — charge bank account</option>
+                            <option value="auto-card" {{ 'selected' if company.CollectionMethod == 'auto-card' }}>Auto Card — charge card on file</option>
+                            <option value="manual" {{ 'selected' if company.CollectionMethod == 'manual' }}>Manual — send invoice, wait for payment</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Collection Timing</label>
+                        <select name="CollectionTiming">
+                            <option value="on-delivery" {{ 'selected' if company.CollectionTiming == 'on-delivery' }}>On delivery day</option>
+                            <option value="end-of-week" {{ 'selected' if company.CollectionTiming == 'end-of-week' }}>End of week (Friday)</option>
+                            <option value="end-of-cycle" {{ 'selected' if company.CollectionTiming == 'end-of-cycle' }}>End of billing cycle</option>
+                        </select>
+                        <span class="field-hint">When auto-charge runs (ignored for manual collection)</span>
+                    </div>
+                </div>
+                <div class="field-grid field-grid-2" style="margin-top:14px;">
+                    <div class="field">
+                        <label>
+                            <input type="checkbox" name="AutoChargeEnabled" {{ 'checked' if company.AutoChargeEnabled in ('TRUE', 'on', True) }} style="width:auto;margin-right:6px;">
+                            Enable auto-charge
+                        </label>
+                        <span class="field-hint">Automatically charge stored payment method on collection day</span>
+                    </div>
+                    <div class="field">
+                        <label>Helcim Customer Code</label>
+                        <input type="text" name="HelcimCustomerCode" value="{{ company.HelcimCustomerCode or '' }}" placeholder="Set up in Helcim dashboard">
+                        <span class="field-hint">Required for auto EFT/card — links to their Helcim payment profile</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-top:20px;">
+                <div class="sec-label">INVOICE SETTINGS</div>
+                <div class="field-grid field-grid-2">
+                    <div class="field">
+                        <label>Invoice Prefix</label>
+                        <input type="text" name="InvoicePrefix" value="{{ company.InvoicePrefix or ('BD-' + company_id) }}" placeholder="BD-BROCK">
+                        <span class="field-hint">Invoices numbered as BD-BROCK-001, BD-BROCK-002, etc.</span>
+                    </div>
+                    <div class="field">
+                        <label>Next Invoice #</label>
+                        <input type="number" name="NextInvoiceNumber" value="{{ company.NextInvoiceNumber or 1 }}" min="1" style="max-width:120px;">
+                        <span class="field-hint">Auto-increments — only change to fix numbering</span>
+                    </div>
+                </div>
+                <div class="field-grid field-grid-2" style="margin-top:14px;">
+                    <div class="field">
+                        <label>Billing Contact Name</label>
+                        <input type="text" name="BillingContactName" value="{{ company.BillingContactName or '' }}" placeholder="Accounts Payable">
+                    </div>
+                    <div class="field">
+                        <label>Billing Contact Email</label>
+                        <input type="email" name="BillingContactEmail" value="{{ company.BillingContactEmail or '' }}" placeholder="ap@company.com">
+                        <span class="field-hint">Invoices and statements are sent to this address</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" style="margin-top:20px;">
+                <div class="sec-label">ACCOUNT BALANCE</div>
+                <div style="display:flex;gap:24px;align-items:center;padding:12px 16px;background:rgba(0,70,94,.04);border-radius:10px;">
+                    <div>
+                        <div style="font-size:.72rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;letter-spacing:.5px;">Credit Balance</div>
+                        <div style="font-size:1.4rem;font-weight:900;color:{{ '#167421' if (company.CreditBalance or 0)|float > 0 else '#003141' }};">{{ '$%.2f'|format((company.CreditBalance or 0)|float) }}</div>
+                    </div>
+                    <div style="flex:1;">
+                        <span class="field-hint" style="margin:0;">Credits are automatically deducted from the next invoice. Issue credits from the admin dashboard.</span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-billing -->
+
+        <!-- ════════ TAB 4: SUBSIDY STRUCTURE ════════ -->
         <div id="tab-subsidy" class="tab-panel">
 
             <!-- ═══ SECTION 1: PRICING STRUCTURE ═══ -->

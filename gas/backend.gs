@@ -829,30 +829,14 @@ function doPost(e) {
       var companyId = String(data.company_id || "").trim().toUpperCase();
       var invSheet  = getOrCreateInvoiceSheet(ssHub);
       var rows      = invSheet.getDataRange().getValues();
+      var headers   = rows[0];
+      var companyIdIdx = headers.indexOf("CompanyID");
       var result    = [];
       for (var i = 1; i < rows.length; i++) {
-        if (String(rows[i][1]).trim().toUpperCase() !== companyId) continue;
-        result.push({
-          invoiceId:      rows[i][0],
-          companyId:      rows[i][1],
-          companyName:    rows[i][2],
-          weekOf:         rows[i][3] ? Utilities.formatDate(new Date(rows[i][3]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          sundayAnchor:   rows[i][4],
-          totalOrders:    rows[i][5],
-          totalMeals:     rows[i][6],
-          totalEmployees: rows[i][7],
-          employeePaid:   rows[i][8],
-          companyOwed:    rows[i][9],
-          bdContributed:  rows[i][10],
-          breakdown:      rows[i][11] ? JSON.parse(rows[i][11]) : [],
-          status:         rows[i][12] || "pending",
-          createdAt:      rows[i][13] ? Utilities.formatDate(new Date(rows[i][13]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paidAt:         rows[i][14] ? Utilities.formatDate(new Date(rows[i][14]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paymentMethod:  rows[i][15] || "",
-          notes:          rows[i][16] || ""
-        });
+        if (String(rows[i][companyIdIdx]).trim().toUpperCase() !== companyId) continue;
+        result.push(_readInvoiceRow(headers, rows[i]));
       }
-      result.sort(function(a,b){ return b.weekOf.localeCompare(a.weekOf); });
+      result.sort(function(a,b){ return (b.PeriodStart || "").localeCompare(a.PeriodStart || ""); });
       return jsonOut({invoices: result});
     }
     // ─────────────────────────────────────────
@@ -861,48 +845,46 @@ function doPost(e) {
     if (data.action === "get_all_invoices") {
       var invSheet = getOrCreateInvoiceSheet(ssHub);
       var rows     = invSheet.getDataRange().getValues();
+      var headers  = rows[0];
+      var invoiceNumberIdx = headers.indexOf("InvoiceNumber");
       var result   = [];
       for (var i = 1; i < rows.length; i++) {
-        if (!rows[i][0]) continue;
-        result.push({
-          invoiceId:      rows[i][0],
-          companyId:      rows[i][1],
-          companyName:    rows[i][2],
-          weekOf:         rows[i][3] ? Utilities.formatDate(new Date(rows[i][3]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          sundayAnchor:   rows[i][4],
-          totalOrders:    rows[i][5],
-          totalMeals:     rows[i][6],
-          totalEmployees: rows[i][7],
-          employeePaid:   rows[i][8],
-          companyOwed:    rows[i][9],
-          bdContributed:  rows[i][10],
-          breakdown:      rows[i][11] ? JSON.parse(rows[i][11]) : [],
-          status:         rows[i][12] || "pending",
-          createdAt:      rows[i][13] ? Utilities.formatDate(new Date(rows[i][13]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paidAt:         rows[i][14] ? Utilities.formatDate(new Date(rows[i][14]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paymentMethod:  rows[i][15] || "",
-          notes:          rows[i][16] || ""
-        });
+        if (!rows[i][invoiceNumberIdx] && !rows[i][headers.indexOf("InvoiceID")]) continue;
+        result.push(_readInvoiceRow(headers, rows[i]));
       }
-      result.sort(function(a,b){ return b.weekOf.localeCompare(a.weekOf); });
+      result.sort(function(a,b){ return (b.PeriodStart || "").localeCompare(a.PeriodStart || ""); });
       return jsonOut({invoices: result});
     }
     // ─────────────────────────────────────────
     // UPDATE INVOICE STATUS  (admin — mark paid/sent)
     // ─────────────────────────────────────────
     if (data.action === "update_invoice_status") {
-      var invoiceId     = String(data.invoice_id || "").trim();
-      var newStatus     = String(data.status || "").trim();
-      var paymentMethod = String(data.payment_method || "").trim();
-      var notes         = String(data.notes || "").trim();
-      var invSheet      = getOrCreateInvoiceSheet(ssHub);
-      var rows          = invSheet.getDataRange().getValues();
+      var invoiceId      = String(data.invoice_id || "").trim();
+      var newStatus      = String(data.status || "").trim();
+      var paymentMethod  = String(data.payment_method || "").trim();
+      var paidAmount     = data.paid_amount;
+      var paymentRef     = String(data.payment_reference || "").trim();
+      var notes          = String(data.notes || "").trim();
+      var invSheet       = getOrCreateInvoiceSheet(ssHub);
+      var rows           = invSheet.getDataRange().getValues();
+      var headers        = rows[0];
+      var invoiceIdIdx   = headers.indexOf("InvoiceID");
+      var statusIdx      = headers.indexOf("Status");
+      var paidAtIdx      = headers.indexOf("PaidAt");
+      var sentAtIdx      = headers.indexOf("SentAt");
+      var paidAmountIdx  = headers.indexOf("PaidAmount");
+      var payRefIdx      = headers.indexOf("PaymentReference");
+      var payMethodIdx   = headers.indexOf("PaymentMethod");
+      var notesIdx       = headers.indexOf("Notes");
       for (var i = 1; i < rows.length; i++) {
-        if (String(rows[i][0]).trim() !== invoiceId) continue;
-        invSheet.getRange(i+1, 13).setValue(newStatus);
-        if (newStatus === "paid") invSheet.getRange(i+1, 15).setValue(new Date());
-        if (paymentMethod) invSheet.getRange(i+1, 16).setValue(paymentMethod);
-        if (notes)         invSheet.getRange(i+1, 17).setValue(notes);
+        if (String(rows[i][invoiceIdIdx]).trim() !== invoiceId) continue;
+        if (statusIdx >= 0) invSheet.getRange(i+1, statusIdx+1).setValue(newStatus);
+        if (newStatus === "paid" && paidAtIdx >= 0) invSheet.getRange(i+1, paidAtIdx+1).setValue(new Date());
+        if (newStatus === "sent" && sentAtIdx >= 0) invSheet.getRange(i+1, sentAtIdx+1).setValue(new Date());
+        if (paymentMethod && payMethodIdx >= 0) invSheet.getRange(i+1, payMethodIdx+1).setValue(paymentMethod);
+        if (paidAmount !== undefined && paidAmount !== "" && paidAmountIdx >= 0) invSheet.getRange(i+1, paidAmountIdx+1).setValue(parseFloat(paidAmount) || 0);
+        if (paymentRef && payRefIdx >= 0) invSheet.getRange(i+1, payRefIdx+1).setValue(paymentRef);
+        if (notes && notesIdx >= 0) invSheet.getRange(i+1, notesIdx+1).setValue(notes);
         return jsonOut({success: true});
       }
       return jsonOut({success: false, error: "Invoice not found"});
@@ -1192,33 +1174,94 @@ function getOrCreateInvoiceSheet(ssHub) {
   if (!sheet) {
     sheet = ssHub.insertSheet("CompanyInvoices");
     sheet.appendRow([
-      "InvoiceID","CompanyID","CompanyName","WeekOf","SundayAnchor",
-      "TotalOrders","TotalMeals","TotalEmployees",
-      "EmployeePaid","CompanyOwed","BDContributed",
-      "TierBreakdownJSON","Status","CreatedAt","PaidAt","PaymentMethod","Notes"
+      "InvoiceNumber","InvoiceID","CompanyID","CompanyName","BillingCycle",
+      "PeriodStart","PeriodEnd","SundayAnchors","TotalOrders","TotalMeals",
+      "TotalEmployees","SubtotalFullRetail","EmployeePaid","CompanyOwed",
+      "BDContributed","CreditApplied","AmountDue","TierBreakdownJSON",
+      "Status","CollectionMethod","DueDate","CreatedAt","SentAt","PaidAt",
+      "PaidAmount","PaymentReference","PaymentMethod","OverdueReminderSent","Notes"
     ]);
     sheet.setFrozenRows(1);
-    sheet.getRange(1,1,1,17).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+    sheet.getRange(1,1,1,29).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
   }
   return sheet;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INVOICE ROW READER  (header-based — never hardcode column indices)
+// ─────────────────────────────────────────────────────────────────────────────
+function _readInvoiceRow(headers, row) {
+  var tz = Session.getScriptTimeZone();
+  var obj = {};
+  var dateFields = ["PeriodStart","PeriodEnd","DueDate","CreatedAt","SentAt","PaidAt"];
+  for (var c = 0; c < headers.length; c++) {
+    var h = headers[c];
+    var val = row[c];
+    if (dateFields.indexOf(h) >= 0 && val) {
+      try { val = Utilities.formatDate(new Date(val), tz, "yyyy-MM-dd"); } catch(e) { val = String(val); }
+    } else if (h === "TierBreakdownJSON" && val) {
+      try { val = JSON.parse(val); } catch(e) { val = []; }
+    }
+    obj[h] = (val === undefined || val === null) ? "" : val;
+  }
+  return obj;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CORE INVOICE BUILDER  (shared by auto-Thursday trigger + manual generate)
 // ─────────────────────────────────────────────────────────────────────────────
 function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
+  var tz = Session.getScriptTimeZone();
   var invSheet  = getOrCreateInvoiceSheet(ssHub);
   var invRows   = invSheet.getDataRange().getValues();
+  var invHeaders = invRows[0];
+
+  // ── Look up company record (header-based) ──
+  var compSheet = ssHub.getSheetByName("Companies");
+  if (!compSheet) return {success:false, error:"Companies sheet not found"};
+  var compRows = compSheet.getDataRange().getValues();
+  var compHeaders = compRows[0];
+  var compIdIdx         = compHeaders.indexOf("CompanyID");
+  var compNameIdx       = compHeaders.indexOf("CompanyName");
+  var billingCycleIdx   = compHeaders.indexOf("BillingCycle");
+  var collectionIdx     = compHeaders.indexOf("CollectionMethod");
+  var payTermsIdx       = compHeaders.indexOf("PaymentTerms");
+  var invPrefixIdx      = compHeaders.indexOf("InvoicePrefix");
+  var nextInvNumIdx     = compHeaders.indexOf("NextInvoiceNumber");
+  var creditBalIdx      = compHeaders.indexOf("CreditBalance");
+  var fullPriceIdx      = compHeaders.indexOf("FullPrice");
+
+  var companyRow = -1, companyName = "", billingCycle = "weekly", collectionMethod = "";
+  var paymentTerms = "due-on-receipt", invoicePrefix = "BD", nextInvoiceNumber = 1;
+  var creditBalance = 0, fullPrice = 0;
+  for (var k = 1; k < compRows.length; k++) {
+    if (String(compRows[k][compIdIdx]).trim().toUpperCase() === companyId) {
+      companyRow = k;
+      companyName       = compNameIdx >= 0 ? String(compRows[k][compNameIdx] || "") : "";
+      billingCycle      = billingCycleIdx >= 0 ? String(compRows[k][billingCycleIdx] || "weekly").trim() : "weekly";
+      collectionMethod  = collectionIdx >= 0 ? String(compRows[k][collectionIdx] || "").trim() : "";
+      paymentTerms      = payTermsIdx >= 0 ? String(compRows[k][payTermsIdx] || "due-on-receipt").trim() : "due-on-receipt";
+      invoicePrefix     = invPrefixIdx >= 0 ? String(compRows[k][invPrefixIdx] || "BD").trim() : "BD";
+      nextInvoiceNumber = nextInvNumIdx >= 0 ? (parseInt(compRows[k][nextInvNumIdx]) || 1) : 1;
+      creditBalance     = creditBalIdx >= 0 ? (parseFloat(compRows[k][creditBalIdx]) || 0) : 0;
+      fullPrice         = fullPriceIdx >= 0 ? (parseFloat(compRows[k][fullPriceIdx]) || 0) : 0;
+      break;
+    }
+  }
+  if (companyRow < 0) return {success:false, error:"Company not found: " + companyId};
+
+  // ── Build InvoiceID (deterministic, for duplicate check) ──
   var invoiceId = "BD-" + sundayAnchor.replace(/-/g,"").slice(0,8) + "-" + companyId;
 
-  // Skip if already exists (used during auto-run to avoid duplicates)
-  if (skipIfExists) {
+  // ── Duplicate check using InvoiceID column ──
+  var invIdIdx = invHeaders.indexOf("InvoiceID");
+  if (skipIfExists && invIdIdx >= 0) {
     for (var x = 1; x < invRows.length; x++) {
-      if (String(invRows[x][0]).trim() === invoiceId) return {success:false, skipped:true};
+      if (String(invRows[x][invIdIdx]).trim() === invoiceId) return {success:false, skipped:true};
     }
   }
 
-  // Pull orders for this company + week
+  // ── Pull orders for this company + week ──
   var corpSheet = ssHub.getSheetByName("CorporateOrders");
   if (!corpSheet) return {success:false, error:"No CorporateOrders sheet"};
   var rows    = corpSheet.getDataRange().getValues();
@@ -1231,22 +1274,20 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
   var tiIdx   = headers.indexOf("Tier");
   var emIdx   = headers.indexOf("EmployeeEmail");
   var oidIdx  = headers.indexOf("OrderID");
-  var ddIdx   = headers.indexOf("DeliveryDate");
   var cnIdx   = headers.indexOf("CompanyName");
 
   var empPaid = 0, compOwed = 0, bdContr = 0;
   var meals = 0, employees = {}, orders = {};
-  var weekOf = "", companyName = "";
   var tierCounts = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
   var tierCompany = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
+  var sundayAnchors = {};
 
   for (var i = 1; i < rows.length; i++) {
     if (!rows[i][0]) continue;
     if (String(rows[i][coIdx]).trim().toUpperCase() !== companyId) continue;
-    // SundayAnchor may be stored as a Date object if Sheets auto-converted it
     var rawAnchor = rows[i][anIdx];
     var rowAnchor = rawAnchor instanceof Date
-      ? Utilities.formatDate(rawAnchor, Session.getScriptTimeZone(), "yyyy-MM-dd")
+      ? Utilities.formatDate(rawAnchor, tz, "yyyy-MM-dd")
       : String(rawAnchor).trim();
     if (rowAnchor !== sundayAnchor) continue;
     meals++;
@@ -1255,10 +1296,8 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
     bdContr  += parseFloat(rows[i][bdIdx]) || 0;
     employees[String(rows[i][emIdx]).trim().toLowerCase()] = true;
     if (oidIdx >= 0) orders[String(rows[i][oidIdx]).trim()] = true;
-    if (!weekOf && ddIdx >= 0 && rows[i][ddIdx]) {
-      weekOf = Utilities.formatDate(new Date(rows[i][ddIdx]), Session.getScriptTimeZone(), "yyyy-MM-dd");
-    }
     if (!companyName && cnIdx >= 0) companyName = String(rows[i][cnIdx]).trim();
+    sundayAnchors[rowAnchor] = true;
     var tier = String(rows[i][tiIdx] || "").trim();
     if (tierCounts[tier] !== undefined) {
       tierCounts[tier]++;
@@ -1268,20 +1307,101 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
 
   if (meals === 0) return {success:false, error:"No orders found for this week"};
 
-  // Build breakdown array for PDF rendering
+  // ── Generate sequential InvoiceNumber ──
+  var paddedNum = String(nextInvoiceNumber);
+  while (paddedNum.length < 3) paddedNum = "0" + paddedNum;
+  var invoiceNumber = invoicePrefix + "-" + paddedNum;
+
+  // Increment NextInvoiceNumber on the Companies sheet
+  if (nextInvNumIdx >= 0 && companyRow >= 0) {
+    compSheet.getRange(companyRow + 1, nextInvNumIdx + 1).setValue(nextInvoiceNumber + 1);
+  }
+
+  // ── Calculate PeriodStart / PeriodEnd from sundayAnchor ──
+  var anchorDate = new Date(sundayAnchor + "T12:00:00");
+  var periodStart = new Date(anchorDate);
+  periodStart.setDate(anchorDate.getDate() + 1); // Monday
+  var periodEnd = new Date(anchorDate);
+  periodEnd.setDate(anchorDate.getDate() + 5); // Friday
+
+  // ── Calculate DueDate from PaymentTerms ──
+  var dueDate = new Date(periodStart);
+  if (paymentTerms === "net-15") {
+    dueDate.setDate(periodStart.getDate() + 15);
+  } else if (paymentTerms === "net-30") {
+    dueDate.setDate(periodStart.getDate() + 30);
+  } else if (paymentTerms === "net-45") {
+    dueDate.setDate(periodStart.getDate() + 45);
+  } else if (paymentTerms === "net-60") {
+    dueDate.setDate(periodStart.getDate() + 60);
+  } else if (paymentTerms === "net-7") {
+    dueDate.setDate(periodStart.getDate() + 7);
+  }
+  // "due-on-receipt" → dueDate stays as periodStart
+
+  // ── SubtotalFullRetail ──
+  var subtotalFullRetail = Math.round(meals * fullPrice * 100) / 100;
+
+  // ── Apply CreditBalance ──
+  compOwed = Math.round(compOwed * 100) / 100;
+  var creditApplied = 0;
+  var amountDue = compOwed;
+  if (creditBalance > 0) {
+    creditApplied = Math.min(creditBalance, compOwed);
+    amountDue = Math.round((compOwed - creditApplied) * 100) / 100;
+    // Update company's CreditBalance
+    if (creditBalIdx >= 0 && companyRow >= 0) {
+      compSheet.getRange(companyRow + 1, creditBalIdx + 1).setValue(Math.round((creditBalance - creditApplied) * 100) / 100);
+    }
+  }
+  creditApplied = Math.round(creditApplied * 100) / 100;
+
+  // ── Build tier breakdown JSON ──
   var breakdown = [];
   var tierLabels = {Free:"Free meals", Tier1:"Tier 1", Tier2:"Tier 2", Tier3:"Tier 3", Additional:"Additional"};
   Object.keys(tierCounts).forEach(function(t) {
     if (tierCounts[t] > 0) breakdown.push({tier:tierLabels[t], meals:tierCounts[t], companyTotal:Math.round(tierCompany[t]*100)/100});
   });
 
-  invSheet.appendRow([
-    invoiceId, companyId, companyName, weekOf ? new Date(weekOf) : "", sundayAnchor,
-    Object.keys(orders).length || meals, meals, Object.keys(employees).length,
-    Math.round(empPaid*100)/100, Math.round(compOwed*100)/100, Math.round(bdContr*100)/100,
-    JSON.stringify(breakdown), "pending", new Date(), "", "", ""
-  ]);
-  return {success:true, invoiceId:invoiceId};
+  // ── Write all 29 columns using header-based lookups ──
+  var newRow = [];
+  for (var c = 0; c < invHeaders.length; c++) {
+    var h = invHeaders[c];
+    switch(h) {
+      case "InvoiceNumber":      newRow.push(invoiceNumber); break;
+      case "InvoiceID":          newRow.push(invoiceId); break;
+      case "CompanyID":          newRow.push(companyId); break;
+      case "CompanyName":        newRow.push(companyName); break;
+      case "BillingCycle":       newRow.push(billingCycle); break;
+      case "PeriodStart":        newRow.push(periodStart); break;
+      case "PeriodEnd":          newRow.push(periodEnd); break;
+      case "SundayAnchors":      newRow.push(Object.keys(sundayAnchors).join(",")); break;
+      case "TotalOrders":        newRow.push(Object.keys(orders).length || meals); break;
+      case "TotalMeals":         newRow.push(meals); break;
+      case "TotalEmployees":     newRow.push(Object.keys(employees).length); break;
+      case "SubtotalFullRetail": newRow.push(subtotalFullRetail); break;
+      case "EmployeePaid":       newRow.push(Math.round(empPaid*100)/100); break;
+      case "CompanyOwed":        newRow.push(compOwed); break;
+      case "BDContributed":      newRow.push(Math.round(bdContr*100)/100); break;
+      case "CreditApplied":      newRow.push(creditApplied); break;
+      case "AmountDue":          newRow.push(amountDue); break;
+      case "TierBreakdownJSON":  newRow.push(JSON.stringify(breakdown)); break;
+      case "Status":             newRow.push("pending"); break;
+      case "CollectionMethod":   newRow.push(collectionMethod); break;
+      case "DueDate":            newRow.push(dueDate); break;
+      case "CreatedAt":          newRow.push(new Date()); break;
+      case "SentAt":             newRow.push(""); break;
+      case "PaidAt":             newRow.push(""); break;
+      case "PaidAmount":         newRow.push(""); break;
+      case "PaymentReference":   newRow.push(""); break;
+      case "PaymentMethod":      newRow.push(""); break;
+      case "OverdueReminderSent": newRow.push(""); break;
+      case "Notes":              newRow.push(""); break;
+      default:                   newRow.push(""); break;
+    }
+  }
+  invSheet.appendRow(newRow);
+  return {success:true, invoiceId:invoiceId, invoiceNumber:invoiceNumber};
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1320,10 +1440,18 @@ function generateWeeklyInvoices() {
     }
   }
 
-  var created = 0, skipped = 0;
+  var created = 0, skipped = 0, errors = [];
   Object.keys(companies).forEach(function(companyId) {
     var result = _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, true);
-    if (result.success) created++; else if (result.skipped) skipped++;
+    if (result.success) {
+      created++;
+      Logger.log("  Created invoice " + (result.invoiceNumber || result.invoiceId) + " for " + companyId);
+    } else if (result.skipped) {
+      skipped++;
+    } else {
+      errors.push(companyId + ": " + (result.error || "unknown"));
+    }
   });
-  Logger.log("generateWeeklyInvoices: anchor=" + sundayAnchor + " created=" + created + " skipped=" + skipped);
+  Logger.log("generateWeeklyInvoices: anchor=" + sundayAnchor + " created=" + created + " skipped=" + skipped + " errors=" + errors.length);
+  if (errors.length > 0) Logger.log("  Errors: " + errors.join("; "));
 }
