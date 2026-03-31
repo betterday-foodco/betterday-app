@@ -2045,7 +2045,7 @@ function closePaymentModal() {
 
 async function _executeCheckout() {
   document.getElementById('checkoutOverlay').classList.remove('hidden');
-
+  try {
   const c=currentCompany, emp=currentEmployee;
   const total=cart.reduce((s,i)=>s+i.price,0), fp=parseFloat(c.FullPrice)||16.99, savings=cart.length*fp-total;
   const bdPerMeal = parseFloat(c.BDCoveragePerMeal) || 0;
@@ -2102,6 +2102,15 @@ async function _executeCheckout() {
     if (anchor) existingOrderCounts[anchor] = (existingOrderCounts[anchor] || 0) + 1;
   });
   cart=[]; goTo('sThankYou');
+  } catch(err) {
+    console.error('Checkout error:', err);
+    document.getElementById('checkoutOverlay').classList.add('hidden');
+    _checkoutInProgress = false;
+    const btn = document.getElementById('payBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
+    showToast('Order failed: ' + (err.message || 'unknown error'));
+    document.getElementById('summaryModal').classList.remove('hidden');
+  }
 }
 
 function goBackToMenu() { computeWeeks(); setupMenu(); goTo('sMenu'); }
