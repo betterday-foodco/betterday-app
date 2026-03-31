@@ -234,15 +234,15 @@ function doPost(e) {
             "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
             "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
             // Header
-            "<tr><td style='background:#4ea2fd;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
-            "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:32px;display:block;margin:0 auto;'>" +
-            "<div style='font-size:.65rem;color:rgba(255,255,255,.75);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>FOR WORK</div>" +
+            "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
+            "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:36px;display:block;margin:0 auto;'>" +
+            "<div style='font-size:.6rem;color:rgba(250,235,218,.55);letter-spacing:2.5px;text-transform:uppercase;margin-top:5px;'>FOR WORK</div>" +
             "</td></tr>" +
             // Body
             "<tr><td style='background:#ffffff;padding:36px 32px 28px;'>" +
             "<p style='font-size:1.15rem;font-weight:800;color:#0d2030;margin:0 0 10px;'>Your sign-in link is ready</p>" +
             "<p style='font-size:.9rem;color:#50657a;line-height:1.65;margin:0 0 28px;'>Click the button below to sign in — no password needed. This link expires in <strong>15 minutes</strong> and can only be used once.</p>" +
-            "<a href='" + signInUrl + "' style='display:block;background:#4ea2fd;color:#ffffff;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-weight:700;font-size:1rem;letter-spacing:0.2px;'>Sign in to BetterDay &rarr;</a>" +
+            "<a href='" + signInUrl + "' style='display:block;background:#00465e;color:#ffffff;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-weight:700;font-size:1rem;letter-spacing:0.2px;'>Sign in to BetterDay &rarr;</a>" +
             "</td></tr>" +
             // Footer
             "<tr><td style='background:#f9f5f0;border-radius:0 0 16px 16px;padding:20px 32px;border-top:1px solid #e8e0d5;'>" +
