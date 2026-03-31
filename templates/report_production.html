@@ -1,49 +1,54 @@
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
-<title>Production Summary — {{ week }}</title>
+<title>Production Summary</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:#FAEBDA;padding:32px;color:#003141}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #003141}
 .header h1{font-size:1.4rem;font-weight:900}
-.header .week{font-size:.85rem;color:#7A8F9C}
-.btn-print{padding:8px 20px;background:#003141;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
-.section-title{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;margin:20px 0 8px}
+.header-sub{font-size:.85rem;color:#7A8F9C;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.week-select{font-size:.82rem;padding:8px 12px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;font-family:inherit;font-weight:700;color:#003141;cursor:pointer}
+.btn{padding:8px 20px;background:#003141;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-outline{padding:8px 20px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,49,65,.04)}
 th{text-align:left;padding:10px 16px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#00465E;background:#F8F3EC;border-bottom:1.5px solid #E8DFD2}
 td{padding:10px 16px;font-size:.85rem;border-bottom:1px solid rgba(0,49,65,.05)}
 tr:last-child td{border-bottom:none}
-.diet-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.6rem;font-weight:800}
-.diet-meat{background:#FFF3E0;color:#B56B10}
-.diet-plant{background:#EEFBE8;color:#167421}
+.diet-badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.6rem;font-weight:800}
+.diet-meat{background:#FFF3E0;color:#B56B10}.diet-plant{background:#EEFBE8;color:#167421}
 .total-row td{font-weight:800;background:#F8F3EC;border-top:2px solid #E8DFD2}
-@media print{body{background:#fff;padding:16px}.btn-print{display:none}}
+.sku{font-size:.75rem;color:#7A8F9C;font-family:monospace}
+@media print{body{background:#fff;padding:16px}.btn,.btn-outline,.week-select{display:none}}
 </style>
 </head><body>
 <div class="header">
   <div>
     <h1>👨‍🍳 Production Summary</h1>
-    <div class="week">Week of {{ week }} · {{ total }} total meals</div>
+    <div class="header-sub">{{ delivery_date }} · {{ total }} total meals</div>
   </div>
-  <button class="btn-print" onclick="window.print()">Print / PDF</button>
+  <div class="header-right">
+    <select class="week-select" onchange="location.href='/bd-admin/report/production?week='+this.value">
+      {% for w in all_weeks %}<option value="{{ w.anchor }}" {% if w.anchor == week %}selected{% endif %}>{{ w.delivery_label }}</option>{% endfor %}
+    </select>
+    <a href="/bd-admin/report/production?week={{ week }}&format=csv" class="btn-outline">Download CSV</a>
+    <button class="btn" onclick="window.print()">Print / PDF</button>
+  </div>
 </div>
-
-<div class="section-title">Dishes by quantity</div>
 <table>
-  <thead><tr><th>Dish Name</th><th>Diet</th><th style="text-align:right">Quantity</th></tr></thead>
+  <thead><tr><th style="text-align:right">Qty</th><th>Diet</th><th>Dish Name</th><th>SKU</th></tr></thead>
   <tbody>
     {% for d in dishes %}
     <tr>
-      <td style="font-weight:700;">{{ d.name }}</td>
-      <td><span class="diet-badge {% if 'plant' in d.diet|lower or 'vegan' in d.diet|lower %}diet-plant{% else %}diet-meat{% endif %}">{{ d.diet }}</span></td>
       <td style="text-align:right;font-weight:800;font-size:1.1rem;">{{ d.count }}</td>
+      <td><span class="diet-badge {% if 'plant' in d.diet|lower or 'vegan' in d.diet|lower %}diet-plant{% else %}diet-meat{% endif %}">{{ d.diet }}</span></td>
+      <td style="font-weight:700;">{{ d.name }}</td>
+      <td class="sku">{{ d.sku }}</td>
     </tr>
     {% endfor %}
-    <tr class="total-row">
-      <td>TOTAL</td><td></td><td style="text-align:right;font-size:1.2rem;">{{ total }}</td>
-    </tr>
+    <tr class="total-row"><td style="text-align:right;font-size:1.2rem;">{{ total }}</td><td></td><td>TOTAL</td><td></td></tr>
   </tbody>
 </table>
 </body></html>

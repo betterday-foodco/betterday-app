@@ -207,6 +207,7 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
   <div class="ni" onclick="sidebarNav('companies',this)">&#9733; &nbsp;Companies <span class="nbdg">{{ total_companies }}</span></div>
   <div class="ni" onclick="sidebarNav('invoices',this)">&#9670; &nbsp;Invoices <span class="nbdg">{{ invoices|length }}</span></div>
   <div class="ni" onclick="sidebarNav('orders',this)">&#9776; &nbsp;Orders</div>
+  <div class="ni" onclick="sidebarNav('reports',this)">&#9881; &nbsp;Reports</div>
   <div class="sb-div"></div>
   <div class="sb-sec">Settings</div>
   <a class="ni" href="/admin-logout">&#8594; &nbsp;Sign out</a>
@@ -254,28 +255,19 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
         <div class="card card-purple"><div class="section-label" style="color:#7453A2;">Avg Order</div><div class="stat-value purple">${{ "%.2f"|format(avg_order_value) }}</div></div>
       </div>
 
-      <!-- Quick Reports -->
-      <div class="sl">Reports &amp; Exports</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
-        <a href="/bd-admin/report/production?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
-          <div style="font-size:22px;margin-bottom:8px;">👨‍🍳</div>
-          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Production Summary</div>
-          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Total qty of each dish for kitchen production</div>
+      <!-- Quick Report Buttons (under This Week) -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
+        <a href="/bd-admin/report/production?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">👨‍🍳</span> Production Summary
         </a>
-        <a href="/bd-admin/report/picklists?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
-          <div style="font-size:22px;margin-bottom:8px;">📦</div>
-          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Company Pick Lists</div>
-          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Per-company meal totals for packing</div>
+        <a href="/bd-admin/report/picklists?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">📦</span> Company Packing Slips
         </a>
-        <a href="/bd-admin/report/labels?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
-          <div style="font-size:22px;margin-bottom:8px;">🏷️</div>
-          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Meal Labels</div>
-          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Per-person labels sorted by company &amp; name</div>
+        <a href="/bd-admin/report/labels?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">🏷️</span> Meal Labels
         </a>
-        <a href="/bd-admin/report/delivery?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
-          <div style="font-size:22px;margin-bottom:8px;">🚛</div>
-          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Delivery Sheet</div>
-          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Route sheet matching 1.0 CGY format</div>
+        <a href="/bd-admin/report/delivery?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">🚛</span> Delivery Stops for OptimoRoute
         </a>
       </div>
 
@@ -499,6 +491,55 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
       </div>
     </div>
 
+    <!-- ════════ REPORTS TAB ════════ -->
+    <div id="tab-reports" class="tab-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-size:1rem;font-weight:900;color:#003141;">Reports</div>
+        <select id="reportWeekSelect" style="font-size:.82rem;padding:8px 14px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;font-family:inherit;font-weight:700;color:#003141;cursor:pointer;">
+          {% for w in sorted_weeks %}
+          <option value="{{ w.anchor }}" {% if w.anchor == active_week.anchor %}selected{% endif %}>Week of {{ w.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">👨‍🍳</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Production Summary</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Total quantity of each dish by SKU for kitchen production. Sorted by count, diet, then name.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('production')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View Report</a>
+            <a onclick="downloadReportCSV('production')" style="padding:8px 18px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">Download CSV</a>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">📦</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Company Packing Slips</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Per-company meal totals for packing. One page per company, print-ready PDF format.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('picklists')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View / Print PDF</a>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">🏷️</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Meal Labels</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Per-person per-meal labels. Sorted Z→A by last name within each company, with company dividers.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('labels')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View Report</a>
+            <a onclick="downloadReportCSV('labels')" style="padding:8px 18px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">Download CSV</a>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">🚛</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Delivery Stops for OptimoRoute</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Route sheet matching 1.0 CGY format. Export as CSV for upload to OptimoRoute.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('delivery')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View Report</a>
+            <a onclick="downloadReportCSV('delivery')" style="padding:8px 18px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">Download CSV</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /cont -->
 </div><!-- /mn -->
 
@@ -597,6 +638,16 @@ function renderOrders() {
 }
 function ordPage(dir){ordPageNum+=dir;renderOrders();}
 filterOrders();
+
+/* ── Reports Tab ── */
+function openReport(type) {
+  var week = document.getElementById('reportWeekSelect')?.value || '';
+  window.open('/bd-admin/report/' + type + '?week=' + week, '_blank');
+}
+function downloadReportCSV(type) {
+  var week = document.getElementById('reportWeekSelect')?.value || '';
+  window.open('/bd-admin/report/' + type + '?week=' + week + '&format=csv', '_blank');
+}
 </script>
 </body>
 </html>

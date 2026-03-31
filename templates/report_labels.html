@@ -1,51 +1,53 @@
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
-<title>Meal Labels — {{ week }}</title>
+<title>Meal Labels</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:#FAEBDA;padding:32px;color:#003141}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #003141}
 .header h1{font-size:1.4rem;font-weight:900}
-.header .week{font-size:.85rem;color:#7A8F9C}
-.btn-print{padding:8px 20px;background:#003141;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+.header-sub{font-size:.85rem;color:#7A8F9C;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.week-select{font-size:.82rem;padding:8px 12px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;font-family:inherit;font-weight:700;color:#003141;cursor:pointer}
+.btn{padding:8px 20px;background:#003141;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-outline{padding:8px 20px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
 .company-divider{background:#003141;color:#FFC600;padding:12px 20px;border-radius:10px;margin:20px 0 10px;font-size:.9rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;page-break-before:always}
 .company-divider:first-of-type{page-break-before:auto;margin-top:0}
-.label-row{display:grid;grid-template-columns:200px 1fr 100px;gap:0;background:#fff;border:1px solid rgba(0,49,65,.06);border-radius:8px;margin-bottom:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,49,65,.03)}
+.label-row{display:grid;grid-template-columns:200px 1fr 80px 100px;gap:0;background:#fff;border:1px solid rgba(0,49,65,.06);border-radius:8px;margin-bottom:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,49,65,.03)}
 .label-cell{padding:10px 16px;display:flex;align-items:center;font-size:.85rem}
 .label-name{font-weight:800;color:#003141}
 .label-dish{font-weight:600;color:#2E4A5A;border-left:1px solid rgba(0,49,65,.06);border-right:1px solid rgba(0,49,65,.06)}
+.label-sku{font-size:.72rem;color:#7A8F9C;font-family:monospace;border-right:1px solid rgba(0,49,65,.06)}
 .label-diet{justify-content:center}
 .diet-badge{display:inline-block;padding:4px 14px;border-radius:99px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
-.diet-meat{background:#B56B10;color:#fff}
-.diet-plant{background:#167421;color:#fff}
-.label-header{display:grid;grid-template-columns:200px 1fr 100px;gap:0;padding:6px 16px;font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:4px}
-@media print{
-  body{background:#fff;padding:12px}
-  .btn-print{display:none}
-  .company-divider{break-before:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .company-divider:first-of-type{break-before:auto}
-  .label-row{break-inside:avoid}
-  .diet-badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-}
+.diet-meat{background:#B56B10;color:#fff}.diet-plant{background:#167421;color:#fff}
+.label-header{display:grid;grid-template-columns:200px 1fr 80px 100px;gap:0;padding:6px 16px;font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:4px}
+@media print{body{background:#fff;padding:12px}.btn,.btn-outline,.week-select{display:none}.company-divider{break-before:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}.company-divider:first-of-type{break-before:auto}.label-row{break-inside:avoid}.diet-badge{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head><body>
 <div class="header">
   <div>
     <h1>🏷️ Individual Meal Labels</h1>
-    <div class="week">Week of {{ week }} · Sorted Z→A by last name within each company</div>
+    <div class="header-sub">{{ delivery_date }} · Sorted Z→A by last name within each company</div>
   </div>
-  <button class="btn-print" onclick="window.print()">Print / PDF</button>
+  <div class="header-right">
+    <select class="week-select" onchange="location.href='/bd-admin/report/labels?week='+this.value">
+      {% for w in all_weeks %}<option value="{{ w.anchor }}" {% if w.anchor == week %}selected{% endif %}>{{ w.delivery_label }}</option>{% endfor %}
+    </select>
+    <a href="/bd-admin/report/labels?week={{ week }}&format=csv" class="btn-outline">Download CSV</a>
+    <button class="btn" onclick="window.print()">Print / PDF</button>
+  </div>
 </div>
-
 {% for group in company_groups %}
 <div class="company-divider">▸ {{ group.company }}</div>
-<div class="label-header"><span>Employee</span><span>Dish</span><span style="text-align:center">Diet</span></div>
+<div class="label-header"><span>Employee</span><span>Dish</span><span>SKU</span><span style="text-align:center">Diet</span></div>
 {% for l in group.labels %}
 <div class="label-row">
   <div class="label-cell label-name">{{ l.name }}</div>
   <div class="label-cell label-dish">{{ l.dish }}</div>
+  <div class="label-cell label-sku">{{ l.sku }}</div>
   <div class="label-cell label-diet">
     <span class="diet-badge {% if 'plant' in l.diet|lower or 'vegan' in l.diet|lower %}diet-plant{% else %}diet-meat{% endif %}">
       {% if 'plant' in l.diet|lower or 'vegan' in l.diet|lower %}PLANT{% else %}MEAT{% endif %}

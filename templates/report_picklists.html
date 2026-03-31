@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8">
-<title>Pick Lists — {{ week }}</title>
+<title>Company Packing Slips</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:#FAEBDA;padding:32px;color:#003141}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #003141}
 .header h1{font-size:1.4rem;font-weight:900}
-.header .week{font-size:.85rem;color:#7A8F9C}
-.btn-print{padding:8px 20px;background:#003141;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+.header-sub{font-size:.85rem;color:#7A8F9C;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.week-select{font-size:.82rem;padding:8px 12px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;font-family:inherit;font-weight:700;color:#003141;cursor:pointer}
+.btn{padding:8px 20px;background:#003141;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
 .company-block{background:#fff;border-radius:12px;padding:22px 26px;margin-bottom:16px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);page-break-inside:avoid}
 .company-name{font-size:1.1rem;font-weight:900;color:#003141;margin-bottom:4px}
 .company-total{font-size:.78rem;color:#7A8F9C;margin-bottom:14px}
@@ -18,35 +20,40 @@ th{text-align:left;padding:8px 12px;font-size:.58rem;font-weight:800;text-transf
 td{padding:8px 12px;font-size:.85rem;border-bottom:1px solid rgba(0,49,65,.05)}
 tr:last-child td{border-bottom:none}
 .diet-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.58rem;font-weight:800}
-.diet-meat{background:#FFF3E0;color:#B56B10}
-.diet-plant{background:#EEFBE8;color:#167421}
+.diet-meat{background:#FFF3E0;color:#B56B10}.diet-plant{background:#EEFBE8;color:#167421}
 .total-row td{font-weight:800;border-top:2px solid #E8DFD2}
-@media print{body{background:#fff;padding:16px}.btn-print{display:none}.company-block{break-inside:avoid;page-break-after:always}.company-block:last-child{page-break-after:auto}}
+.sku{font-size:.75rem;color:#7A8F9C;font-family:monospace}
+@media print{body{background:#fff;padding:16px}.btn,.week-select{display:none}.company-block{break-inside:avoid;page-break-after:always}.company-block:last-child{page-break-after:auto}}
 </style>
 </head><body>
 <div class="header">
   <div>
-    <h1>📦 Company Pick Lists</h1>
-    <div class="week">Week of {{ week }}</div>
+    <h1>📦 Company Packing Slips</h1>
+    <div class="header-sub">{{ delivery_date }}</div>
   </div>
-  <button class="btn-print" onclick="window.print()">Print / PDF</button>
+  <div class="header-right">
+    <select class="week-select" onchange="location.href='/bd-admin/report/picklists?week='+this.value">
+      {% for w in all_weeks %}<option value="{{ w.anchor }}" {% if w.anchor == week %}selected{% endif %}>{{ w.delivery_label }}</option>{% endfor %}
+    </select>
+    <button class="btn" onclick="window.print()">Print PDF</button>
+  </div>
 </div>
-
 {% for co_name, co_data in companies.items() %}
 <div class="company-block">
   <div class="company-name">{{ co_name }}</div>
-  <div class="company-total">{{ co_data.total }} meals</div>
+  <div class="company-total">{{ co_data.total }} meals · {{ delivery_date }}</div>
   <table>
-    <thead><tr><th>Dish</th><th>Diet</th><th style="text-align:right">Qty</th></tr></thead>
+    <thead><tr><th style="text-align:right">Qty</th><th>Diet</th><th>Dish</th><th>SKU</th></tr></thead>
     <tbody>
       {% for dish_name, dish_data in co_data.dishes.items() %}
       <tr>
-        <td style="font-weight:600;">{{ dish_name }}</td>
-        <td><span class="diet-badge {% if 'plant' in dish_data.diet|lower or 'vegan' in dish_data.diet|lower %}diet-plant{% else %}diet-meat{% endif %}">{{ dish_data.diet }}</span></td>
         <td style="text-align:right;font-weight:800;">{{ dish_data.count }}</td>
+        <td><span class="diet-badge {% if 'plant' in dish_data.diet|lower or 'vegan' in dish_data.diet|lower %}diet-plant{% else %}diet-meat{% endif %}">{{ dish_data.diet }}</span></td>
+        <td style="font-weight:600;">{{ dish_name }}</td>
+        <td class="sku">{{ dish_data.sku or '' }}</td>
       </tr>
       {% endfor %}
-      <tr class="total-row"><td>Total</td><td></td><td style="text-align:right;font-weight:900;">{{ co_data.total }}</td></tr>
+      <tr class="total-row"><td style="text-align:right;font-weight:900;">{{ co_data.total }}</td><td></td><td>Total</td><td></td></tr>
     </tbody>
   </table>
 </div>

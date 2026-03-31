@@ -551,28 +551,65 @@ def _get_week_orders(sunday_anchor):
     return raw
 
 
+def _get_sorted_weeks():
+    """Return list of week anchors for the dropdown."""
+    start = _current_monday()
+    weeks = []
+    for i in range(-4, 6):
+        monday = start + timedelta(weeks=i)
+        sunday = (monday - timedelta(days=1))
+        anchor = sunday.strftime('%Y-%m-%d')
+        delivery = monday.strftime('%A, %b %d, %Y')
+        weeks.append({'anchor': anchor, 'delivery_label': f'Delivery on: {delivery}'})
+    return weeks
+
+def _nice_delivery_date(sunday_anchor):
+    """Convert 2026-03-29 to 'Monday, Mar 30, 2026' (delivery = Sunday + 1)."""
+    try:
+        sun = datetime.strptime(sunday_anchor, '%Y-%m-%d')
+        mon = sun + timedelta(days=1)
+        return mon.strftime('%A, %b %d, %Y')
+    except Exception:
+        return sunday_anchor
+
 @app.route('/bd-admin/report/production')
 @admin_required
 def report_production():
     week = request.args.get('week', '')
+    fmt = request.args.get('format', '')
     orders = _get_week_orders(week)
 
-    # Group by dish + diet
+    # Group by dish + diet + SKU
     dishes = {}
     for o in orders:
         name = o.get('DishName', 'Unknown')
         diet = o.get('DietType', 'Unknown')
-        key = f"{name}|{diet}"
+        sku = str(o.get('MealID', '')).strip()
+        key = f"{sku}|{name}|{diet}"
         if key not in dishes:
-            dishes[key] = {'name': name, 'diet': diet, 'count': 0}
+            dishes[key] = {'name': name, 'diet': diet, 'sku': sku, 'count': 0}
         dishes[key]['count'] += 1
 
-    # Sort by diet (Meat first), then by count descending
-    sorted_dishes = sorted(dishes.values(), key=lambda d: (0 if 'meat' in d['diet'].lower() else 1, -d['count']))
+    # Sort by count desc, then diet (Meat first), then name alpha, then SKU
+    sorted_dishes = sorted(dishes.values(), key=lambda d: (-d['count'], 0 if 'meat' in d['diet'].lower() else 1, d['name'].lower(), d['sku']))
     total = sum(d['count'] for d in sorted_dishes)
 
+    if fmt == 'csv':
+        import io, csv
+        si = io.StringIO()
+        cw = csv.writer(si)
+        cw.writerow(['Qty', 'Diet', 'Dish Name', 'SKU'])
+        for d in sorted_dishes:
+            cw.writerow([d['count'], d['diet'], d['name'], d['sku']])
+        output = make_response(si.getvalue())
+        output.headers['Content-Disposition'] = f'attachment; filename=production_{week}.csv'
+        output.headers['Content-type'] = 'text/csv'
+        return output
+
     return render_template('report_production.html',
-                           week=week, dishes=sorted_dishes, total=total)
+                           week=week, delivery_date=_nice_delivery_date(week),
+                           dishes=sorted_dishes, total=total,
+                           all_weeks=_get_sorted_weeks())
 
 
 @app.route('/bd-admin/report/picklists')
@@ -594,45 +631,64 @@ def report_picklists():
         companies[co]['dishes'][dish]['count'] += 1
         companies[co]['total'] += 1
 
+    # Add SKU to each dish
+    for co in companies.values():
+        for dish_name, dish_data in co['dishes'].items():
+            # Find SKU from orders
+            for o in orders:
+                if o.get('DishName') == dish_name:
+                    dish_data['sku'] = str(o.get('MealID', '')).strip()
+                    break
+
     return render_template('report_picklists.html',
-                           week=week, companies=companies)
+                           week=week, delivery_date=_nice_delivery_date(week),
+                           companies=companies, all_weeks=_get_sorted_weeks())
 
 
 @app.route('/bd-admin/report/labels')
 @admin_required
 def report_labels():
     week = request.args.get('week', '')
+    fmt = request.args.get('format', '')
     orders = _get_week_orders(week)
 
-    # Build label rows: one per meal per person
     labels = []
     for o in orders:
         last = (o.get('EmployeeName', '') or '').split()[-1] if o.get('EmployeeName') else ''
         labels.append({
-            'company':  o.get('CompanyName', o.get('CompanyID', '')),
-            'name':     o.get('EmployeeName', ''),
-            'last':     last,
-            'dish':     o.get('DishName', 'Unknown'),
-            'diet':     o.get('DietType', ''),
+            'company': o.get('CompanyName', o.get('CompanyID', '')),
+            'name':    o.get('EmployeeName', ''),
+            'last':    last,
+            'dish':    o.get('DishName', 'Unknown'),
+            'diet':    o.get('DietType', ''),
+            'sku':     str(o.get('MealID', '')).strip(),
         })
 
-    # Sort by company, then reverse alpha by last name, then by dish
-    labels.sort(key=lambda l: (l['company'].lower(), -ord(l['last'][0].lower()) if l['last'] else 0, l['last'].lower(), l['dish'].lower()) if l['last'] else (l['company'].lower(), 0, '', l['dish'].lower()))
-
-    # Actually: sort by company ASC, last name Z→A (reverse), then dish ASC
+    # Sort: company ASC, then Z→A by last name, then dish ASC
+    from itertools import groupby as _groupby
     labels.sort(key=lambda l: (l['company'].lower(), l['dish'].lower()))
-    labels.sort(key=lambda l: l['company'].lower())
-    # Now reverse-alpha by last name within each company
-    from itertools import groupby
     sorted_labels = []
-    for co, group in groupby(labels, key=lambda l: l['company']):
+    for co, group in _groupby(sorted(labels, key=lambda l: l['company'].lower()), key=lambda l: l['company']):
         co_labels = list(group)
         co_labels.sort(key=lambda l: (l['last'].lower() if l['last'] else ''), reverse=True)
-        # Then stable sort by dish within same last name
         sorted_labels.append({'company': co, 'labels': co_labels})
 
+    if fmt == 'csv':
+        import io, csv
+        si = io.StringIO()
+        cw = csv.writer(si)
+        cw.writerow(['Company', 'Employee', 'Dish', 'SKU', 'Diet'])
+        for g in sorted_labels:
+            for l in g['labels']:
+                cw.writerow([g['company'], l['name'], l['dish'], l['sku'], l['diet']])
+        output = make_response(si.getvalue())
+        output.headers['Content-Disposition'] = f'attachment; filename=labels_{week}.csv'
+        output.headers['Content-type'] = 'text/csv'
+        return output
+
     return render_template('report_labels.html',
-                           week=week, company_groups=sorted_labels)
+                           week=week, delivery_date=_nice_delivery_date(week),
+                           company_groups=sorted_labels, all_weeks=_get_sorted_weeks())
 
 
 @app.route('/bd-admin/report/delivery')
@@ -669,9 +725,24 @@ def report_delivery():
         companies_data[cid]['meals'] += 1
 
     delivery_rows = sorted(companies_data.values(), key=lambda r: r['client'])
+    fmt = request.args.get('format', '')
+
+    if fmt == 'csv':
+        import io, csv
+        si = io.StringIO()
+        cw = csv.writer(si)
+        cw.writerow(['Client','Meals','Total','Address','Gate Code','Email','Phone','Notes','Bags','Duration','Business Hours','Assigned Driver'])
+        for r in delivery_rows:
+            addr = f"{r['address']}, {r['city']}, {r['province']} {r['postal']}".strip(', ')
+            cw.writerow([r['client'], r['meals'], '', addr, '', r['email'], r['phone'], r['notes'], '', '', '', ''])
+        output = make_response(si.getvalue())
+        output.headers['Content-Disposition'] = f'attachment; filename=delivery_stops_{week}.csv'
+        output.headers['Content-type'] = 'text/csv'
+        return output
 
     return render_template('report_delivery.html',
-                           week=week, rows=delivery_rows)
+                           week=week, delivery_date=_nice_delivery_date(week),
+                           rows=delivery_rows, all_weeks=_get_sorted_weeks())
 
 
 # ─────────────────────────────────────────────────────────────
