@@ -1977,14 +1977,7 @@ async function doCheckout() {
 var _helcimCheckoutToken = '';
 
 async function openPaymentModal(total) {
-  const c = currentCompany, emp = currentEmployee;
-  const deliveries = [...new Set(cart.map(i => weeks[i.weekIndex]?.deliveryShort))].join(', ');
-  document.getElementById('paySimAmount').textContent = '$' + total.toFixed(2);
-  document.getElementById('paySimDesc').textContent = cart.length + ' meal' + (cart.length !== 1 ? 's' : '') + ' · Delivery ' + deliveries;
-  document.getElementById('paySimProcessing').classList.remove('hidden');
-  document.getElementById('paySimProcText').textContent = 'Initializing secure payment…';
-  document.getElementById('helcimPayContainer').innerHTML = '';
-  document.getElementById('paymentModal').classList.remove('hidden');
+  const emp = currentEmployee;
 
   // Initialize checkout session via Flask backend
   try {
@@ -2000,16 +1993,17 @@ async function openPaymentModal(total) {
     const data = await resp.json();
     if (data.checkoutToken) {
       _helcimCheckoutToken = data.checkoutToken;
-      document.getElementById('paySimProcessing').classList.add('hidden');
-      // Render the Helcim payment modal inside our container
+      // Helcim renders its own full-page modal overlay
       appendHelcimPayIframe(_helcimCheckoutToken);
     } else {
       throw new Error(data.error || 'Failed to initialize');
     }
   } catch(e) {
     console.error('Helcim init failed:', e);
-    document.getElementById('paySimProcText').textContent = 'Payment unavailable — please try again';
-    setTimeout(closePaymentModal, 2500);
+    showToast('Payment unavailable — please try again');
+    _checkoutInProgress = false;
+    const btn = document.getElementById('payBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
   }
 }
 
@@ -2020,7 +2014,7 @@ window.addEventListener('message', function(event) {
   if (event.data && event.data.eventName === key) {
     if (event.data.eventStatus === 'SUCCESS') {
       console.log('Payment successful:', event.data.eventMessage);
-      document.getElementById('paymentModal').classList.add('hidden');
+      _helcimCheckoutToken = '';
       _executeCheckout();
     } else if (event.data.eventStatus === 'ABORTED') {
       console.warn('Payment aborted:', event.data.eventMessage);
@@ -2031,8 +2025,6 @@ window.addEventListener('message', function(event) {
 });
 
 function closePaymentModal() {
-  document.getElementById('paymentModal').classList.add('hidden');
-  document.getElementById('helcimPayContainer').innerHTML = '';
   _helcimCheckoutToken = '';
   _checkoutInProgress = false;
   const btn = document.getElementById('payBtn');
