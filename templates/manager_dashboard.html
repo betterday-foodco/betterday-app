@@ -32,7 +32,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .tb-out{font-size:.68rem;font-weight:700;color:rgba(250,235,218,.4);border:1px solid rgba(250,235,218,.14);border-radius:99px;padding:5px 14px;text-decoration:none;transition:.14s}
 .tb-out:hover{color:#FAEBDA;border-color:rgba(250,235,218,.4)}
-.cont{padding:24px 36px;max-width:1050px;margin:0 auto}
+.cont{padding:24px 28px;max-width:1200px;margin:0 auto}
 
 /* ════════ SECTION LABELS ════════ */
 .sl{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
@@ -61,7 +61,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .tab-panel.active{display:block}
 
 /* ════════ WEEK + IMPACT ROW ════════ */
-.week-impact-row{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:16px;align-items:stretch}
+.week-impact-row{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:16px;align-items:start}
 .week-stack{display:flex;flex-direction:column;gap:8px}
 .ws{border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:14px}
 .ws.c-purple{background:#F3EEFF;border:1px solid rgba(200,164,245,.3)}
@@ -75,7 +75,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .week-stack-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin-bottom:2px}
 
 /* ════════ CAROUSEL ════════ */
-.impact-carousel{position:relative;overflow:hidden;border-radius:14px;background:#fff;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04)}
+.impact-carousel{position:relative;overflow:hidden;border-radius:14px;background:#fff;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);height:220px}
 .impact-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);height:100%}
 .impact-slide{min-width:50%;display:flex;height:100%}
 .rc{border-radius:0;padding:22px 44px;display:flex;flex-direction:column;justify-content:center;flex:1;border-right:1px solid rgba(0,49,65,.05)}
@@ -1360,38 +1360,42 @@ ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><str
 }
 
 // ═══ CAROUSEL ═══
-(function(){
-  var track = document.getElementById('impactTrack');
-  var dotsWrap = document.getElementById('carouselDots');
-  if (!track || !dotsWrap) return;
-  var slides = track.querySelectorAll('.impact-slide');
-  var total = slides.length;
-  var maxIdx = total - 2;
-  if (maxIdx < 0) return;
-  var current = 0;
-  var interval = 5000;
+requestAnimationFrame(function(){
+  setTimeout(function(){
+    var track = document.getElementById('impactTrack');
+    var dotsWrap = document.getElementById('carouselDots');
+    var prevBtn = document.getElementById('carPrev');
+    var nextBtn = document.getElementById('carNext');
+    if (!track || !dotsWrap || !prevBtn || !nextBtn) { console.warn('Carousel elements missing'); return; }
+    var slides = track.querySelectorAll('.impact-slide');
+    var total = slides.length;
+    var maxIdx = total - 2;
+    if (maxIdx < 0) return;
+    var current = 0;
+    var interval = 5000;
 
-  function goTo(idx){
-    if(idx < 0) idx = maxIdx; if(idx > maxIdx) idx = 0;
-    current = idx;
-    track.style.transform = 'translateX(-' + (current * 50) + '%)';
-    dotsWrap.querySelectorAll('.carousel-dot').forEach(function(d, i){ d.className = 'carousel-dot' + (i === current ? ' active' : ''); });
-  }
-  for(var i = 0; i <= maxIdx; i++){
-    var d = document.createElement('div');
-    d.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-    d.dataset.idx = i;
-    d.addEventListener('click', function(){ goTo(parseInt(this.dataset.idx)); resetTimer(); });
-    dotsWrap.appendChild(d);
-  }
-  document.getElementById('carPrev').addEventListener('click', function(){ goTo(current - 1); resetTimer(); });
-  document.getElementById('carNext').addEventListener('click', function(){ goTo(current + 1); resetTimer(); });
-  var timer = setInterval(function(){ goTo(current + 1); }, interval);
-  function resetTimer(){ clearInterval(timer); timer = setInterval(function(){ goTo(current + 1); }, interval); }
-  var carousel = document.getElementById('impactCarousel');
-  carousel.addEventListener('mouseenter', function(){ clearInterval(timer); });
-  carousel.addEventListener('mouseleave', function(){ timer = setInterval(function(){ goTo(current + 1); }, interval); });
-})();
+    function goTo(idx){
+      if(idx < 0) idx = maxIdx; if(idx > maxIdx) idx = 0;
+      current = idx;
+      track.style.transform = 'translateX(-' + (current * 50) + '%)';
+      dotsWrap.querySelectorAll('.carousel-dot').forEach(function(d, i){ d.className = 'carousel-dot' + (i === current ? ' active' : ''); });
+    }
+    for(var i = 0; i <= maxIdx; i++){
+      var d = document.createElement('div');
+      d.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      d.dataset.idx = i;
+      d.addEventListener('click', function(){ goTo(parseInt(this.dataset.idx)); resetTimer(); });
+      dotsWrap.appendChild(d);
+    }
+    prevBtn.addEventListener('click', function(){ goTo(current - 1); resetTimer(); });
+    nextBtn.addEventListener('click', function(){ goTo(current + 1); resetTimer(); });
+    var timer = setInterval(function(){ goTo(current + 1); }, interval);
+    function resetTimer(){ clearInterval(timer); timer = setInterval(function(){ goTo(current + 1); }, interval); }
+    var carousel = document.getElementById('impactCarousel');
+    carousel.addEventListener('mouseenter', function(){ clearInterval(timer); });
+    carousel.addEventListener('mouseleave', function(){ timer = setInterval(function(){ goTo(current + 1); }, interval); });
+  }, 100);
+});
 
 // ══════════════════════════════════════════
 // BULK EMPLOYEE ACTIONS
