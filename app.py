@@ -1181,6 +1181,48 @@ def manager_update_account():
     return redirect(url_for('manager_dashboard') + '?saved=account')
 
 
+@app.route('/manager/save-meal-allowances', methods=['POST'])
+@manager_required
+def manager_save_meal_allowances():
+    """Save meal count changes from manager portal. Logs all changes."""
+    company_id = session.get('manager_company_id')
+    manager_email = session.get('manager_email', 'manager')
+    data = request.get_json(force=True)
+    changes = data.get('changes', [])
+    if not changes:
+        return jsonify({'success': False, 'error': 'No changes provided'})
+    # Check permission
+    comp = _cached_get_company(company_id)
+    if not comp or not comp.get('found'):
+        return jsonify({'success': False, 'error': 'Company not found'})
+    company = comp.get('company', {})
+    if str(company.get('ManagerCanEditMeals', '')).upper() != 'TRUE':
+        return jsonify({'success': False, 'error': 'Editing not enabled for this company'})
+    # Send to GAS
+    result = _gas_post({
+        'action': 'manager_save_meal_allowances',
+        'company_id': company_id,
+        'changes': changes,
+        'changed_by': manager_email
+    }, timeout=15)
+    # Clear company cache so changes take effect immediately
+    with _company_cache_lock:
+        _company_cache.pop(company_id.upper(), None)
+    return jsonify(result or {'success': False, 'error': 'GAS timeout'})
+
+
+@app.route('/manager/meal-change-log')
+@manager_required
+def manager_meal_change_log():
+    """Fetch the meal allowance change log for this company."""
+    company_id = session.get('manager_company_id')
+    result = _gas_post({
+        'action': 'get_meal_change_log',
+        'company_id': company_id
+    }, timeout=10)
+    return jsonify(result or {'log': []})
+
+
 @app.route('/manager/invoice-status', methods=['POST'])
 @manager_required
 def manager_invoice_status():

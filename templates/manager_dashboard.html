@@ -136,6 +136,13 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 #monthlyTotalsTable th{color:rgba(255,255,255,.6)}
 .tier-table .tier-free{color:#167421;font-weight:800}
 .note-box{background:#FFF8F0;border:1px solid rgba(212,160,41,.2);border-radius:10px;padding:14px 18px;font-size:.8rem;color:#5a4a2a;margin-top:14px;line-height:1.5}
+.meal-input{width:56px;padding:5px 4px;border:1.5px solid #E8DFD2;border-radius:6px;font-size:.78rem;font-family:'DM Sans',sans-serif;text-align:center;color:#00465E;font-weight:700;background:#fff;transition:.15s}
+.meal-input:focus{border-color:#00465E;box-shadow:0 0 0 2px rgba(0,70,94,.1);outline:none}
+.meal-input::-webkit-inner-spin-button{opacity:1}
+.log-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,49,65,.05);align-items:flex-start}
+.log-date{font-size:.7rem;color:#7A8F9C;white-space:nowrap;min-width:100px}
+.log-detail{font-size:.78rem;color:#2E4A5A;line-height:1.4}
+.log-detail strong{color:#00465E}
 
 /* ════════ ORDER DETAIL MODAL ════════ */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,20,30,.45);backdrop-filter:blur(3px);z-index:100;display:none;align-items:center;justify-content:center}
@@ -599,58 +606,147 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     <div class="tab-panel" id="tab-mealplan">
       <div class="sl" style="margin-top:0">Your Meal Subsidy Plan</div>
 
-      {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' and benefit_levels %}
-      <div style="font-size:.85rem;color:#7A8F9C;margin-bottom:16px;">Your company has <strong>{{ benefit_levels|length }}</strong> employee benefit level{{ 's' if benefit_levels|length > 1 else '' }}. Each level has its own meal pricing structure.</div>
+      {% set can_edit = company.ManagerCanEditMeals and company.ManagerCanEditMeals|string|upper == 'TRUE' %}
+      {% set has_levels = company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' and benefit_levels %}
 
-      {% for lv in benefit_levels %}
+      <!-- ── BASE PRICING (shared across all levels) ── -->
       <div class="card">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;background:rgba(0,70,94,.08);padding:3px 12px;border-radius:99px;">{{ lv.LevelName or 'Level ' ~ loop.index }}</span>
-          {% if lv.MaxMealsPerWeek %}<span style="font-size:.72rem;color:#7A8F9C;">Max {{ lv.MaxMealsPerWeek }} meals/week</span>{% endif %}
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div class="card-title" style="margin:0;">Pricing Structure</div>
+          <span style="font-size:.72rem;color:#7A8F9C;">Full retail: <strong style="color:#00465E;">${{ '%.2f'|format((company.FullPrice or company.BasePrice or 16.99)|float) }}</strong>/meal</span>
         </div>
+        <p style="font-size:.82rem;color:#7A8F9C;margin-bottom:16px;line-height:1.5;">
+          Per-meal pricing for all employees. {{ 'Meal counts vary by employee level below.' if has_levels else 'Meal counts shown below.' }}
+        </p>
         <table class="tier-table">
-          <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
-          <tbody>
-            {% if lv.FreeMealsPerWeek and lv.FreeMealsPerWeek|string not in ('', '0') %}
-            <tr><td class="tier-free">Free</td><td>{{ lv.FreeMealsPerWeek }}</td><td style="color:#167421;font-weight:700;">$0.00</td><td style="color:#167421;font-weight:700;">${{ '%.2f'|format((lv.FreeTier_CompanySubsidy or 0)|float) }}</td></tr>
-            {% endif %}
-            {% if lv.Tier1_Meals and lv.Tier1_Meals|string not in ('', '0') %}
-            <tr><td>Tier 1</td><td>{{ lv.Tier1_Meals }}</td><td>${{ '%.2f'|format((lv.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
-            {% endif %}
-            {% if lv.Tier2_Meals and lv.Tier2_Meals|string not in ('', '0') %}
-            <tr><td>Tier 2</td><td>{{ lv.Tier2_Meals }}</td><td>${{ '%.2f'|format((lv.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
-            {% endif %}
-            {% if lv.Tier3_Meals and lv.Tier3_Meals|string not in ('', '0') %}
-            <tr><td>Tier 3</td><td>{{ lv.Tier3_Meals }}</td><td>${{ '%.2f'|format((lv.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((lv.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
-            {% endif %}
-          </tbody>
-        </table>
-      </div>
-      {% endfor %}
-
-      {% else %}
-      <div class="card">
-        <table class="tier-table">
-          <thead><tr><th>Tier</th><th>Meals / Week</th><th>Employee Price</th><th>Company Covers</th></tr></thead>
+          <thead><tr><th>Tier</th><th>Employee Pays</th><th>{{ company.CompanyName or 'Company' }} Covers</th><th>BetterDay Covers</th></tr></thead>
           <tbody>
             {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
-            <tr><td class="tier-free">Free</td><td>{{ company.FreeMealsPerWeek }}</td><td style="color:#167421;font-weight:700;">$0.00</td><td style="color:#167421;font-weight:700;">${{ '%.2f'|format((company.BasePrice or company.FullPrice or 0)|float) }}</td></tr>
+            <tr>
+              <td><span style="background:#EEFBE8;color:#167421;padding:2px 10px;border-radius:99px;font-size:.72rem;font-weight:700;">🎁 Free</span></td>
+              <td style="color:#167421;font-weight:700;">$0.00</td>
+              <td>${{ '%.2f'|format((company.FreeTier_CompanySubsidy or company.BasePrice or company.FullPrice or 0)|float) }}</td>
+              <td>${{ '%.2f'|format((company.FreeTier_BDSubsidy or 0)|float) }}</td>
+            </tr>
             {% endif %}
             {% if company.Tier1_EmployeePrice %}
-            <tr><td>Tier 1</td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td></tr>
+            <tr><td>Tier 1</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_BDSubsidy or 0)|float) }}</td></tr>
             {% endif %}
             {% if company.Tier2_EmployeePrice %}
-            <tr><td>Tier 2</td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td></tr>
+            <tr><td>Tier 2</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_BDSubsidy or 0)|float) }}</td></tr>
             {% endif %}
             {% if company.Tier3_EmployeePrice %}
-            <tr><td>Tier 3</td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td></tr>
+            <tr><td>Tier 3</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_BDSubsidy or 0)|float) }}</td></tr>
             {% endif %}
           </tbody>
         </table>
       </div>
+
+      <!-- ── MEAL ALLOWANCES PER LEVEL ── -->
+      <div class="card" style="margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div class="card-title" style="margin:0;">Meal Allowances</div>
+          {% if can_edit %}
+          <button onclick="saveMealAllowances(this)" style="background:#00465E;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;" id="saveMealsBtn">💾 Save Changes</button>
+          {% endif %}
+        </div>
+        <p style="font-size:.82rem;color:#7A8F9C;margin-bottom:16px;line-height:1.5;">
+          Number of meals each {{ 'employee level' if has_levels else 'employee' }} receives at each pricing tier per week.
+          {% if can_edit %}<br><span style="font-size:.75rem;color:#B56B10;">✏️ You can adjust meal counts below. Pricing cannot be changed here.</span>{% endif %}
+        </p>
+
+        <table class="tier-table" id="mealAllowanceTable">
+          <thead>
+            <tr>
+              <th>{{ 'Level' if has_levels else '' }}</th>
+              <th>Free</th>
+              <th>Tier 1</th>
+              <th>Tier 2</th>
+              <th>Tier 3</th>
+              <th>Max/Wk</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% if has_levels %}
+            <!-- Default row from company settings -->
+            <tr data-level="default">
+              <td><span style="font-weight:700;color:#00465E;">Default</span></td>
+              {% if can_edit %}
+              <td><input type="number" min="0" class="meal-input" data-field="FreeMealsPerWeek" value="{{ company.FreeMealsPerWeek or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier1_Meals" value="{{ company.Tier1_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier2_Meals" value="{{ company.Tier2_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier3_Meals" value="{{ company.Tier3_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="MaxMealsPerWeek" value="{{ company.MaxMealsPerWeek or '' }}" placeholder="∞" onchange="showSaveBtn()"></td>
+              {% else %}
+              <td>{{ company.FreeMealsPerWeek or 0 }}</td>
+              <td>{{ company.Tier1_Meals or 0 }}</td>
+              <td>{{ company.Tier2_Meals or 0 }}</td>
+              <td>{{ company.Tier3_Meals or 0 }}</td>
+              <td>{{ company.MaxMealsPerWeek or '∞' }}</td>
+              {% endif %}
+            </tr>
+            {% for lv in benefit_levels %}
+            <tr data-level="{{ lv.LevelID }}" data-level-name="{{ lv.LevelName }}">
+              <td><span style="font-size:.72rem;font-weight:700;color:#00465E;background:rgba(0,70,94,.06);padding:2px 10px;border-radius:99px;">{{ lv.LevelName }}</span></td>
+              {% if can_edit %}
+              <td><input type="number" min="0" class="meal-input" data-field="FreeMealsPerWeek" value="{{ lv.FreeMealsPerWeek or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier1_Meals" value="{{ lv.Tier1_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier2_Meals" value="{{ lv.Tier2_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier3_Meals" value="{{ lv.Tier3_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="MaxMealsPerWeek" value="{{ lv.MaxMealsPerWeek or '' }}" placeholder="∞" onchange="showSaveBtn()"></td>
+              {% else %}
+              <td>{{ lv.FreeMealsPerWeek or 0 }}</td>
+              <td>{{ lv.Tier1_Meals or 0 }}</td>
+              <td>{{ lv.Tier2_Meals or 0 }}</td>
+              <td>{{ lv.Tier3_Meals or 0 }}</td>
+              <td>{{ lv.MaxMealsPerWeek or '∞' }}</td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          {% else %}
+            <!-- Single row — no benefit levels -->
+            <tr data-level="default">
+              <td><span style="font-weight:700;color:#00465E;">All Employees</span></td>
+              {% if can_edit %}
+              <td><input type="number" min="0" class="meal-input" data-field="FreeMealsPerWeek" value="{{ company.FreeMealsPerWeek or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier1_Meals" value="{{ company.Tier1_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier2_Meals" value="{{ company.Tier2_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="Tier3_Meals" value="{{ company.Tier3_Meals or 0 }}" onchange="showSaveBtn()"></td>
+              <td><input type="number" min="0" class="meal-input" data-field="MaxMealsPerWeek" value="{{ company.MaxMealsPerWeek or '' }}" placeholder="∞" onchange="showSaveBtn()"></td>
+              {% else %}
+              <td>{{ company.FreeMealsPerWeek or 0 }}</td>
+              <td>{{ company.Tier1_Meals or 0 }}</td>
+              <td>{{ company.Tier2_Meals or 0 }}</td>
+              <td>{{ company.Tier3_Meals or 0 }}</td>
+              <td>{{ company.MaxMealsPerWeek or '∞' }}</td>
+              {% endif %}
+            </tr>
+          {% endif %}
+          </tbody>
+        </table>
+
+        {% if can_edit %}
+        <div style="margin-top:12px;font-size:.72rem;color:#7A8F9C;line-height:1.5;">
+          🔒 All changes are logged in the audit trail below. Pricing adjustments require BetterDay admin approval.
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- ── CONTACT NOTE (shown when NOT editable) ── -->
+      {% if not can_edit %}
+      <div class="note-box" style="margin-top:16px;">Need to adjust your meal plan? Contact your BetterDay account manager to modify subsidy tiers, meal counts, or pricing. <a href="mailto:hello@eatbetterday.ca" style="color:#00465E;font-weight:700">hello@eatbetterday.ca</a></div>
       {% endif %}
 
-      <div class="note-box">Need to adjust your meal plan? Contact your BetterDay account manager to modify subsidy tiers, meal counts, or pricing. <a href="mailto:hello@eatbetterday.ca" style="color:#00465E;font-weight:700">hello@eatbetterday.ca</a></div>
+      <!-- ── CHANGE LOG ── -->
+      {% if can_edit %}
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title">Change Log</div>
+        <p style="font-size:.82rem;color:#7A8F9C;margin-bottom:12px;">Recent changes to meal allowances made from this portal.</p>
+        <div id="changeLogBody" style="font-size:.82rem;">
+          <div style="color:#7A8F9C;text-align:center;padding:20px;">Loading change log...</div>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
     <!-- ════════════════════════════════════════ -->
@@ -1513,6 +1609,77 @@ function bulkExportCSV() {
   a.click();
   clearBulkSelection();
 }
+
+// ═══════════════════════════════════════
+// MEAL ALLOWANCE EDITING + CHANGE LOG
+// ═══════════════════════════════════════
+function showSaveBtn() {
+  const btn = document.getElementById('saveMealsBtn');
+  if (btn) btn.style.display = 'inline-block';
+}
+
+async function saveMealAllowances(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const rows = document.querySelectorAll('#mealAllowanceTable tbody tr');
+  const changes = [];
+  rows.forEach(tr => {
+    const level = tr.dataset.level;
+    const levelName = tr.dataset.levelName || 'Default';
+    const inputs = tr.querySelectorAll('.meal-input');
+    const data = { level: level, levelName: levelName };
+    inputs.forEach(inp => { data[inp.dataset.field] = inp.value || '0'; });
+    changes.push(data);
+  });
+  try {
+    const r = await fetch('/manager/save-meal-allowances', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ changes: changes })
+    });
+    const d = await r.json();
+    if (d.success) {
+      btn.textContent = '✓ Saved';
+      btn.style.background = '#167421';
+      setTimeout(() => { btn.style.display = 'none'; btn.textContent = '💾 Save Changes'; btn.style.background = '#00465E'; btn.disabled = false; }, 2000);
+      loadChangeLog();
+    } else {
+      alert('Save failed: ' + (d.error || 'Unknown error'));
+      btn.textContent = '💾 Save Changes'; btn.disabled = false;
+    }
+  } catch(e) {
+    alert('Save failed: ' + e.message);
+    btn.textContent = '💾 Save Changes'; btn.disabled = false;
+  }
+}
+
+async function loadChangeLog() {
+  const el = document.getElementById('changeLogBody');
+  if (!el) return;
+  try {
+    const r = await fetch('/manager/meal-change-log');
+    const d = await r.json();
+    if (!d.log || d.log.length === 0) {
+      el.innerHTML = '<div style="color:#7A8F9C;text-align:center;padding:20px;font-size:.82rem;">No changes recorded yet.</div>';
+      return;
+    }
+    el.innerHTML = d.log.map(entry =>
+      '<div class="log-row">' +
+        '<div class="log-date">' + fmtDate(entry.timestamp) + '</div>' +
+        '<div class="log-detail"><strong>' + (entry.changedBy || 'Manager') + '</strong> changed <strong>' + (entry.levelName || 'Default') + '</strong>: ' + entry.description + '</div>' +
+      '</div>'
+    ).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:#7A8F9C;text-align:center;padding:20px;">Could not load change log.</div>';
+  }
+}
+
+// Load change log on tab switch to mealplan
+const _origSidebarNav = sidebarNav;
+sidebarNav = function(name, el) {
+  _origSidebarNav(name, el);
+  if (name === 'mealplan') loadChangeLog();
+};
 </script>
 </body>
 </html>

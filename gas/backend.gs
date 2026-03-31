@@ -1155,6 +1155,110 @@ function doPost(e) {
       });
     }
 
+    // ─────────────────────────────────────────
+    // MANAGER SAVE MEAL ALLOWANCES (with audit log)
+    // ─────────────────────────────────────────
+    if (data.action === "manager_save_meal_allowances") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var changedBy = String(data.changed_by || "manager").trim();
+      var changes   = data.changes || [];
+      if (!companyId || changes.length === 0) return jsonOut({success: false, error: "Missing data"});
+
+      var compSheet = ssHub.getSheetByName("Companies");
+      var compRows  = compSheet.getDataRange().getValues();
+      var compHeaders = compRows[0];
+      var compRowIdx  = -1;
+      for (var i = 1; i < compRows.length; i++) {
+        if (String(compRows[i][0]).trim().toUpperCase() === companyId) { compRowIdx = i; break; }
+      }
+      if (compRowIdx < 0) return jsonOut({success: false, error: "Company not found"});
+
+      // Get or create MealEditLog sheet
+      var logSheet = ssHub.getSheetByName("MealEditLog");
+      if (!logSheet) {
+        logSheet = ssHub.insertSheet("MealEditLog");
+        logSheet.appendRow(["Timestamp","CompanyID","ChangedBy","LevelType","LevelName","Field","OldValue","NewValue","Description"]);
+        logSheet.setFrozenRows(1);
+        logSheet.getRange(1,1,1,9).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+      }
+
+      var mealFields = ["FreeMealsPerWeek","Tier1_Meals","Tier2_Meals","Tier3_Meals","MaxMealsPerWeek"];
+      var logEntries = [];
+
+      changes.forEach(function(ch) {
+        if (ch.level === "default") {
+          // Update company-level defaults
+          mealFields.forEach(function(f) {
+            if (ch[f] === undefined) return;
+            var colIdx = compHeaders.indexOf(f);
+            if (colIdx < 0) return;
+            var oldVal = String(compRows[compRowIdx][colIdx] || "0");
+            var newVal = String(ch[f] || "0");
+            if (oldVal !== newVal) {
+              compSheet.getRange(compRowIdx + 1, colIdx + 1).setValue(ch[f]);
+              logEntries.push([new Date(), companyId, changedBy, "default", "Default", f, oldVal, newVal,
+                f + ": " + oldVal + " → " + newVal]);
+            }
+          });
+        } else {
+          // Update a benefit level row
+          var lvSheet = ssHub.getSheetByName("BenefitLevels");
+          if (!lvSheet) return;
+          var lvRows = lvSheet.getDataRange().getValues();
+          var lvHeaders = lvRows[0];
+          for (var j = 1; j < lvRows.length; j++) {
+            if (String(lvRows[j][0]).trim().toUpperCase() !== companyId) continue;
+            if (String(lvRows[j][lvHeaders.indexOf("LevelID")]) !== String(ch.level)) continue;
+            mealFields.forEach(function(f) {
+              if (ch[f] === undefined) return;
+              var colIdx = lvHeaders.indexOf(f);
+              if (colIdx < 0) return;
+              var oldVal = String(lvRows[j][colIdx] || "0");
+              var newVal = String(ch[f] || "0");
+              if (oldVal !== newVal) {
+                lvSheet.getRange(j + 1, colIdx + 1).setValue(ch[f]);
+                logEntries.push([new Date(), companyId, changedBy, "level", ch.levelName || "Level", f, oldVal, newVal,
+                  (ch.levelName || "Level") + " " + f + ": " + oldVal + " → " + newVal]);
+              }
+            });
+            break;
+          }
+        }
+      });
+
+      // Write all log entries
+      logEntries.forEach(function(row) { logSheet.appendRow(row); });
+
+      return jsonOut({success: true, changesLogged: logEntries.length});
+    }
+
+    // ─────────────────────────────────────────
+    // GET MEAL CHANGE LOG
+    // ─────────────────────────────────────────
+    if (data.action === "get_meal_change_log") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var logSheet = ssHub.getSheetByName("MealEditLog");
+      if (!logSheet) return jsonOut({log: []});
+      var rows = logSheet.getDataRange().getValues();
+      var result = [];
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][1]).trim().toUpperCase() !== companyId) continue;
+        result.push({
+          timestamp: rows[i][0] ? Utilities.formatDate(new Date(rows[i][0]), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm") : "",
+          changedBy: String(rows[i][2] || ""),
+          levelName: String(rows[i][4] || ""),
+          field: String(rows[i][5] || ""),
+          oldValue: String(rows[i][6] || ""),
+          newValue: String(rows[i][7] || ""),
+          description: String(rows[i][8] || "")
+        });
+      }
+      // Most recent first, max 50
+      result.reverse();
+      if (result.length > 50) result = result.slice(0, 50);
+      return jsonOut({log: result});
+    }
+
     return ContentService.createTextOutput("Error: Unknown Action");
   } catch (err) {
     return ContentService.createTextOutput("Error: " + err.toString());
