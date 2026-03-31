@@ -1406,6 +1406,11 @@ def menu_builder():
     return render_template('menubuilder.html')
 
 
+@app.route('/category-model')
+def category_model_demo():
+    return render_template('category-model-demo.html')
+
+
 # ─────────────────────────────────────────────────────────────
 # ENTRYPOINT
 # ─────────────────────────────────────────────────────────────
