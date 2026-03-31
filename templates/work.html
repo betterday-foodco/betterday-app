@@ -902,35 +902,20 @@
     <div class="pay-sim-brand">better<span>day</span> checkout</div>
     <div class="pay-sim-amount" id="paySimAmount">$0.00</div>
     <div class="pay-sim-desc" id="paySimDesc"></div>
-    <div class="pay-sim-field">
-      <label class="pay-sim-label">Card number</label>
-      <input class="pay-sim-input" id="paySimCard" type="text" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" value="4242 4242 4242 4242" autocomplete="cc-number">
-    </div>
-    <div class="pay-sim-row2">
-      <div class="pay-sim-field">
-        <label class="pay-sim-label">Expiry</label>
-        <input class="pay-sim-input" id="paySimExpiry" type="text" inputmode="numeric" maxlength="5" placeholder="MM/YY" value="12/28" autocomplete="cc-exp">
-      </div>
-      <div class="pay-sim-field">
-        <label class="pay-sim-label">CVC</label>
-        <input class="pay-sim-input" id="paySimCvc" type="text" inputmode="numeric" maxlength="3" placeholder="123" value="123" autocomplete="cc-csc">
-      </div>
-    </div>
-    <div class="pay-sim-field">
-      <label class="pay-sim-label">Cardholder name</label>
-      <input class="pay-sim-input" id="paySimName" type="text" placeholder="Jane Smith" autocomplete="cc-name">
-    </div>
-    <button class="pay-sim-btn" id="paySimBtn" onclick="submitPayment()">Pay $0.00</button>
+    <!-- HelcimPay.js renders its iframe here -->
+    <div id="helcimPayContainer"></div>
     <div class="pay-sim-processing hidden" id="paySimProcessing">
       <div class="pay-sim-spinner"></div>
-      <div class="pay-sim-proc-text">Processing payment…</div>
+      <div class="pay-sim-proc-text" id="paySimProcText">Initializing secure payment…</div>
     </div>
     <div class="pay-sim-footer">
-      <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="6.5" fill="#635BFF"/><path d="M5.4 9L3.2 6.8l.75-.75L5.4 7.5l3.65-3.65.75.75L5.4 9Z" fill="#fff"/></svg>
-      Powered by <strong>Stripe</strong> &nbsp;·&nbsp; 256-bit SSL
+      <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="6.5" fill="#7C6EF6"/><path d="M5.4 9L3.2 6.8l.75-.75L5.4 7.5l3.65-3.65.75.75L5.4 9Z" fill="#fff"/></svg>
+      Powered by <strong style="color:#7C6EF6">Helcim</strong> &nbsp;·&nbsp; 256-bit SSL &nbsp;·&nbsp; PCI Compliant
     </div>
   </div>
 </div>
+<!-- HelcimPay.js SDK -->
+<script src="https://myposit.helcim.com/helcim-pay/services/start.js" type="text/javascript"></script>
 
 <!-- ══════════════════════════════════════════
      ORDER INVOICE MODAL  (profile — view order)
@@ -1989,33 +1974,70 @@ async function doCheckout() {
   await _executeCheckout();
 }
 
-function openPaymentModal(total) {
+var _helcimCheckoutToken = '';
+
+async function openPaymentModal(total) {
   const c = currentCompany, emp = currentEmployee;
   const deliveries = [...new Set(cart.map(i => weeks[i.weekIndex]?.deliveryShort))].join(', ');
   document.getElementById('paySimAmount').textContent = '$' + total.toFixed(2);
   document.getElementById('paySimDesc').textContent = cart.length + ' meal' + (cart.length !== 1 ? 's' : '') + ' · Delivery ' + deliveries;
-  document.getElementById('paySimBtn').textContent = 'Pay $' + total.toFixed(2);
-  document.getElementById('paySimBtn').disabled = false;
-  document.getElementById('paySimName').value = emp ? `${emp.firstName} ${emp.lastName}` : '';
-  document.getElementById('paySimProcessing').classList.add('hidden');
+  document.getElementById('paySimProcessing').classList.remove('hidden');
+  document.getElementById('paySimProcText').textContent = 'Initializing secure payment…';
+  document.getElementById('helcimPayContainer').innerHTML = '';
   document.getElementById('paymentModal').classList.remove('hidden');
+
+  // Initialize checkout session via Flask backend
+  try {
+    const resp = await fetch('/api/helcim/checkout', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        amount: total,
+        customer_code: emp ? emp.email : '',
+        order_id: 'BD-' + Date.now()
+      })
+    });
+    const data = await resp.json();
+    if (data.checkoutToken) {
+      _helcimCheckoutToken = data.checkoutToken;
+      document.getElementById('paySimProcessing').classList.add('hidden');
+      // Render the Helcim payment modal inside our container
+      appendHelcimPayIframe(_helcimCheckoutToken);
+    } else {
+      throw new Error(data.error || 'Failed to initialize');
+    }
+  } catch(e) {
+    console.error('Helcim init failed:', e);
+    document.getElementById('paySimProcText').textContent = 'Payment unavailable — please try again';
+    setTimeout(closePaymentModal, 2500);
+  }
 }
+
+// Listen for HelcimPay.js payment result
+window.addEventListener('message', function(event) {
+  if (!_helcimCheckoutToken) return;
+  var key = 'helcim-pay-js-' + _helcimCheckoutToken;
+  if (event.data && event.data.eventName === key) {
+    if (event.data.eventStatus === 'SUCCESS') {
+      console.log('Payment successful:', event.data.eventMessage);
+      document.getElementById('paymentModal').classList.add('hidden');
+      _executeCheckout();
+    } else if (event.data.eventStatus === 'ABORTED') {
+      console.warn('Payment aborted:', event.data.eventMessage);
+      showToast('Payment was cancelled');
+      closePaymentModal();
+    }
+  }
+});
 
 function closePaymentModal() {
   document.getElementById('paymentModal').classList.add('hidden');
+  document.getElementById('helcimPayContainer').innerHTML = '';
+  _helcimCheckoutToken = '';
   _checkoutInProgress = false;
   const btn = document.getElementById('payBtn');
   if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
   document.getElementById('summaryModal').classList.remove('hidden');
-}
-
-async function submitPayment() {
-  const btn = document.getElementById('paySimBtn');
-  btn.disabled = true;
-  document.getElementById('paySimProcessing').classList.remove('hidden');
-  await new Promise(r => setTimeout(r, 1800));
-  document.getElementById('paymentModal').classList.add('hidden');
-  await _executeCheckout();
 }
 
 async function _executeCheckout() {

@@ -33,6 +33,7 @@ GOOGLE_SCRIPT_URL = os.environ.get(
 )
 APP_BASE_URL    = os.environ.get('APP_BASE_URL', 'https://betterday-app.onrender.com')
 ADMIN_PASSWORD  = os.environ.get('ADMIN_PASSWORD',   'betterday2024')
+HELCIM_API_TOKEN = os.environ.get('HELCIM_API_TOKEN', '')
 app.secret_key  = os.environ.get('FLASK_SECRET_KEY', 'bd-dev-secret-change-in-prod')
 
 logging.basicConfig(level=logging.WARNING)
@@ -1148,6 +1149,54 @@ def company_lookup(company_id):
     if result is None:
         return jsonify({'error': 'lookup failed'}), 502
     return jsonify(result)
+
+
+@app.route('/api/helcim/checkout', methods=['POST'])
+def helcim_checkout():
+    """Initialize a HelcimPay.js checkout session for employee card payment."""
+    if not HELCIM_API_TOKEN:
+        return jsonify({'error': 'Payment processing not configured'}), 503
+    data = request.get_json(force=True) or {}
+    amount = float(data.get('amount', 0))
+    if amount <= 0:
+        return jsonify({'error': 'Invalid amount'}), 400
+    try:
+        resp = requests.post(
+            'https://api.helcim.com/v2/helcim-pay/initialize',
+            headers={
+                'accept': 'application/json',
+                'api-token': HELCIM_API_TOKEN,
+                'content-type': 'application/json'
+            },
+            json={
+                'paymentType': 'purchase',
+                'amount': round(amount, 2),
+                'currency': 'CAD',
+                'customerCode': data.get('customer_code', ''),
+                'invoiceNumber': data.get('order_id', ''),
+            },
+            timeout=15
+        )
+        if resp.status_code == 200:
+            result = resp.json()
+            # Store secretToken server-side for validation later
+            checkout_token = result.get('checkoutToken', '')
+            secret_token = result.get('secretToken', '')
+            if checkout_token:
+                with _token_store_lock:
+                    _token_store['helcim_' + checkout_token] = {
+                        'secret': secret_token,
+                        'amount': amount,
+                        'order_id': data.get('order_id', ''),
+                        'created_at': time.time()
+                    }
+            return jsonify({'checkoutToken': checkout_token})
+        else:
+            log.warning('Helcim init failed: %s %s', resp.status_code, resp.text[:200])
+            return jsonify({'error': 'Payment initialization failed'}), 502
+    except Exception as e:
+        log.error('Helcim init error: %s', e)
+        return jsonify({'error': 'Payment service unavailable'}), 503
 
 
 @app.route('/work/submit', methods=['POST'])
