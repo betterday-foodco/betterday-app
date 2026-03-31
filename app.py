@@ -1132,7 +1132,11 @@ def admin_send_reminders():
     """Send order reminder emails to employees who haven't ordered this week."""
     if not session.get('admin_logged_in'):
         return jsonify({'error': 'Unauthorized'}), 401
-    result = _gas_post({'action': 'send_order_reminders'})
+    data = request.get_json(force=True) or {}
+    payload = {'action': 'send_order_reminders'}
+    if data.get('company_ids'):
+        payload['company_ids'] = data['company_ids']
+    result = _gas_post(payload)
     if result:
         return jsonify(result)
     return jsonify({'error': 'Failed to send reminders'}), 502

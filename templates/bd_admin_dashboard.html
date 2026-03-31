@@ -650,22 +650,36 @@ function downloadReportCSV(type) {
 
 // ═══ ORDER REMINDER MODAL ═══
 var _reminderSending = false;
+var _reminderCompanies = {{ companies_json|safe }};
 function openReminderModal() {
   var totalEmp = {{ total_unique_employees }};
   var weekEmp = {{ week_employees }};
   var toSend = totalEmp - weekEmp;
   var pct = totalEmp > 0 ? Math.round(weekEmp / totalEmp * 100) : 0;
 
+  var coCheckboxes = _reminderCompanies.map(function(c) {
+    var id = c.CompanyID || c.company_id || '';
+    var name = c.CompanyName || c.company_name || id;
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.82rem;color:#003141;cursor:pointer;">'
+      + '<input type="checkbox" class="reminder-co-cb" value="' + id + '" checked style="width:16px;height:16px;accent-color:#B56B10;">'
+      + '<span style="font-weight:600;">' + name + '</span></label>';
+  }).join('');
+
   var modal = document.createElement('div');
   modal.id = 'reminderModal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,20,30,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.2);">'
+  modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.2);">'
     + '<div style="font-size:1.1rem;font-weight:800;color:#003141;margin-bottom:6px;">Send Order Reminders</div>'
     + '<div style="font-size:.82rem;color:#7A8F9C;margin-bottom:20px;">Delivery week of {{ active_week.label }}</div>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">'
     + '<div style="background:#EEFBE8;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#167421;">' + weekEmp + '</div><div style="font-size:.68rem;color:#5a7268;">Ordered</div></div>'
     + '<div style="background:#FFF3E0;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#B56B10;">' + toSend + '</div><div style="font-size:.68rem;color:#8a6530;">Haven\'t Ordered</div></div>'
     + '<div style="background:#E8F3FF;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#2d7ec4;">' + pct + '%</div><div style="font-size:.68rem;color:#3a6a9c;">Participation</div></div>'
+    + '</div>'
+    + '<div style="background:#f8f5f0;border:1px solid #E8DFD2;border-radius:10px;padding:14px 16px;margin-bottom:16px;">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Send to companies</div>'
+    + '<button onclick="document.querySelectorAll(\'.reminder-co-cb\').forEach(function(c){c.checked=!c.checked})" style="font-size:.65rem;font-weight:700;color:#B56B10;background:none;border:none;cursor:pointer;">Toggle all</button></div>'
+    + coCheckboxes
     + '</div>'
     + '<div style="background:#FAF6F0;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:.82rem;color:#5a7268;line-height:1.5;">'
     + '📧 Will send a reminder email to <strong style="color:#003141;">' + toSend + ' employee' + (toSend !== 1 ? 's' : '') + '</strong> who haven\'t placed an order for this week yet.'
@@ -674,7 +688,7 @@ function openReminderModal() {
     + '<button onclick="closeReminderModal()" style="flex:1;padding:12px;background:none;border:1.5px solid #E8DFD2;border-radius:10px;font-size:.82rem;font-weight:700;color:#7A8F9C;cursor:pointer;font-family:DM Sans,sans-serif;">Cancel</button>'
     + '<button id="sendReminderBtn" onclick="sendReminders()" style="flex:2;padding:12px;background:#B56B10;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:DM Sans,sans-serif;transition:.15s;"'
     + (toSend === 0 ? ' disabled style="flex:2;padding:12px;background:#ccc;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:800;cursor:default;font-family:DM Sans,sans-serif;"' : '')
-    + '>Send ' + toSend + ' Reminder' + (toSend !== 1 ? 's' : '') + '</button>'
+    + '>Send Reminders</button>'
     + '</div>'
     + '<div id="reminderStatus" style="display:none;margin-top:14px;text-align:center;font-size:.82rem;font-weight:700;"></div>'
     + '</div>';
@@ -692,23 +706,28 @@ async function sendReminders() {
   _reminderSending = true;
   var btn = document.getElementById('sendReminderBtn');
   btn.disabled = true;
-  btn.textContent = 'Sending...';
+  btn.textContent = 'Sending\u2026';
   btn.style.background = '#9aabb8';
 
+  // Collect selected company IDs
+  var selectedCos = [];
+  document.querySelectorAll('.reminder-co-cb:checked').forEach(function(cb) { selectedCos.push(cb.value); });
+  if (selectedCos.length === 0) { btn.disabled = false; btn.textContent = 'Send Reminders'; btn.style.background = '#B56B10'; _reminderSending = false; alert('Select at least one company'); return; }
+
   try {
-    var resp = await fetch('/bd-admin/send-reminders', {method: 'POST', headers: {'Content-Type': 'application/json'}});
+    var resp = await fetch('/bd-admin/send-reminders', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({company_ids: selectedCos})});
     var data = await resp.json();
     var status = document.getElementById('reminderStatus');
     status.style.display = 'block';
     if (data.success) {
       status.style.color = '#167421';
-      status.textContent = '✓ Sent ' + data.sent + ' reminder' + (data.sent !== 1 ? 's' : '') + ' · ' + data.skipped + ' already ordered';
+      status.textContent = '\u2713 Sent ' + data.sent + ' reminder' + (data.sent !== 1 ? 's' : '') + ' \u00b7 ' + data.skipped + ' already ordered';
       btn.textContent = 'Done!';
       btn.style.background = '#167421';
       setTimeout(closeReminderModal, 3000);
     } else {
       status.style.color = '#e74c3c';
-      status.textContent = '⚠ ' + (data.error || 'Failed to send');
+      status.textContent = '\u26a0 ' + (data.error || 'Failed to send');
       btn.textContent = 'Failed';
       btn.style.background = '#e74c3c';
     }
@@ -717,7 +736,7 @@ async function sendReminders() {
     var status = document.getElementById('reminderStatus');
     status.style.display = 'block';
     status.style.color = '#e74c3c';
-    status.textContent = '⚠ Network error';
+    status.textContent = '\u26a0 Network error';
   }
   _reminderSending = false;
 }

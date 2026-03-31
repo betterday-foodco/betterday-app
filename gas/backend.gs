@@ -959,11 +959,18 @@ function doPost(e) {
       var APP_URL = PropertiesService.getScriptProperties().getProperty("APP_URL") || "https://betterday-app.onrender.com";
       var sent = 0, skipped = 0, totalEmployees = 0, totalOrdered = 0;
       var companies = {};
+      // Optional company filter — if provided, only send to these companies
+      var filterCos = null;
+      if (data.company_ids && data.company_ids.length > 0) {
+        filterCos = {};
+        data.company_ids.forEach(function(c) { filterCos[String(c).trim().toUpperCase()] = true; });
+      }
 
       for (var i = 1; i < empRows.length; i++) {
         var email = String(empRows[i][4] || "").trim().toLowerCase();
         var coId = String(empRows[i][1] || "").trim().toUpperCase();
         if (!email || !coId) continue;
+        if (filterCos && !filterCos[coId]) continue;
         totalEmployees++;
         if (!companies[coId]) companies[coId] = {total: 0, ordered: 0};
         companies[coId].total++;
