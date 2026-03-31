@@ -2101,7 +2101,11 @@ async function _executeCheckout() {
     const anchor = weeks[i.weekIndex]?.sundayAnchor;
     if (anchor) existingOrderCounts[anchor] = (existingOrderCounts[anchor] || 0) + 1;
   });
-  cart=[]; goTo('sThankYou');
+  cart=[];
+  _checkoutInProgress = false;
+  const payBtn2 = document.getElementById('payBtn');
+  if (payBtn2) { payBtn2.disabled = false; payBtn2.textContent = 'Place Order'; }
+  goTo('sThankYou');
   } catch(err) {
     console.error('Checkout error:', err);
     document.getElementById('checkoutOverlay').classList.add('hidden');
