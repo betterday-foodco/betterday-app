@@ -26,20 +26,15 @@
     #sMagicVerify.active { display: flex; align-items: center; justify-content: center; min-height: 100dvh; background: #f4ede3; }
 
     /* ── SHARED AUTH SHELL ── */
-    .auth-bg { min-height: 100vh; display: grid; grid-template-rows: 140px 1fr; position: relative; }
-    .auth-bg-top { background: var(--dark); position: relative; overflow: hidden; }
-    .auth-bg-top::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 80% 50%, rgba(78,162,253,.25) 0%, transparent 65%),
-                  radial-gradient(ellipse at 20% 80%, rgba(250,235,218,.08) 0%, transparent 50%);
-    }
-    .auth-bg-dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 28px 28px; }
-    .auth-bg-bottom { background: var(--cream); }
-    .auth-card-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-start; justify-content: center; padding: 24px; padding-top: 100px; }
-    .auth-card { background: #fff; border-radius: 28px; padding: 32px 32px 28px; width: 100%; max-width: 420px; box-shadow: 0 24px 60px rgba(0,70,94,.16), 0 4px 16px rgba(0,70,94,.08); position: relative; z-index: 10; }
-    .auth-brand { position: absolute; top: 28px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; z-index: 5; }
-    .auth-logo-mark { display: none; } /* Replaced by Logo.svg img */
-    .auth-wordmark { font-family: 'DM Sans', sans-serif; font-size: 1.4rem; color: #fff; }
+    .auth-bg { min-height: 100vh; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+    .auth-bg-top { display: none; }
+    .auth-bg-dots { display: none; }
+    .auth-bg-bottom { display: none; }
+    .auth-card-wrap { width: 100%; max-width: 420px; }
+    .auth-card { background: #fff; border-radius: 16px; padding: 40px 36px; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 24px rgba(0,0,0,.06); border: 1px solid #E8DFD2; position: relative; z-index: 10; }
+    .auth-brand { text-align: center; background: #003141; margin: -40px -36px 28px; padding: 28px 36px; border-radius: 16px 16px 0 0; }
+    .auth-logo-mark { display: none; }
+    .auth-wordmark { display: none; }
     .auth-tagline { font-size: .65rem; color: rgba(250,235,218,.5); font-weight: 400; margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
 
     /* ── MANAGER GATE SCREEN ── */

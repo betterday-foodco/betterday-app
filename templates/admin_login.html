@@ -1,194 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>BetterDay — Admin Login</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root { --cream:#faebda; --dark:#00465e; --primary:#4ea2fd; --red:#e74c3c; }
-    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-    body {
-      font-family:'DM Sans',sans-serif;
-      background:var(--dark);
-      min-height:100vh;
-      display:grid;
-      grid-template-rows:180px 1fr;
-      position:relative;
-    }
-    .bg-top {
-      background:var(--dark);
-      position:relative;
-      overflow:hidden;
-    }
-    .bg-top::before {
-      content:'';
-      position:absolute; inset:0;
-      background:
-        radial-gradient(ellipse at 80% 50%, rgba(78,162,253,.22) 0%, transparent 60%),
-        radial-gradient(ellipse at 15% 80%, rgba(250,235,218,.07) 0%, transparent 50%);
-    }
-    .bg-dots {
-      position:absolute; inset:0;
-      background-image:radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px);
-      background-size:28px 28px;
-    }
-    .bg-bottom { background:var(--cream); }
-
-    .card-wrap {
-      position:absolute;
-      top:0; left:0; right:0; bottom:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
-      pointer-events:none;
-    }
-    .card {
-      background:#fff;
-      border-radius:28px;
-      padding:36px 32px 32px;
-      width:100%;
-      max-width:400px;
-      box-shadow:0 24px 60px rgba(0,0,0,.18);
-      pointer-events:all;
-    }
-
-    .logo-wrap {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      margin-bottom:28px;
-    }
-    .logo-icon { display:none; }
-    .logo-img { height:32px; margin-bottom:6px; }
-    .logo-title {
-      font-family:'DM Sans',sans-serif;
-      font-size:.65rem;
-      font-weight:400;
-      text-transform:uppercase;
-      letter-spacing:2px;
-      color:rgba(250,235,218,.5);
-      line-height:1;
-      margin-top:2px;
-    }
-    .logo-sub {
-      font-size:.72rem;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:1.2px;
-      color:var(--dark);
-      margin-top:3px;
-    }
-
-    .eyebrow {
-      font-size:.65rem;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:1.4px;
-      color:var(--primary);
-      margin-bottom:4px;
-    }
-    .card-title {
-      font-family:'DM Sans',sans-serif;
-      font-size:1.55rem;
-      color:var(--dark);
-      margin-bottom:6px;
-    }
-    .card-sub {
-      font-size:.83rem;
-      color:#7b8c9f;
-      margin-bottom:24px;
-      line-height:1.5;
-    }
-
-    label {
-      display:block;
-      font-size:.68rem;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.9px;
-      color:#a0aebb;
-      margin-bottom:6px;
-    }
-    input[type=password] {
-      width:100%;
-      padding:13px 16px;
-      border:2px solid #e8edf2;
-      border-radius:12px;
-      font-size:1rem;
-      font-family:'DM Sans',sans-serif;
-      color:var(--dark);
-      background:#f8fafc;
-      outline:none;
-      transition:.15s;
-      letter-spacing:.1em;
-    }
-    input[type=password]:focus {
-      border-color:var(--primary);
-      background:#fff;
-    }
-
-    .error-msg {
-      background:rgba(231,76,60,.08);
-      border:1.5px solid rgba(231,76,60,.2);
-      border-radius:10px;
-      padding:10px 14px;
-      font-size:.8rem;
-      font-weight:700;
-      color:var(--red);
-      margin-bottom:16px;
-    }
-
-    .submit-btn {
-      width:100%;
-      padding:14px;
-      background:var(--dark);
-      color:#fff;
-      border:none;
-      border-radius:12px;
-      font-size:.9rem;
-      font-weight:800;
-      font-family:'DM Sans',sans-serif;
-      cursor:pointer;
-      transition:.15s;
-      margin-top:18px;
-      letter-spacing:.3px;
-    }
-    .submit-btn:hover { background:#005070; }
-    .submit-btn:active { transform:scale(.98); }
-  </style>
+    <title>Admin Portal — BetterDay</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand: #00465e;
+            --text: #012030;
+            --text-secondary: #7A8F9C;
+            --border: #E8DFD2;
+            --bg: #FAEBDA;
+            --white: #FFFFFF;
+            --error-bg: #FEF2F2;
+            --error-border: #FECACA;
+            --error-text: #B91C1C;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 24px rgba(0,0,0,.06);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 36px;
+        }
+        .logo-wrap { text-align: center; background: #003141; margin: -40px -36px 32px; padding: 28px 36px; border-radius: 16px 16px 0 0; }
+        .logo { height: 30px; display: block; margin: 0 auto 4px; }
+        .logo-tagline { font-size: .65rem; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; color: rgba(250,235,218,.5); }
+        .btn-login:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+        .btn-spin { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-login.loading { display: flex; align-items: center; justify-content: center; }
+        .btn-login.loading .btn-spin { display: inline-block; }
+        .btn-login.loading .btn-label::after { content: 'Signing in…'; }
+        .btn-login:not(.loading) .btn-label::after { content: 'Sign in →'; }
+        .card-title { font-size: 1.35rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+        .card-sub { font-size: .875rem; color: var(--text-secondary); margin-bottom: 28px; line-height: 1.5; }
+        .divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+        .field { margin-bottom: 18px; }
+        label { display: block; font-size: .8rem; font-weight: 600; color: var(--text); margin-bottom: 7px; }
+        input[type=password] {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: .9rem;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: var(--white);
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        input[type=password]:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(0,70,94,.08);
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--brand);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: .9rem;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background .15s, transform .1s;
+        }
+        .btn-login:hover { background: #005878; transform: translateY(-1px); }
+        .btn-login:active { transform: translateY(0); }
+        .error-msg {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: .85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 24px;
+            font-size: .8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .footer-note a { color: var(--brand); text-decoration: none; font-weight: 600; }
+        .footer-note a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-  <div class="bg-top">
-    <div class="bg-dots"></div>
-  </div>
-  <div class="bg-bottom"></div>
 
-  <div class="card-wrap">
-    <div class="card">
-      <div class="logo-wrap">
-        <img src="{{ url_for('static', filename='Cream Logo.png') }}" alt="BetterDay" class="logo-img">
-        <div class="logo-title">FOR WORK</div>
-        <div class="logo-sub" style="margin-top:12px;">Admin Portal</div>
-      </div>
-
-      <div class="eyebrow">Restricted</div>
-      <div class="card-title">Sign in</div>
-      <div class="card-sub">Enter your admin password to access the dashboard.</div>
-
-      {% if error %}
-      <div class="error-msg">{{ error }}</div>
-      {% endif %}
-
-      <form method="POST" action="{{ url_for('admin_login', next=request.args.get('next', '')) }}">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password"
-               placeholder="••••••••••" autocomplete="current-password" autofocus>
-        <button type="submit" class="submit-btn">Sign in →</button>
-      </form>
+<div class="card">
+    <div class="logo-wrap">
+        <img src="{{ url_for('static', filename='Cream Logo.png') }}" class="logo" alt="BetterDay">
+        <div class="logo-tagline">FOR WORK</div>
     </div>
-  </div>
+
+    <div class="card-title">Admin Portal</div>
+    <div class="card-sub">Enter your admin password to access the dashboard.</div>
+
+    <div class="divider"></div>
+
+    {% if error %}
+    <div class="error-msg">
+        <span>⚠</span> {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('admin_login', next=request.args.get('next', '')) }}" autocomplete="off">
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Enter your password" required autofocus>
+        </div>
+        <button type="submit" class="btn-login" id="loginBtn">
+            <span class="btn-spin"></span>
+            <span class="btn-label"></span>
+        </button>
+    </form>
+    <script>
+        document.querySelector('form').addEventListener('submit', function() {
+            var btn = document.getElementById('loginBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+        });
+    </script>
+
+    <div class="footer-note">
+        Need access or forgot your password?<br>
+        Contact <a href="mailto:hello@eatbetterday.ca">hello@eatbetterday.ca</a>
+    </div>
+</div>
+
 </body>
 </html>
