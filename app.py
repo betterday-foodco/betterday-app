@@ -24,6 +24,14 @@ def nicedate_filter(s):
     except Exception:
         return str(s) if s else '—'
 
+@app.template_filter('money')
+def money_filter(s):
+    """Format a number as $##.## — handles floats, strings, None."""
+    try:
+        return '%.2f' % float(s)
+    except (TypeError, ValueError):
+        return '0.00'
+
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────
@@ -1111,6 +1119,17 @@ def admin_manager_view(company_id):
     return redirect(url_for('manager_dashboard'))
 
 
+@app.route('/bd-admin/send-reminders', methods=['POST'])
+def admin_send_reminders():
+    """Send order reminder emails to employees who haven't ordered this week."""
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    result = _gas_post({'action': 'send_order_reminders'})
+    if result:
+        return jsonify(result)
+    return jsonify({'error': 'Failed to send reminders'}), 502
+
+
 # ─────────────────────────────────────────────────────────────
 # BETTERDAY FOR WORK — CORPORATE EMPLOYEE ORDERING
 # ─────────────────────────────────────────────────────────────
@@ -1182,13 +1201,13 @@ def helcim_checkout():
                 'api-token': HELCIM_API_TOKEN,
                 'content-type': 'application/json'
             },
-            json={
+            json={k: v for k, v in {
                 'paymentType': 'purchase',
                 'amount': round(amount, 2),
                 'currency': 'CAD',
-                'customerCode': data.get('customer_code', ''),
-                'invoiceNumber': data.get('order_id', ''),
-            },
+                'customerCode': data.get('customer_code') or None,
+                'invoiceNumber': data.get('order_id') or None,
+            }.items() if v is not None},
             timeout=15
         )
         if resp.status_code == 200:
@@ -1206,11 +1225,28 @@ def helcim_checkout():
                     }
             return jsonify({'checkoutToken': checkout_token})
         else:
-            log.warning('Helcim init failed: %s %s', resp.status_code, resp.text[:200])
-            return jsonify({'error': 'Payment initialization failed'}), 502
+            log.warning('Helcim init failed: status=%s body=%s', resp.status_code, resp.text[:500])
+            return jsonify({'error': 'Payment initialization failed', 'detail': resp.text[:200]}), 502
     except Exception as e:
         log.error('Helcim init error: %s', e)
-        return jsonify({'error': 'Payment service unavailable'}), 503
+        return jsonify({'error': 'Payment service unavailable', 'detail': str(e)}), 503
+
+
+@app.route('/api/helcim/test')
+def helcim_test():
+    """Quick test to verify Helcim API connectivity. Remove before go-live."""
+    if not HELCIM_API_TOKEN:
+        return jsonify({'ok': False, 'error': 'HELCIM_API_TOKEN not set', 'token_len': 0})
+    try:
+        resp = requests.post(
+            'https://api.helcim.com/v2/helcim-pay/initialize',
+            headers={'accept': 'application/json', 'api-token': HELCIM_API_TOKEN, 'content-type': 'application/json'},
+            json={'paymentType': 'purchase', 'amount': 1.00, 'currency': 'CAD'},
+            timeout=15
+        )
+        return jsonify({'ok': resp.status_code == 200, 'status': resp.status_code, 'body': resp.text[:500], 'token_preview': HELCIM_API_TOKEN[:8] + '...'})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)})
 
 
 @app.route('/work/submit', methods=['POST'])
