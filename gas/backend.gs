@@ -235,7 +235,7 @@ function doPost(e) {
             "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
             // Header
             "<tr><td style='background:#4ea2fd;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
-            "<div style='font-family:Georgia,\"Times New Roman\",serif;font-size:1.5rem;color:#ffffff;font-weight:700;letter-spacing:-0.5px;'>BetterDay</div>" +
+            "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:32px;display:block;margin:0 auto;'>" +
             "<div style='font-size:.65rem;color:rgba(255,255,255,.75);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>FOR WORK</div>" +
             "</td></tr>" +
             // Body
@@ -346,7 +346,7 @@ function doPost(e) {
             "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
             "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
             "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
-            "<div style='font-family:Georgia,serif;font-size:1.5rem;color:#faebda;font-weight:700;'>BetterDay</div>" +
+            "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:32px;display:block;margin:0 auto;'>" +
             "<div style='font-size:.65rem;color:rgba(250,235,218,.6);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>MANAGER PORTAL</div>" +
             "</td></tr>" +
             "<tr><td style='background:#fff;padding:36px 32px 28px;'>" +
@@ -993,7 +993,7 @@ function doPost(e) {
               "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
               "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
               "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
-              "<div style='font-family:Georgia,serif;font-size:1.5rem;color:#faebda;font-weight:700;'>BetterDay</div>" +
+              "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:32px;display:block;margin:0 auto;'>" +
               "<div style='font-size:.65rem;color:rgba(250,235,218,.6);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>FOR WORK</div>" +
               "</td></tr>" +
               "<tr><td style='background:#fff;padding:36px 32px 28px;'>" +
