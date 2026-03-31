@@ -285,18 +285,18 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
       </div>
 
       <!-- Top Performers -->
-      <div class="card card-gradient" style="margin-bottom:14px;display:flex;align-items:center;min-height:90px;">
-        <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:24px;align-items:center;width:100%;">
-          <div>
+      <div class="card card-gradient" style="margin-bottom:14px;display:flex;align-items:center;min-height:90px;padding:22px 28px;">
+        <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:28px;align-items:center;width:100%;">
+          <div style="min-width:0;">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#3a5a4e;margin-bottom:4px;">Top Company</div>
-            <div style="font-size:24px;font-weight:800;color:#00465E;letter-spacing:.5px;">{{ top_company }}</div>
-            <div style="font-size:15px;font-weight:700;color:#00465E;margin-top:6px;">{{ top_company_meals }} meals · ${{ "%.2f"|format(top_company_revenue) }} revenue</div>
+            <div style="font-size:22px;font-weight:800;color:#00465E;letter-spacing:.5px;">{{ top_company }}</div>
+            <div style="font-size:14px;font-weight:700;color:#00465E;margin-top:6px;">{{ top_company_meals }} meals &middot; ${{ "%.2f"|format(top_company_revenue) }} revenue</div>
           </div>
           <div style="background:rgba(0,49,65,.12);height:50px;"></div>
-          <div>
+          <div style="min-width:0;">
             <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#3a5a4e;margin-bottom:4px;">Best-Selling Dish</div>
-            <div style="font-size:24px;font-weight:800;color:#00465E;letter-spacing:.5px;">{{ top_meal }}</div>
-            <div style="font-size:15px;font-weight:700;color:#00465E;margin-top:6px;">{{ top_meal_count }} orders · ${{ "%.2f"|format(top_meal_revenue) }} revenue</div>
+            <div style="font-size:22px;font-weight:800;color:#00465E;letter-spacing:.5px;">{{ top_meal }}</div>
+            <div style="font-size:14px;font-weight:700;color:#00465E;margin-top:6px;">{{ top_meal_count }} orders &middot; ${{ "%.2f"|format(top_meal_revenue) }} revenue</div>
           </div>
         </div>
       </div>
@@ -657,11 +657,12 @@ function openReminderModal() {
   var toSend = totalEmp - weekEmp;
   var pct = totalEmp > 0 ? Math.round(weekEmp / totalEmp * 100) : 0;
 
-  var coCheckboxes = _reminderCompanies.map(function(c) {
+  var sortedCos = _reminderCompanies.slice().sort(function(a,b){ return (a.CompanyName||'').localeCompare(b.CompanyName||''); });
+  var coCheckboxes = sortedCos.map(function(c) {
     var id = c.CompanyID || c.company_id || '';
     var name = c.CompanyName || c.company_name || id;
-    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:.82rem;color:#003141;cursor:pointer;">'
-      + '<input type="checkbox" class="reminder-co-cb" value="' + id + '" checked style="width:16px;height:16px;accent-color:#B56B10;">'
+    return '<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.82rem;color:#003141;cursor:pointer;">'
+      + '<input type="checkbox" class="reminder-co-cb" value="' + id + '" checked style="width:15px;height:15px;accent-color:#B56B10;">'
       + '<span style="font-weight:600;">' + name + '</span></label>';
   }).join('');
 
@@ -677,9 +678,13 @@ function openReminderModal() {
     + '<div style="background:#E8F3FF;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#2d7ec4;">' + pct + '%</div><div style="font-size:.68rem;color:#3a6a9c;">Participation</div></div>'
     + '</div>'
     + '<div style="background:#f8f5f0;border:1px solid #E8DFD2;border-radius:10px;padding:14px 16px;margin-bottom:16px;">'
-    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Send to companies</div>'
-    + '<button onclick="document.querySelectorAll(\'.reminder-co-cb\').forEach(function(c){c.checked=!c.checked})" style="font-size:.65rem;font-weight:700;color:#B56B10;background:none;border:none;cursor:pointer;">Toggle all</button></div>'
+    + '<div style="display:flex;gap:8px;margin-bottom:2px;">'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#003141;cursor:pointer;"><input type="radio" name="reminderScope" value="all" checked onchange="document.getElementById(\'reminderCoList\').style.display=\'none\'" style="accent-color:#B56B10;"> All companies</label>'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#003141;cursor:pointer;"><input type="radio" name="reminderScope" value="select" onchange="document.getElementById(\'reminderCoList\').style.display=\'block\'" style="accent-color:#B56B10;"> Select companies</label>'
+    + '</div>'
+    + '<div id="reminderCoList" style="display:none;margin-top:10px;max-height:160px;overflow-y:auto;border-top:1px solid #E8DFD2;padding-top:8px;">'
     + coCheckboxes
+    + '</div>'
     + '</div>'
     + '<div style="background:#FAF6F0;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:.82rem;color:#5a7268;line-height:1.5;">'
     + '📧 Will send a reminder email to <strong style="color:#003141;">' + toSend + ' employee' + (toSend !== 1 ? 's' : '') + '</strong> who haven\'t placed an order for this week yet.'
@@ -709,13 +714,17 @@ async function sendReminders() {
   btn.textContent = 'Sending\u2026';
   btn.style.background = '#9aabb8';
 
-  // Collect selected company IDs
+  // Collect selected company IDs (all or filtered)
+  var scope = document.querySelector('input[name="reminderScope"]:checked')?.value || 'all';
   var selectedCos = [];
-  document.querySelectorAll('.reminder-co-cb:checked').forEach(function(cb) { selectedCos.push(cb.value); });
-  if (selectedCos.length === 0) { btn.disabled = false; btn.textContent = 'Send Reminders'; btn.style.background = '#B56B10'; _reminderSending = false; alert('Select at least one company'); return; }
+  if (scope === 'select') {
+    document.querySelectorAll('.reminder-co-cb:checked').forEach(function(cb) { selectedCos.push(cb.value); });
+    if (selectedCos.length === 0) { btn.disabled = false; btn.textContent = 'Send Reminders'; btn.style.background = '#B56B10'; _reminderSending = false; alert('Select at least one company'); return; }
+  }
 
   try {
-    var resp = await fetch('/bd-admin/send-reminders', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({company_ids: selectedCos})});
+    var payload = selectedCos.length > 0 ? {company_ids: selectedCos} : {};
+    var resp = await fetch('/bd-admin/send-reminders', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
     var data = await resp.json();
     var status = document.getElementById('reminderStatus');
     status.style.display = 'block';
