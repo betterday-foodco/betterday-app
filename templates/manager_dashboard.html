@@ -897,7 +897,7 @@ function printOrderPDF() {
     + '<div style="margin-top:20px;padding-top:12px;border-top:2px solid #003141;display:flex;justify-content:space-between">'
     + '<span style="font-size:13px;font-weight:800;color:#003141">TOTAL PAID</span><span style="font-size:20px;font-weight:900;color:#003141">' + empPaid + '</span></div>'
     + '<div style="margin-top:6px;display:flex;justify-content:space-between"><span style="font-size:11px;color:#888">Total subsidy applied</span><span style="font-size:13px;font-weight:700;color:#167421">' + totalSubsidy + '</span></div>'
-    + '<div style="margin-top:40px;text-align:center;font-size:10px;color:#bbb">BetterDay for Work &middot; betterday.ca</div>'
+    + '<div style="margin-top:40px;text-align:center;font-size:10px;color:#bbb">BetterDay for Work &middot; eatbetterday.ca</div>'
     + '<script>window.onload=function(){window.print()}<\/script></body></html>');
   w.document.close();
 }
@@ -1349,7 +1349,7 @@ function downloadInvPDF(idx) {
 </div>
 ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><strong>Notes:</strong> ' + inv.notes + '</div>' : ''}
 <div class="footer">
-  Questions? Contact BetterDay at support@betterday.ca \u00b7 Invoice ${inv.invoiceId}
+  Questions? Contact BetterDay at hello@eatbetterday.ca \u00b7 Invoice ${inv.invoiceId}
 </div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;

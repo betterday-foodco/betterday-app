@@ -1097,6 +1097,20 @@ def manager_logout():
     return redirect(url_for('manager_login'))
 
 
+@app.route('/bd-admin/manager-view/<company_id>')
+def admin_manager_view(company_id):
+    """Let admin preview a company's manager dashboard by setting the session."""
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+    company_id = company_id.strip().upper()
+    result = _cached_get_company(company_id)
+    if result and result.get('found'):
+        c = result['company']
+        session['manager_company_id'] = company_id
+        session['manager_company_name'] = c.get('CompanyName', company_id)
+    return redirect(url_for('manager_dashboard'))
+
+
 # ─────────────────────────────────────────────────────────────
 # BETTERDAY FOR WORK — CORPORATE EMPLOYEE ORDERING
 # ─────────────────────────────────────────────────────────────
@@ -1201,7 +1215,7 @@ def helcim_checkout():
 
 @app.route('/work/submit', methods=['POST'])
 def work_submit():
-    """Server-side fallback / future Stripe integration point."""
+    """Server-side order submission endpoint."""
     data   = request.get_json(force=True) or {}
     result = _gas_post({
         'action':           'submit_corporate_order',
