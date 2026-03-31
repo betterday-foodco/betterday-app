@@ -1883,7 +1883,16 @@ function buildCartItemRows(ic, tc, nc, mc, pc) {
     const rows=Object.values(byWeek[wi]).map(({meal,entries})=>{
       const lt=entries.reduce((s,e)=>s+e.price,0);
       const priceHtml=lt===0?`<span style="color:var(--green);font-weight:800">FREE</span>`:'$'+lt.toFixed(2);
-      const meta=entries.length+'× '+entries.map(e=>e.tier==='free'?'FREE':'$'+e.price.toFixed(2)).join('+');
+      // Group entries by price tier for clean display: "1 Free · 2 × $1.99"
+      const tierGroups={};
+      entries.forEach(e=>{
+        const label=e.tier==='free'?'Free':'$'+e.price.toFixed(2);
+        tierGroups[label]=(tierGroups[label]||0)+1;
+      });
+      const meta=Object.entries(tierGroups).map(([label,count])=>{
+        const countHtml=`<strong>${count}</strong>`;
+        return label==='Free'?`${countHtml} Free`:`${countHtml} × ${label}`;
+      }).join(' · ');
       const qty=entries.length;
       const mj=JSON.stringify(meal).replace(/"/g,'&quot;');
       const qtyCtrl=`<div class="cart-qty-pill"><button class="cart-qty-btn" onclick="event.stopPropagation();removeMeal('${entries[0].mealId}',${entries[0].weekIndex})">−</button><span class="cart-qty-val">${qty}</span><button class="cart-qty-btn" onclick="event.stopPropagation();addMeal('${entries[0].mealId}',${entries[0].weekIndex},${mj})">+</button></div>`;
