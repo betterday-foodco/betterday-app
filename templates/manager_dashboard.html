@@ -13,7 +13,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 /* ════════ SIDEBAR ════════ */
 .sb{width:218px;background:#003141;position:fixed;top:0;left:0;bottom:0;z-index:10;display:flex;flex-direction:column;padding-top:20px}
 .sb-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px}
-.sb-logo img{height:22px;filter:brightness(0) invert(1) sepia(1) saturate(0.3) hue-rotate(10deg) brightness(1.6)}
+.sb-logo img{height:22px}
 .sb-logo-text{font-size:13px;font-weight:700;color:#FAEBDA}
 .sb-sec{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(250,235,218,.35);padding:14px 20px 5px}
 .sb-div{height:1px;background:rgba(255,255,255,.07);margin:8px 20px}
@@ -221,7 +221,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 <aside class="sb">
   <div class="sb-logo" style="flex-direction:column;align-items:flex-start;gap:2px;">
     <div style="display:flex;align-items:center;gap:8px;">
-      <img src="{{ url_for('static', filename='Logo.svg') }}" alt="BD" style="height:20px;" onerror="this.style.display='none'">
+      <img src="{{ url_for('static', filename='Cream Logo.png') }}" alt="BD" style="height:20px;" onerror="this.style.display='none'">
       <span style="font-size:.55rem;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.4);">FOR WORK</span>
     </div>
     <span class="sb-logo-text" style="font-size:11px;color:rgba(250,235,218,.6);font-weight:600;">{{ company_name }} · Manager</span>
