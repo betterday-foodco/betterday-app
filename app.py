@@ -464,10 +464,10 @@ def bd_admin_dashboard():
     total_companies        = len(companies)
     active_companies_week  = len(set(o['company_id'] for o in active_week['orders']))
     pending_invoices_value = round(sum(
-        float(inv.get('companyOwed', 0) or 0)
-        for inv in invoices if (inv.get('status') or 'pending') == 'pending'
+        float(inv.get('AmountDue') or inv.get('amountDue') or inv.get('companyOwed') or inv.get('CompanyOwed') or 0)
+        for inv in invoices if (inv.get('Status') or inv.get('status') or 'pending').lower() in ('pending', 'sent', 'overdue')
     ), 2)
-    pending_invoices_count = sum(1 for inv in invoices if (inv.get('status') or 'pending') == 'pending')
+    pending_invoices_count = sum(1 for inv in invoices if (inv.get('Status') or inv.get('status') or 'pending').lower() in ('pending', 'sent', 'overdue'))
 
     # This week stats
     week_orders      = active_week['orders']
