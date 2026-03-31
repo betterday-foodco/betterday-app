@@ -333,7 +333,7 @@
     /* Closed week overlay */
     .closed-overlay { background: #fff; border-radius: 20px; padding: 36px 28px; text-align: center; max-width: 440px; margin: 40px auto; box-shadow: 0 8px 32px rgba(0,70,94,.1); }
     .closed-icon  { font-size: 3rem; margin-bottom: 16px; }
-    .closed-title { font-family: 'DM Sans', sans-serif; font-size: 1.6rem; color: var(--dark); margin-bottom: 8px; }
+    .closed-title { font-family: 'DM Sans', sans-serif; font-size: 1.6rem; font-weight: 900; color: var(--dark); margin-bottom: 8px; }
     .closed-sub   { font-size: .92rem; color: #7b8c9f; line-height: 1.6; margin-bottom: 24px; }
     .closed-cutoff { background: rgba(231,76,60,.08); border: 1px solid rgba(231,76,60,.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: .85rem; color: var(--red); font-weight: 700; }
     .btn-next-week { background: var(--primary); color: #fff; border: none; border-radius: 14px; padding: 14px 28px; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 800; cursor: pointer; transition: .15s; box-shadow: 0 6px 20px rgba(78,162,253,.35); }
@@ -830,7 +830,7 @@
       <div class="thankyou-title">You're all set!</div>
       <div class="thankyou-sub">Your order is confirmed. We'll have it in the fridge by lunchtime on delivery day.</div>
       <div class="thankyou-detail" id="tyDetail"></div>
-      <p style="font-size:.8rem;color:#aab4be;margin-bottom:20px;line-height:1.5;">A confirmation email will be sent to you shortly.</p>
+      <p style="font-size:.8rem;color:#aab4be;margin-bottom:20px;line-height:1.5;">Your meals will be ready at your office fridge on delivery day.</p>
       <button class="btn-back" onclick="goBackToMenu()">← Order for another week</button>
     </div>
   </div>
@@ -1653,6 +1653,11 @@ function buildWeekTabs() {
 
 async function switchWeek(i) { activeWeekIndex=i; buildWeekTabs(); buildPricingBanner(); renderWeek(i); document.getElementById('nextMealPrice').textContent=getNextPriceLabel(i); }
 
+function refreshMenu(index) {
+  var anchor = weeks[index]?.sundayAnchor;
+  if (anchor) delete menuCache[anchor];
+  renderWeek(index);
+}
 
 async function renderWeek(index) {
   const w=weeks[index], inner=document.getElementById('menuInner');
@@ -1673,10 +1678,10 @@ async function renderWeek(index) {
       try { menu=await apiFetch({action:'get_menu',sunday_anchor:w.sundayAnchor}); menuCache[w.sundayAnchor]=menu; break; }
       catch(e) { if(attempt===0) await new Promise(r=>setTimeout(r,2000)); }
     }
-    if (!menu) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">😕</div><div class="closed-title">Couldn't load menu</div><div class="closed-sub">Connection may be slow.</div><button onclick="renderMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Try again</button></div>`; return; }
+    if (!menu) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">😕</div><div class="closed-title">Couldn't load menu</div><div class="closed-sub">Connection may be slow.</div><button onclick="refreshMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Try again</button></div>`; return; }
   }
   const meat=menu.meat||[], veg=menu.vegan||[];
-  if (!meat.length&&!veg.length) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">Check back soon — the menu for this week hasn't been published.</div><button onclick="delete menuCache['${w.sundayAnchor}'];renderMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Refresh</button></div>`; return; }
+  if (!meat.length&&!veg.length) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">Check back soon — the menu for this week hasn't been published.</div><button onclick="refreshMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Refresh</button></div>`; return; }
   const hasBoth = meat.length>0 && veg.length>0;
   const slot = document.getElementById('pricingToggleSlot');
   if (slot) slot.innerHTML = hasBoth
@@ -2046,9 +2051,12 @@ window.addEventListener('message', function(event) {
     if (event.data.eventStatus === 'SUCCESS') {
       console.log('Payment successful:', event.data.eventMessage);
       _helcimCheckoutToken = '';
+      // Remove Helcim's iframe overlay so the page is clickable again
+      if (typeof removeHelcimPayIframe === 'function') removeHelcimPayIframe();
       _executeCheckout();
     } else if (event.data.eventStatus === 'ABORTED') {
       console.warn('Payment aborted:', event.data.eventMessage);
+      if (typeof removeHelcimPayIframe === 'function') removeHelcimPayIframe();
       showToast('Payment was cancelled');
       closePaymentModal();
     }
