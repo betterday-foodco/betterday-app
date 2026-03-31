@@ -357,7 +357,7 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                 <div class="tier-base">
                     <div class="field">
                         <label>Full Retail Price ($)</label>
-                        <input type="number" step="0.01" name="BasePrice" id="basePrice" value="{{ company.BasePrice or '16.99' }}" placeholder="16.99" oninput="updatePreview()">
+                        <input type="number" step="0.01" name="BasePrice" id="basePrice" value="{{ company.BasePrice|money }}" placeholder="16.99" oninput="updatePreview()">
                     </div>
                     <div class="field">
                         <label>Allow Extra at Full Price?</label>
@@ -383,29 +383,29 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                             <td style="padding:8px;"><input type="checkbox" id="enableFree" onchange="toggleTierRow(this)" {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string != '0' %}checked{% endif %}></td>
                             <td style="padding:8px;font-weight:800;color:#167421;">&#127873; Free</td>
                             <td style="padding:8px;color:#7A8F9C;font-weight:600;">$0.00</td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_BDSubsidy" id="freeBdSubsidy" value="{{ company.FreeTier_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_CompanySubsidy" id="freeCoSubsidy" value="{{ company.FreeTier_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_BDSubsidy" id="freeBdSubsidy" value="{{ company.FreeTier_BDSubsidy|money }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_CompanySubsidy" id="freeCoSubsidy" value="{{ company.FreeTier_CompanySubsidy|money }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
                         </tr>
                         <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
                             <td style="padding:8px;"><input type="checkbox" id="enableT1" onchange="toggleTierRow(this)" {% if company.Tier1_EmployeePrice %}checked{% endif %}></td>
                             <td style="padding:8px;font-weight:700;color:#003141;">Tier 1</td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_EmployeePrice" id="t1EmpPrice" value="{{ company.Tier1_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_BDSubsidy" id="t1BdSubsidy" value="{{ company.Tier1_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_CompanySubsidy" id="t1CoSubsidy" value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_EmployeePrice" id="t1EmpPrice" value="{{ company.Tier1_EmployeePrice|money }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_BDSubsidy" id="t1BdSubsidy" value="{{ company.Tier1_BDSubsidy|money }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_CompanySubsidy" id="t1CoSubsidy" value="{{ company.Tier1_CompanySubsidy|money }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
                         </tr>
                         <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
                             <td style="padding:8px;"><input type="checkbox" id="enableT2" onchange="toggleTierRow(this)" {% if company.Tier2_EmployeePrice %}checked{% endif %}></td>
                             <td style="padding:8px;font-weight:700;color:#003141;">Tier 2</td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_EmployeePrice" id="t2EmpPrice" value="{{ company.Tier2_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_BDSubsidy" id="t2BdSubsidy" value="{{ company.Tier2_BDSubsidy or '' }}" placeholder="4.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_CompanySubsidy" id="t2CoSubsidy" value="{{ company.Tier2_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_EmployeePrice" id="t2EmpPrice" value="{{ company.Tier2_EmployeePrice|money }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_BDSubsidy" id="t2BdSubsidy" value="{{ company.Tier2_BDSubsidy|money }}" placeholder="4.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_CompanySubsidy" id="t2CoSubsidy" value="{{ company.Tier2_CompanySubsidy|money }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
                         </tr>
                         <tr>
                             <td style="padding:8px;"><input type="checkbox" id="enableT3" onchange="toggleTierRow(this)" {% if company.Tier3_EmployeePrice %}checked{% endif %}></td>
                             <td style="padding:8px;font-weight:700;color:#003141;">Tier 3</td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_EmployeePrice" id="t3EmpPrice" value="{{ company.Tier3_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_BDSubsidy" id="t3BdSubsidy" value="{{ company.Tier3_BDSubsidy or '' }}" placeholder="3.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_CompanySubsidy" id="t3CoSubsidy" value="{{ company.Tier3_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_EmployeePrice" id="t3EmpPrice" value="{{ company.Tier3_EmployeePrice|money }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_BDSubsidy" id="t3BdSubsidy" value="{{ company.Tier3_BDSubsidy|money }}" placeholder="3.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_CompanySubsidy" id="t3CoSubsidy" value="{{ company.Tier3_CompanySubsidy|money }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -477,7 +477,7 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                         + Add Level
                     </button>
                     <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-                        <button type="button" onclick="saveBenefitLevels()" style="font-size:.8rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;">Save Levels</button>
+                        <button type="button" id="saveLevelsBtn" onclick="saveBenefitLevels()" style="font-size:.8rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;">Save Levels</button>
                         <span id="levelsSaveStatus" style="font-size:.75rem;color:#167421;display:none;">&#10003; Saved</span>
                     </div>
                 </div>
@@ -499,7 +499,7 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                 Editing <strong>{{ company.CompanyName or 'New Company' }}</strong>
                 — changes saved to Google Sheets
             </div>
-            <button type="submit" class="btn-save">Save Company &rarr;</button>
+            <button type="submit" class="btn-save" id="saveCompanyBtn">Save Company &rarr;</button>
         </div>
 
     </form>
@@ -507,6 +507,12 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
 </div><!-- /mn -->
 
 <script>
+/* ════════ SAVE COMPANY LOADING ════════ */
+document.querySelector('form')?.addEventListener('submit', function() {
+  var btn = document.getElementById('saveCompanyBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+});
+
 /* ════════ SIDEBAR / TABS ════════ */
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
@@ -655,19 +661,22 @@ function saveBenefitLevels() {
   var levels = collectLevelData();
   var companyId = document.querySelector('[name="CompanyID"]').value.trim().toUpperCase();
   if (!companyId) { alert('Save the company first'); return; }
+  var btn = document.getElementById('saveLevelsBtn');
   var statusEl = document.getElementById('levelsSaveStatus');
   statusEl.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Saving…';
   fetch('/api/gas', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'save_benefit_levels', company_id: companyId, levels: levels })
   }).then(r => r.json()).then(d => {
+    btn.disabled = false; btn.textContent = 'Save Levels';
     if (d.success) {
       statusEl.textContent = '\u2713 ' + levels.length + ' level(s) saved';
       statusEl.style.display = 'inline';
       setTimeout(() => statusEl.style.display = 'none', 4000);
     } else { alert('Error: ' + (d.error || 'Unknown')); }
-  }).catch(() => alert('Network error'));
+  }).catch(() => { btn.disabled = false; btn.textContent = 'Save Levels'; alert('Network error'); });
 }
 
 function loadExistingLevels() {

@@ -250,8 +250,11 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
         <div class="card card-purple"><div class="section-label" style="color:#7453A2;">Avg Order</div><div class="stat-value purple">${{ "%.2f"|format(avg_order_value) }}</div></div>
       </div>
 
-      <!-- Quick Report Buttons (under This Week) -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
+      <!-- Quick Action Buttons -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;">
+        <button onclick="openReminderModal()" style="display:flex;align-items:center;gap:10px;background:#B56B10;color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s;box-shadow:0 2px 8px rgba(181,107,16,.25);font-family:'DM Sans',sans-serif;" onmouseover="this.style.background='#D4A04A'" onmouseout="this.style.background='#B56B10'">
+          <span style="font-size:18px;">📧</span> Send Order Reminders
+        </button>
         <a href="/bd-admin/report/production?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
           <span style="font-size:18px;">👨‍🍳</span> Production Summary
         </a>
@@ -423,10 +426,10 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
               <td><span class="bdg {% if status == 'paid' %}ba{% elif status == 'sent' %}bs{% else %}bp{% endif %}">{{ status|capitalize }}</span></td>
               <td>
                 {% if status == 'pending' %}
-                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','sent')">Mark Sent</button>
-                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid')">Mark Paid</button>
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','sent',this)">Mark Sent</button>
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Mark Paid</button>
                 {% elif status == 'sent' %}
-                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid')">Mark Paid</button>
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Mark Paid</button>
                 {% endif %}
               </td>
             </tr>
@@ -589,11 +592,12 @@ function filterInvoices() {
 }
 
 /* ── Mark Invoice ── */
-function markInvoice(iid, newStatus) {
+function markInvoice(iid, newStatus, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
   fetch('/bd-admin/invoice-status', {
     method: 'POST', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({invoice_id: iid, status: newStatus})
-  }).then(r => r.json()).then(d => { if (d.success) location.reload(); else alert('Error: ' + (d.error||'Unknown')); }).catch(() => alert('Network error'));
+  }).then(r => r.json()).then(d => { if (d.success) location.reload(); else { if(btn){btn.disabled=false;btn.textContent=newStatus==='paid'?'Mark Paid':'Mark Sent';} alert('Error: ' + (d.error||'Unknown')); }}).catch(() => { if(btn){btn.disabled=false;btn.textContent=newStatus==='paid'?'Mark Paid':'Mark Sent';} alert('Network error'); });
 }
 
 /* ── Orders Tab ── */
@@ -642,6 +646,80 @@ function openReport(type) {
 function downloadReportCSV(type) {
   var week = document.getElementById('reportWeekSelect')?.value || '';
   window.open('/bd-admin/report/' + type + '?week=' + week + '&format=csv', '_blank');
+}
+
+// ═══ ORDER REMINDER MODAL ═══
+var _reminderSending = false;
+function openReminderModal() {
+  var totalEmp = {{ total_unique_employees }};
+  var weekEmp = {{ week_employees }};
+  var toSend = totalEmp - weekEmp;
+  var pct = totalEmp > 0 ? Math.round(weekEmp / totalEmp * 100) : 0;
+
+  var modal = document.createElement('div');
+  modal.id = 'reminderModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,20,30,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.2);">'
+    + '<div style="font-size:1.1rem;font-weight:800;color:#003141;margin-bottom:6px;">Send Order Reminders</div>'
+    + '<div style="font-size:.82rem;color:#7A8F9C;margin-bottom:20px;">Delivery week of {{ active_week.label }}</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">'
+    + '<div style="background:#EEFBE8;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#167421;">' + weekEmp + '</div><div style="font-size:.68rem;color:#5a7268;">Ordered</div></div>'
+    + '<div style="background:#FFF3E0;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#B56B10;">' + toSend + '</div><div style="font-size:.68rem;color:#8a6530;">Haven\'t Ordered</div></div>'
+    + '<div style="background:#E8F3FF;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#2d7ec4;">' + pct + '%</div><div style="font-size:.68rem;color:#3a6a9c;">Participation</div></div>'
+    + '</div>'
+    + '<div style="background:#FAF6F0;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:.82rem;color:#5a7268;line-height:1.5;">'
+    + '📧 Will send a reminder email to <strong style="color:#003141;">' + toSend + ' employee' + (toSend !== 1 ? 's' : '') + '</strong> who haven\'t placed an order for this week yet.'
+    + '</div>'
+    + '<div style="display:flex;gap:10px;">'
+    + '<button onclick="closeReminderModal()" style="flex:1;padding:12px;background:none;border:1.5px solid #E8DFD2;border-radius:10px;font-size:.82rem;font-weight:700;color:#7A8F9C;cursor:pointer;font-family:DM Sans,sans-serif;">Cancel</button>'
+    + '<button id="sendReminderBtn" onclick="sendReminders()" style="flex:2;padding:12px;background:#B56B10;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:DM Sans,sans-serif;transition:.15s;"'
+    + (toSend === 0 ? ' disabled style="flex:2;padding:12px;background:#ccc;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:800;cursor:default;font-family:DM Sans,sans-serif;"' : '')
+    + '>Send ' + toSend + ' Reminder' + (toSend !== 1 ? 's' : '') + '</button>'
+    + '</div>'
+    + '<div id="reminderStatus" style="display:none;margin-top:14px;text-align:center;font-size:.82rem;font-weight:700;"></div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e) { if (e.target === modal) closeReminderModal(); });
+}
+
+function closeReminderModal() {
+  var m = document.getElementById('reminderModal');
+  if (m) m.remove();
+}
+
+async function sendReminders() {
+  if (_reminderSending) return;
+  _reminderSending = true;
+  var btn = document.getElementById('sendReminderBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  btn.style.background = '#9aabb8';
+
+  try {
+    var resp = await fetch('/bd-admin/send-reminders', {method: 'POST', headers: {'Content-Type': 'application/json'}});
+    var data = await resp.json();
+    var status = document.getElementById('reminderStatus');
+    status.style.display = 'block';
+    if (data.success) {
+      status.style.color = '#167421';
+      status.textContent = '✓ Sent ' + data.sent + ' reminder' + (data.sent !== 1 ? 's' : '') + ' · ' + data.skipped + ' already ordered';
+      btn.textContent = 'Done!';
+      btn.style.background = '#167421';
+      setTimeout(closeReminderModal, 3000);
+    } else {
+      status.style.color = '#e74c3c';
+      status.textContent = '⚠ ' + (data.error || 'Failed to send');
+      btn.textContent = 'Failed';
+      btn.style.background = '#e74c3c';
+    }
+  } catch(e) {
+    console.error('Reminder error:', e);
+    var status = document.getElementById('reminderStatus');
+    status.style.display = 'block';
+    status.style.color = '#e74c3c';
+    status.textContent = '⚠ Network error';
+  }
+  _reminderSending = false;
 }
 </script>
 </body>

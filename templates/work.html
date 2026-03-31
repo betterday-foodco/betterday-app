@@ -26,7 +26,7 @@
     #sMagicVerify.active { display: flex; align-items: center; justify-content: center; min-height: 100dvh; background: #f4ede3; }
 
     /* ── SHARED AUTH SHELL ── */
-    .auth-bg { min-height: 100vh; display: grid; grid-template-rows: 180px 1fr; position: relative; }
+    .auth-bg { min-height: 100vh; display: grid; grid-template-rows: 140px 1fr; position: relative; }
     .auth-bg-top { background: var(--dark); position: relative; overflow: hidden; }
     .auth-bg-top::before {
       content: ''; position: absolute; inset: 0;
@@ -35,7 +35,7 @@
     }
     .auth-bg-dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 28px 28px; }
     .auth-bg-bottom { background: var(--cream); }
-    .auth-card-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 24px; padding-top: 60px; }
+    .auth-card-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: flex-start; justify-content: center; padding: 24px; padding-top: 100px; }
     .auth-card { background: #fff; border-radius: 28px; padding: 32px 32px 28px; width: 100%; max-width: 420px; box-shadow: 0 24px 60px rgba(0,70,94,.16), 0 4px 16px rgba(0,70,94,.08); position: relative; z-index: 10; }
     .auth-brand { position: absolute; top: 28px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; z-index: 5; }
     .auth-logo-mark { display: none; } /* Replaced by Logo.svg img */
@@ -69,7 +69,7 @@
 
     /* ── FORM ELEMENTS ── */
     .card-eyebrow { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--primary); margin-bottom: 5px; }
-    .card-title { font-family: 'DM Sans', sans-serif; font-size: 1.65rem; color: var(--dark); line-height: 1.15; margin-bottom: 5px; }
+    .card-title { font-family: 'DM Sans', sans-serif; font-size: 1.65rem; font-weight: 900; color: var(--dark); line-height: 1.15; margin-bottom: 5px; }
     .card-subtitle { font-size: .88rem; color: #7b8c9f; line-height: 1.5; margin-bottom: 22px; }
     .field-group { margin-bottom: 12px; }
     .field-group label { display: block; font-size: .75rem; font-weight: 800; color: var(--dark); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
@@ -571,7 +571,7 @@
         <div class="field-group">
           <label>Company Code</label>
           <div class="code-field-wrap">
-            <input type="text" id="companyCodeInput" placeholder="Company code" autocomplete="off"
+            <input type="text" id="companyCodeInput" placeholder="Enter here" autocomplete="off"
               oninput="previewCompanyCode(this)" onkeydown="if(event.key==='Enter')doCompanyNext()">
             <span class="code-check" id="companyCodeCheck"></span>
           </div>
@@ -916,7 +916,7 @@
   </div>
 </div>
 <!-- HelcimPay.js SDK -->
-<script src="https://myposit.helcim.com/helcim-pay/services/start.js" type="text/javascript"></script>
+<script src="https://secure.helcim.app/helcim-pay/services/start.js" type="text/javascript"></script>
 
 <!-- ══════════════════════════════════════════
      ORDER INVOICE MODAL  (profile — view order)
@@ -1993,8 +1993,14 @@ async function openPaymentModal(total) {
     const data = await resp.json();
     if (data.checkoutToken) {
       _helcimCheckoutToken = data.checkoutToken;
+      console.log('Helcim checkoutToken:', _helcimCheckoutToken);
+      // Check if Helcim script loaded
+      if (typeof appendHelcimPayIframe === 'undefined') {
+        console.error('appendHelcimPayIframe not found - Helcim script may not have loaded');
+        throw new Error('Helcim payment script not loaded');
+      }
       // Helcim renders its own full-page modal overlay
-      appendHelcimPayIframe(_helcimCheckoutToken);
+      appendHelcimPayIframe(_helcimCheckoutToken, document.getElementById('helcimPayContainer'));
     } else {
       throw new Error(data.error || 'Failed to initialize');
     }
