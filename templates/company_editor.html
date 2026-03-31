@@ -497,9 +497,9 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
         <div class="save-bar">
             <div class="save-bar-info">
                 Editing <strong>{{ company.CompanyName or 'New Company' }}</strong>
-                — changes saved to Google Sheets
+                — changes saved automatically
             </div>
-            <button type="submit" class="btn-save" id="saveCompanyBtn">Save Company &rarr;</button>
+            <button type="submit" class="btn-save" id="saveCompanyBtn">&#x1F4BE;&ensp;Save Company</button>
         </div>
 
     </form>
@@ -510,7 +510,7 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
 /* ════════ SAVE COMPANY LOADING ════════ */
 document.querySelector('form')?.addEventListener('submit', function() {
   var btn = document.getElementById('saveCompanyBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving\u2026'; }
 });
 
 /* ════════ SIDEBAR / TABS ════════ */
