@@ -26,18 +26,22 @@ def nicedate_filter(s):
 
 @app.template_filter('money')
 def money_filter(s):
-    """Format a number as $##.## — handles floats, strings, None."""
+    """Format a number as $##.## — handles floats, strings, None, Undefined."""
     try:
+        if s is None or str(s).strip() == '':
+            return '0.00'
         return '%.2f' % float(s)
-    except (TypeError, ValueError):
+    except Exception:
         return '0.00'
 
 @app.template_filter('commafy')
 def commafy_filter(s):
     """Format a number with commas: 90000 → 90,000."""
     try:
+        if s is None or str(s).strip() == '':
+            return '0'
         return '{:,.0f}'.format(float(s))
-    except (TypeError, ValueError):
+    except Exception:
         return '0'
 
 # ─────────────────────────────────────────────────────────────
