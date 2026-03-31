@@ -4,7 +4,7 @@
     <title>Office Invoices — Week of {{ sunday }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root { --cream:#faebda; --dark:#00465e; --primary:#4ea2fd; --green:#27ae60; --red:#e74c3c; }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -14,7 +14,7 @@
         .toolbar{background:var(--dark);padding:0 32px;height:56px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2);}
         .toolbar::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 90% 50%,rgba(78,162,253,.2) 0%,transparent 60%);pointer-events:none;}
         .toolbar-title{color:rgba(255,255,255,.8);font-weight:800;font-size:.85rem;text-transform:uppercase;letter-spacing:.8px;position:relative;}
-        .toolbar-week{color:white;font-family:'DM Serif Display',serif;font-size:1rem;position:relative;}
+        .toolbar-week{color:white;font-family:'DM Sans',sans-serif;font-size:1rem;position:relative;}
         .toolbar-right{margin-left:auto;display:flex;gap:8px;position:relative;}
         .tbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;font-size:.75rem;font-weight:800;cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif;text-decoration:none;border:none;}
         .tbtn-print{background:white;color:var(--dark);}
@@ -33,7 +33,7 @@
         .inv-bd-logo{height:28px;margin-bottom:6px;display:block;}
         .inv-bd-tagline{font-size:.7rem;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.8px;}
         .inv-meta{text-align:right;position:relative;}
-        .inv-meta-title{font-family:'DM Serif Display',serif;font-size:1.6rem;color:white;line-height:1;margin-bottom:4px;}
+        .inv-meta-title{font-family:'DM Sans',sans-serif;font-size:1.6rem;color:white;line-height:1;margin-bottom:4px;}
         .inv-meta-num{font-size:.75rem;color:rgba(255,255,255,.5);font-weight:700;margin-bottom:2px;}
         .inv-meta-date{font-size:.8rem;color:rgba(255,255,255,.7);font-weight:600;}
 
@@ -111,7 +111,7 @@
         /* EMPTY */
         .no-invoices{text-align:center;padding:80px 40px;background:white;max-width:600px;margin:60px auto;border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,.08);}
         .no-invoices .icon{font-size:3rem;margin-bottom:16px;}
-        .no-invoices h2{font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--dark);margin-bottom:8px;}
+        .no-invoices h2{font-family:'DM Sans',sans-serif;font-size:1.5rem;color:var(--dark);margin-bottom:8px;}
         .no-invoices p{font-size:.9rem;color:#7b8c9f;}
 
         /* PRINT */
