@@ -1237,13 +1237,11 @@ def helcim_checkout():
                 'api-token': HELCIM_API_TOKEN,
                 'content-type': 'application/json'
             },
-            json={k: v for k, v in {
+            json={
                 'paymentType': 'purchase',
                 'amount': round(amount, 2),
                 'currency': 'CAD',
-                'customerCode': data.get('customer_code') or None,
-                'invoiceNumber': data.get('order_id') or None,
-            }.items() if v is not None},
+            },
             timeout=15
         )
         if resp.status_code == 200:
