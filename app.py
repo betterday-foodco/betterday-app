@@ -61,6 +61,7 @@ log = logging.getLogger(__name__)
 _token_store      = {}   # token → {email, company_id, created_at, used}
 _token_store_lock = threading.Lock()
 _TOKEN_TTL        = 900  # 15 minutes
+_menu_cache       = {}   # 'menu_{anchor}' → {data, ts}
 
 def _store_magic_token(token, email, company_id):
     with _token_store_lock:
@@ -211,6 +212,29 @@ def gas_proxy():
                 return jsonify({'valid': True, 'employee': employee, 'company': company})
         # Token not in Flask store — fall through to GAS (handles tokens from old emails)
         # (fall through to the requests.post below)
+
+    # ── get_menu: cache on Flask for 10 minutes to avoid GAS cold-starts ──
+    if payload.get('action') == 'get_menu':
+        anchor = payload.get('sunday_anchor', '')
+        cache_key = f'menu_{anchor}'
+        cached = _menu_cache.get(cache_key)
+        if cached and (time.time() - cached['ts'] < 600):  # 10 min TTL
+            return jsonify(cached['data']), 200
+        try:
+            r = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=20)
+            data = r.json()
+            if r.status_code == 200 and (data.get('meat') or data.get('vegan')):
+                _menu_cache[cache_key] = {'data': data, 'ts': time.time()}
+            return jsonify(data), r.status_code
+        except requests.Timeout:
+            if cached:  # return stale cache rather than error
+                return jsonify(cached['data']), 200
+            return jsonify({'error': 'Menu loading timed out — please try again.'}), 504
+        except Exception as ex:
+            log.error('Menu fetch error: %s', ex)
+            if cached:
+                return jsonify(cached['data']), 200
+            return jsonify({'error': 'Could not load menu.'}), 500
 
     try:
         r = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=15)

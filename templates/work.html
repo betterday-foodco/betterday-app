@@ -1667,11 +1667,16 @@ async function renderWeek(index) {
   }
   let menu=menuCache[w.sundayAnchor];
   if (!menu) {
-    try { menu=await apiFetch({action:'get_menu',sunday_anchor:w.sundayAnchor}); menuCache[w.sundayAnchor]=menu; }
-    catch(e) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">😕</div><div class="closed-title">Couldn't load menu</div></div>`; return; }
+    inner.innerHTML=`<div class="closed-overlay"><div style="width:36px;height:36px;border:4px solid rgba(0,70,94,.12);border-top-color:#4ea2fd;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><div class="closed-title" style="font-size:1rem;">Loading menu\u2026</div></div>`;
+    // Try up to 2 times with increasing timeout
+    for (let attempt=0; attempt<2; attempt++) {
+      try { menu=await apiFetch({action:'get_menu',sunday_anchor:w.sundayAnchor}); menuCache[w.sundayAnchor]=menu; break; }
+      catch(e) { if(attempt===0) await new Promise(r=>setTimeout(r,2000)); }
+    }
+    if (!menu) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">😕</div><div class="closed-title">Couldn't load menu</div><div class="closed-sub">Connection may be slow.</div><button onclick="renderMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Try again</button></div>`; return; }
   }
   const meat=menu.meat||[], veg=menu.vegan||[];
-  if (!meat.length&&!veg.length) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">Check back soon!</div></div>`; return; }
+  if (!meat.length&&!veg.length) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">Check back soon — the menu for this week hasn't been published.</div><button onclick="delete menuCache['${w.sundayAnchor}'];renderMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Refresh</button></div>`; return; }
   const hasBoth = meat.length>0 && veg.length>0;
   const slot = document.getElementById('pricingToggleSlot');
   if (slot) slot.innerHTML = hasBoth
