@@ -121,17 +121,6 @@ def _cached_get_company(company_id):
     return result
 
 
-@app.route('/bd-admin/clear-cache', methods=['POST'])
-@admin_required
-def clear_cache():
-    """Clear all Flask caches — forces fresh GAS lookups."""
-    with _company_cache_lock:
-        _company_cache.clear()
-    _menu_cache.clear()
-    threading.Thread(target=_warmup_gas, daemon=True).start()
-    return jsonify({'success': True, 'message': 'Cache cleared and re-warming'})
-
-
 def _warmup_gas():
     """Pre-load all companies into the Flask cache so lookups are instant."""
     try:
@@ -188,6 +177,17 @@ def admin_login():
 def admin_logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('admin_login'))
+
+
+@app.route('/bd-admin/clear-cache', methods=['POST'])
+@admin_required
+def clear_cache():
+    """Clear all Flask caches — forces fresh GAS lookups."""
+    with _company_cache_lock:
+        _company_cache.clear()
+    _menu_cache.clear()
+    threading.Thread(target=_warmup_gas, daemon=True).start()
+    return jsonify({'success': True, 'message': 'Cache cleared and re-warming'})
 
 
 # ─────────────────────────────────────────────────────────────
