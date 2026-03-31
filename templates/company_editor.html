@@ -115,13 +115,12 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
   <div class="sb-div"></div>
   <div class="sb-co-name">{{ company.CompanyName or 'New Company' }}</div>
   <div class="sb-co-sub">{{ 'Edit company' if company else 'Create new corporate client' }}</div>
-  <div class="sb-sec">Navigation</div>
-  <a class="ni" href="/bd-admin/dashboard">&#8592; &nbsp;Dashboard</a>
-  <div class="sb-div"></div>
-  <div class="sb-sec">Editor</div>
-  <div class="ni on" data-tab="details" onclick="switchTab('details',this)">&#9632; &nbsp;Company Details</div>
-  <div class="ni" data-tab="delivery" onclick="switchTab('delivery',this)">&#9670; &nbsp;Delivery</div>
-  <div class="ni" data-tab="subsidy" onclick="switchTab('subsidy',this)">&#9733; &nbsp;Subsidy</div>
+  <div class="sb-sec">Main</div>
+  <a class="ni" href="/bd-admin/dashboard">&#9632; &nbsp;Overview</a>
+  <a class="ni" href="/bd-admin/dashboard#companies">&#9733; &nbsp;Companies</a>
+  <a class="ni" href="/bd-admin/dashboard#invoices">&#9670; &nbsp;Invoices</a>
+  <a class="ni" href="/bd-admin/dashboard#orders">&#9776; &nbsp;Orders</a>
+  <a class="ni" href="/bd-admin/dashboard#reports">&#9881; &nbsp;Reports</a>
   <div class="sb-div"></div>
   <div class="sb-sec">Settings</div>
   <a class="ni" href="/admin-logout">&#8594; &nbsp;Sign out</a>
@@ -532,9 +531,8 @@ function switchTab(tabId, el){
   // Update tab bar buttons
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
   if(el && el.classList.contains('tab-btn')) el.classList.add('active');
-  // Sync sidebar to match tab bar click
-  var sidebarItems = document.querySelectorAll('.sb .ni[data-tab]');
-  sidebarItems.forEach(function(n){ n.classList.toggle('on', n.dataset.tab === tabId); });
+  // Tab bar buttons sync
+
   closeSidebar();
 }
 
