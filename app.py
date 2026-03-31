@@ -463,11 +463,14 @@ def bd_admin_dashboard():
     total_unique_employees = len(set(o['employee_email'] for o in all_orders if o['employee_email']))
     total_companies        = len(companies)
     active_companies_week  = len(set(o['company_id'] for o in active_week['orders']))
+    def _inv_status(inv):
+        s = inv.get('Status') or inv.get('status') or 'pending'
+        return str(s).strip().lower()
     pending_invoices_value = round(sum(
         float(inv.get('AmountDue') or inv.get('amountDue') or inv.get('companyOwed') or inv.get('CompanyOwed') or 0)
-        for inv in invoices if (inv.get('Status') or inv.get('status') or 'pending').lower() in ('pending', 'sent', 'overdue')
+        for inv in invoices if _inv_status(inv) in ('pending', 'sent', 'overdue')
     ), 2)
-    pending_invoices_count = sum(1 for inv in invoices if (inv.get('Status') or inv.get('status') or 'pending').lower() in ('pending', 'sent', 'overdue'))
+    pending_invoices_count = sum(1 for inv in invoices if _inv_status(inv) in ('pending', 'sent', 'overdue'))
 
     # This week stats
     week_orders      = active_week['orders']
@@ -562,8 +565,8 @@ def bd_admin_dashboard():
         total_meals=total_meals, total_co_spend=total_co_spend, total_bd_spend=total_bd_spend,
         total_emp_spend=total_emp_spend, total_unique_employees=total_unique_employees,
         pending_invoices_value=pending_invoices_value, pending_invoices_count=pending_invoices_count,
-        paid_invoices_count=sum(1 for inv in invoices if (inv.get('status') or inv.get('Status') or '').lower() == 'paid'),
-        paid_invoices_value=round(sum(float(inv.get('companyOwed') or inv.get('CompanyOwed') or 0) for inv in invoices if (inv.get('status') or inv.get('Status') or '').lower() == 'paid'), 2),
+        paid_invoices_count=sum(1 for inv in invoices if _inv_status(inv) == 'paid'),
+        paid_invoices_value=round(sum(float(inv.get('AmountDue') or inv.get('companyOwed') or inv.get('CompanyOwed') or 0) for inv in invoices if _inv_status(inv) == 'paid'), 2),
         week_order_count=week_order_count, week_meal_count=week_meal_count,
         week_employees=week_employees, week_revenue=week_revenue,
         total_revenue=total_revenue, total_orders=total_orders, avg_order_value=avg_order_value,
