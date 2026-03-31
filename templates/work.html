@@ -1985,6 +1985,7 @@ async function doCheckout() {
 }
 
 var _helcimCheckoutToken = '';
+var _lastHelcimTxnId = '';
 
 async function openPaymentModal(total) {
   const emp = currentEmployee;
@@ -2050,6 +2051,11 @@ window.addEventListener('message', function(event) {
   if (event.data && event.data.eventName === key) {
     if (event.data.eventStatus === 'SUCCESS') {
       console.log('Payment successful:', event.data.eventMessage);
+      // Extract transaction ID from Helcim response
+      var txnData = {};
+      try { txnData = typeof event.data.eventMessage === 'string' ? JSON.parse(event.data.eventMessage) : (event.data.eventMessage || {}); } catch(e) {}
+      _lastHelcimTxnId = txnData.transactionId || txnData.id || '';
+      console.log('Helcim transaction ID:', _lastHelcimTxnId);
       _helcimCheckoutToken = '';
       // Remove Helcim's iframe overlay so the page is clickable again
       if (typeof removeHelcimPayIframe === 'function') removeHelcimPayIframe();
@@ -2103,7 +2109,9 @@ async function _executeCheckout() {
       meal_id:item.mealId, dish_name:item.meal?.name||'',
       diet_type:item.meal?.diet||'', tier:item.tier, employee_price:item.price,
       company_coverage:getCoverage(item).co.toFixed(2), bd_coverage:getCoverage(item).bd.toFixed(2),
-      employee_level: (emp.benefitLevel || 'General')
+      employee_level: (emp.benefitLevel || 'General'),
+      payment_transaction_id: _lastHelcimTxnId || '',
+      status: total > 0 ? 'paid' : 'confirmed'
     }).catch(e => { console.error('Order submit error:', e); return {success:false}; });
   });
 
@@ -2112,6 +2120,7 @@ async function _executeCheckout() {
 
   document.getElementById('checkoutOverlay').classList.add('hidden');
   _checkoutInProgress = false;
+  _lastHelcimTxnId = '';
 
   const byWeek={}; cartSnapshot.forEach(i=>{if(!byWeek[i.weekIndex])byWeek[i.weekIndex]=[];byWeek[i.weekIndex].push(i);});
   let dh=`<div class="thankyou-row"><span>Name</span><span>${emp.firstName} ${emp.lastName}</span></div>`;

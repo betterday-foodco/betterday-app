@@ -506,7 +506,7 @@ function doPost(e) {
       var corpSheet = ssHub.getSheetByName("CorporateOrders");
       if (!corpSheet) {
         corpSheet = ssHub.insertSheet("CorporateOrders");
-        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","StripePaymentIntentID","Status","OrderID","EmployeeLevel"]);
+        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","PaymentTransactionID","Status","OrderID","EmployeeLevel"]);
       }
       corpSheet.appendRow([
         new Date(),
@@ -523,8 +523,8 @@ function doPost(e) {
         data.employee_price,
         data.company_coverage,
         data.bd_coverage || "0.00",
-        "",
-        "pending",
+        data.payment_transaction_id || "",
+        data.status || "confirmed",
         data.order_id || "",
         data.employee_level || "General"
       ]);
