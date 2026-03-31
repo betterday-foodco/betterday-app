@@ -1,431 +1,507 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>{{ company.CompanyName or 'New Company' }} — BD Company Editor</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-    <style>
-        :root { --cream:#faebda; --dark:#00465e; --primary:#4ea2fd; --green:#27ae60; --red:#e74c3c; --amber:#f39c12; }
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--dark);min-height:100vh;padding-bottom:80px;}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ company.CompanyName or 'New Company' }} — BD Company Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scrollbar-gutter:stable}
+body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-height:100vh;display:flex;overflow-y:scroll}
 
-        .header{background:var(--dark);padding:0 32px;height:64px;display:flex;align-items:center;box-shadow:0 4px 24px rgba(0,70,94,.3);position:sticky;top:0;z-index:100;}
-        .header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 90% 50%,rgba(78,162,253,.2) 0%,transparent 60%);pointer-events:none;}
-        .header-logo{height:30px;filter:brightness(0) invert(1);margin-right:14px;}
-        .header-divider{width:1px;height:22px;background:rgba(255,255,255,.2);margin-right:14px;}
-        .header-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:white;position:relative;}
-        .header-sub{font-size:.72rem;color:rgba(255,255,255,.45);margin-top:1px;position:relative;}
-        .header-right{margin-left:auto;display:flex;gap:10px;align-items:center;}
-        .header-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:.78rem;font-weight:800;text-decoration:none;transition:.15s;font-family:'DM Sans',sans-serif;border:none;cursor:pointer;}
-        .btn-back{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.15);}
-        .btn-back:hover{background:rgba(255,255,255,.2);}
+/* ════════ SIDEBAR ════════ */
+.sb{width:218px;background:#003141;position:fixed;top:0;left:0;bottom:0;z-index:10;display:flex;flex-direction:column;padding-top:20px;transition:transform .25s}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px}
+.sb-logo img{height:20px}
+.sb-sec{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(250,235,218,.35);padding:14px 20px 5px}
+.sb-div{height:1px;background:rgba(255,255,255,.07);margin:8px 20px}
+.sb-co-name{padding:0 20px 6px;font-size:1rem;font-weight:800;color:#FFC600;letter-spacing:.3px;line-height:1.2}
+.sb-co-sub{padding:0 20px 18px;font-size:.65rem;color:rgba(250,235,218,.4);font-weight:600}
+.ni{display:flex;align-items:center;gap:9px;padding:10px 20px;font-size:.82rem;font-weight:600;color:rgba(250,235,218,.65);cursor:pointer;border-left:3px solid transparent;transition:.12s;text-decoration:none}
+.ni:hover{color:#FAEBDA;background:rgba(255,255,255,.06)}
+.ni.on{color:#FFC600;background:rgba(253,196,1,.12);border-left-color:#FFC600;font-weight:800}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9}
+@media(max-width:1000px){
+  .sb{transform:translateX(-100%)}
+  .sb.open{transform:translateX(0)}
+  .sb-overlay.open{display:block}
+  .mn{margin-left:0!important}
+}
 
-        .container{max-width:900px;margin:0 auto;padding:28px 32px;}
+/* ════════ MAIN ════════ */
+.mn{margin-left:218px;flex:1;min-height:100vh;padding-bottom:80px}
+.tb{height:52px;background:#003141;display:flex;align-items:center;padding:0 26px;gap:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.tb-burger{display:none;background:none;border:none;color:#FAEBDA;font-size:1.4rem;cursor:pointer;padding:4px 8px;margin-left:-8px}
+@media(max-width:1000px){.tb-burger{display:block}}
+.tb-title{font-size:.9rem;font-weight:900;color:#FAEBDA;letter-spacing:-.2px}
+.tb-title b{color:#FFC600}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-out{font-size:.68rem;font-weight:700;color:rgba(250,235,218,.4);border:1px solid rgba(250,235,218,.14);border-radius:99px;padding:5px 14px;text-decoration:none;transition:.14s}
+.tb-out:hover{color:#FAEBDA;border-color:rgba(250,235,218,.4)}
+.cont{padding:24px 28px;max-width:960px;margin:0 auto}
 
-        /* ALERTS */
-        .alert{padding:13px 18px;border-radius:12px;margin-bottom:20px;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:10px;}
-        .alert-success{background:rgba(39,174,96,.1);border:1px solid rgba(39,174,96,.25);color:#1a7a3c;}
-        .alert-error{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);color:var(--red);}
+/* ════════ ALERTS ════════ */
+.alert{padding:13px 18px;border-radius:12px;margin-bottom:20px;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:10px}
+.alert-success{background:rgba(39,174,96,.1);border:1px solid rgba(39,174,96,.25);color:#1a7a3c}
+.alert-error{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);color:#e74c3c}
 
-        /* SECTIONS */
-        .form-section{background:white;border-radius:20px;padding:24px 26px;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,70,94,.06);border:1px solid rgba(0,70,94,.06);}
-        .form-section-header{display:flex;align-items:center;gap:12px;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid rgba(0,70,94,.07);}
-        .fs-icon{width:36px;height:36px;border-radius:10px;background:rgba(78,162,253,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-        .fs-title{font-weight:800;font-size:1rem;color:var(--dark);}
-        .fs-sub{font-size:.72rem;color:#7b8c9f;margin-top:2px;}
+/* ════════ TAB PANELS ════════ */
+.tab-panel{display:none}.tab-panel.active{display:block}
 
-        /* FIELDS */
-        .field-grid{display:grid;gap:14px;}
-        .field-grid-2{grid-template-columns:1fr 1fr;}
-        .field-grid-3{grid-template-columns:1fr 1fr 1fr;}
-        .field-grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
-        @media(max-width:600px){.field-grid-2,.field-grid-3,.field-grid-4{grid-template-columns:1fr;}}
-        .field{display:flex;flex-direction:column;gap:5px;}
-        .field label{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7b8c9f;}
-        .field input,.field select,.field textarea{padding:11px 14px;border:2px solid #e8edf2;border-radius:11px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--dark);background:#f8fafc;transition:.15s;outline:none;width:100%;}
-        .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);background:white;box-shadow:0 0 0 3px rgba(78,162,253,.1);}
-        .field textarea{resize:vertical;min-height:80px;}
-        .field-hint{font-size:.68rem;color:#a0aebb;font-weight:600;margin-top:2px;}
+/* ════════ FORM SECTIONS ════════ */
+.form-section{background:#fff;border-radius:14px;padding:22px 24px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,49,65,.04);border:1px solid rgba(0,49,65,.06)}
+.form-section-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(0,49,65,.07)}
+.fs-icon{width:34px;height:34px;border-radius:10px;background:rgba(78,162,253,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.fs-title{font-weight:800;font-size:.95rem;color:#003141}
+.fs-sub{font-size:.7rem;color:#7A8F9C;margin-top:2px}
 
-        /* TIER ROWS */
-        .tier-section{display:flex;flex-direction:column;gap:16px;}
-        .tier-row{background:#f8fafc;border:1.5px solid rgba(0,70,94,.08);border-radius:14px;padding:16px 18px;}
-        .tier-row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-        .tier-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.4px;}
-        .tier-badge-free{background:rgba(39,174,96,.12);color:var(--green);}
-        .tier-badge-t1,.tier-badge-t2,.tier-badge-t3{background:rgba(78,162,253,.12);color:var(--primary);}
-        .tier-badge-full{background:rgba(0,70,94,.07);color:#7b8c9f;}
-        .tier-toggle{display:flex;align-items:center;gap:8px;}
-        .tier-toggle label{font-size:.75rem;font-weight:700;color:#50657a;}
-        .tier-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary);}
-        .tier-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-        @media(max-width:500px){.tier-fields{grid-template-columns:1fr 1fr;}}
+/* ════════ FIELDS ════════ */
+.field-grid{display:grid;gap:14px}
+.field-grid-2{grid-template-columns:1fr 1fr}
+.field-grid-3{grid-template-columns:1fr 1fr 1fr}
+.field-grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:600px){.field-grid-2,.field-grid-3,.field-grid-4{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C}
+.field input,.field select,.field textarea{padding:10px 13px;border:1.5px solid #E8DFD2;border-radius:9px;font-size:.85rem;font-family:'DM Sans',sans-serif;color:#003141;background:#FAF6F0;transition:.15s;outline:none;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#00465E;background:#fff;box-shadow:0 0 0 3px rgba(0,70,94,.08)}
+.field textarea{resize:vertical;min-height:80px}
+.field-hint{font-size:.66rem;color:#7A8F9C;font-weight:600;margin-top:2px}
 
-        /* PRICE PREVIEW */
-        .price-preview{background:rgba(78,162,253,.06);border:1.5px solid rgba(78,162,253,.15);border-radius:14px;padding:16px 18px;margin-top:8px;}
-        .price-preview-title{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:var(--primary);margin-bottom:12px;}
-        .price-preview-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(78,162,253,.1);font-size:.82rem;}
-        .price-preview-row:last-child{border-bottom:none;}
-        .price-preview-label{color:#50657a;font-weight:600;}
-        .price-preview-val{font-weight:800;color:var(--dark);}
-        .price-preview-val.green{color:var(--green);}
+/* ════════ TIER TABLE ════════ */
+.tier-base{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;padding:14px 18px;background:#FAF6F0;border-radius:10px}
 
-        /* SAVE BAR */
-        .save-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid rgba(0,70,94,.1);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 -4px 20px rgba(0,70,94,.08);z-index:100;}
-        .save-bar-info{font-size:.8rem;color:#7b8c9f;font-weight:600;}
-        .save-bar-info strong{color:var(--dark);}
-        .btn-save{padding:13px 32px;background:var(--dark);color:white;border:none;border-radius:12px;font-weight:900;font-size:.95rem;cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif;box-shadow:0 4px 16px rgba(0,70,94,.25);}
-        .btn-save:hover{background:var(--primary);transform:translateY(-1px);}
-    </style>
+/* ════════ PRICE PREVIEW ════════ */
+.price-preview{background:rgba(0,70,94,.04);border:1.5px solid rgba(0,70,94,.1);border-radius:12px;padding:16px 18px;margin-top:12px}
+.price-preview-title{font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:#00465E;margin-bottom:12px}
+.price-preview-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(0,70,94,.07);font-size:.82rem}
+.price-preview-row:last-child{border-bottom:none}
+.price-preview-label{color:#5a7268;font-weight:600}
+.price-preview-val{font-weight:800;color:#003141}
+.price-preview-val.green{color:#167421}
+
+/* ════════ SAVE BAR ════════ */
+.save-bar{position:fixed;bottom:0;left:218px;right:0;background:#fff;border-top:1px solid rgba(0,49,65,.1);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 -4px 20px rgba(0,49,65,.08);z-index:100}
+.save-bar-info{font-size:.8rem;color:#7A8F9C;font-weight:600}
+.save-bar-info strong{color:#003141}
+.btn-save{padding:12px 30px;background:#003141;color:#fff;border:none;border-radius:10px;font-weight:900;font-size:.9rem;cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif;box-shadow:0 4px 16px rgba(0,49,65,.25)}
+.btn-save:hover{background:#00465E;transform:translateY(-1px)}
+@media(max-width:1000px){.save-bar{left:0}}
+
+/* ════════ SECTION LABELS ════════ */
+.sl{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sl:first-child{margin-top:0}
+.sl::after{content:'';flex:1;height:1px;background:#E0D4C2}
+</style>
 </head>
 <body>
 
-<div class="header">
-    <img src="{{ url_for('static', filename='Logo.svg') }}" class="header-logo" alt="BetterDay">
-    <div class="header-divider"></div>
-    <div style="position:relative;">
-        <div class="header-title">{{ company.CompanyName or 'New Company' }}</div>
-        <div class="header-sub">{{ 'Edit company' if company else 'Create new corporate client' }}</div>
-    </div>
-    <div class="header-right">
-        <a href="/bd-admin/dashboard" class="header-btn btn-back">← Admin Dashboard</a>
-    </div>
-</div>
+<!-- ════════ SIDEBAR ════════ -->
+<div class="sb-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sb" id="sidebar">
+  <div class="sb-logo" style="display:flex;align-items:center;gap:10px;">
+    <img src="/static/Cream%20Logo.png" alt="BD" style="height:32px;" onerror="this.style.display='none'">
+    <span style="font-size:.6rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.45);">FOR WORK</span>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-co-name">{{ company.CompanyName or 'New Company' }}</div>
+  <div class="sb-co-sub">{{ 'Edit company' if company else 'Create new corporate client' }}</div>
+  <div class="sb-sec">Navigation</div>
+  <a class="ni" href="/bd-admin/dashboard">&#8592; &nbsp;Dashboard</a>
+  <div class="sb-div"></div>
+  <div class="sb-sec">Editor</div>
+  <div class="ni on" onclick="switchTab('details',this)">&#9632; &nbsp;Company Details</div>
+  <div class="ni" onclick="switchTab('delivery',this)">&#9670; &nbsp;Delivery</div>
+  <div class="ni" onclick="switchTab('subsidy',this)">&#9733; &nbsp;Subsidy</div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">Settings</div>
+  <a class="ni" href="/admin-logout">&#8594; &nbsp;Sign out</a>
+</aside>
 
-<div class="container">
+<!-- ════════ MAIN ════════ -->
+<div class="mn">
+  <div class="tb">
+    <button class="tb-burger" onclick="toggleSidebar()">&#9776;</button>
+    <div class="tb-title"><b>{{ company.CompanyName or 'New Company' }}</b> &mdash; Editor</div>
+    <div class="tb-right">
+      <a href="/bd-admin/dashboard" class="tb-out">&#8592; Dashboard</a>
+    </div>
+  </div>
+
+  <div class="cont">
 
     {% if success %}
-    <div class="alert alert-success">✅ {{ success }}</div>
+    <div class="alert alert-success">&#9989; {{ success }}</div>
     {% endif %}
     {% if error %}
-    <div class="alert alert-error">⚠️ {{ error }}</div>
+    <div class="alert alert-error">&#9888; {{ error }}</div>
     {% endif %}
 
     <form method="POST">
         <input type="hidden" name="company_id" value="{{ company_id }}">
 
-        <!-- IDENTITY -->
-        <div class="form-section">
-            <div class="form-section-header">
-                <div class="fs-icon">🏢</div>
-                <div>
-                    <div class="fs-title">Company Identity</div>
-                    <div class="fs-sub">Core details and status</div>
-                </div>
-            </div>
-            <div class="field-grid field-grid-3">
-                <div class="field">
-                    <label>Company ID *</label>
-                    <input type="text" name="CompanyID" value="{{ company.CompanyID or '' }}" placeholder="e.g. ACME" style="text-transform:uppercase;font-weight:800;letter-spacing:1px;" required>
-                    <span class="field-hint">Short unique code used in the employee portal</span>
-                </div>
-                <div class="field">
-                    <label>Company Name *</label>
-                    <input type="text" name="CompanyName" value="{{ company.CompanyName or '' }}" placeholder="Company Name" required>
-                </div>
-                <div class="field">
-                    <label>Status</label>
-                    <select name="Status">
-                        <option value="Active" {% if not company.Status or company.Status == 'Active' %}selected{% endif %}>Active</option>
-                        <option value="Inactive" {% if company.Status == 'Inactive' %}selected{% endif %}>Inactive</option>
-                        <option value="Pilot" {% if company.Status == 'Pilot' %}selected{% endif %}>Pilot</option>
-                        <option value="Paused" {% if company.Status == 'Paused' %}selected{% endif %}>Paused</option>
-                    </select>
-                </div>
-            </div>
-            <div class="field-grid field-grid-2" style="margin-top:14px;">
-                <div class="field">
-                    <label>Company Email Domain</label>
-                    <input type="text" name="CompanyEmailDomain" value="{{ company.CompanyEmailDomain or '' }}" placeholder="brockhealth.com">
-                    <span class="field-hint">Employees with this domain skip the PIN requirement</span>
-                </div>
-                <div class="field">
-                    <label>Stripe Customer ID</label>
-                    <input type="text" name="StripeCustomerID" value="{{ company.StripeCustomerID or '' }}" placeholder="cus_…">
-                </div>
-            </div>
-        </div>
+        <!-- ════════ TAB 1: COMPANY DETAILS ════════ -->
+        <div id="tab-details" class="tab-panel active">
 
-        <!-- DELIVERY -->
-        <div class="form-section">
-            <div class="form-section-header">
-                <div class="fs-icon">📦</div>
-                <div>
-                    <div class="fs-title">Delivery Details</div>
-                    <div class="fs-sub">Address, fridge location, access notes</div>
+            <!-- IDENTITY -->
+            <div class="sl">Company Identity</div>
+            <div class="form-section">
+                <div class="form-section-header">
+                    <div class="fs-icon">&#127970;</div>
+                    <div>
+                        <div class="fs-title">Company Identity</div>
+                        <div class="fs-sub">Core details and status</div>
+                    </div>
                 </div>
-            </div>
-            <div class="field-grid field-grid-2">
-                <div class="field">
-                    <label>Address Line 1</label>
-                    <input type="text" name="AddressLine1" value="{{ company.AddressLine1 or '' }}" placeholder="123 Main Street">
+                <div class="field-grid field-grid-3">
+                    <div class="field">
+                        <label>Company ID *</label>
+                        <input type="text" name="CompanyID" value="{{ company.CompanyID or '' }}" placeholder="e.g. ACME" style="text-transform:uppercase;font-weight:800;letter-spacing:1px;" required>
+                        <span class="field-hint">Short unique code used in the employee portal</span>
+                    </div>
+                    <div class="field">
+                        <label>Company Name *</label>
+                        <input type="text" name="CompanyName" value="{{ company.CompanyName or '' }}" placeholder="Company Name" required>
+                    </div>
+                    <div class="field">
+                        <label>Status</label>
+                        <select name="Status">
+                            <option value="Active" {% if not company.Status or company.Status == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="Inactive" {% if company.Status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                            <option value="Pilot" {% if company.Status == 'Pilot' %}selected{% endif %}>Pilot</option>
+                            <option value="Paused" {% if company.Status == 'Paused' %}selected{% endif %}>Paused</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="field">
-                    <label>Address Line 2</label>
-                    <input type="text" name="AddressLine2" value="{{ company.AddressLine2 or '' }}" placeholder="Suite 400">
-                </div>
-            </div>
-            <div class="field-grid field-grid-3" style="margin-top:14px;">
-                <div class="field">
-                    <label>City</label>
-                    <input type="text" name="City" value="{{ company.City or '' }}" placeholder="Calgary">
-                </div>
-                <div class="field">
-                    <label>Province / State</label>
-                    <input type="text" name="Province" value="{{ company.Province or '' }}" placeholder="AB">
-                </div>
-                <div class="field">
-                    <label>Postal Code</label>
-                    <input type="text" name="PostalCode" value="{{ company.PostalCode or '' }}" placeholder="T2P 1J9">
-                </div>
-            </div>
-            <div class="field-grid field-grid-2" style="margin-top:14px;">
-                <div class="field">
-                    <label>Fridge / Drop Location</label>
-                    <input type="text" name="FridgeLocationDescription" value="{{ company.FridgeLocationDescription or '' }}" placeholder="Main floor kitchen, left of elevator">
-                </div>
-                <div class="field">
-                    <label>Delivery Window</label>
-                    <div style="display:flex;gap:8px;align-items:center;">
-                        <input type="text" name="DeliveryWindowStart" value="{{ company.DeliveryWindowStart or '' }}" placeholder="7:00 AM" style="flex:1;">
-                        <span style="color:#a0aebb;font-weight:700;">to</span>
-                        <input type="text" name="DeliveryWindowEnd" value="{{ company.DeliveryWindowEnd or '' }}" placeholder="9:00 AM" style="flex:1;">
+                <div class="field-grid field-grid-2" style="margin-top:14px;">
+                    <div class="field">
+                        <label>Company Email Domain</label>
+                        <input type="text" name="CompanyEmailDomain" value="{{ company.CompanyEmailDomain or '' }}" placeholder="brockhealth.com">
+                        <span class="field-hint">Employees with this domain skip the PIN requirement</span>
+                    </div>
+                    <div class="field">
+                        <label>Stripe Customer ID</label>
+                        <input type="text" name="StripeCustomerID" value="{{ company.StripeCustomerID or '' }}" placeholder="cus_…">
                     </div>
                 </div>
             </div>
-            <div class="field" style="margin-top:14px;">
-                <label>Delivery Instructions</label>
-                <textarea name="DeliveryInstructions">{{ company.DeliveryInstructions or company.AccessInstructions or '' }}</textarea>
-                <span class="field-hint">Shown on invoices and picklists — parking, buzzer codes, specific contacts</span>
-            </div>
-            <div class="field" style="margin-top:14px;">
-                <label>Internal Notes</label>
-                <textarea name="InternalNotes">{{ company.InternalNotes or '' }}</textarea>
-            </div>
-        </div>
 
-        <!-- CONTACTS -->
-        <div class="form-section">
-            <div class="form-section-header">
-                <div class="fs-icon">👤</div>
-                <div>
-                    <div class="fs-title">Contacts &amp; Billing</div>
-                    <div class="fs-sub">Primary contact and billing information</div>
+            <!-- PORTAL ACCESS -->
+            <div class="sl">Portal Access</div>
+            <div class="form-section">
+                <div class="form-section-header">
+                    <div class="fs-icon">&#128274;</div>
+                    <div>
+                        <div class="fs-title">Manager Portal Access</div>
+                        <div class="fs-sub">Password for the company's manager dashboard login</div>
+                    </div>
                 </div>
-            </div>
-            <div class="field-grid field-grid-3">
-                <div class="field">
-                    <label>Primary Contact Name</label>
-                    <input type="text" name="PrimaryContactName" value="{{ company.PrimaryContactName or '' }}" placeholder="Jane Smith">
-                </div>
-                <div class="field">
-                    <label>Primary Contact Email</label>
-                    <input type="email" name="PrimaryContactEmail" value="{{ company.PrimaryContactEmail or '' }}" placeholder="jane@company.com">
-                </div>
-                <div class="field">
-                    <label>Primary Contact Phone</label>
-                    <input type="text" name="PrimaryContactPhone" value="{{ company.PrimaryContactPhone or '' }}" placeholder="403-555-0100">
-                </div>
-            </div>
-            <div class="field-grid field-grid-3" style="margin-top:14px;">
-                <div class="field">
-                    <label>Billing Contact Name</label>
-                    <input type="text" name="BillingContactName" value="{{ company.BillingContactName or '' }}" placeholder="Finance Dept">
-                </div>
-                <div class="field">
-                    <label>Billing Contact Email</label>
-                    <input type="email" name="BillingContactEmail" value="{{ company.BillingContactEmail or '' }}" placeholder="billing@company.com">
-                </div>
-                <div class="field">
-                    <label>Billing Frequency</label>
-                    <select name="BillingFrequency">
-                        <option value="Weekly" {% if company.BillingFrequency == 'Weekly' %}selected{% endif %}>Weekly</option>
-                        <option value="Bi-weekly" {% if company.BillingFrequency == 'Bi-weekly' %}selected{% endif %}>Bi-weekly</option>
-                        <option value="Monthly" {% if company.BillingFrequency == 'Monthly' or not company.BillingFrequency %}selected{% endif %}>Monthly</option>
-                    </select>
-                </div>
-            </div>
-            <div class="field-grid field-grid-2" style="margin-top:14px;">
-                <div class="field">
-                    <label>Invoice Prefix</label>
-                    <input type="text" name="InvoicePrefix" value="{{ company.InvoicePrefix or '' }}" placeholder="BD-ACME">
-                    <span class="field-hint">Used on invoice numbers e.g. BD-ACME-0001</span>
-                </div>
-                <div class="field">
-                    <label>Billing Reference / PO Number</label>
-                    <input type="text" name="BillingReference" value="{{ company.BillingReference or '' }}" placeholder="PO-2026-01">
-                </div>
-            </div>
-        </div>
-
-        <!-- PORTAL ACCESS -->
-        <div class="form-section">
-            <div class="form-section-header">
-                <div class="fs-icon">🔐</div>
-                <div>
-                    <div class="fs-title">Manager Portal Access</div>
-                    <div class="fs-sub">Password for the company's manager dashboard login</div>
-                </div>
-            </div>
-            <div class="field-grid field-grid-2">
-                <div class="field">
-                    <label>Portal Password</label>
-                    <input type="text" name="ManagerPassword" value="{{ company.ManagerPassword or '' }}" placeholder="1234">
-                    <span class="field-hint">Company manager uses this to log in at /manager</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- PRICING TIERS — compact grid -->
-        <div class="form-section" id="companyTiersSection">
-            <div class="form-section-header">
-                <div class="fs-icon">💰</div>
-                <div>
-                    <div class="fs-title">Pricing Tiers</div>
-                    <div class="fs-sub">Configure base pricing, free meals, and subsidized tiers</div>
+                <div class="field-grid field-grid-2">
+                    <div class="field">
+                        <label>Portal Password</label>
+                        <input type="text" name="ManagerPassword" value="{{ company.ManagerPassword or '' }}" placeholder="1234">
+                        <span class="field-hint">Company manager uses this to log in at /manager</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Base pricing row -->
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;padding:14px 18px;background:#f8f3ec;border-radius:10px;">
-                <div class="field">
-                    <label>Full Retail Price ($)</label>
-                    <input type="number" step="0.01" name="BasePrice" id="basePrice" value="{{ company.BasePrice or '16.99' }}" placeholder="16.99" oninput="updatePreview()">
+            <!-- CONTACTS & BILLING -->
+            <div class="sl">Contacts &amp; Billing</div>
+            <div class="form-section">
+                <div class="form-section-header">
+                    <div class="fs-icon">&#128100;</div>
+                    <div>
+                        <div class="fs-title">Contacts &amp; Billing</div>
+                        <div class="fs-sub">Primary contact and billing information</div>
+                    </div>
                 </div>
-                <div class="field">
-                    <label>Max Meals / Employee / Week</label>
-                    <input type="number" name="MaxMealsPerEmployeePerWeek" value="{{ company.MaxMealsPerEmployeePerWeek or '' }}" placeholder="No limit">
+                <div class="field-grid field-grid-3">
+                    <div class="field">
+                        <label>Primary Contact Name</label>
+                        <input type="text" name="PrimaryContactName" value="{{ company.PrimaryContactName or '' }}" placeholder="Jane Smith">
+                    </div>
+                    <div class="field">
+                        <label>Primary Contact Email</label>
+                        <input type="email" name="PrimaryContactEmail" value="{{ company.PrimaryContactEmail or '' }}" placeholder="jane@company.com">
+                    </div>
+                    <div class="field">
+                        <label>Primary Contact Phone</label>
+                        <input type="text" name="PrimaryContactPhone" value="{{ company.PrimaryContactPhone or '' }}" placeholder="403-555-0100">
+                    </div>
                 </div>
-                <div class="field">
-                    <label>Allow Extra at Full Price?</label>
-                    <select name="AllowExtraAtFullPrice">
-                        <option value="TRUE" {% if company.AllowExtraAtFullPrice == 'TRUE' %}selected{% endif %}>Yes</option>
-                        <option value="FALSE" {% if company.AllowExtraAtFullPrice != 'TRUE' %}selected{% endif %}>No</option>
-                    </select>
+                <div class="field-grid field-grid-3" style="margin-top:14px;">
+                    <div class="field">
+                        <label>Billing Contact Name</label>
+                        <input type="text" name="BillingContactName" value="{{ company.BillingContactName or '' }}" placeholder="Finance Dept">
+                    </div>
+                    <div class="field">
+                        <label>Billing Contact Email</label>
+                        <input type="email" name="BillingContactEmail" value="{{ company.BillingContactEmail or '' }}" placeholder="billing@company.com">
+                    </div>
+                    <div class="field">
+                        <label>Billing Frequency</label>
+                        <select name="BillingFrequency">
+                            <option value="Weekly" {% if company.BillingFrequency == 'Weekly' %}selected{% endif %}>Weekly</option>
+                            <option value="Bi-weekly" {% if company.BillingFrequency == 'Bi-weekly' %}selected{% endif %}>Bi-weekly</option>
+                            <option value="Monthly" {% if company.BillingFrequency == 'Monthly' or not company.BillingFrequency %}selected{% endif %}>Monthly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-grid field-grid-2" style="margin-top:14px;">
+                    <div class="field">
+                        <label>Invoice Prefix</label>
+                        <input type="text" name="InvoicePrefix" value="{{ company.InvoicePrefix or '' }}" placeholder="BD-ACME">
+                        <span class="field-hint">Used on invoice numbers e.g. BD-ACME-0001</span>
+                    </div>
+                    <div class="field">
+                        <label>Billing Reference / PO Number</label>
+                        <input type="text" name="BillingReference" value="{{ company.BillingReference or '' }}" placeholder="PO-2026-01">
+                    </div>
                 </div>
             </div>
 
-            <!-- Tier grid — each row is one tier, all fields inline -->
-            <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="tierGrid">
-                <thead>
-                    <tr style="border-bottom:2px solid #E8DFD2;">
-                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;width:30px;"></th>
-                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier</th>
-                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Meals</th>
-                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Emp Price</th>
-                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">BD Subsidy</th>
-                        <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Co Subsidy</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
-                        <td style="padding:8px;"><input type="checkbox" id="enableFree" onchange="toggleTierRow(this)" {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string != '0' %}checked{% endif %}></td>
-                        <td style="padding:8px;font-weight:800;color:#167421;">🎁 Free</td>
-                        <td style="padding:8px;"><input type="number" name="FreeMealsPerWeek" id="freeMeals" value="{{ company.FreeMealsPerWeek or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;color:#7A8F9C;font-weight:600;">$0.00</td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_BDSubsidy" id="freeBdSubsidy" value="{{ company.FreeTier_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_CompanySubsidy" id="freeCoSubsidy" value="{{ company.FreeTier_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
-                    </tr>
-                    <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
-                        <td style="padding:8px;"><input type="checkbox" id="enableT1" onchange="toggleTierRow(this)" {% if company.Tier1_EmployeePrice %}checked{% endif %}></td>
-                        <td style="padding:8px;font-weight:700;color:#003141;">Tier 1</td>
-                        <td style="padding:8px;"><input type="number" name="Tier1_Meals" id="t1Meals" value="{{ company.Tier1_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_EmployeePrice" id="t1EmpPrice" value="{{ company.Tier1_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_BDSubsidy" id="t1BdSubsidy" value="{{ company.Tier1_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_CompanySubsidy" id="t1CoSubsidy" value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
-                    </tr>
-                    <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
-                        <td style="padding:8px;"><input type="checkbox" id="enableT2" onchange="toggleTierRow(this)" {% if company.Tier2_EmployeePrice %}checked{% endif %}></td>
-                        <td style="padding:8px;font-weight:700;color:#003141;">Tier 2</td>
-                        <td style="padding:8px;"><input type="number" name="Tier2_Meals" id="t2Meals" value="{{ company.Tier2_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_EmployeePrice" id="t2EmpPrice" value="{{ company.Tier2_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_BDSubsidy" id="t2BdSubsidy" value="{{ company.Tier2_BDSubsidy or '' }}" placeholder="4.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_CompanySubsidy" id="t2CoSubsidy" value="{{ company.Tier2_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
-                    </tr>
-                    <tr>
-                        <td style="padding:8px;"><input type="checkbox" id="enableT3" onchange="toggleTierRow(this)" {% if company.Tier3_EmployeePrice %}checked{% endif %}></td>
-                        <td style="padding:8px;font-weight:700;color:#003141;">Tier 3</td>
-                        <td style="padding:8px;"><input type="number" name="Tier3_Meals" id="t3Meals" value="{{ company.Tier3_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_EmployeePrice" id="t3EmpPrice" value="{{ company.Tier3_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_BDSubsidy" id="t3BdSubsidy" value="{{ company.Tier3_BDSubsidy or '' }}" placeholder="3.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
-                        <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_CompanySubsidy" id="t3CoSubsidy" value="{{ company.Tier3_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
-                    </tr>
-                </tbody>
-            </table>
+        </div><!-- /tab-details -->
 
-            <!-- LIVE PRICE PREVIEW -->
-            <div class="price-preview" id="pricePreview" style="margin-top:16px;">
-                <div class="price-preview-title">💡 Employee sees this pricing ladder</div>
-                <div id="previewRows"></div>
-            </div>
-        </div>
+        <!-- ════════ TAB 2: DELIVERY DETAILS ════════ -->
+        <div id="tab-delivery" class="tab-panel">
 
-        <!-- EMPLOYEE BENEFIT LEVELS -->
-        <div class="form-section">
-            <div class="form-section-header">
-                <div class="fs-icon">👥</div>
-                <div>
-                    <div class="fs-title">Employee Benefit Levels</div>
-                    <div class="fs-sub">Different employee groups can get different meal allowances at each tier</div>
+            <div class="sl">Delivery Address</div>
+            <div class="form-section">
+                <div class="form-section-header">
+                    <div class="fs-icon">&#128230;</div>
+                    <div>
+                        <div class="fs-title">Delivery Details</div>
+                        <div class="fs-sub">Address, fridge location, access notes</div>
+                    </div>
+                </div>
+                <div class="field-grid field-grid-2">
+                    <div class="field">
+                        <label>Address Line 1</label>
+                        <input type="text" name="AddressLine1" value="{{ company.AddressLine1 or '' }}" placeholder="123 Main Street">
+                    </div>
+                    <div class="field">
+                        <label>Address Line 2</label>
+                        <input type="text" name="AddressLine2" value="{{ company.AddressLine2 or '' }}" placeholder="Suite 400">
+                    </div>
+                </div>
+                <div class="field-grid field-grid-3" style="margin-top:14px;">
+                    <div class="field">
+                        <label>City</label>
+                        <input type="text" name="City" value="{{ company.City or '' }}" placeholder="Calgary">
+                    </div>
+                    <div class="field">
+                        <label>Province / State</label>
+                        <input type="text" name="Province" value="{{ company.Province or '' }}" placeholder="AB">
+                    </div>
+                    <div class="field">
+                        <label>Postal Code</label>
+                        <input type="text" name="PostalCode" value="{{ company.PostalCode or '' }}" placeholder="T2P 1J9">
+                    </div>
+                </div>
+                <div class="field-grid field-grid-2" style="margin-top:14px;">
+                    <div class="field">
+                        <label>Fridge / Drop Location</label>
+                        <input type="text" name="FridgeLocationDescription" value="{{ company.FridgeLocationDescription or '' }}" placeholder="Main floor kitchen, left of elevator">
+                    </div>
+                    <div class="field">
+                        <label>Delivery Window</label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="text" name="DeliveryWindowStart" value="{{ company.DeliveryWindowStart or '' }}" placeholder="7:00 AM" style="flex:1;">
+                            <span style="color:#7A8F9C;font-weight:700;">to</span>
+                            <input type="text" name="DeliveryWindowEnd" value="{{ company.DeliveryWindowEnd or '' }}" placeholder="9:00 AM" style="flex:1;">
+                        </div>
+                    </div>
+                </div>
+                <div class="field" style="margin-top:14px;">
+                    <label>Delivery Instructions</label>
+                    <textarea name="DeliveryInstructions">{{ company.DeliveryInstructions or company.AccessInstructions or '' }}</textarea>
+                    <span class="field-hint">Shown on invoices and picklists — parking, buzzer codes, specific contacts</span>
+                </div>
+                <div class="field" style="margin-top:14px;">
+                    <label>Internal Notes</label>
+                    <textarea name="InternalNotes">{{ company.InternalNotes or '' }}</textarea>
                 </div>
             </div>
-            <div style="margin-bottom:14px;">
-                <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;cursor:pointer;">
-                    <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
-                           {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}checked{% endif %}
-                           onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;">
-                    Enable Employee Benefit Levels
-                </label>
-                <span class="field-hint" style="margin-left:26px;">Pricing stays the same for all levels — only the number of meals at each tier changes per level.</span>
-            </div>
-            <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper != 'TRUE' %}style="display:none"{% endif %}>
-                <div style="background:#f8f3ec;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:.75rem;color:#5a7268;line-height:1.5;">
-                    Each level shares the same per-meal pricing above — you're only configuring <strong>how many meals</strong> each group gets at each tier.
-                    Assign levels from the Manager Portal → Employees tab.
+
+        </div><!-- /tab-delivery -->
+
+        <!-- ════════ TAB 3: SUBSIDY STRUCTURE ════════ -->
+        <div id="tab-subsidy" class="tab-panel">
+
+            <!-- PRICING TIERS -->
+            <div class="sl">Pricing Tiers</div>
+            <div class="form-section" id="companyTiersSection">
+                <div class="form-section-header">
+                    <div class="fs-icon">&#128176;</div>
+                    <div>
+                        <div class="fs-title">Pricing Tiers</div>
+                        <div class="fs-sub">Configure base pricing, free meals, and subsidized tiers</div>
+                    </div>
                 </div>
 
-                <!-- Levels grid -->
-                <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="levelsGrid">
+                <!-- Base pricing row -->
+                <div class="tier-base">
+                    <div class="field">
+                        <label>Full Retail Price ($)</label>
+                        <input type="number" step="0.01" name="BasePrice" id="basePrice" value="{{ company.BasePrice or '16.99' }}" placeholder="16.99" oninput="updatePreview()">
+                    </div>
+                    <div class="field">
+                        <label>Max Meals / Employee / Week</label>
+                        <input type="number" name="MaxMealsPerEmployeePerWeek" value="{{ company.MaxMealsPerEmployeePerWeek or '' }}" placeholder="No limit">
+                    </div>
+                    <div class="field">
+                        <label>Allow Extra at Full Price?</label>
+                        <select name="AllowExtraAtFullPrice">
+                            <option value="TRUE" {% if company.AllowExtraAtFullPrice == 'TRUE' %}selected{% endif %}>Yes</option>
+                            <option value="FALSE" {% if company.AllowExtraAtFullPrice != 'TRUE' %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tier grid -->
+                <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="tierGrid">
                     <thead>
                         <tr style="border-bottom:2px solid #E8DFD2;">
-                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Level Name</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#167421;">Free Meals</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 1</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 2</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 3</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Max/Week</th>
-                            <th style="width:60px;"></th>
+                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;width:30px;"></th>
+                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier</th>
+                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Meals</th>
+                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Emp Price</th>
+                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">BD Subsidy</th>
+                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Co Subsidy</th>
                         </tr>
                     </thead>
-                    <tbody id="levelsContainer"></tbody>
+                    <tbody>
+                        <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
+                            <td style="padding:8px;"><input type="checkbox" id="enableFree" onchange="toggleTierRow(this)" {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string != '0' %}checked{% endif %}></td>
+                            <td style="padding:8px;font-weight:800;color:#167421;">&#127873; Free</td>
+                            <td style="padding:8px;"><input type="number" name="FreeMealsPerWeek" id="freeMeals" value="{{ company.FreeMealsPerWeek or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;color:#7A8F9C;font-weight:600;">$0.00</td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_BDSubsidy" id="freeBdSubsidy" value="{{ company.FreeTier_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="FreeTier_CompanySubsidy" id="freeCoSubsidy" value="{{ company.FreeTier_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
+                            <td style="padding:8px;"><input type="checkbox" id="enableT1" onchange="toggleTierRow(this)" {% if company.Tier1_EmployeePrice %}checked{% endif %}></td>
+                            <td style="padding:8px;font-weight:700;color:#003141;">Tier 1</td>
+                            <td style="padding:8px;"><input type="number" name="Tier1_Meals" id="t1Meals" value="{{ company.Tier1_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_EmployeePrice" id="t1EmpPrice" value="{{ company.Tier1_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_BDSubsidy" id="t1BdSubsidy" value="{{ company.Tier1_BDSubsidy or '' }}" placeholder="5.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier1_CompanySubsidy" id="t1CoSubsidy" value="{{ company.Tier1_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                        </tr>
+                        <tr style="border-bottom:1px solid rgba(0,49,65,.06);">
+                            <td style="padding:8px;"><input type="checkbox" id="enableT2" onchange="toggleTierRow(this)" {% if company.Tier2_EmployeePrice %}checked{% endif %}></td>
+                            <td style="padding:8px;font-weight:700;color:#003141;">Tier 2</td>
+                            <td style="padding:8px;"><input type="number" name="Tier2_Meals" id="t2Meals" value="{{ company.Tier2_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_EmployeePrice" id="t2EmpPrice" value="{{ company.Tier2_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_BDSubsidy" id="t2BdSubsidy" value="{{ company.Tier2_BDSubsidy or '' }}" placeholder="4.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier2_CompanySubsidy" id="t2CoSubsidy" value="{{ company.Tier2_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px;"><input type="checkbox" id="enableT3" onchange="toggleTierRow(this)" {% if company.Tier3_EmployeePrice %}checked{% endif %}></td>
+                            <td style="padding:8px;font-weight:700;color:#003141;">Tier 3</td>
+                            <td style="padding:8px;"><input type="number" name="Tier3_Meals" id="t3Meals" value="{{ company.Tier3_Meals or '' }}" placeholder="0" style="width:70px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_EmployeePrice" id="t3EmpPrice" value="{{ company.Tier3_EmployeePrice or '' }}" placeholder="0.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_BDSubsidy" id="t3BdSubsidy" value="{{ company.Tier3_BDSubsidy or '' }}" placeholder="3.00" style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;" oninput="updatePreview()"></td>
+                            <td style="padding:8px;"><input type="number" step="0.01" name="Tier3_CompanySubsidy" id="t3CoSubsidy" value="{{ company.Tier3_CompanySubsidy or '' }}" placeholder="auto" readonly style="width:80px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;background:#f0f4f8;color:#7b8c9f;"></td>
+                        </tr>
+                    </tbody>
                 </table>
 
-                <button type="button" onclick="addLevel()" style="font-size:.78rem;font-weight:700;color:#00465E;background:#fff;border:1.5px dashed #E8DFD2;border-radius:8px;padding:10px 16px;cursor:pointer;width:100%;margin-top:8px;transition:.15s;"
-                        onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">
-                    + Add Level
-                </button>
-                <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-                    <button type="button" onclick="saveBenefitLevels()" style="font-size:.8rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;">
-                        Save Levels
-                    </button>
-                    <span id="levelsSaveStatus" style="font-size:.75rem;color:#167421;display:none;">✓ Saved</span>
+                <!-- LIVE PRICE PREVIEW -->
+                <div class="price-preview" id="pricePreview" style="margin-top:16px;">
+                    <div class="price-preview-title">&#128161; Employee sees this pricing ladder</div>
+                    <div id="previewRows"></div>
                 </div>
             </div>
-        </div>
+
+            <!-- EMPLOYEE BENEFIT LEVELS -->
+            <div class="sl">Employee Benefit Levels</div>
+            <div class="form-section">
+                <div class="form-section-header">
+                    <div class="fs-icon">&#128101;</div>
+                    <div>
+                        <div class="fs-title">Employee Benefit Levels</div>
+                        <div class="fs-sub">Different employee groups can get different meal allowances at each tier</div>
+                    </div>
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;cursor:pointer;">
+                        <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
+                               {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}checked{% endif %}
+                               onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;">
+                        Enable Employee Benefit Levels
+                    </label>
+                    <span class="field-hint" style="margin-left:26px;">Pricing stays the same for all levels — only the number of meals at each tier changes per level.</span>
+                </div>
+                <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper != 'TRUE' %}style="display:none"{% endif %}>
+                    <div style="background:#FAF6F0;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:.75rem;color:#5a7268;line-height:1.5;">
+                        Each level shares the same per-meal pricing above — you're only configuring <strong>how many meals</strong> each group gets at each tier.
+                        Assign levels from the Manager Portal &rarr; Employees tab.
+                    </div>
+
+                    <!-- Levels grid -->
+                    <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="levelsGrid">
+                        <thead>
+                            <tr style="border-bottom:2px solid #E8DFD2;">
+                                <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Level Name</th>
+                                <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#167421;">Free Meals</th>
+                                <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 1</th>
+                                <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 2</th>
+                                <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 3</th>
+                                <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Max/Week</th>
+                                <th style="width:60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="levelsContainer"></tbody>
+                    </table>
+
+                    <button type="button" onclick="addLevel()" style="font-size:.78rem;font-weight:700;color:#00465E;background:#fff;border:1.5px dashed #E8DFD2;border-radius:8px;padding:10px 16px;cursor:pointer;width:100%;margin-top:8px;transition:.15s;"
+                            onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">
+                        + Add Level
+                    </button>
+                    <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+                        <button type="button" onclick="saveBenefitLevels()" style="font-size:.8rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;padding:10px 20px;cursor:pointer;">
+                            Save Levels
+                        </button>
+                        <span id="levelsSaveStatus" style="font-size:.75rem;color:#167421;display:none;">&#10003; Saved</span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-subsidy -->
 
         <div class="save-bar">
             <div class="save-bar-info">
                 Editing <strong>{{ company.CompanyName or 'New Company' }}</strong>
                 — changes saved to Google Sheets
             </div>
-            <button type="submit" class="btn-save">Save Company →</button>
+            <button type="submit" class="btn-save">Save Company &rarr;</button>
         </div>
 
     </form>
-</div>
+  </div><!-- /cont -->
+</div><!-- /mn -->
 
 <script>
+/* ════════ SIDEBAR / TABS ════════ */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+function switchTab(tabId, el){
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('tab-' + tabId).classList.add('active');
+  document.querySelectorAll('.sb .ni').forEach(function(n){ n.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  closeSidebar();
+}
+
+/* ════════ TIER LOGIC (preserved exactly) ════════ */
 function toggleTierRow(cb) { updatePreview(); }
 function toggleTier(fieldId, show) {
     document.getElementById(fieldId).style.display = show ? '' : 'none';
@@ -454,7 +530,7 @@ function updatePreview() {
     const t3ep = parseFloat(document.getElementById('t3EmpPrice')?.value) || 0;
     const t3bd = parseFloat(document.getElementById('t3BdSubsidy')?.value) || 0;
 
-    // Update auto-calculated company subsidy = Full price − Employee price − BD subsidy
+    // Update auto-calculated company subsidy = Full price - Employee price - BD subsidy
     const setSubsidy = (id, ep, bd) => {
         const el = document.getElementById(id);
         if (el) el.value = Math.max(0, fp - ep - bd).toFixed(2);
@@ -471,19 +547,19 @@ function updatePreview() {
     const rows = [];
     let cur = 0;
     if (freeEnabled && free > 0) {
-        rows.push({ label: `Meal${free > 1 ? 's' : ''} 1–${free}`, val: 'FREE 🎉', green: true });
+        rows.push({ label: `Meal${free > 1 ? 's' : ''} 1\u2013${free}`, val: 'FREE \ud83c\udf89', green: true });
         cur += free;
     }
     if (t1En && t1m > 0) {
-        rows.push({ label: `Meal${t1m > 1 ? 's' : ''} ${cur+1}–${cur+t1m}`, val: `$${t1ep.toFixed(2)}` });
+        rows.push({ label: `Meal${t1m > 1 ? 's' : ''} ${cur+1}\u2013${cur+t1m}`, val: `$${t1ep.toFixed(2)}` });
         cur += t1m;
     }
     if (t2En && t2m > 0) {
-        rows.push({ label: `Meal${t2m > 1 ? 's' : ''} ${cur+1}–${cur+t2m}`, val: `$${t2ep.toFixed(2)}` });
+        rows.push({ label: `Meal${t2m > 1 ? 's' : ''} ${cur+1}\u2013${cur+t2m}`, val: `$${t2ep.toFixed(2)}` });
         cur += t2m;
     }
     if (t3En && t3m > 0) {
-        rows.push({ label: `Meal${t3m > 1 ? 's' : ''} ${cur+1}–${cur+t3m}`, val: `$${t3ep.toFixed(2)}` });
+        rows.push({ label: `Meal${t3m > 1 ? 's' : ''} ${cur+1}\u2013${cur+t3m}`, val: `$${t3ep.toFixed(2)}` });
         cur += t3m;
     }
     rows.push({ label: 'Additional meals', val: `$${fp.toFixed(2)} (full price)` });
@@ -519,8 +595,8 @@ function addLevel(data) {
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier1_Meals||0)+'" data-field="Tier1_Meals" style="'+_s+'"></td>' +
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier2_Meals||0)+'" data-field="Tier2_Meals" style="'+_s+'"></td>' +
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier3_Meals||0)+'" data-field="Tier3_Meals" style="'+_s+'"></td>' +
-    '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.MaxMealsPerWeek||'')+'" data-field="MaxMealsPerWeek" placeholder="∞" style="'+_s+'"></td>' +
-    '<td style="padding:6px 8px;"><button type="button" onclick="removeLevel('+id+')" style="font-size:.65rem;color:#B56B10;background:none;border:1px solid rgba(181,107,16,.15);border-radius:5px;padding:3px 8px;cursor:pointer;">✕</button></td>';
+    '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.MaxMealsPerWeek||'')+'" data-field="MaxMealsPerWeek" placeholder="\u221E" style="'+_s+'"></td>' +
+    '<td style="padding:6px 8px;"><button type="button" onclick="removeLevel('+id+')" style="font-size:.65rem;color:#B56B10;background:none;border:1px solid rgba(181,107,16,.15);border-radius:5px;padding:3px 8px;cursor:pointer;">\u2715</button></td>';
   // Store LevelID as a hidden data attribute
   tr.dataset.levelId = lv.LevelID || id;
   document.getElementById('levelsContainer').appendChild(tr);
@@ -556,7 +632,7 @@ function saveBenefitLevels() {
     body: JSON.stringify({ action: 'save_benefit_levels', company_id: companyId, levels: levels })
   }).then(r => r.json()).then(d => {
     if (d.success) {
-      statusEl.textContent = '✓ ' + levels.length + ' level(s) saved';
+      statusEl.textContent = '\u2713 ' + levels.length + ' level(s) saved';
       statusEl.style.display = 'inline';
       setTimeout(() => statusEl.style.display = 'none', 4000);
     } else { alert('Error: ' + (d.error || 'Unknown')); }
