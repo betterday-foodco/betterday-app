@@ -2005,13 +2005,13 @@ async function openPaymentModal(total) {
         throw new Error('Helcim payment script not loaded');
       }
       // Helcim renders its own full-page modal overlay
-      appendHelcimPayIframe(_helcimCheckoutToken, document.getElementById('helcimPayContainer'));
+      appendHelcimPayIframe(_helcimCheckoutToken);
     } else {
       throw new Error(data.error || 'Failed to initialize');
     }
   } catch(e) {
     console.error('Helcim init failed:', e);
-    showToast('Payment unavailable — please try again');
+    showToast('Payment error: ' + (e.message || 'unavailable'));
     _checkoutInProgress = false;
     const btn = document.getElementById('payBtn');
     if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
