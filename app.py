@@ -14,6 +14,16 @@ from functools import wraps
 
 app = Flask(__name__)
 
+@app.template_filter('nicedate')
+def nicedate_filter(s):
+    """Convert '2026-03-30' to 'March 30, 2026'."""
+    try:
+        from datetime import datetime as _dt
+        d = _dt.strptime(str(s).strip()[:10], '%Y-%m-%d')
+        return d.strftime('%B %d, %Y').replace(' 0', ' ')
+    except Exception:
+        return str(s) if s else '—'
+
 # ─────────────────────────────────────────────────────────────
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────

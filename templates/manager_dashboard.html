@@ -32,7 +32,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .tb-out{font-size:.68rem;font-weight:700;color:rgba(250,235,218,.4);border:1px solid rgba(250,235,218,.14);border-radius:99px;padding:5px 14px;text-decoration:none;transition:.14s}
 .tb-out:hover{color:#FAEBDA;border-color:rgba(250,235,218,.4)}
-.cont{padding:24px 28px;max-width:1100px;margin:0 auto}
+.cont{padding:24px 36px;max-width:1050px;margin:0 auto}
 
 /* ════════ SECTION LABELS ════════ */
 .sl{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
@@ -249,7 +249,12 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 
   <div class="cont">
 
-    <!-- ═══ ROI SNAPSHOT — always visible ═══ -->
+    <!-- ════════════════════════════════════════ -->
+    <!-- TAB: OVERVIEW                           -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-overview">
+
+    <!-- ROI SNAPSHOT -->
     <div class="roi-hero">
       <div class="roi-pill">ROI Snapshot</div>
       <div class="roi-grid">
@@ -277,10 +282,6 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       </div>
     </div>
 
-    <!-- ════════════════════════════════════════ -->
-    <!-- TAB: OVERVIEW                           -->
-    <!-- ════════════════════════════════════════ -->
-    <div class="tab-panel active" id="tab-overview">
       <div class="week-impact-row">
         <div class="week-stack">
           <div class="week-stack-title">This Week &mdash; {{ active_week.label if active_week else '' }}</div>
@@ -366,7 +367,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
             {% for inv in invoices %}
             <tr style="cursor:pointer" onclick="toggleInvDetail({{ loop.index0 }})">
               <td class="tn">{{ inv.invoiceId }}</td>
-              <td>{{ inv.weekOf | replace('-', '/') if inv.weekOf else '—' }}</td>
+              <td>{{ inv.weekOf | nicedate }}</td>
               <td>{{ inv.totalMeals }}</td>
               <td>{{ inv.totalEmployees }}</td>
               <td class="tg">${{ '%.2f' | format(inv.companyOwed | float) }}</td>
@@ -560,7 +561,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
                 <span class="emp-badge personal">Personal</span>
                 {% endif %}
               </td>
-              <td>{{ emp.createdAt or '—' }}</td>
+              <td>{{ emp.createdAt | nicedate }}</td>
               <td>
                 {% if emp.isManager %}
                 <span class="emp-badge manager">Manager</span>
@@ -770,6 +771,17 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 <!-- ════════ EMBEDDED ORDER DATA ════════ -->
 <script>
 const ORDERS       = {{ orders_json | safe }};
+
+// Format "2026-03-30" → "March 30, 2026"
+function fmtDate(s) {
+  if (!s || s === '—') return '—';
+  try {
+    var parts = String(s).split(/[-\/T]/);
+    var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    if (isNaN(d.getTime())) return s;
+    return d.toLocaleDateString('en-US', {month:'long', day:'numeric', year:'numeric'});
+  } catch(e) { return s; }
+}
 const INVOICES     = {{ invoices | tojson | safe }};
 const MONTHLY      = {{ sorted_monthly | tojson | safe }};
 const COMPANY_NAME = {{ company_name | tojson }};
@@ -813,7 +825,7 @@ function openOrderModal(order) {
   _currentOrderData = order;
 
   document.getElementById('modalTitle').textContent = (order.employee_name || order.name || 'Order') + "'s Order";
-  document.getElementById('modalSub').textContent = 'Delivery ' + (order.delivery_date || order.week || '—') + ' · ' + (order.status || 'Pending');
+  document.getElementById('modalSub').textContent = 'Delivery ' + fmtDate(order.delivery_date || order.week) + ' · ' + (order.status || 'Pending');
   document.getElementById('modalMeals').textContent = order.meals.length;
   document.getElementById('modalEmpPaid').textContent = '$' + (order.emp_total || 0).toFixed(2);
   document.getElementById('modalCoCovered').textContent = '$' + (order.co_total || 0).toFixed(2);
@@ -866,7 +878,7 @@ function printOrderPDF() {
   var totalSubsidy = '$' + (coNum + bdNum).toFixed(2);
   var empPaid = '$' + (d.emp_total || 0).toFixed(2);
   var name = d.employee_name || d.name || 'Employee';
-  var delivery = d.delivery_date || d.week || '—';
+  var delivery = fmtDate(d.delivery_date || d.week);
 
   var w = window.open('', '_blank');
   w.document.write('<!DOCTYPE html><html><head><title>Order - ' + name + '</title>'
@@ -949,7 +961,7 @@ function renderOrderTable() {
         <td>$${o.emp_total.toFixed(2)}</td>
         <td class="tg">$${o.co_total.toFixed(2)}</td>
         <td class="ts">$${o.bd_total.toFixed(2)}</td>
-        <td>${o.delivery_date || '—'}</td>
+        <td>${fmtDate(o.delivery_date)}</td>
         <td><span class="bdg ${statusClass}">${o.status || 'Pending'}</span></td>
         <td style="font-size:.75rem;color:#00465E;font-weight:700">View &rarr;</td>
       </tr>`;
@@ -988,7 +1000,7 @@ function renderOverviewOrders() {
       <td>$${o.emp_total.toFixed(2)}</td>
       <td class="tg">$${o.co_total.toFixed(2)}</td>
       <td class="ts">$${o.bd_total.toFixed(2)}</td>
-      <td>${o.delivery_date || '—'}</td>
+      <td>${fmtDate(o.delivery_date)}</td>
       <td><span class="bdg ${statusClass}">${o.status || 'Pending'}</span></td>
     </tr>`;
   }).join('');
