@@ -917,6 +917,104 @@ function doPost(e) {
       var result = _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, false);
       return jsonOut(result);
     }
+    // ─────────────────────────────────────────
+    // SEND ORDER REMINDERS (admin triggers manually)
+    // Returns summary of who was emailed
+    // ─────────────────────────────────────────
+    if (data.action === "send_order_reminders") {
+      var tz = Session.getScriptTimeZone();
+      // Find current week's Sunday anchor
+      var today = new Date();
+      var dow = today.getDay();
+      var sun = new Date(today);
+      sun.setDate(today.getDate() - dow);
+      var sundayAnchor = Utilities.formatDate(sun, tz, "yyyy-MM-dd");
+      var deliveryMon = new Date(sun);
+      deliveryMon.setDate(sun.getDate() + 1);
+      var deliveryLabel = Utilities.formatDate(deliveryMon, tz, "MMMM d, yyyy");
+
+      // Get all employees
+      var empSheet = getOrCreateEmployeesSheet(ssHub);
+      var empRows = empSheet.getDataRange().getValues();
+      var empHeaders = empRows[0];
+
+      // Get all orders for this week
+      var corpSheet = ssHub.getSheetByName("CorporateOrders");
+      var orderedEmails = {};
+      if (corpSheet) {
+        var oRows = corpSheet.getDataRange().getValues();
+        var oHeaders = oRows[0];
+        var oEmailIdx = oHeaders.indexOf("EmployeeEmail");
+        var oAnchorIdx = oHeaders.indexOf("SundayAnchor");
+        for (var i = 1; i < oRows.length; i++) {
+          var rawAn = oRows[i][oAnchorIdx];
+          var rowAn = (rawAn instanceof Date) ? Utilities.formatDate(rawAn, tz, "yyyy-MM-dd") : String(rawAn).trim();
+          if (rowAn === sundayAnchor) {
+            orderedEmails[String(oRows[i][oEmailIdx]).trim().toLowerCase()] = true;
+          }
+        }
+      }
+
+      // Find employees who haven't ordered
+      var APP_URL = PropertiesService.getScriptProperties().getProperty("APP_URL") || "https://betterday-app.onrender.com";
+      var sent = 0, skipped = 0, totalEmployees = 0, totalOrdered = 0;
+      var companies = {};
+
+      for (var i = 1; i < empRows.length; i++) {
+        var email = String(empRows[i][4] || "").trim().toLowerCase();
+        var coId = String(empRows[i][1] || "").trim().toUpperCase();
+        if (!email || !coId) continue;
+        totalEmployees++;
+        if (!companies[coId]) companies[coId] = {total: 0, ordered: 0};
+        companies[coId].total++;
+
+        if (orderedEmails[email]) {
+          totalOrdered++;
+          companies[coId].ordered++;
+          skipped++;
+          continue;
+        }
+
+        // Send reminder email
+        try {
+          var firstName = String(empRows[i][2] || "").trim() || "there";
+          MailApp.sendEmail({
+            to: email,
+            subject: "Don't forget to order your meals this week!",
+            htmlBody:
+              "<!DOCTYPE html><html><body style='margin:0;padding:0;background:#f4ede3;font-family:-apple-system,BlinkMacSystemFont,sans-serif;'>" +
+              "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
+              "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
+              "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
+              "<div style='font-family:Georgia,serif;font-size:1.5rem;color:#faebda;font-weight:700;'>BetterDay</div>" +
+              "<div style='font-size:.65rem;color:rgba(250,235,218,.6);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>FOR WORK</div>" +
+              "</td></tr>" +
+              "<tr><td style='background:#fff;padding:36px 32px 28px;'>" +
+              "<p style='font-size:1.15rem;font-weight:800;color:#0d2030;margin:0 0 10px;'>Hey " + firstName + ", your meals are waiting!</p>" +
+              "<p style='font-size:.9rem;color:#50657a;line-height:1.65;margin:0 0 28px;'>This week's menu is live and orders close <strong>Wednesday at midnight</strong>. Delivery is <strong>" + deliveryLabel + "</strong>.</p>" +
+              "<a href='" + APP_URL + "/work' style='display:block;background:#00465e;color:#fff;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-weight:700;font-size:1rem;'>Order your meals &rarr;</a>" +
+              "</td></tr>" +
+              "<tr><td style='background:#f9f5f0;border-radius:0 0 16px 16px;padding:20px 32px;border-top:1px solid #e8e0d5;'>" +
+              "<p style='font-size:.75rem;color:#9aabb8;margin:0;'>You're receiving this because you're enrolled in your company's BetterDay meal program.</p>" +
+              "</td></tr></table></td></tr></table></body></html>"
+          });
+          sent++;
+        } catch(mailErr) {
+          Logger.log("Reminder email failed for " + email + ": " + mailErr.toString());
+        }
+      }
+
+      return jsonOut({
+        success: true,
+        sent: sent,
+        skipped: skipped,
+        totalEmployees: totalEmployees,
+        totalOrdered: totalOrdered,
+        weekOf: sundayAnchor,
+        deliveryDate: deliveryLabel
+      });
+    }
+
     return ContentService.createTextOutput("Error: Unknown Action");
   } catch (err) {
     return ContentService.createTextOutput("Error: " + err.toString());
