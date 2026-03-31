@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>Delivery Sheet — {{ week }}</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#FAEBDA;padding:32px;color:#003141}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #003141}
+.header h1{font-size:1.4rem;font-weight:900}
+.header .week{font-size:.85rem;color:#7A8F9C}
+.btns{display:flex;gap:8px}
+.btn{padding:8px 20px;background:#003141;color:#fff;border:none;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-outline{padding:8px 20px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,49,65,.04)}
+th{text-align:left;padding:10px 14px;font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#00465E;background:#F8F3EC;border-bottom:1.5px solid #E8DFD2;white-space:nowrap}
+td{padding:10px 14px;font-size:.82rem;border-bottom:1px solid rgba(0,49,65,.05);color:#2E4A5A;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.client{font-weight:800;color:#003141}
+.notes{max-width:200px;font-size:.75rem;color:#7A8F9C;line-height:1.4}
+@media print{body{background:#fff;padding:12px}.btns{display:none}table{font-size:.7rem}th,td{padding:6px 8px}}
+</style>
+</head><body>
+<div class="header">
+  <div>
+    <h1>🚛 Delivery Sheet</h1>
+    <div class="week">Week of {{ week }} · {{ rows|length }} deliveries</div>
+  </div>
+  <div class="btns">
+    <button class="btn-outline" onclick="exportCSV()">Export CSV</button>
+    <button class="btn" onclick="window.print()">Print / PDF</button>
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Client</th>
+      <th>Meals</th>
+      <th>Total</th>
+      <th>Address</th>
+      <th>Gate Code</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Notes</th>
+      <th>Bags</th>
+      <th>Duration</th>
+      <th>Business Hours</th>
+      <th>Assigned Driver</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td class="client">{{ r.client }}</td>
+      <td style="font-weight:700;">{{ r.meals }}</td>
+      <td></td>
+      <td>{{ r.address }}{% if r.city %}, {{ r.city }}{% endif %}{% if r.province %}, {{ r.province }}{% endif %} {{ r.postal }}</td>
+      <td></td>
+      <td>{{ r.email }}</td>
+      <td>{{ r.phone }}</td>
+      <td class="notes">{{ r.notes }}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function exportCSV() {
+  var rows = [['Client','Meals','Total','Address','Gate Code','Email','Phone','Notes','Bags','Duration','Business Hours','Assigned Driver']];
+  document.querySelectorAll('tbody tr').forEach(function(tr) {
+    var cells = [];
+    tr.querySelectorAll('td').forEach(function(td) { cells.push('"' + (td.textContent||'').trim().replace(/"/g,'""') + '"'); });
+    rows.push(cells);
+  });
+  var csv = rows.map(function(r){return r.join(',')}).join('\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'delivery_sheet_{{ week }}.csv';
+  a.click();
+}
+</script>
+</body></html>

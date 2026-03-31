@@ -254,6 +254,31 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
         <div class="card card-purple"><div class="section-label" style="color:#7453A2;">Avg Order</div><div class="stat-value purple">${{ "%.2f"|format(avg_order_value) }}</div></div>
       </div>
 
+      <!-- Quick Reports -->
+      <div class="sl">Reports &amp; Exports</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
+        <a href="/bd-admin/report/production?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
+          <div style="font-size:22px;margin-bottom:8px;">👨‍🍳</div>
+          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Production Summary</div>
+          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Total qty of each dish for kitchen production</div>
+        </a>
+        <a href="/bd-admin/report/picklists?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
+          <div style="font-size:22px;margin-bottom:8px;">📦</div>
+          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Company Pick Lists</div>
+          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Per-company meal totals for packing</div>
+        </a>
+        <a href="/bd-admin/report/labels?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
+          <div style="font-size:22px;margin-bottom:8px;">🏷️</div>
+          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Meal Labels</div>
+          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Per-person labels sorted by company &amp; name</div>
+        </a>
+        <a href="/bd-admin/report/delivery?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;background:#fff;border-radius:12px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);cursor:pointer;transition:.15s;display:block;" onmouseover="this.style.borderColor='#00465E';this.style.boxShadow='0 4px 16px rgba(0,49,65,.1)'" onmouseout="this.style.borderColor='rgba(0,49,65,.06)';this.style.boxShadow='0 2px 12px rgba(0,49,65,.04)'">
+          <div style="font-size:22px;margin-bottom:8px;">🚛</div>
+          <div style="font-size:.82rem;font-weight:800;color:#003141;margin-bottom:3px;">Delivery Sheet</div>
+          <div style="font-size:.68rem;color:#7A8F9C;line-height:1.4;">Route sheet matching 1.0 CGY format</div>
+        </a>
+      </div>
+
       <!-- Growth & Engagement -->
       <div class="sl">Growth &amp; Engagement</div>
       <div class="growth-wrap">

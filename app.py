@@ -540,6 +540,138 @@ def bd_admin_invoice_status():
     return jsonify({'success': bool(result and result.get('success'))})
 
 
+# ─────────────────────────────────────────────────────────────
+# BD ADMIN REPORTS
+# ─────────────────────────────────────────────────────────────
+def _get_week_orders(sunday_anchor):
+    """Fetch all corporate orders for a given week, return as list of dicts."""
+    raw = _gas_post({'action': 'get_corporate_orders', 'sunday_anchor': sunday_anchor}, timeout=15) or []
+    if not isinstance(raw, list):
+        raw = []
+    return raw
+
+
+@app.route('/bd-admin/report/production')
+@admin_required
+def report_production():
+    week = request.args.get('week', '')
+    orders = _get_week_orders(week)
+
+    # Group by dish + diet
+    dishes = {}
+    for o in orders:
+        name = o.get('DishName', 'Unknown')
+        diet = o.get('DietType', 'Unknown')
+        key = f"{name}|{diet}"
+        if key not in dishes:
+            dishes[key] = {'name': name, 'diet': diet, 'count': 0}
+        dishes[key]['count'] += 1
+
+    # Sort by diet (Meat first), then by count descending
+    sorted_dishes = sorted(dishes.values(), key=lambda d: (0 if 'meat' in d['diet'].lower() else 1, -d['count']))
+    total = sum(d['count'] for d in sorted_dishes)
+
+    return render_template('report_production.html',
+                           week=week, dishes=sorted_dishes, total=total)
+
+
+@app.route('/bd-admin/report/picklists')
+@admin_required
+def report_picklists():
+    week = request.args.get('week', '')
+    orders = _get_week_orders(week)
+
+    # Group by company, then by dish
+    companies = {}
+    for o in orders:
+        co = o.get('CompanyName', o.get('CompanyID', 'Unknown'))
+        dish = o.get('DishName', 'Unknown')
+        diet = o.get('DietType', '')
+        if co not in companies:
+            companies[co] = {'dishes': {}, 'total': 0}
+        if dish not in companies[co]['dishes']:
+            companies[co]['dishes'][dish] = {'count': 0, 'diet': diet}
+        companies[co]['dishes'][dish]['count'] += 1
+        companies[co]['total'] += 1
+
+    return render_template('report_picklists.html',
+                           week=week, companies=companies)
+
+
+@app.route('/bd-admin/report/labels')
+@admin_required
+def report_labels():
+    week = request.args.get('week', '')
+    orders = _get_week_orders(week)
+
+    # Build label rows: one per meal per person
+    labels = []
+    for o in orders:
+        last = (o.get('EmployeeName', '') or '').split()[-1] if o.get('EmployeeName') else ''
+        labels.append({
+            'company':  o.get('CompanyName', o.get('CompanyID', '')),
+            'name':     o.get('EmployeeName', ''),
+            'last':     last,
+            'dish':     o.get('DishName', 'Unknown'),
+            'diet':     o.get('DietType', ''),
+        })
+
+    # Sort by company, then reverse alpha by last name, then by dish
+    labels.sort(key=lambda l: (l['company'].lower(), -ord(l['last'][0].lower()) if l['last'] else 0, l['last'].lower(), l['dish'].lower()) if l['last'] else (l['company'].lower(), 0, '', l['dish'].lower()))
+
+    # Actually: sort by company ASC, last name Z→A (reverse), then dish ASC
+    labels.sort(key=lambda l: (l['company'].lower(), l['dish'].lower()))
+    labels.sort(key=lambda l: l['company'].lower())
+    # Now reverse-alpha by last name within each company
+    from itertools import groupby
+    sorted_labels = []
+    for co, group in groupby(labels, key=lambda l: l['company']):
+        co_labels = list(group)
+        co_labels.sort(key=lambda l: (l['last'].lower() if l['last'] else ''), reverse=True)
+        # Then stable sort by dish within same last name
+        sorted_labels.append({'company': co, 'labels': co_labels})
+
+    return render_template('report_labels.html',
+                           week=week, company_groups=sorted_labels)
+
+
+@app.route('/bd-admin/report/delivery')
+@admin_required
+def report_delivery():
+    week = request.args.get('week', '')
+    orders = _get_week_orders(week)
+
+    # Group by company for the delivery sheet
+    companies_data = {}
+    all_companies = {}
+    # Get company details from cache
+    with _company_cache_lock:
+        for cid, entry in _company_cache.items():
+            if entry.get('data') and entry['data'].get('company'):
+                all_companies[cid.upper()] = entry['data']['company']
+
+    for o in orders:
+        cid = str(o.get('CompanyID', '')).upper()
+        if cid not in companies_data:
+            c = all_companies.get(cid, {})
+            companies_data[cid] = {
+                'client':    o.get('CompanyName', cid),
+                'meals':     0,
+                'address':   c.get('AddressLine1', ''),
+                'city':      c.get('City', ''),
+                'province':  c.get('Province', ''),
+                'postal':    c.get('PostalCode', ''),
+                'email':     c.get('PrimaryContactEmail', ''),
+                'phone':     c.get('PrimaryContactPhone', ''),
+                'notes':     c.get('DeliveryInstructions', ''),
+                'delivery_day': c.get('DeliveryDay', ''),
+            }
+        companies_data[cid]['meals'] += 1
+
+    delivery_rows = sorted(companies_data.values(), key=lambda r: r['client'])
+
+    return render_template('report_delivery.html',
+                           week=week, rows=delivery_rows)
 
 
 # ─────────────────────────────────────────────────────────────
