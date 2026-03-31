@@ -262,15 +262,15 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
           <div class="roi-right"><div class="roi-label">Productive hours<br>kept at the office</div><div class="roi-source">45 min/meal saved<br>Fooda Workplace ROI Report</div></div>
         </div>
         <div class="roi-cell hero-sub">
-          <div class="roi-big">${{ '%,.0f'|format((total_meals * 0.75 * 32)|int) }}</div>
+          <div class="roi-big">${{ '%.0f'|format((total_meals * 0.75 * 32)|int) }}</div>
           <div class="roi-right"><div class="roi-label">Productivity value<br>recovered</div><div class="roi-source">Hours &times; $32/hr median salary<br>Harvard Business Review</div></div>
         </div>
         <div class="roi-cell hero-sub">
           {% set annual_roi = (total_meals * 0.75 * 32 * 52 / (sorted_weeks|length if sorted_weeks else 1))|int %}
           {% if annual_roi >= 1000 %}
-          <div class="roi-big">${{ '%,.0f'|format(annual_roi / 1000) }}K</div>
+          <div class="roi-big">${{ '%.0f'|format(annual_roi / 1000) }}K</div>
           {% else %}
-          <div class="roi-big">${{ '%,.0f'|format(annual_roi) }}</div>
+          <div class="roi-big">${{ '%.0f'|format(annual_roi) }}</div>
           {% endif %}
           <div class="roi-right"><div class="roi-label">Projected<br>annual ROI</div><div class="roi-source">Based on current pace<br>annualized over 52 weeks</div></div>
         </div>
@@ -292,7 +292,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
           <div class="impact-track" id="impactTrack">
             <div class="impact-slide"><div class="rc c-mint"><div class="rc-top"><div class="rc-val green">20%</div><div class="rc-titles"><div class="rc-label">Productivity</div><div class="rc-label">Boost</div></div></div><div class="rc-desc">Employees who eat well at work are 20% more productive than those who skip meals or eat poorly</div><div class="rc-source">American Journal of Clinical Nutrition</div></div></div>
             <div class="impact-slide"><div class="rc c-sky"><div class="rc-val sky">{{ avg_participation_pct }}%</div><div class="rc-titles"><div class="rc-label">Team Repeat</div><div class="rc-label">Rate</div></div></div><div class="rc-desc">Of your employees have ordered more than once &mdash; a strong signal of program adoption</div><div class="rc-source">Your BetterDay data</div></div></div>
-            <div class="impact-slide"><div class="rc c-peach"><div class="rc-top"><div class="rc-val amber">${{ '%,.0f'|format(total_unique_employees * 0.2 * 75000) if total_unique_employees else '0' }}</div><div class="rc-titles"><div class="rc-label">Retention Cost</div><div class="rc-label">At Stake</div></div></div><div class="rc-desc">1 in 5 employees leave voluntarily each year. At $75K&ndash;$120K per replacement, meal programs reduce this risk</div><div class="rc-source">Gallup Employment Report</div></div></div>
+            <div class="impact-slide"><div class="rc c-peach"><div class="rc-top"><div class="rc-val amber">${{ '%.0f'|format(total_unique_employees * 0.2 * 75000) if total_unique_employees else '0' }}</div><div class="rc-titles"><div class="rc-label">Retention Cost</div><div class="rc-label">At Stake</div></div></div><div class="rc-desc">1 in 5 employees leave voluntarily each year. At $75K&ndash;$120K per replacement, meal programs reduce this risk</div><div class="rc-source">Gallup Employment Report</div></div></div>
             <div class="impact-slide"><div class="rc c-lavender"><div class="rc-top"><div class="rc-val purple">{% if employees|length > 0 %}{{ '%.1f'|format(total_meals / employees|length) }}{% else %}0{% endif %}</div><div class="rc-titles"><div class="rc-label">Avg Meals</div><div class="rc-label">per Employee</div></div></div><div class="rc-desc">Higher adoption = stronger team culture. Programs above 3 meals/person show highest engagement</div><div class="rc-source">Your BetterDay data</div></div></div>
             <div class="impact-slide"><div class="rc c-cream"><div class="rc-top"><div class="rc-val gold">{% if employees|length > 0 %}{{ '%.1f'|format(total_meals * 0.75 / employees|length) }}{% else %}0{% endif %}<span style="font-size:16px">hrs</span></div><div class="rc-titles"><div class="rc-label">Hours Saved</div><div class="rc-label">Per Employee</div></div></div><div class="rc-desc">Time each team member didn't spend leaving for lunch &mdash; reinvested into work</div><div class="rc-source">Fooda Workplace ROI Report</div></div></div>
             <div class="impact-slide"><div class="rc c-rose"><div class="rc-top"><div class="rc-val rose">{{ active_week.new_members if active_week and active_week.new_members is defined else '—' }}</div><div class="rc-titles"><div class="rc-label">New Members</div><div class="rc-label-sub">this week</div></div></div><div class="rc-desc">First-time orderers signal growing adoption. Steady onboarding = 40% higher retention</div><div class="rc-source">Your BetterDay data</div></div></div>
