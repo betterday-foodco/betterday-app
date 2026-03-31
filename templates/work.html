@@ -1984,6 +1984,12 @@ var _helcimCheckoutToken = '';
 async function openPaymentModal(total) {
   const emp = currentEmployee;
 
+  // Show loading overlay while payment processor initializes
+  var overlay = document.getElementById('checkoutOverlay');
+  overlay.querySelector('.checkout-overlay-label').textContent = 'Connecting to payment processor\u2026';
+  overlay.querySelector('.checkout-overlay-sub').textContent = '$' + total.toFixed(2) + ' \u00b7 Secure checkout by Helcim';
+  overlay.classList.remove('hidden');
+
   // Initialize checkout session via Flask backend
   try {
     const resp = await fetch('/api/helcim/checkout', {
@@ -1991,30 +1997,44 @@ async function openPaymentModal(total) {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         amount: total,
-        customer_code: emp ? emp.email : '',
         order_id: 'BD-' + Date.now()
       })
     });
     const data = await resp.json();
     if (data.checkoutToken) {
       _helcimCheckoutToken = data.checkoutToken;
-      console.log('Helcim checkoutToken:', _helcimCheckoutToken);
       // Check if Helcim script loaded
       if (typeof appendHelcimPayIframe === 'undefined') {
-        console.error('appendHelcimPayIframe not found - Helcim script may not have loaded');
         throw new Error('Helcim payment script not loaded');
       }
+      // Update message while iframe loads
+      overlay.querySelector('.checkout-overlay-label').textContent = 'Loading secure payment form\u2026';
       // Helcim renders its own full-page modal overlay
       appendHelcimPayIframe(_helcimCheckoutToken);
+      // Hide our overlay once Helcim's iframe appears (poll for it)
+      var _pollCount = 0;
+      var _pollTimer = setInterval(function() {
+        _pollCount++;
+        if (document.querySelector('.helcim-pay-iframe-wrapper, iframe[src*="helcim"]') || _pollCount > 30) {
+          overlay.classList.add('hidden');
+          overlay.querySelector('.checkout-overlay-label').textContent = 'Placing your order\u2026';
+          overlay.querySelector('.checkout-overlay-sub').textContent = "Please don't close this page";
+          clearInterval(_pollTimer);
+        }
+      }, 200);
     } else {
       throw new Error(data.error || 'Failed to initialize');
     }
   } catch(e) {
     console.error('Helcim init failed:', e);
+    overlay.classList.add('hidden');
+    overlay.querySelector('.checkout-overlay-label').textContent = 'Placing your order\u2026';
+    overlay.querySelector('.checkout-overlay-sub').textContent = "Please don't close this page";
     showToast('Payment error: ' + (e.message || 'unavailable'));
     _checkoutInProgress = false;
     const btn = document.getElementById('payBtn');
     if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
+    document.getElementById('summaryModal').classList.remove('hidden');
   }
 }
 
