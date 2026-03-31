@@ -900,6 +900,157 @@ function doPost(e) {
       return jsonOut(result);
     }
     // ─────────────────────────────────────────
+    // CREATE CREDIT NOTE
+    // ─────────────────────────────────────────
+    if (data.action === "create_credit_note") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var amount = parseFloat(data.amount) || 0;
+      var reason = String(data.reason || "").trim();
+      var createdBy = String(data.created_by || "admin").trim();
+      if (!companyId || amount <= 0) return jsonOut({success:false, error:"CompanyID and positive amount required"});
+
+      var cnSheet = ssHub.getSheetByName("CreditNotes");
+      if (!cnSheet) {
+        cnSheet = ssHub.insertSheet("CreditNotes");
+        cnSheet.appendRow(["CreditNoteID","CompanyID","CompanyName","Amount","Reason","Status","AppliedToInvoice","CreatedAt","CreatedBy","Notes"]);
+        cnSheet.setFrozenRows(1);
+        cnSheet.getRange(1,1,1,10).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+      }
+      // Look up company name
+      var compSheet = ssHub.getSheetByName("Companies");
+      var compRows = compSheet.getDataRange().getValues();
+      var compHeaders = compRows[0];
+      var coNameIdx = compHeaders.indexOf("CompanyName");
+      var coIdIdx = compHeaders.indexOf("CompanyID");
+      var creditBalIdx = compHeaders.indexOf("CreditBalance");
+      var companyName = "", companyRow = -1;
+      for (var k = 1; k < compRows.length; k++) {
+        if (String(compRows[k][coIdIdx]).trim().toUpperCase() === companyId) {
+          companyName = String(compRows[k][coNameIdx] || "");
+          companyRow = k;
+          break;
+        }
+      }
+      // Generate credit note ID
+      var cnRows = cnSheet.getDataRange().getValues();
+      var cnCount = 0;
+      for (var i = 1; i < cnRows.length; i++) {
+        if (String(cnRows[i][1]).trim().toUpperCase() === companyId) cnCount++;
+      }
+      var cnId = "CN-" + companyId + "-" + String(cnCount + 1).padStart(3, "0");
+      cnSheet.appendRow([cnId, companyId, companyName, amount, reason, "pending", "", new Date(), createdBy, data.notes || ""]);
+      // Add to company's credit balance
+      if (creditBalIdx >= 0 && companyRow >= 0) {
+        var currentBal = parseFloat(compRows[companyRow][creditBalIdx]) || 0;
+        compSheet.getRange(companyRow + 1, creditBalIdx + 1).setValue(Math.round((currentBal + amount) * 100) / 100);
+      }
+      return jsonOut({success:true, creditNoteId:cnId});
+    }
+    // ─────────────────────────────────────────
+    // GET CREDIT NOTES (for a company or all)
+    // ─────────────────────────────────────────
+    if (data.action === "get_credit_notes") {
+      var cnSheet = ssHub.getSheetByName("CreditNotes");
+      if (!cnSheet) return jsonOut({creditNotes:[]});
+      var rows = cnSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var companyId = data.company_id ? String(data.company_id).trim().toUpperCase() : null;
+      var result = [];
+      for (var i = 1; i < rows.length; i++) {
+        if (!rows[i][0]) continue;
+        if (companyId && String(rows[i][headers.indexOf("CompanyID")]).trim().toUpperCase() !== companyId) continue;
+        var cn = {};
+        headers.forEach(function(h, idx) {
+          var val = rows[i][idx];
+          if ((h === "CreatedAt") && val) {
+            try { val = Utilities.formatDate(new Date(val), Session.getScriptTimeZone(), "yyyy-MM-dd"); } catch(e) {}
+          }
+          cn[h] = val !== undefined && val !== null ? val : "";
+        });
+        result.push(cn);
+      }
+      return jsonOut({creditNotes:result});
+    }
+    // ─────────────────────────────────────────
+    // VOID CREDIT NOTE
+    // ─────────────────────────────────────────
+    if (data.action === "void_credit_note") {
+      var cnId = String(data.credit_note_id || "").trim();
+      var cnSheet = ssHub.getSheetByName("CreditNotes");
+      if (!cnSheet) return jsonOut({success:false, error:"No CreditNotes sheet"});
+      var rows = cnSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var idIdx = headers.indexOf("CreditNoteID");
+      var statusIdx = headers.indexOf("Status");
+      var amountIdx = headers.indexOf("Amount");
+      var coIdx = headers.indexOf("CompanyID");
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][idIdx]).trim() !== cnId) continue;
+        if (String(rows[i][statusIdx]).trim() === "applied") return jsonOut({success:false, error:"Cannot void an applied credit"});
+        cnSheet.getRange(i+1, statusIdx+1).setValue("void");
+        // Subtract from company credit balance
+        var amt = parseFloat(rows[i][amountIdx]) || 0;
+        var companyId = String(rows[i][coIdx]).trim().toUpperCase();
+        var compSheet = ssHub.getSheetByName("Companies");
+        var compRows = compSheet.getDataRange().getValues();
+        var compHeaders = compRows[0];
+        var creditBalIdx = compHeaders.indexOf("CreditBalance");
+        var compIdIdx = compHeaders.indexOf("CompanyID");
+        for (var k = 1; k < compRows.length; k++) {
+          if (String(compRows[k][compIdIdx]).trim().toUpperCase() === companyId) {
+            var bal = parseFloat(compRows[k][creditBalIdx]) || 0;
+            compSheet.getRange(k+1, creditBalIdx+1).setValue(Math.max(0, Math.round((bal - amt)*100)/100));
+            break;
+          }
+        }
+        return jsonOut({success:true});
+      }
+      return jsonOut({success:false, error:"Credit note not found"});
+    }
+    // ─────────────────────────────────────────
+    // GET AR SUMMARY (aging report for admin dashboard)
+    // ─────────────────────────────────────────
+    if (data.action === "get_ar_summary") {
+      var invSheet = getOrCreateInvoiceSheet(ssHub);
+      var rows = invSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var now = new Date();
+      var summary = {totalOutstanding:0, current:0, over15:0, over30:0, over60:0, over90:0, byCompany:{}};
+      for (var i = 1; i < rows.length; i++) {
+        var inv = _readInvoiceRow(headers, rows[i]);
+        if (inv.Status === "paid" || inv.Status === "void" || !inv.AmountDue) continue;
+        var due = inv.AmountDue;
+        var paidAmt = parseFloat(inv.PaidAmount) || 0;
+        var outstanding = due - paidAmt;
+        if (outstanding <= 0) continue;
+        summary.totalOutstanding += outstanding;
+        // Aging
+        var dueDate = inv.DueDate ? new Date(inv.DueDate + "T12:00:00") : now;
+        var daysOverdue = Math.floor((now - dueDate) / (1000*60*60*24));
+        if (daysOverdue <= 0) summary.current += outstanding;
+        else if (daysOverdue <= 15) summary.current += outstanding;
+        else if (daysOverdue <= 30) summary.over15 += outstanding;
+        else if (daysOverdue <= 60) summary.over30 += outstanding;
+        else if (daysOverdue <= 90) summary.over60 += outstanding;
+        else summary.over90 += outstanding;
+        // By company
+        var co = inv.CompanyID || "UNKNOWN";
+        if (!summary.byCompany[co]) summary.byCompany[co] = {name:inv.CompanyName||co, outstanding:0, invoiceCount:0, oldestDue:""};
+        summary.byCompany[co].outstanding += outstanding;
+        summary.byCompany[co].invoiceCount++;
+        if (!summary.byCompany[co].oldestDue || inv.DueDate < summary.byCompany[co].oldestDue) {
+          summary.byCompany[co].oldestDue = inv.DueDate;
+        }
+      }
+      summary.totalOutstanding = Math.round(summary.totalOutstanding*100)/100;
+      summary.current = Math.round(summary.current*100)/100;
+      summary.over15 = Math.round(summary.over15*100)/100;
+      summary.over30 = Math.round(summary.over30*100)/100;
+      summary.over60 = Math.round(summary.over60*100)/100;
+      summary.over90 = Math.round(summary.over90*100)/100;
+      return jsonOut(summary);
+    }
+    // ─────────────────────────────────────────
     // SEND ORDER REMINDERS (admin triggers manually)
     // Returns summary of who was emailed
     // ─────────────────────────────────────────

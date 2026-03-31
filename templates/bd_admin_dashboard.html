@@ -120,7 +120,7 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
 .tw tbody tr:last-child td{border-bottom:none}
 .tn{font-weight:800;color:#003141}.tg{font-weight:700;color:#167421}.ts{font-weight:700;color:#2d7ec4}
 .bdg{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.58rem;font-weight:800}
-.ba{background:#EEFBE8;color:#167421}.bp{background:#FFF3E0;color:#B56B10}.bs{background:#E8F3FF;color:#0066BF}
+.ba{background:#EEFBE8;color:#167421}.bp{background:#FFF3E0;color:#B56B10}.bs{background:#E8F3FF;color:#0066BF}.bd{background:#FDEDEB;color:#c0392b}.bv{background:#f0f0f0;color:#999}
 .pag{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-top:1px solid rgba(0,49,65,.07);font-size:.74rem;color:#7A8F9C}
 .pgb{font-size:.72rem;font-weight:700;color:#00465E;background:none;border:1.5px solid #E8DFD2;border-radius:7px;padding:4px 11px;cursor:pointer}
 .pgb:hover{border-color:#00465E}
@@ -390,9 +390,35 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
 
     <!-- ════════ INVOICES TAB ════════ -->
     <div id="tab-invoices" class="tab-panel">
+
+      <!-- AR SUMMARY CARDS -->
+      <div id="arSummary" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+        <div style="flex:1;min-width:140px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Total Outstanding</div>
+          <div id="arTotal" style="font-size:1.5rem;font-weight:900;color:#003141;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#27ae60;">Current</div>
+          <div id="arCurrent" style="font-size:1.1rem;font-weight:900;color:#27ae60;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#f39c12;">15+ Days</div>
+          <div id="ar15" style="font-size:1.1rem;font-weight:900;color:#f39c12;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#e74c3c;">30+ Days</div>
+          <div id="ar30" style="font-size:1.1rem;font-weight:900;color:#e74c3c;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#c0392b;">60+ Days</div>
+          <div id="ar60" style="font-size:1.1rem;font-weight:900;color:#c0392b;margin-top:4px;">—</div>
+        </div>
+      </div>
+
+      <!-- INVOICE LIST -->
       <div class="section-header">
         <div class="section-title">All Invoices</div>
-        <div class="controls">
+        <div class="controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <select class="ctrl-select" id="invCompanyFilter" onchange="filterInvoices()">
             <option value="">All Companies</option>
             {% for c in companies %}
@@ -404,38 +430,55 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
             <option value="pending">Pending</option>
             <option value="sent">Sent</option>
             <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+            <option value="partial">Partial</option>
+            <option value="void">Void</option>
           </select>
+          <button class="btn-outline" onclick="openCreditNoteModal()" style="font-size:.72rem;white-space:nowrap;">+ Issue Credit</button>
         </div>
       </div>
       <div class="tw">
         {% if invoices %}
         <table>
-          <thead><tr><th>Invoice #</th><th>Company</th><th>Week Of</th><th>Meals</th><th>Co. Owes</th><th>BD</th><th>Status</th><th></th></tr></thead>
+          <thead><tr><th>Invoice #</th><th>Company</th><th>Period</th><th>Meals</th><th>Amount Due</th><th>Due Date</th><th>Status</th><th></th></tr></thead>
           <tbody>
             {% for inv in invoices %}
-            {% set iid = inv.invoiceId|default(inv.InvoiceID|default('—')) %}
-            {% set cid = inv.companyId|default(inv.CompanyID|default(''))|upper %}
-            {% set status = (inv.status|default(inv.Status|default('pending')))|lower %}
+            {% set iid = inv.InvoiceID|default(inv.invoiceId|default('—')) %}
+            {% set inum = inv.InvoiceNumber|default(inv.invoiceNumber|default(iid)) %}
+            {% set cid = inv.CompanyID|default(inv.companyId|default(''))|upper %}
+            {% set status = (inv.Status|default(inv.status|default('pending')))|lower %}
+            {% set amtDue = inv.AmountDue|default(inv.amountDue|default(inv.companyOwed|default(inv.CompanyOwed|default(0))))|float %}
+            {% set dueDate = inv.DueDate|default(inv.dueDate|default('')) %}
+            {% set periodStart = inv.PeriodStart|default(inv.periodStart|default(inv.weekOf|default(inv.WeekOf|default('')))) %}
             <tr class="clickable inv-row" data-iid="{{ iid }}" data-co="{{ cid }}" data-status="{{ status }}" onclick="toggleInvDetail('{{ iid }}')">
-              <td style="font-weight:700;">{{ iid }}</td>
-              <td class="tn">{{ co_names.get(cid, inv.companyName|default(inv.CompanyName|default(cid))) }}</td>
-              <td>{{ inv.weekOf|default(inv.WeekOf|default('—')) }}</td>
-              <td>{{ inv.totalMeals|default(inv.TotalMeals|default(0)) }}</td>
-              <td class="tg">${{ "%.2f"|format(inv.companyOwed|default(inv.CompanyOwed|default(0))|float) }}</td>
-              <td class="ts">${{ "%.2f"|format(inv.bdContributed|default(inv.BDContributed|default(0))|float) }}</td>
-              <td><span class="bdg {% if status == 'paid' %}ba{% elif status == 'sent' %}bs{% else %}bp{% endif %}">{{ status|capitalize }}</span></td>
-              <td>
+              <td style="font-weight:700;font-size:.82rem;">{{ inum }}</td>
+              <td class="tn">{{ co_names.get(cid, inv.CompanyName|default(inv.companyName|default(cid))) }}</td>
+              <td style="font-size:.78rem;">{{ periodStart|nicedate }}</td>
+              <td>{{ inv.TotalMeals|default(inv.totalMeals|default(0)) }}</td>
+              <td style="font-weight:800;">${{ "%.2f"|format(amtDue) }}</td>
+              <td style="font-size:.78rem;">{{ dueDate|nicedate }}</td>
+              <td><span class="bdg {% if status == 'paid' %}ba{% elif status == 'sent' %}bs{% elif status == 'overdue' %}bd{% elif status == 'void' %}bv{% else %}bp{% endif %}">{{ status|capitalize }}</span></td>
+              <td style="white-space:nowrap;">
                 {% if status == 'pending' %}
-                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','sent',this)">Mark Sent</button>
-                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Mark Paid</button>
-                {% elif status == 'sent' %}
-                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Mark Paid</button>
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','sent',this)">Send</button>
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Paid</button>
+                {% elif status == 'sent' or status == 'overdue' %}
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Paid</button>
                 {% endif %}
               </td>
             </tr>
             <tr class="inv-detail" id="inv-detail-{{ iid }}">
               <td colspan="8">
                 <div class="inv-detail-inner">
+                  <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:10px;font-size:.78rem;color:#5a7268;">
+                    <span>Full Retail: <strong>${{ "%.2f"|format(inv.SubtotalFullRetail|default(inv.subtotalFullRetail|default(0))|float) }}</strong></span>
+                    <span>Emp. Paid: <strong>${{ "%.2f"|format(inv.EmployeePaid|default(inv.employeePaid|default(0))|float) }}</strong></span>
+                    <span>Co. Owes: <strong>${{ "%.2f"|format(inv.CompanyOwed|default(inv.companyOwed|default(0))|float) }}</strong></span>
+                    <span>BD Subsidy: <strong>${{ "%.2f"|format(inv.BDContributed|default(inv.bdContributed|default(0))|float) }}</strong></span>
+                    {% if (inv.CreditApplied|default(inv.creditApplied|default(0))|float) > 0 %}
+                    <span style="color:#27ae60;">Credit Applied: <strong>-${{ "%.2f"|format(inv.CreditApplied|default(inv.creditApplied|default(0))|float) }}</strong></span>
+                    {% endif %}
+                  </div>
                   <strong>Tier Breakdown</strong>
                   <table>
                     <thead><tr><th>Tier</th><th>Meals</th><th>Co. Total</th></tr></thead>
@@ -565,10 +608,11 @@ function toggleInvDetail(iid) {
   var open = el.style.display === 'table-row';
   el.style.display = open ? 'none' : 'table-row';
   if (!open) {
-    var inv = ALL_INVOICES.find(i => (i.invoiceId||i.InvoiceID) === iid);
+    var inv = ALL_INVOICES.find(i => (i.InvoiceID||i.invoiceId) === iid);
     if (inv) {
       var bd = [];
-      try { bd = typeof inv.breakdown === 'string' ? JSON.parse(inv.breakdown) : (inv.breakdown || inv.tierBreakdown || []); } catch(e) {}
+      try { bd = typeof inv.TierBreakdownJSON === 'string' ? JSON.parse(inv.TierBreakdownJSON) : (inv.TierBreakdownJSON || inv.breakdown || []); } catch(e) {}
+      if (!Array.isArray(bd)) bd = [];
       var html = '';
       bd.forEach(function(t) { html += '<tr><td>'+(t.tier||'—')+'</td><td>'+(t.meals||0)+'</td><td class="tg">$'+(t.companyTotal||0).toFixed(2)+'</td></tr>'; });
       if (!html) html = '<tr><td colspan="3" style="color:#7A8F9C;">No breakdown data</td></tr>';
@@ -748,6 +792,83 @@ async function sendReminders() {
     status.textContent = '\u26a0 Network error';
   }
   _reminderSending = false;
+}
+
+/* ── AR Summary (loads async) ── */
+(function loadAR() {
+  fetch('/bd-admin/ar-summary').then(r=>r.json()).then(d=>{
+    document.getElementById('arTotal').textContent = '$' + (d.totalOutstanding||0).toFixed(2);
+    document.getElementById('arCurrent').textContent = '$' + (d.current||0).toFixed(2);
+    document.getElementById('ar15').textContent = '$' + (d.over15||0).toFixed(2);
+    document.getElementById('ar30').textContent = '$' + ((d.over30||0)+(d.over60||0)+(d.over90||0)).toFixed(2);
+    document.getElementById('ar60').textContent = '$' + ((d.over60||0)+(d.over90||0)).toFixed(2);
+  }).catch(()=>{});
+})();
+
+/* ── Credit Note Modal ── */
+function openCreditNoteModal() {
+  var existing = document.getElementById('creditNoteModal');
+  if (existing) { existing.style.display = 'flex'; return; }
+  var m = document.createElement('div');
+  m.id = 'creditNoteModal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);';
+  m.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;width:440px;max-width:90vw;box-shadow:0 12px 40px rgba(0,0,0,.2);">
+      <div style="font-size:1.1rem;font-weight:900;color:#003141;margin-bottom:16px;">Issue Credit Note</div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Company</label>
+        <select id="cnCompany" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;">
+          {% for c in companies %}<option value="{{ c.CompanyID|default('')|upper }}">{{ c.CompanyName or c.CompanyID }}</option>{% endfor %}
+        </select>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Amount ($)</label>
+        <input type="number" id="cnAmount" min="0.01" step="0.01" placeholder="0.00" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-size:.88rem;">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Reason</label>
+        <input type="text" id="cnReason" placeholder="e.g. Missed delivery March 15" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-size:.88rem;">
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Notes (optional)</label>
+        <input type="text" id="cnNotes" placeholder="" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-size:.88rem;">
+      </div>
+      <div id="cnStatus" style="display:none;font-size:.82rem;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="document.getElementById('creditNoteModal').style.display='none'" style="padding:10px 20px;border:1px solid #d5d5d5;border-radius:10px;background:#fff;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+        <button id="cnSubmitBtn" onclick="submitCreditNote()" style="padding:10px 24px;border:none;border-radius:10px;background:#003141;color:#fff;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;">Issue Credit</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+}
+async function submitCreditNote() {
+  var btn = document.getElementById('cnSubmitBtn');
+  var status = document.getElementById('cnStatus');
+  var company = document.getElementById('cnCompany').value;
+  var amount = parseFloat(document.getElementById('cnAmount').value);
+  var reason = document.getElementById('cnReason').value.trim();
+  if (!amount || amount <= 0) { status.style.display='block'; status.style.color='#e74c3c'; status.textContent='Enter a valid amount'; return; }
+  if (!reason) { status.style.display='block'; status.style.color='#e74c3c'; status.textContent='Enter a reason'; return; }
+  btn.disabled = true; btn.textContent = 'Issuing…';
+  status.style.display = 'none';
+  try {
+    var r = await fetch('/bd-admin/credit-notes', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({_action:'create_credit_note', company_id:company, amount:amount, reason:reason, notes:document.getElementById('cnNotes').value})
+    });
+    var d = await r.json();
+    if (d.success) {
+      status.style.display='block'; status.style.color='#167421';
+      status.textContent = '\u2705 Credit ' + (d.creditNoteId||'') + ' issued — $' + amount.toFixed(2) + ' added to balance';
+      btn.textContent = 'Done'; setTimeout(()=>{ document.getElementById('creditNoteModal').style.display='none'; location.reload(); }, 1500);
+    } else {
+      status.style.display='block'; status.style.color='#e74c3c'; status.textContent = 'Error: ' + (d.error||'Unknown');
+      btn.disabled=false; btn.textContent='Issue Credit';
+    }
+  } catch(e) {
+    status.style.display='block'; status.style.color='#e74c3c'; status.textContent='Network error';
+    btn.disabled=false; btn.textContent='Issue Credit';
+  }
 }
 </script>
 </body>

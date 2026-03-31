@@ -1166,6 +1166,31 @@ def admin_send_reminders():
     return jsonify({'error': 'Failed to send reminders'}), 502
 
 
+@app.route('/bd-admin/credit-notes', methods=['GET', 'POST'])
+def admin_credit_notes():
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    if request.method == 'POST':
+        data = request.get_json(force=True) or {}
+        action = data.get('_action', 'create_credit_note')
+        payload = {'action': action}
+        payload.update(data)
+        del payload['_action']
+        result = _gas_post(payload)
+        return jsonify(result) if result else jsonify({'error': 'Failed'}), 502
+    # GET — list all
+    result = _gas_post({'action': 'get_credit_notes'})
+    return jsonify(result) if result else jsonify({'creditNotes': []})
+
+
+@app.route('/bd-admin/ar-summary')
+def admin_ar_summary():
+    if not session.get('admin_logged_in'):
+        return jsonify({'error': 'Unauthorized'}), 401
+    result = _gas_post({'action': 'get_ar_summary'})
+    return jsonify(result) if result else jsonify({'error': 'Failed to load AR data'}), 502
+
+
 # ─────────────────────────────────────────────────────────────
 # BETTERDAY FOR WORK — CORPORATE EMPLOYEE ORDERING
 # ─────────────────────────────────────────────────────────────
