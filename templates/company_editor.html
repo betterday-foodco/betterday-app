@@ -426,35 +426,20 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                     <div class="price-preview-title">&#128161; Employee sees this pricing ladder</div>
                     <div id="previewRows"></div>
                 </div>
-            </div>
-
-            <!-- EMPLOYEE BENEFIT LEVELS -->
-            <div class="sl">Employee Benefit Levels</div>
-            <div class="form-section">
-                <div class="form-section-header">
-                    <div class="fs-icon">&#128101;</div>
-                    <div>
-                        <div class="fs-title">Employee Benefit Levels</div>
-                        <div class="fs-sub">Different employee groups can get different meal allowances at each tier</div>
-                    </div>
-                </div>
-                <div style="margin-bottom:14px;">
-                    <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;cursor:pointer;">
+                <!-- EMPLOYEE BENEFIT LEVELS — inline toggle + grid -->
+                <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,49,65,.07);">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;cursor:pointer;color:#003141;">
                         <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
                                {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}checked{% endif %}
-                               onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;">
+                               onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;accent-color:#00465E;">
                         Enable Employee Benefit Levels
                     </label>
-                    <span class="field-hint" style="margin-left:26px;">Pricing stays the same for all levels — only the number of meals at each tier changes per level.</span>
+                    <span class="field-hint" style="margin-left:26px;">Different employee groups get different meal allowances. Assign levels from the Employees tab.</span>
                 </div>
                 <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper != 'TRUE' %}style="display:none"{% endif %}>
-                    <div style="background:#FAF6F0;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:.75rem;color:#5a7268;line-height:1.5;">
-                        Each level shares the same per-meal pricing above — you're only configuring <strong>how many meals</strong> each group gets at each tier.
-                        Assign levels from the Manager Portal &rarr; Employees tab.
-                    </div>
 
                     <!-- Levels grid -->
-                    <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="levelsGrid">
+                    <table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-top:12px;" id="levelsGrid">
                         <thead>
                             <tr style="border-bottom:2px solid #E8DFD2;">
                                 <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Level Name</th>
