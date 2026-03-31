@@ -26,7 +26,7 @@
     #sMagicVerify.active { display: flex; align-items: center; justify-content: center; min-height: 100dvh; background: #f4ede3; }
 
     /* ── SHARED AUTH SHELL ── */
-    .auth-bg { min-height: 100vh; display: grid; grid-template-rows: 130px 1fr; position: relative; }
+    .auth-bg { min-height: 100vh; display: grid; grid-template-rows: 180px 1fr; position: relative; }
     .auth-bg-top { background: var(--dark); position: relative; overflow: hidden; }
     .auth-bg-top::before {
       content: ''; position: absolute; inset: 0;
@@ -35,7 +35,7 @@
     }
     .auth-bg-dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 28px 28px; }
     .auth-bg-bottom { background: var(--cream); }
-    .auth-card-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .auth-card-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 24px; padding-top: 60px; }
     .auth-card { background: #fff; border-radius: 28px; padding: 32px 32px 28px; width: 100%; max-width: 420px; box-shadow: 0 24px 60px rgba(0,70,94,.16), 0 4px 16px rgba(0,70,94,.08); position: relative; z-index: 10; }
     .auth-brand { position: absolute; top: 28px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; z-index: 5; }
     .auth-logo-mark { display: none; } /* Replaced by Logo.svg img */
@@ -556,7 +556,7 @@
   <div class="auth-bg">
     <div class="auth-bg-top"><div class="auth-bg-dots"></div>
       <div class="auth-brand">
-        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:30px;">
+        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:36px;">
         <div class="auth-wordmark" style="display:none;"></div>
         <div class="auth-tagline">FOR WORK</div>
       </div>
@@ -592,7 +592,7 @@
   <div class="auth-bg">
     <div class="auth-bg-top"><div class="auth-bg-dots"></div>
       <div class="auth-brand">
-        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:30px;">
+        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:36px;">
         <div class="auth-wordmark" style="display:none;"></div>
         <div class="auth-tagline">FOR WORK</div>
       </div>
@@ -756,8 +756,9 @@
 <div id="sMenu" class="screen">
   <div class="menu-shell">
     <div class="menu-topbar">
-      <div class="menu-topbar-brand" style="display:flex;align-items:center;gap:8px;">
-        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:26px;display:block;">
+      <div class="menu-topbar-brand" style="display:flex;align-items:center;gap:10px;">
+        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:32px;display:block;">
+        <span style="font-size:.55rem;font-weight:400;text-transform:uppercase;letter-spacing:2px;color:rgba(250,235,218,.45);">For Work</span>
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
         <div class="next-price-chip">Next meal: <strong id="nextMealPrice">—</strong></div>
