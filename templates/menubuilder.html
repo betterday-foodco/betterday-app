@@ -18,20 +18,17 @@
 }
 /* ── APP SHELL ── */
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--g900);background:var(--g50);display:flex;height:100vh;overflow:hidden;max-width:100vw}
-.sidebar{width:var(--sw);background:linear-gradient(180deg,#ff6b9d 0%,#c44dff 25%,#4dc9f6 50%,#f7d94e 75%,#ff6b9d 100%);background-size:200% 200%;animation:sidebar-party 3s ease infinite;border-right:none;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow:hidden}
-@keyframes sidebar-party{0%{background-position:50% 0%}50%{background-position:50% 100%}100%{background-position:50% 0%}}
-@keyframes bre-rainbow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.sidebar::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M30 4l4 8-4 8-4-8 4-8zm0 36l4 8-4 8-4-8 4-8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0}
+.sidebar{width:var(--sw);background:var(--navy);border-right:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow:hidden}
 .sidebar *{position:relative;z-index:1}
 .sl{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid rgba(255,255,255,.3)}
-.lb{width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#c44dff;text-shadow:0 0 8px rgba(196,77,255,.5)}
+.lb{width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--navy)}
 .sn{flex:1;padding:8px 0;overflow-y:auto;overflow-x:hidden}
 .ni{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:rgba(255,255,255,.85);cursor:pointer;text-decoration:none;transition:background .12s,color .12s;font-weight:500}
 .ni:hover{background:rgba(255,255,255,.2);color:white}
-.ni.active{background:rgba(255,255,255,.3);color:white;font-weight:700;text-shadow:0 0 10px rgba(255,255,255,.5)}
-.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.9;filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}
-.ni.active svg{opacity:1;filter:drop-shadow(0 0 4px rgba(255,255,255,.7))}
-.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;max-width:calc(100vw - var(--sw));background:linear-gradient(135deg,#ff6b9d,#c44dff,#4dc9f6,#f7d94e,#ff6b9d);background-size:400% 400%;animation:bre-rainbow 4s ease infinite}
+.ni.active{background:rgba(255,255,255,.15);color:white;font-weight:700}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.9}
+.ni.active svg{opacity:1}
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;max-width:calc(100vw - var(--sw));background:var(--g50)}
 .topbar{display:none}
 .bc{font-size:13px;color:var(--g400)}
 .btn-save{background:var(--green);color:white;border:none;padding:8px 20px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
