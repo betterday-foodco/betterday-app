@@ -288,7 +288,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
   <div class="ni" onclick="sidebarNav('invoices', this)">&#9670; &nbsp;Invoices</div>
   <div class="ni" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
   <div class="ni" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees</div>
-  {% if company.EnableParLevels and company.EnableParLevels|string|upper == 'TRUE' %}
+  {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
   <div class="ni" onclick="sidebarNav('parlevel', this)">&#128230; &nbsp;Office Orders</div>
   {% endif %}
   <div class="sb-div"></div>
@@ -584,7 +584,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       <div id="bulkActionsBar" style="display:none;background:#003141;border-radius:10px;padding:12px 18px;margin-bottom:10px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
         <span style="font-size:.8rem;font-weight:800;color:#FFC600;" id="bulkCount">0 selected</span>
         <div style="width:1px;height:22px;background:rgba(255,255,255,.15);"></div>
-        {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}
+        {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
         <select id="bulkLevelSelect" style="font-size:.75rem;padding:5px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-family:inherit;cursor:pointer;">
           <option value="">Change Level&hellip;</option>
           {% for lv in benefit_levels %}
@@ -602,7 +602,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 
       <div class="tw">
         <table id="empTable">
-          <thead><tr><th style="width:30px;"><input type="checkbox" id="selectAllEmps" onchange="toggleAllEmps(this.checked)" style="width:16px;height:16px;cursor:pointer;"></th><th>Name</th><th>Email</th><th>Type</th><th>Joined</th><th>Role</th>{% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}<th>Benefit Level</th>{% endif %}<th>Actions</th></tr></thead>
+          <thead><tr><th style="width:30px;"><input type="checkbox" id="selectAllEmps" onchange="toggleAllEmps(this.checked)" style="width:16px;height:16px;cursor:pointer;"></th><th>Name</th><th>Email</th><th>Type</th><th>Joined</th><th>Role</th>{% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}<th>Benefit Level</th>{% endif %}<th>Actions</th></tr></thead>
           <tbody id="empTableBody">
             {% for emp in employees %}
             {% set domain = company.CompanyEmailDomain or '' %}
@@ -626,7 +626,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
                 <span style="font-size:.82rem;color:#7A8F9C">Employee</span>
                 {% endif %}
               </td>
-              {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}
+              {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
               <td>
                 <select onchange="updateEmpLevel('{{ emp.email }}', this.value, this)" style="font-size:.78rem;padding:4px 8px;border:1px solid #E0D4C2;border-radius:6px;background:#fff;cursor:pointer;">
                   {% for lv in benefit_levels %}
@@ -655,7 +655,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     <!-- ════════════════════════════════════════ -->
     <!-- TAB: OFFICE PAR LEVELS                  -->
     <!-- ════════════════════════════════════════ -->
-    {% if company.EnableParLevels and company.EnableParLevels|string|upper == 'TRUE' %}
+    {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
     <div class="tab-panel" id="tab-parlevel">
       <div class="sl" style="margin-top:0">Office Orders</div>
 
@@ -745,8 +745,8 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     <div class="tab-panel" id="tab-mealplan">
       <div class="sl" style="margin-top:0">Your Meal Subsidy Plan</div>
 
-      {% set can_edit = company.ManagerCanEditMeals and company.ManagerCanEditMeals|string|upper == 'TRUE' %}
-      {% set has_levels = company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' and benefit_levels %}
+      {% set can_edit = company.ManagerCanEditMeals and company.ManagerCanEditMeals|string|upper in ('TRUE', '1', '1.0', 'ON') %}
+      {% set has_levels = company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper in ('TRUE', '1', '1.0', 'ON') and benefit_levels %}
 
       <!-- ── BASE PRICING (shared across all levels) ── -->
       <div class="card">

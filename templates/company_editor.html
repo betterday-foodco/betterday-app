@@ -482,23 +482,23 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                     <div class="field">
                         <label>Allow Extra at Full Price?</label>
                         <select name="AllowExtraAtFullPrice">
-                            <option value="TRUE" {% if company.AllowExtraAtFullPrice == 'TRUE' %}selected{% endif %}>Yes</option>
-                            <option value="FALSE" {% if company.AllowExtraAtFullPrice != 'TRUE' %}selected{% endif %}>No</option>
+                            <option value="TRUE" {% if company.AllowExtraAtFullPrice|string|upper in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>Yes</option>
+                            <option value="FALSE" {% if company.AllowExtraAtFullPrice|string|upper not in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>No</option>
                         </select>
                     </div>
                     <div class="field">
                         <label>Manager Can Edit Meal Counts?</label>
                         <select name="ManagerCanEditMeals">
-                            <option value="FALSE" {% if company.ManagerCanEditMeals != 'TRUE' %}selected{% endif %}>No — view only</option>
-                            <option value="TRUE" {% if company.ManagerCanEditMeals == 'TRUE' %}selected{% endif %}>Yes — managers can adjust meal counts per tier</option>
+                            <option value="FALSE" {% if company.ManagerCanEditMeals|string|upper not in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>No — view only</option>
+                            <option value="TRUE" {% if company.ManagerCanEditMeals|string|upper in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>Yes — managers can adjust meal counts per tier</option>
                         </select>
                         <span class="field-hint">When enabled, office managers can change meal-per-tier counts from their portal. All changes are logged.</span>
                     </div>
                     <div class="field">
                         <label>Enable Office Par Levels?</label>
                         <select name="EnableParLevels">
-                            <option value="FALSE" {% if company.EnableParLevels != 'TRUE' %}selected{% endif %}>No — employee ordering only</option>
-                            <option value="TRUE" {% if company.EnableParLevels == 'TRUE' %}selected{% endif %}>Yes — office manager can set weekly category quantities</option>
+                            <option value="FALSE" {% if company.EnableParLevels|string|upper not in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>No — employee ordering only</option>
+                            <option value="TRUE" {% if company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>Yes — office manager can set weekly category quantities</option>
                         </select>
                         <span class="field-hint">Adds an "Office Orders" tab to the manager portal for bulk category-based ordering (snacks, sandwiches, etc.)</span>
                     </div>
@@ -587,13 +587,13 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                 <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,49,65,.07);">
                     <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;cursor:pointer;color:#003141;">
                         <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
-                               {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper == 'TRUE' %}checked{% endif %}
+                               {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}checked{% endif %}
                                onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;accent-color:#00465E;">
                         Add additional employee levels
                     </label>
                     <span class="field-hint" style="margin-left:26px;">Create different meal allowances for management, executives, etc.</span>
                 </div>
-                <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper != 'TRUE' %}style="display:none"{% endif %}>
+                <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper not in ('TRUE', '1', '1.0', 'ON') %}style="display:none"{% endif %}>
                     <table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-top:12px;" id="levelsGrid">
                         <thead>
                             <tr style="border-bottom:2px solid #E8DFD2;">
