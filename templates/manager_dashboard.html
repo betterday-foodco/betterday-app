@@ -2066,16 +2066,25 @@ let _parCatalog = null;  // cached catalog from 9.0 sheet
 
 let _weeklyMenu = null;
 
-function _getCurrentSundayAnchor() {
+function _getNextOpenSundayAnchor() {
+  // Same logic as /work app: find the first Sunday whose cutoff (Wed 11:59 PM) hasn't passed
   const now = new Date();
-  const d = new Date(now); d.setDate(d.getDate() - d.getDay());
-  return d.toISOString().slice(0,10);
+  const sun = new Date(now); sun.setDate(sun.getDate() - sun.getDay()); sun.setHours(0,0,0,0);
+  for (let i = 0; i < 4; i++) {
+    const s = new Date(sun); s.setDate(s.getDate() + 7 * i);
+    const cutoff = new Date(s); cutoff.setDate(cutoff.getDate() + 3); cutoff.setHours(23,59,0,0);
+    const delivery = new Date(s); delivery.setDate(delivery.getDate() + 1);
+    if (now < cutoff && delivery > now) return s.toISOString().slice(0,10);
+  }
+  // Fallback: next Sunday
+  sun.setDate(sun.getDate() + 7);
+  return sun.toISOString().slice(0,10);
 }
 
 async function loadWeeklyMenu() {
   if (_weeklyMenu) return _weeklyMenu;
   try {
-    const anchor = _getCurrentSundayAnchor();
+    const anchor = _getNextOpenSundayAnchor();
     const r = await fetch('/api/gas', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
