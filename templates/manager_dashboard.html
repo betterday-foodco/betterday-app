@@ -702,26 +702,20 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         <!-- Populated by JS -->
       </div>
 
-      <!-- Edit Cart button -->
-      <div style="display:flex;gap:10px;margin-bottom:20px;">
-        <button onclick="openFullCartEditor()" style="flex:1;background:#00465E;color:#fff;border:none;border-radius:12px;padding:14px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;letter-spacing:-.2px;" onmouseover="this.style.background='#006580'" onmouseout="this.style.background='#00465E'">Edit Cart</button>
-        <button onclick="confirmParOrder(this)" style="background:#fff;border:2px solid #00465E;border-radius:12px;padding:14px 20px;font-size:.82rem;font-weight:700;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;white-space:nowrap;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='#fff'">Confirm Order</button>
-      </div>
-
-      <div style="font-size:.72rem;color:#7A8F9C;line-height:1.5;margin-bottom:20px;">
-        Standing order repeats weekly. Changes apply to all future deliveries unless using one-time adjustment.
-      </div>
-
-      <!-- ═══════ MANAGE ORDER ═══════ -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
-        <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="padding:10px 18px;border:1.5px solid #E8DFD2;border-radius:10px;font-size:.75rem;font-weight:700;color:#7A8F9C;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">Pause All</button>
-        <div style="padding:10px 18px;border:1.5px solid #E8DFD2;border-radius:10px;display:flex;align-items:center;gap:8px;">
-          <label class="pl-toggle">
-            <input type="checkbox" id="plOverrideToggle" onchange="toggleOverrideMode()">
-            <span class="pl-toggle-track"></span>
-          </label>
-          <span style="font-size:.72rem;color:#5a4a2a;font-weight:600;">One-time adjustment</span>
+      <!-- Order info + manage -->
+      <div style="background:#F9F5F0;border:1px solid #E8DFD2;border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+        <div style="font-size:.75rem;color:#5a4a2a;line-height:1.5;margin-bottom:10px;">
+          Your standing order auto-submits every <strong>Wednesday at midnight</strong> for the following week's delivery. Changes save automatically.
         </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="padding:8px 16px;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.72rem;font-weight:700;color:#7A8F9C;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">Pause All</button>
+          <div style="padding:8px 16px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;display:flex;align-items:center;gap:8px;">
+            <label class="pl-toggle">
+              <input type="checkbox" id="plOverrideToggle" onchange="toggleOverrideMode()">
+              <span class="pl-toggle-track"></span>
+            </label>
+            <span style="font-size:.72rem;color:#5a4a2a;font-weight:600;">One-time change only</span>
+          </div>
       </div>
 
       <!-- ═══════ DELIVERY HISTORY ═══════ -->
@@ -1862,17 +1856,17 @@ function renderParGrid() {
         : (qty > 0 ? 'Auto-selected' : '');
 
       html += `
-        <div style="padding:12px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #F8F8F8;${isPaused ? 'opacity:.4;' : ''}" onclick="openCatDetail('${cat.id}')" class="pl-cart-row">
-          <div style="width:36px;height:36px;border-radius:8px;background:${qty > 0 ? '#00465E' : '#F1F5F9'};color:${qty > 0 ? '#fff' : '#CBD5E1'};display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;flex-shrink:0;">${qty}</div>
+        <div style="padding:14px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid ${qty > 0 ? '#E8DFD2' : '#F8F8F8'};background:${qty > 0 ? '#F8FCFF' : '#FAFAFA'};${isPaused ? 'opacity:.35;' : (qty === 0 ? 'opacity:.6;' : '')}" onclick="openCatDetail('${cat.id}')" class="pl-cart-row">
+          <div style="width:40px;height:40px;border-radius:10px;background:${qty > 0 ? '#00465E' : '#E8E8E8'};color:${qty > 0 ? '#fff' : '#B0B0B0'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;flex-shrink:0;">${qty}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:.82rem;font-weight:700;color:#00465E;">${cat.name}</div>
-            <div style="font-size:.68rem;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemNames || 'No items'}</div>
+            <div style="font-size:.85rem;font-weight:${qty > 0 ? '800' : '600'};color:${qty > 0 ? '#00465E' : '#94A3B8'};">${cat.name}</div>
+            <div style="font-size:.68rem;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${qty > 0 ? (itemNames || 'Auto-selected') : 'Tap to add items'}</div>
           </div>
           <div style="text-align:right;flex-shrink:0;">
-            ${qty > 0 ? '<div style="font-size:.82rem;font-weight:800;color:#00465E;">$' + lineTotal.toFixed(2) + '</div>' : ''}
+            ${qty > 0 ? '<div style="font-size:.88rem;font-weight:900;color:#00465E;">$' + lineTotal.toFixed(2) + '</div>' : ''}
             <div style="font-size:.6rem;color:#94A3B8;">$${cat.unitPrice.toFixed(2)}/ea</div>
           </div>
-          <div style="color:#CBD5E1;font-size:14px;flex-shrink:0;">›</div>
+          <div style="color:${qty > 0 ? '#00465E' : '#CBD5E1'};font-size:16px;flex-shrink:0;font-weight:700;">›</div>
         </div>`;
     });
     html += '</div>';
