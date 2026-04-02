@@ -291,7 +291,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
   <div class="ni" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
   <div class="ni" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees</div>
   {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
-  <div class="ni" onclick="try{sidebarNav('parlevel', this)}catch(e){alert('Error: '+e.message)}">&#128230; &nbsp;Office Orders</div>
+  <div class="ni" onclick="sidebarNav('parlevel', this)">&#128230; &nbsp;Office Orders</div>
   {% endif %}
   <div class="sb-div"></div>
   <div class="sb-sec">Settings</div>
@@ -1511,7 +1511,7 @@ function downloadInvPDF(idx) {
   </div>
   <div class="inv-meta">
     <strong>Invoice Date</strong><br>${fmtDate(inv.createdAt)}<br>
-    <strong style="display:block;margin-top:8px;">Week Of</strong>${fmtDate(inv.PeriodStart or inv.weekOf or '')}<br>
+    <strong style="display:block;margin-top:8px;">Week Of</strong>${fmtDate(inv.PeriodStart || inv.weekOf || '')}<br>
     ${inv.status === 'paid' ? '<strong style="display:block;margin-top:8px;">Paid</strong>' + fmtDate(inv.paidAt) + (inv.paymentMethod ? ' \u00b7 ' + inv.paymentMethod : '') : ''}
   </div>
 </div>
@@ -1521,14 +1521,14 @@ function downloadInvPDF(idx) {
   <tbody>${tierRows || '<tr><td colspan="3" style="color:#717171">No breakdown available</td></tr>'}</tbody>
 </table>
 <div style="display:flex;gap:32px;margin-bottom:24px;font-size:.82rem;color:#484848;">
-  <div><strong style="display:block;color:#222">Total Meals</strong>${inv.TotalMeals or inv.totalMeals or 0}</div>
+  <div><strong style="display:block;color:#222">Total Meals</strong>${inv.TotalMeals || inv.totalMeals || 0}</div>
   <div><strong style="display:block;color:#222">Employees</strong>${inv.totalEmployees}</div>
-  <div><strong style="display:block;color:#222">Employee Paid</strong>${fmt$(inv.EmployeePaid or inv.employeePaid or 0)}</div>
-  <div><strong style="display:block;color:#222">BD Contributed</strong>${fmt$(inv.BDContributed or inv.bdContributed or 0)}</div>
+  <div><strong style="display:block;color:#222">Employee Paid</strong>${fmt$(inv.EmployeePaid || inv.employeePaid || 0)}</div>
+  <div><strong style="display:block;color:#222">BD Contributed</strong>${fmt$(inv.BDContributed || inv.bdContributed || 0)}</div>
 </div>
 <div class="total-row">
   <span class="total-label">Total Owed by ${COMPANY_NAME}</span>
-  <span class="total-val">${fmt$(inv.CompanyOwed or inv.companyOwed or 0)}</span>
+  <span class="total-val">${fmt$(inv.CompanyOwed || inv.companyOwed || 0)}</span>
 </div>
 ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><strong>Notes:</strong> ' + inv.notes + '</div>' : ''}
 <div class="footer">
