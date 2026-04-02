@@ -2005,11 +2005,23 @@ async function confirmParOrder(btn) {
 }
 
 // ── Category detail slide-in panel ──
-function openCatDetail(catId) {
+let _parCatalog = null;  // cached catalog from 9.0 sheet
+
+async function loadParCatalog() {
+  if (_parCatalog) return _parCatalog;
+  try {
+    const r = await fetch('/manager/par-catalog');
+    const d = await r.json();
+    _parCatalog = d.catalog || {};
+    return _parCatalog;
+  } catch(e) { return {}; }
+}
+
+async function openCatDetail(catId) {
   const cat = PL_CATEGORIES.find(c => c.id === catId);
   if (!cat) return;
   const d = plData[catId] || { qty: 0, items: [] };
-  // Create overlay + panel if not exists
+
   let overlay = document.querySelector('.pl-overlay');
   let panel = document.querySelector('.pl-detail-panel');
   if (!overlay) {
@@ -2023,8 +2035,15 @@ function openCatDetail(catId) {
     panel.className = 'pl-detail-panel';
     document.body.appendChild(panel);
   }
-  // Build items — for demo, generate placeholder items based on qty
-  const items = d.items && d.items.length > 0 ? d.items : generateDemoItems(cat, d.qty);
+
+  // Show loading state
+  panel.innerHTML = `<div class="pl-detail-header"><h3>${cat.icon} ${cat.name}</h3><button class="pl-detail-close" onclick="closeCatDetail()">✕</button></div><div class="pl-detail-body" style="display:flex;align-items:center;justify-content:center;"><div style="color:#7A8F9C;">Loading items...</div></div>`;
+  requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
+
+  // Load real catalog from 9.0 sheet
+  const catalog = await loadParCatalog();
+  const catItems = catalog[catId] || [];
+
   panel.innerHTML = `
     <div class="pl-detail-header">
       <h3>${cat.icon} ${cat.name}</h3>
@@ -2037,27 +2056,30 @@ function openCatDetail(catId) {
       </div>
       <span class="pl-dish-badge ${cat.rotating ? 'swapped' : 'locked'}">${cat.rotating ? '↻ Rotates' : '🔒 Static'}</span>
     </div>
+    <div style="padding:8px 20px;background:#fff;border-bottom:1px solid #E8DFD2;font-size:.7rem;color:#7A8F9C;">
+      ${catItems.length} items available · Click + to add to your order
+    </div>
     <div class="pl-detail-body">
-      ${items.length === 0 ? '<div style="text-align:center;padding:40px 20px;color:#7A8F9C;">Set a quantity above to see items here.</div>' :
-        items.map((item, i) => `
-          <div class="pl-dish-row">
-            <img class="pl-dish-img" src="${item.image || ''}" alt="" onerror="this.style.background='#E8DFD2';this.alt='🍽'">
+      ${catItems.length === 0 ? '<div style="text-align:center;padding:40px 20px;color:#7A8F9C;">No items in this category yet.</div>' :
+        catItems.map((item, i) => `
+          <div class="pl-dish-row" data-item-id="${item.id}">
+            <img class="pl-dish-img" src="${item.image || ''}" alt="" onerror="this.style.background='linear-gradient(135deg,#E8DFD2,#F9F5F0)';this.style.display='flex';this.alt='🍽'">
             <div class="pl-dish-info">
               <div class="pl-dish-name">${item.name}</div>
-              <div class="pl-dish-meta">${item.sku || ''} · ${item.diet || cat.name} · $${cat.unitPrice.toFixed(2)}</div>
+              <div class="pl-dish-meta">${item.id} · ${item.diet} · ${item.cal ? item.cal + ' cal' : ''} ${item.protein ? '· ' + item.protein + 'g P' : ''}</div>
+              ${item.tags ? '<div style="font-size:.6rem;color:#9CA3AF;margin-top:2px;">' + item.tags + '</div>' : ''}
             </div>
             <div style="display:flex;align-items:center;gap:6px;">
-              ${cat.rotating ? '<button class="pl-dish-swap" onclick="swapDish(\'' + catId + '\',' + i + ')">Swap</button>' : ''}
+              ${cat.rotating ? '<button class="pl-dish-swap" onclick="event.stopPropagation()">Swap</button>' : ''}
               <div class="pl-qty-ctrl" style="transform:scale(.85);">
-                <button class="pl-qty-btn" onclick="adjustDishQty(\'' + catId + '\',' + i + ',-1)">−</button>
-                <span class="pl-qty-val" style="width:24px;font-size:.78rem;">${item.qty || 1}</span>
-                <button class="pl-qty-btn" onclick="adjustDishQty(\'' + catId + '\',' + i + ',1)">+</button>
+                <button class="pl-qty-btn" onclick="adjustCatItemQty(this,-1)">−</button>
+                <span class="pl-qty-val" style="width:24px;font-size:.78rem;">0</span>
+                <button class="pl-qty-btn" onclick="adjustCatItemQty(this,1)">+</button>
               </div>
             </div>
           </div>`).join('')}
     </div>
   `;
-  requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
 }
 
 function closeCatDetail() {
@@ -2091,12 +2113,15 @@ function generateDemoItems(cat, qty) {
   return items;
 }
 
-function swapDish(catId, idx) {
-  alert('Swap panel coming soon — will show available alternatives from this week\'s menu.');
-}
-function adjustDishQty(catId, idx, delta) {
-  // For demo, just show feedback
-  alert('Dish quantity adjustment — will update when connected to live menu data.');
+function adjustCatItemQty(btn, delta) {
+  const ctrl = btn.closest('.pl-qty-ctrl');
+  const valSpan = ctrl.querySelector('.pl-qty-val');
+  let val = parseInt(valSpan.textContent) || 0;
+  val = Math.max(0, val + delta);
+  valSpan.textContent = val;
+  // Highlight row if qty > 0
+  const row = btn.closest('.pl-dish-row');
+  if (row) row.style.background = val > 0 ? 'rgba(22,163,74,.04)' : '';
 }
 </script>
 </body>

@@ -689,6 +689,52 @@ function doPost(e) {
       veganIds.forEach(function(id) { if(dishMap[id]) veganMenu.push({id:id, ...dishMap[id]}); });
       return jsonOut({meat: meatMenu, vegan: veganMenu});
     }
+
+    // ─────────────────────────────────────────
+    // GET PAR LEVEL CATALOG (all items from 9.0 Merged Masterlist, grouped by category)
+    // ─────────────────────────────────────────
+    if (data.action === "get_par_catalog") {
+      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+      var sheet = ssBuffer.getSheetByName("9.0 Merged Masterlist");
+      if (!sheet) return jsonOut({error: "9.0 Merged Masterlist not found"});
+      var rows = sheet.getDataRange().getValues();
+      // Column indices: 0=ID, 2=Name, 3=Diet, 4=Active, 6=Type, 21=Photo URL, 23=Description, 24=Cal, 25=Pro, 26=Carb, 27=Fat, 32=Tags
+      var typeMap = {
+        "Omni - Meat":      "meat_entree",
+        "Meat Only":        "meat_entree",
+        "Omni - Vegan":     "plant_entree",
+        "Vegan Only":       "plant_entree",
+        "Breakfast":        "hot_breakfast",
+        "Sandwich & Wraps": "sandwich_wrap",
+        "Snack":            "snack",
+        "Chia & Parfait":   "chia_oats",
+        "Protein Pack":     "snack",
+        "Bulk Prep":        "snack"
+      };
+      var catalog = {};
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][4]).trim() !== "Active") continue;
+        var typeRaw = String(rows[i][6] || "").trim();
+        var catId = typeMap[typeRaw];
+        if (!catId) continue;
+        if (!catalog[catId]) catalog[catId] = [];
+        catalog[catId].push({
+          id:    String(rows[i][0]).trim(),
+          name:  String(rows[i][2] || "").trim(),
+          diet:  String(rows[i][3] || "").trim(),
+          type:  typeRaw,
+          image: String(rows[i][21] || "").trim(),
+          description: String(rows[i][23] || "").trim(),
+          cal:   rows[i][24] || 0,
+          protein: rows[i][25] || 0,
+          carbs: rows[i][26] || 0,
+          fat:   rows[i][27] || 0,
+          tags:  String(rows[i][32] || "").trim()
+        });
+      }
+      return jsonOut({catalog: catalog});
+    }
+
     // ─────────────────────────────────────────
     // GET BENEFIT LEVELS (for a company)
     // ─────────────────────────────────────────

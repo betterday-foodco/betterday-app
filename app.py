@@ -1358,6 +1358,23 @@ def confirm_par_order():
     return jsonify(result or {'success': False, 'error': 'GAS timeout'})
 
 
+# Par level catalog cache (items from 9.0 sheet)
+_par_catalog_cache = {'data': None, 'ts': 0}
+
+@app.route('/manager/par-catalog')
+@manager_required
+def get_par_catalog():
+    """Get all available items grouped by par level category. Cached 30 min."""
+    now = time.time()
+    if _par_catalog_cache['data'] and (now - _par_catalog_cache['ts'] < 1800):
+        return jsonify(_par_catalog_cache['data'])
+    result = _gas_post({'action': 'get_par_catalog'}, timeout=20)
+    if result and result.get('catalog'):
+        _par_catalog_cache['data'] = result
+        _par_catalog_cache['ts'] = now
+    return jsonify(result or {'catalog': {}})
+
+
 @app.route('/manager/invoice-status', methods=['POST'])
 @manager_required
 def manager_invoice_status():
