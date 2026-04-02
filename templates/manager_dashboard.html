@@ -190,6 +190,8 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .pl-dish-meta{font-size:.7rem;color:#7A8F9C;margin-top:2px}
 .pl-dish-swap{font-size:.7rem;font-weight:700;color:#2563EB;padding:4px 8px;border-radius:6px;border:1px solid #DBEAFE;background:#EFF6FF;cursor:pointer;transition:.15s;white-space:nowrap}
 .pl-dish-swap:hover{background:#DBEAFE}
+.pl-cart-row{cursor:pointer;transition:.1s}
+.pl-cart-row:hover{background:#F8FCFF}
 .pl-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);z-index:299;display:none}
 .pl-overlay.open{display:block}
 
@@ -658,77 +660,71 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
     <div class="tab-panel" id="tab-parlevel">
 
-      <!-- ═══════ SECTION 1: ORDER SUMMARY ═══════ -->
-      <div class="card" style="background:#00465E;color:#fff;border:none;padding:20px 24px;margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <!-- ═══════ YOUR NEXT DELIVERY (unified header) ═══════ -->
+      <div class="card" style="border:none;background:#fff;padding:24px;margin-bottom:0;border-radius:14px 14px 0 0;border-bottom:1px solid #E8DFD2;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
           <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);">Weekly Standing Order</div>
-            <div style="display:flex;align-items:baseline;gap:16px;margin-top:4px;">
-              <span style="font-size:1.8rem;font-weight:900;" id="plTotalDisplay">$0.00</span>
-              <span style="font-size:.82rem;color:rgba(255,255,255,.7);" id="plItemCountDisplay">0 items</span>
+            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;">Your Next Delivery</div>
+            <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-top:2px;" id="plNextDelivery">Monday, April 7</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</div>
+            <div style="font-size:1.3rem;font-weight:900;color:#00465E;" id="plTotalDisplay">$0.00</div>
+            <div style="font-size:.72rem;font-weight:700;color:#167421;" id="plSavingsDisplay"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════ SAVINGS PROGRESS (thin, inline) ═══════ -->
+      <div style="background:#fff;padding:12px 24px 16px;border-radius:0 0 14px 14px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="flex:1;">
+            <div style="height:8px;background:#F1F5F9;border-radius:8px;overflow:hidden;">
+              <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B,#D97706);border-radius:8px;transition:width .5s;"></div>
             </div>
-            <div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:2px;" id="plSavingsDisplay"></div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <div style="text-align:center;padding:8px 14px;background:rgba(255,255,255,.1);border-radius:8px;">
-              <div style="font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.5);">Delivery</div>
-              <div style="font-size:.78rem;font-weight:800;" id="plNextDelivery">Mon, Apr 7</div>
-            </div>
-            <div style="text-align:center;padding:8px 14px;background:rgba(255,255,255,.1);border-radius:8px;">
-              <div style="font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.5);">Status</div>
-              <div style="font-size:.78rem;font-weight:800;color:#86EFAC;" id="plStatusDisplay">Active</div>
+            <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:.55rem;font-weight:600;color:#94A3B8;position:relative;">
+              <span>$0</span>
+              <span style="position:absolute;left:25%;transform:translateX(-50%);">$500</span>
+              <span style="position:absolute;left:50%;transform:translateX(-50%);">$750</span>
+              <span style="position:absolute;left:75%;transform:translateX(-50%);">$1K</span>
+              <span>$1.5K+</span>
             </div>
           </div>
-        </div>
-        <!-- Savings progress -->
-        <div style="margin-top:14px;">
-          <div style="height:6px;background:rgba(255,255,255,.15);border-radius:6px;overflow:hidden;">
-            <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B);border-radius:6px;transition:width .5s;"></div>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.55rem;font-weight:600;color:rgba(255,255,255,.35);position:relative;">
-            <span>$0</span>
-            <span style="position:absolute;left:25%;transform:translateX(-50%);">$500 10%</span>
-            <span style="position:absolute;left:50%;transform:translateX(-50%);">$750 15%</span>
-            <span style="position:absolute;left:75%;transform:translateX(-50%);">$1K 20%</span>
-            <span>$1.5K+ 25%</span>
-          </div>
+          <div id="plDiscountBadge" style="background:#F1F5F9;color:#94A3B8;font-size:.72rem;font-weight:800;padding:6px 14px;border-radius:8px;white-space:nowrap;min-width:80px;text-align:center;">0% off</div>
         </div>
       </div>
 
-      <!-- ═══════ SECTION 2: BUILD YOUR ORDER ═══════ -->
-      <div style="margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">Weekly Menu</div>
-          <span style="font-size:.68rem;color:#7A8F9C;">Dishes rotate weekly</span>
+      <!-- ═══════ WHAT'S IN YOUR ORDER ═══════ -->
+      <div style="font-size:.88rem;font-weight:900;color:#00465E;margin-bottom:12px;">What's in your order</div>
+
+      <!-- Category summary cards (clickable to edit) -->
+      <div id="plCartSummary" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Edit Cart button -->
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <button onclick="openFullCartEditor()" style="flex:1;background:#00465E;color:#fff;border:none;border-radius:12px;padding:14px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;letter-spacing:-.2px;" onmouseover="this.style.background='#006580'" onmouseout="this.style.background='#00465E'">Edit Cart</button>
+        <button onclick="confirmParOrder(this)" style="background:#fff;border:2px solid #00465E;border-radius:12px;padding:14px 20px;font-size:.82rem;font-weight:700;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;white-space:nowrap;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='#fff'">Confirm Order</button>
+      </div>
+
+      <div style="font-size:.72rem;color:#7A8F9C;line-height:1.5;margin-bottom:20px;">
+        Standing order repeats weekly. Changes apply to all future deliveries unless using one-time adjustment.
+      </div>
+
+      <!-- ═══════ MANAGE ORDER ═══════ -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+        <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="padding:10px 18px;border:1.5px solid #E8DFD2;border-radius:10px;font-size:.75rem;font-weight:700;color:#7A8F9C;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">Pause All</button>
+        <div style="padding:10px 18px;border:1.5px solid #E8DFD2;border-radius:10px;display:flex;align-items:center;gap:8px;">
+          <label class="pl-toggle">
+            <input type="checkbox" id="plOverrideToggle" onchange="toggleOverrideMode()">
+            <span class="pl-toggle-track"></span>
+          </label>
+          <span style="font-size:.72rem;color:#5a4a2a;font-weight:600;">One-time adjustment</span>
         </div>
-        <div class="pl-group-grid" id="plGroupMeals"></div>
       </div>
 
-      <div style="margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">Breakfast & Snacks</div>
-          <span style="font-size:.68rem;color:#7A8F9C;">Same items every week</span>
-        </div>
-        <div class="pl-group-grid" id="plGroupSnacks"></div>
-      </div>
-
-      <!-- ═══════ SECTION 3: ACTIONS ═══════ -->
-      <div style="display:flex;gap:10px;margin-bottom:16px;">
-        <button onclick="confirmParOrder(this)" class="pl-confirm-btn">Confirm This Week's Order</button>
-        <button onclick="toggleAllParLevels()" id="plPauseAllBtn" class="pl-action-btn">Pause All</button>
-      </div>
-
-      <div style="display:flex;gap:12px;align-items:center;padding:10px 16px;background:#F9F5F0;border-radius:10px;margin-bottom:16px;">
-        <label class="pl-toggle">
-          <input type="checkbox" id="plOverrideToggle" onchange="toggleOverrideMode()">
-          <span class="pl-toggle-track"></span>
-        </label>
-        <span style="font-size:.75rem;color:#5a4a2a;">
-          <strong>One-time adjustment</strong> — changes this week only, standing order stays the same
-        </span>
-      </div>
-
-      <!-- ═══════ SECTION 4: HISTORY ═══════ -->
+      <!-- ═══════ DELIVERY HISTORY ═══════ -->
       <div class="card">
         <div class="card-title">Delivery History</div>
         <div id="plHistoryBody" style="font-size:.82rem;">
@@ -1826,104 +1822,128 @@ async function loadParLevels() {
 }
 
 function renderParGrid() {
-  const mealsGrid = document.getElementById('plGroupMeals');
-  const snacksGrid = document.getElementById('plGroupSnacks');
-  if (!mealsGrid || !snacksGrid) return;
-  function buildCard(cat) {
-    const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
-    const isPaused = d.status === 'paused';
-    const qty = d.qty || 0;
-    const hasItems = qty > 0;
-    const lineTotal = qty * cat.unitPrice;
-    return `
-      <div class="pl-cat-card ${isPaused ? 'paused' : ''} ${hasItems ? 'has-items' : ''}" id="plCat_${cat.id}">
-        <div class="pl-cat-header">
-          <div>
-            <div class="pl-cat-name">${cat.name}</div>
-            <div style="font-size:.68rem;color:#7A8F9C;margin-top:2px;">$${cat.unitPrice.toFixed(2)}/ea</div>
-          </div>
-          <span class="pl-cat-tag ${cat.rotating ? 'rotating' : 'static'}">${cat.rotating ? 'Rotates' : 'Static'}</span>
+  const container = document.getElementById('plCartSummary');
+  if (!container) return;
+
+  // Group categories
+  const groups = [
+    { label: 'Weekly Menu', sub: 'Dishes rotate weekly', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
+    { label: 'Breakfast & Snacks', sub: 'Same items every week', cats: PL_CATEGORIES.filter(c => c.group === 'snacks') },
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    const activeCats = g.cats.filter(c => {
+      const d = plData[c.id];
+      return d && (d.qty || 0) > 0 && d.status !== 'paused';
+    });
+    const groupTotal = g.cats.reduce((s, c) => {
+      const d = plData[c.id];
+      return s + ((d && d.status !== 'paused') ? (d.qty || 0) : 0);
+    }, 0);
+
+    html += `<div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;overflow:hidden;">
+      <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F1F5F9;">
+        <div>
+          <div style="font-size:.78rem;font-weight:800;color:#00465E;">${g.label}</div>
+          <div style="font-size:.65rem;color:#7A8F9C;">${g.sub}</div>
         </div>
-        <div class="pl-cat-bignum ${qty === 0 ? 'zero' : ''}">${qty}</div>
-        <div class="pl-cat-subtotal">${hasItems ? '$' + lineTotal.toFixed(2) + '/week' : 'No items set'}</div>
-        <div class="pl-cat-actions">
-          <button class="pl-cat-btn" onclick="event.stopPropagation();openQtyEditor('${cat.id}')">Edit Qty</button>
-          <button class="pl-cat-btn primary" onclick="event.stopPropagation();openCatDetail('${cat.id}')">View Items</button>
-        </div>
+        <span style="font-size:.72rem;font-weight:800;color:${groupTotal > 0 ? '#00465E' : '#CBD5E1'};">${groupTotal} items</span>
       </div>`;
-  }
-  mealsGrid.innerHTML = PL_CATEGORIES.filter(c => c.group === 'meals').map(buildCard).join('');
-  snacksGrid.innerHTML = PL_CATEGORIES.filter(c => c.group === 'snacks').map(buildCard).join('');
+
+    g.cats.forEach(cat => {
+      const d = plData[cat.id] || { qty: 0, status: 'active' };
+      const qty = d.qty || 0;
+      const isPaused = d.status === 'paused';
+      const lineTotal = qty * cat.unitPrice;
+      // Get item names preview
+      const itemNames = (d.items && d.items.length > 0)
+        ? d.items.map(i => i.name || i).slice(0, 3).join(', ') + (d.items.length > 3 ? '...' : '')
+        : (qty > 0 ? 'Auto-selected' : '');
+
+      html += `
+        <div style="padding:12px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #F8F8F8;${isPaused ? 'opacity:.4;' : ''}" onclick="openCatDetail('${cat.id}')" class="pl-cart-row">
+          <div style="width:36px;height:36px;border-radius:8px;background:${qty > 0 ? '#00465E' : '#F1F5F9'};color:${qty > 0 ? '#fff' : '#CBD5E1'};display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;flex-shrink:0;">${qty}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.82rem;font-weight:700;color:#00465E;">${cat.name}</div>
+            <div style="font-size:.68rem;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemNames || 'No items'}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            ${qty > 0 ? '<div style="font-size:.82rem;font-weight:800;color:#00465E;">$' + lineTotal.toFixed(2) + '</div>' : ''}
+            <div style="font-size:.6rem;color:#94A3B8;">$${cat.unitPrice.toFixed(2)}/ea</div>
+          </div>
+          <div style="color:#CBD5E1;font-size:14px;flex-shrink:0;">›</div>
+        </div>`;
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
 }
 
-function openQtyEditor(catId) {
-  const cat = PL_CATEGORIES.find(c => c.id === catId);
-  if (!cat) return;
-  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
-  const qty = d.qty || 0;
-
+function openFullCartEditor() {
+  // Opens the full edit cart modal similar to subscriber-hub
   let overlay = document.querySelector('.pl-overlay');
+  let panel = document.querySelector('.pl-detail-panel');
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.className = 'pl-overlay';
+    overlay.onclick = () => closeCatDetail();
     document.body.appendChild(overlay);
   }
-
-  let modal = document.getElementById('plQtyModal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'plQtyModal';
-    document.body.appendChild(modal);
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.className = 'pl-detail-panel';
+    panel.style.width = '520px';
+    document.body.appendChild(panel);
   }
 
-  overlay.onclick = () => closeQtyEditor();
-  overlay.classList.add('open');
-
-  modal.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:301;background:#fff;border-radius:16px;padding:28px 32px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;min-width:280px;';
-  modal.innerHTML = `
-    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;margin-bottom:4px;">${cat.name}</div>
-    <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:20px;">$${cat.unitPrice.toFixed(2)} per item</div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;">
-      <button onclick="qtyEditorAdjust('${catId}',-1)" style="width:48px;height:48px;border-radius:12px;border:2px solid #E8DFD2;background:#fff;font-size:22px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">−</button>
-      <input id="plQtyEditorVal" type="number" min="0" value="${qty}" style="width:80px;height:56px;border:2.5px solid #00465E;border-radius:14px;font-size:1.8rem;font-weight:900;color:#00465E;text-align:center;font-family:'DM Sans',sans-serif;background:#F8FCFF;outline:none;" onchange="qtyEditorSet('${catId}',this.value)">
-      <button onclick="qtyEditorAdjust('${catId}',1)" style="width:48px;height:48px;border-radius:12px;border:2px solid #E8DFD2;background:#fff;font-size:22px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">+</button>
+  panel.innerHTML = `
+    <div class="pl-detail-header">
+      <h3>Edit Your Order</h3>
+      <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
     </div>
-    <div style="font-size:.85rem;font-weight:700;color:#00465E;margin-bottom:16px;" id="plQtyEditorTotal">$${(qty * cat.unitPrice).toFixed(2)}/week</div>
-    <button onclick="closeQtyEditor()" style="width:100%;padding:12px;background:#00465E;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Done</button>
+    <div class="pl-detail-body" style="padding:0;">
+      ${PL_CATEGORIES.map(cat => {
+        const d = plData[cat.id] || { qty: 0 };
+        const qty = d.qty || 0;
+        return `
+        <div style="padding:16px 20px;border-bottom:1px solid #F1F5F9;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div>
+              <div style="font-size:.82rem;font-weight:800;color:#00465E;">${cat.name}</div>
+              <div style="font-size:.65rem;color:#94A3B8;">${cat.rotating ? 'Rotates weekly' : 'Same items'} · $${cat.unitPrice.toFixed(2)}/ea</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0;border:2px solid ${qty > 0 ? '#00465E' : '#E8DFD2'};border-radius:10px;overflow:hidden;">
+              <button onclick="adjustQty('${cat.id}',-1);openFullCartEditor()" style="width:36px;height:36px;border:none;background:${qty > 0 ? '#F0F7FA' : '#F9F5F0'};font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
+              <span style="width:40px;text-align:center;font-size:1rem;font-weight:900;color:#00465E;">${qty}</span>
+              <button onclick="adjustQty('${cat.id}',1);openFullCartEditor()" style="width:36px;height:36px;border:none;background:${qty > 0 ? '#F0F7FA' : '#F9F5F0'};font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
+            </div>
+          </div>
+          ${qty > 0 ? '<div style="font-size:.72rem;font-weight:700;color:#00465E;">$' + (qty * cat.unitPrice).toFixed(2) + '/week</div>' : ''}
+          ${qty > 0 ? '<button onclick="event.stopPropagation();openCatDetail(\\'' + cat.id + '\\')" style="margin-top:6px;font-size:.68rem;font-weight:700;color:#2563EB;background:none;border:none;cursor:pointer;padding:0;font-family:\'DM Sans\',sans-serif;">Choose specific items →</button>' : ''}
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="padding:16px 20px;border-top:2px solid #E8DFD2;background:#F9F5F0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-size:.88rem;font-weight:900;color:#00465E;" id="plEditorTotal"></span>
+        <span style="font-size:.72rem;font-weight:700;color:#167421;" id="plEditorSavings"></span>
+      </div>
+      <button onclick="closeCatDetail()" style="width:100%;padding:14px;background:#00465E;color:#fff;border:none;border-radius:10px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;">Done</button>
+    </div>
   `;
-}
 
-function qtyEditorAdjust(catId, delta) {
-  const cat = PL_CATEGORIES.find(c => c.id === catId);
-  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
-  d.qty = Math.max(0, (d.qty || 0) + delta);
-  plData[catId] = d;
-  const inp = document.getElementById('plQtyEditorVal');
-  if (inp) inp.value = d.qty;
-  const tot = document.getElementById('plQtyEditorTotal');
-  if (tot && cat) tot.textContent = '$' + (d.qty * cat.unitPrice).toFixed(2) + '/week';
-  renderParGrid();
-  updateParTotals();
-  autoSaveParLevels();
-}
+  // Update editor totals
+  let sub = 0, items = 0;
+  PL_CATEGORIES.forEach(c => { const d = plData[c.id]; if (d && d.status !== 'paused') { sub += (d.qty||0)*c.unitPrice; items += (d.qty||0); } });
+  let dp = sub >= 1500 ? 25 : sub >= 1000 ? 20 : sub >= 750 ? 15 : sub >= 500 ? 10 : 0;
+  const sav = sub * dp / 100;
+  const el = document.getElementById('plEditorTotal');
+  if (el) el.textContent = items + ' items · $' + (sub - sav).toFixed(2);
+  const se = document.getElementById('plEditorSavings');
+  if (se) se.textContent = dp > 0 ? 'Saving $' + sav.toFixed(2) + ' (' + dp + '%)' : '';
 
-function qtyEditorSet(catId, val) {
-  const cat = PL_CATEGORIES.find(c => c.id === catId);
-  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
-  d.qty = Math.max(0, parseInt(val) || 0);
-  plData[catId] = d;
-  const tot = document.getElementById('plQtyEditorTotal');
-  if (tot && cat) tot.textContent = '$' + (d.qty * cat.unitPrice).toFixed(2) + '/week';
-  renderParGrid();
-  updateParTotals();
-  autoSaveParLevels();
-}
-
-function closeQtyEditor() {
-  const overlay = document.querySelector('.pl-overlay');
-  const modal = document.getElementById('plQtyModal');
-  if (overlay) overlay.classList.remove('open');
-  if (modal) modal.remove();
+  requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
 }
 
 function adjustQty(catId, delta) {
@@ -1988,7 +2008,13 @@ function updateParTotals() {
   document.getElementById('plTotalDisplay').textContent = '$' + total.toFixed(2);
   document.getElementById('plItemCountDisplay').textContent = totalItems + ' item' + (totalItems !== 1 ? 's' : '');
   const savingsEl = document.getElementById('plSavingsDisplay');
-  savingsEl.textContent = discountPct > 0 ? ('Saving $' + savings.toFixed(2) + ' (' + discountPct + '% off)') : (subtotal > 0 ? 'Add more to unlock savings' : '');
+  savingsEl.textContent = discountPct > 0 ? ('Saving $' + savings.toFixed(2)) : '';
+  const badge = document.getElementById('plDiscountBadge');
+  if (badge) {
+    badge.textContent = discountPct > 0 ? (discountPct + '% off') : '0% off';
+    badge.style.background = discountPct > 0 ? '#FEF3C7' : '#F1F5F9';
+    badge.style.color = discountPct > 0 ? '#92400E' : '#94A3B8';
+  }
   // Progress bar (capped at 1500)
   const pct = Math.min(100, (subtotal / 1500) * 100);
   document.getElementById('plProgressFill').style.width = pct + '%';
