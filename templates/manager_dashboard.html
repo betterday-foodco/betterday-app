@@ -291,7 +291,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
   <div class="ni" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
   <div class="ni" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees</div>
   {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
-  <div class="ni" onclick="sidebarNav('parlevel', this)">&#128230; &nbsp;Office Orders</div>
+  <div class="ni" onclick="try{sidebarNav('parlevel', this)}catch(e){alert('Error: '+e.message)}">&#128230; &nbsp;Office Orders</div>
   {% endif %}
   <div class="sb-div"></div>
   <div class="sb-sec">Settings</div>
