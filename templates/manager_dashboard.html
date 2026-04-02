@@ -426,10 +426,10 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
             {% for inv in invoices %}
             <tr style="cursor:pointer" onclick="toggleInvDetail({{ loop.index0 }})">
               <td class="tn">{{ inv.invoiceId }}</td>
-              <td>{{ inv.weekOf | nicedate }}</td>
-              <td>{{ inv.totalMeals }}</td>
+              <td>{{ inv.PeriodStart or inv.weekOf or '' | nicedate }}</td>
+              <td>{{ inv.TotalMeals or inv.totalMeals or 0 }}</td>
               <td>{{ inv.totalEmployees }}</td>
-              <td class="tg">${{ '%.2f' | format(inv.companyOwed | float) }}</td>
+              <td class="tg">${{ '%.2f' | format(inv.CompanyOwed or inv.companyOwed or 0 | float) }}</td>
               <td><span class="bdg {% if inv.status|lower == 'paid' %}ba{% elif inv.status|lower == 'sent' %}br{% else %}bp{% endif %}">{{ inv.status | capitalize }}</span></td>
               <td><button class="pgb" onclick="event.stopPropagation();downloadInvPDF({{ loop.index0 }})">PDF</button></td>
             </tr>
@@ -452,7 +452,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
                   {% endif %}
                   <div class="inv-total-row">
                     <span class="inv-total-label">Total Owed by {{ company_name }}</span>
-                    <span class="inv-total-val">${{ '%.2f' | format(inv.companyOwed | float) }}</span>
+                    <span class="inv-total-val">${{ '%.2f' | format(inv.CompanyOwed or inv.companyOwed or 0 | float) }}</span>
                   </div>
                   {% if inv.status == 'paid' %}
                   <div style="font-size:.78rem;color:#167421;margin-top:6px;">
@@ -1511,7 +1511,7 @@ function downloadInvPDF(idx) {
   </div>
   <div class="inv-meta">
     <strong>Invoice Date</strong><br>${fmtDate(inv.createdAt)}<br>
-    <strong style="display:block;margin-top:8px;">Week Of</strong>${fmtDate(inv.weekOf)}<br>
+    <strong style="display:block;margin-top:8px;">Week Of</strong>${fmtDate(inv.PeriodStart or inv.weekOf or '')}<br>
     ${inv.status === 'paid' ? '<strong style="display:block;margin-top:8px;">Paid</strong>' + fmtDate(inv.paidAt) + (inv.paymentMethod ? ' \u00b7 ' + inv.paymentMethod : '') : ''}
   </div>
 </div>
@@ -1521,14 +1521,14 @@ function downloadInvPDF(idx) {
   <tbody>${tierRows || '<tr><td colspan="3" style="color:#717171">No breakdown available</td></tr>'}</tbody>
 </table>
 <div style="display:flex;gap:32px;margin-bottom:24px;font-size:.82rem;color:#484848;">
-  <div><strong style="display:block;color:#222">Total Meals</strong>${inv.totalMeals}</div>
+  <div><strong style="display:block;color:#222">Total Meals</strong>${inv.TotalMeals or inv.totalMeals or 0}</div>
   <div><strong style="display:block;color:#222">Employees</strong>${inv.totalEmployees}</div>
-  <div><strong style="display:block;color:#222">Employee Paid</strong>${fmt$(inv.employeePaid)}</div>
-  <div><strong style="display:block;color:#222">BD Contributed</strong>${fmt$(inv.bdContributed)}</div>
+  <div><strong style="display:block;color:#222">Employee Paid</strong>${fmt$(inv.EmployeePaid or inv.employeePaid or 0)}</div>
+  <div><strong style="display:block;color:#222">BD Contributed</strong>${fmt$(inv.BDContributed or inv.bdContributed or 0)}</div>
 </div>
 <div class="total-row">
   <span class="total-label">Total Owed by ${COMPANY_NAME}</span>
-  <span class="total-val">${fmt$(inv.companyOwed)}</span>
+  <span class="total-val">${fmt$(inv.CompanyOwed or inv.companyOwed or 0)}</span>
 </div>
 ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><strong>Notes:</strong> ' + inv.notes + '</div>' : ''}
 <div class="footer">
