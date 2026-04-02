@@ -2076,9 +2076,11 @@ async function loadParCatalog() {
   try {
     const r = await fetch('/manager/par-catalog');
     const d = await r.json();
+    console.log('Par catalog response:', d);
     _parCatalog = d.catalog || {};
+    if (d.error) console.warn('Catalog error:', d.error);
     return _parCatalog;
-  } catch(e) { return {}; }
+  } catch(e) { console.error('Catalog fetch failed:', e); return {}; }
 }
 
 async function openCatDetail(catId) {
@@ -2101,7 +2103,7 @@ async function openCatDetail(catId) {
   }
 
   // Show loading state
-  panel.innerHTML = `<div class="pl-detail-header"><h3>${cat.icon} ${cat.name}</h3><button class="pl-detail-close" onclick="closeCatDetail()">✕</button></div><div class="pl-detail-body" style="display:flex;align-items:center;justify-content:center;"><div style="color:#7A8F9C;">Loading items...</div></div>`;
+  panel.innerHTML = `<div class="pl-detail-header"><h3>${cat.name}</h3><button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button></div><div class="pl-detail-body" style="display:flex;align-items:center;justify-content:center;padding:60px 20px;"><div style="color:#7A8F9C;">Loading items...</div></div>`;
   requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
 
   // Load real catalog from 9.0 sheet
@@ -2110,36 +2112,35 @@ async function openCatDetail(catId) {
 
   panel.innerHTML = `
     <div class="pl-detail-header">
-      <h3>${cat.icon} ${cat.name}</h3>
-      <button class="pl-detail-close" onclick="closeCatDetail()">✕</button>
+      <h3>${cat.name}</h3>
+      <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
     </div>
-    <div style="padding:12px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <span style="font-size:.75rem;font-weight:700;color:#00465E;">Weekly: ${d.qty} items</span>
-        <span style="font-size:.7rem;color:#7A8F9C;margin-left:8px;">$${cat.unitPrice.toFixed(2)}/ea → $${((d.qty || 0) * cat.unitPrice).toFixed(2)}</span>
+    <div style="padding:14px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <span style="font-size:.88rem;font-weight:900;color:#00465E;">${d.qty || 0} items</span>
+          <span style="font-size:.75rem;color:#7A8F9C;margin-left:8px;">$${cat.unitPrice.toFixed(2)}/ea</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0;border:2px solid #00465E;border-radius:10px;overflow:hidden;">
+          <button onclick="adjustQty('${catId}',-1);openCatDetail('${catId}')" style="width:34px;height:34px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
+          <span style="width:36px;text-align:center;font-size:.95rem;font-weight:900;color:#00465E;background:#fff;">${d.qty || 0}</span>
+          <button onclick="adjustQty('${catId}',1);openCatDetail('${catId}')" style="width:34px;height:34px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
+        </div>
       </div>
-      <span class="pl-dish-badge ${cat.rotating ? 'swapped' : 'locked'}">${cat.rotating ? '↻ Rotates' : '🔒 Static'}</span>
-    </div>
-    <div style="padding:8px 20px;background:#fff;border-bottom:1px solid #E8DFD2;font-size:.7rem;color:#7A8F9C;">
-      ${catItems.length} items available · Click + to add to your order
+      <div style="font-size:.72rem;color:#7A8F9C;margin-top:4px;">${cat.rotating ? 'Dishes rotate weekly — swap any item below' : 'Same items every week'} · ${catItems.length} available</div>
     </div>
     <div class="pl-detail-body">
-      ${catItems.length === 0 ? '<div style="text-align:center;padding:40px 20px;color:#7A8F9C;">No items in this category yet.</div>' :
+      ${catItems.length === 0 ? '<div style="text-align:center;padding:60px 20px;"><div style="font-size:.88rem;font-weight:700;color:#94A3B8;margin-bottom:8px;">No items available yet</div><div style="font-size:.75rem;color:#CBD5E1;">Items will appear here once your menu is published.</div></div>' :
         catItems.map((item, i) => `
           <div class="pl-dish-row" data-item-id="${item.id}">
-            <img class="pl-dish-img" src="${item.image || ''}" alt="" onerror="this.style.background='linear-gradient(135deg,#E8DFD2,#F9F5F0)';this.style.display='flex';this.alt='🍽'">
+            <img class="pl-dish-img" src="${item.image || ''}" alt="" onerror="this.style.background='#F1F5F9';this.src=''">
             <div class="pl-dish-info">
               <div class="pl-dish-name">${item.name}</div>
-              <div class="pl-dish-meta">${item.id} · ${item.diet} · ${item.cal ? item.cal + ' cal' : ''} ${item.protein ? '· ' + item.protein + 'g P' : ''}</div>
-              ${item.tags ? '<div style="font-size:.6rem;color:#9CA3AF;margin-top:2px;">' + item.tags + '</div>' : ''}
+              <div class="pl-dish-meta">${item.cal ? item.cal + ' cal' : ''} ${item.protein ? '· ' + item.protein + 'g P' : ''} · $${cat.unitPrice.toFixed(2)}</div>
+              ${item.tags ? '<div style="font-size:.58rem;color:#94A3B8;margin-top:1px;">' + item.tags + '</div>' : ''}
             </div>
             <div style="display:flex;align-items:center;gap:6px;">
-              ${cat.rotating ? '<button class="pl-dish-swap" onclick="event.stopPropagation()">Swap</button>' : ''}
-              <div class="pl-qty-ctrl" style="transform:scale(.85);">
-                <button class="pl-qty-btn" onclick="adjustCatItemQty(this,-1)">−</button>
-                <span class="pl-qty-val" style="width:24px;font-size:.78rem;">0</span>
-                <button class="pl-qty-btn" onclick="adjustCatItemQty(this,1)">+</button>
-              </div>
+              <button class="pl-dish-swap" onclick="event.stopPropagation()" style="font-size:.68rem;font-weight:700;color:#fff;background:#00465E;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;">+ Add</button>
             </div>
           </div>`).join('')}
     </div>
