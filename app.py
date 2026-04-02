@@ -48,7 +48,7 @@ def commafy_filter(s):
 # ─────────────────────────────────────────────────────────────
 GOOGLE_SCRIPT_URL = os.environ.get(
     'GOOGLE_SCRIPT_URL',
-    "https://script.google.com/macros/s/AKfycbxKVyW7sguwUq3TYsk-xtIF2fLicefaxTwl_PHjQVjt5-OiBarPQ_nXb_0H927NXAMG0w/exec"
+    "https://script.google.com/a/macros/eatbetterday.ca/s/AKfycbz8WgRZi286zPqV97gW7Ch7m8uwRad2-84E_cc1lemiBHZhl58vFk17WV_AcyvuY5NzhA/exec"
 )
 APP_BASE_URL    = os.environ.get('APP_BASE_URL', 'https://betterday-app.onrender.com')
 ADMIN_PASSWORD  = os.environ.get('ADMIN_PASSWORD',   'betterday2024')

@@ -664,10 +664,53 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
 </div><!-- /mn -->
 
 <script>
-/* ════════ SAVE COMPANY LOADING ════════ */
-document.querySelector('form')?.addEventListener('submit', function() {
+/* ════════ SAVE COMPANY (AJAX) ════════ */
+document.querySelector('form')?.addEventListener('submit', function(e) {
+  e.preventDefault();
   var btn = document.getElementById('saveCompanyBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving\u2026'; }
+  var origText = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Saving\u2026';
+  btn.style.opacity = '.6';
+  var formData = new FormData(this);
+  fetch(window.location.pathname, { method: 'POST', body: formData })
+    .then(function(r) { return r.text(); })
+    .then(function(html) {
+      // Check if the response contains success message
+      if (html.includes('saved successfully') || html.includes('alert-success')) {
+        btn.textContent = '\u2705 Saved';
+        btn.style.background = '#167421';
+        btn.style.color = '#fff';
+        setTimeout(function() {
+          btn.textContent = origText;
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.opacity = '';
+          btn.disabled = false;
+        }, 2000);
+      } else {
+        btn.textContent = '\u274C Save failed';
+        btn.style.background = '#dc2626';
+        btn.style.color = '#fff';
+        setTimeout(function() {
+          btn.textContent = origText;
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.opacity = '';
+          btn.disabled = false;
+        }, 3000);
+      }
+    })
+    .catch(function() {
+      btn.textContent = '\u274C Connection error';
+      btn.style.background = '#dc2626';
+      setTimeout(function() {
+        btn.textContent = origText;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.opacity = '';
+        btn.disabled = false;
+      }, 3000);
+    });
 });
 
 /* ════════ SIDEBAR / TABS ════════ */
