@@ -683,11 +683,10 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
               <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B,#D97706);border-radius:8px;transition:width .5s;"></div>
             </div>
             <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:.55rem;font-weight:600;color:#94A3B8;position:relative;">
-              <span>$0</span>
-              <span style="position:absolute;left:25%;transform:translateX(-50%);">$500</span>
-              <span style="position:absolute;left:50%;transform:translateX(-50%);">$750</span>
-              <span style="position:absolute;left:75%;transform:translateX(-50%);">$1K</span>
-              <span>$1.5K+</span>
+              <span>10%</span>
+              <span style="position:absolute;left:33%;transform:translateX(-50%);">$500 · 15%</span>
+              <span style="position:absolute;left:66%;transform:translateX(-50%);">$750 · 20%</span>
+              <span>$1K+ · 25%</span>
             </div>
           </div>
           <div id="plDiscountBadge" style="background:#F1F5F9;color:#94A3B8;font-size:.72rem;font-weight:800;padding:6px 14px;border-radius:8px;white-space:nowrap;min-width:80px;text-align:center;">0% off</div>
@@ -1930,7 +1929,7 @@ function openFullCartEditor() {
   // Update editor totals
   let sub = 0, items = 0;
   PL_CATEGORIES.forEach(c => { const d = plData[c.id]; if (d && d.status !== 'paused') { sub += (d.qty||0)*c.unitPrice; items += (d.qty||0); } });
-  let dp = sub >= 1500 ? 25 : sub >= 1000 ? 20 : sub >= 750 ? 15 : sub >= 500 ? 10 : 0;
+  let dp = sub >= 1000 ? 25 : sub >= 750 ? 20 : sub >= 500 ? 15 : sub > 0 ? 10 : 0;
   const sav = sub * dp / 100;
   const el = document.getElementById('plEditorTotal');
   if (el) el.textContent = items + ' items · $' + (sub - sav).toFixed(2);
@@ -1988,10 +1987,10 @@ function updateParTotals() {
   });
   // Discount tiers
   let discountPct = 0;
-  if (subtotal >= 1500) discountPct = 25;
-  else if (subtotal >= 1000) discountPct = 20;
-  else if (subtotal >= 750) discountPct = 15;
-  else if (subtotal >= 500) discountPct = 10;
+  if (subtotal >= 1000) discountPct = 25;
+  else if (subtotal >= 750) discountPct = 20;
+  else if (subtotal >= 500) discountPct = 15;
+  else if (subtotal > 0) discountPct = 10;
   const savings = subtotal * (discountPct / 100);
   const total = subtotal - savings;
   // Update UI
@@ -2010,7 +2009,7 @@ function updateParTotals() {
     badge.style.color = discountPct > 0 ? '#92400E' : '#94A3B8';
   }
   // Progress bar (capped at 1500)
-  const pct = Math.min(100, (subtotal / 1500) * 100);
+  const pct = Math.min(100, (subtotal / 1000) * 100);
   document.getElementById('plProgressFill').style.width = pct + '%';
 }
 
