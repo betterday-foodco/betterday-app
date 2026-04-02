@@ -165,6 +165,17 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .pl-qty-btn:hover{background:#E8DFD2}
 .pl-qty-val{width:36px;text-align:center;font-size:.85rem;font-weight:900;color:#00465E;border:none;background:#fff;font-family:'DM Sans',sans-serif;padding:0}
 .pl-qty-val:focus{outline:none}
+.pl-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.pl-cat-card{padding:12px 14px;gap:10px}
+.pl-cat-card.has-items{border-color:#00465E;border-width:2px;background:rgba(0,70,94,.02)}
+.pl-cat-name{font-size:.82rem}
+.pl-cat-sub{font-size:.68rem}
+.pl-toggle{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0}
+.pl-toggle input{opacity:0;width:0;height:0}
+.pl-toggle-track{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:22px;transition:.3s}
+.pl-toggle-track:before{content:'';position:absolute;height:18px;width:18px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s}
+.pl-toggle input:checked+.pl-toggle-track{background:#B56B10}
+.pl-toggle input:checked+.pl-toggle-track:before{left:18px}
 .pl-status-pill{font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
 .pl-status-pill.active{background:rgba(22,163,74,.1);color:#16A34A}
 .pl-status-pill.paused{background:rgba(239,68,68,.1);color:#EF4444}
@@ -659,78 +670,89 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     <div class="tab-panel" id="tab-parlevel">
       <div class="sl" style="margin-top:0">Office Orders</div>
 
+      <!-- ── DELIVERY + STATUS BAR ── -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:14px 18px;">
+          <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;">Next Delivery</div>
+          <div style="font-size:1rem;font-weight:900;color:#00465E;" id="plNextDelivery">Monday, Apr 7</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:stretch;">
+          <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:10px 16px;text-align:center;min-width:80px;">
+            <div style="font-size:.55rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Frequency</div>
+            <div style="font-size:.82rem;font-weight:800;color:#00465E;">Weekly</div>
+          </div>
+          <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:10px 16px;text-align:center;min-width:80px;">
+            <div style="font-size:.55rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Status</div>
+            <div style="font-size:.82rem;font-weight:800;color:#167421;" id="plStatusDisplay">Active</div>
+          </div>
+          <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:10px 16px;font-size:.72rem;font-weight:700;color:#7A8F9C;font-family:'DM Sans',sans-serif;cursor:pointer;transition:.15s;white-space:nowrap;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">⏸ Pause All</button>
+        </div>
+      </div>
+
       <!-- ── DISCOUNT PROGRESS BAR ── -->
-      <div class="card" style="background:linear-gradient(135deg,#FFF8F0 0%,#FEF3C7 50%,#FDE68A 100%);border:1.5px solid rgba(212,160,41,.2);position:relative;overflow:hidden;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <div style="font-size:.9rem;font-weight:800;color:#92400E;">Order More, Save More</div>
-          <div id="plDiscountPill" style="background:#B56B10;color:#fff;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:99px;">SAVE 0%</div>
-        </div>
-        <div style="position:relative;margin-bottom:6px;">
-          <div style="height:12px;background:rgba(0,0,0,.08);border-radius:12px;overflow:hidden;">
-            <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#F59E0B,#D97706,#B45309);border-radius:12px;transition:width .5s;"></div>
+      <div style="background:linear-gradient(135deg,#FFF8F0 0%,#FEF3C7 50%,#FDE68A 100%);border:1.5px solid rgba(212,160,41,.2);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <span style="font-size:1.4rem;font-weight:900;color:#1a1a1a;" id="plTotalDisplay">$0.00</span>
+            <span style="font-size:.78rem;color:#92400E;font-weight:600;" id="plSavingsDisplay">Add items to unlock savings</span>
           </div>
-          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.6rem;font-weight:700;color:#92400E;">
-            <span>$0</span>
-            <span style="position:absolute;left:33%;transform:translateX(-50%);">$500 <span style="font-size:.55rem;color:#B45309;">15% off</span></span>
-            <span style="position:absolute;left:66%;transform:translateX(-50%);">$1,000 <span style="font-size:.55rem;color:#B45309;">20% off</span></span>
-            <span>$1,500+ <span style="font-size:.55rem;color:#B45309;">25% off</span></span>
-          </div>
+          <div id="plDiscountPill" style="background:#B56B10;color:#fff;font-size:.68rem;font-weight:800;padding:4px 12px;border-radius:99px;">SAVE 0%</div>
         </div>
-        <div style="display:flex;align-items:baseline;gap:8px;margin-top:10px;">
-          <span style="font-size:1.3rem;font-weight:900;color:#1a1a1a;" id="plTotalDisplay">$0.00</span>
-          <span style="font-size:.78rem;color:#92400E;" id="plSavingsDisplay"></span>
+        <div style="height:10px;background:rgba(0,0,0,.08);border-radius:10px;overflow:hidden;margin-bottom:6px;">
+          <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B,#D97706,#B45309);border-radius:10px;transition:width .5s;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.58rem;font-weight:700;color:#92400E;position:relative;">
+          <span>$0</span>
+          <span style="position:absolute;left:25%;transform:translateX(-50%);">$500 · <span style="color:#B45309;">10%</span></span>
+          <span style="position:absolute;left:50%;transform:translateX(-50%);">$750 · <span style="color:#B45309;">15%</span></span>
+          <span style="position:absolute;left:75%;transform:translateX(-50%);">$1,000 · <span style="color:#B45309;">20%</span></span>
+          <span>$1,500+ · <span style="color:#B45309;">25%</span></span>
         </div>
       </div>
 
-      <!-- ── DELIVERY INFO ── -->
-      <div class="card" style="margin-top:12px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;">Next Delivery</div>
-            <div style="font-size:1.1rem;font-weight:900;color:#00465E;" id="plNextDelivery">Monday, Apr 7</div>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <div style="text-align:center;padding:6px 14px;background:rgba(0,70,94,.05);border-radius:8px;">
-              <div style="font-size:.6rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Frequency</div>
-              <div style="font-size:.82rem;font-weight:800;color:#00465E;">Weekly</div>
-            </div>
-            <div style="text-align:center;padding:6px 14px;background:rgba(0,70,94,.05);border-radius:8px;">
-              <div style="font-size:.6rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Status</div>
-              <div style="font-size:.82rem;font-weight:800;color:#167421;" id="plStatusDisplay">Active</div>
-            </div>
-          </div>
+      <!-- ══════ WEEKLY MENU GROUP ══════ -->
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">🍽️ Weekly Menu</div>
+          <div style="flex:1;height:1px;background:#E8DFD2;"></div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:8px;">
-          <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="flex:1;padding:8px;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;color:#7A8F9C;background:#fff;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">⏸ Pause All</button>
-          <button style="flex:1;padding:8px;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;color:#7A8F9C;background:#fff;font-family:'DM Sans',sans-serif;opacity:.5;cursor:not-allowed;" title="Available for orders $1,000+">📦 Dual Delivery</button>
-        </div>
-      </div>
-
-      <!-- ── CATEGORY GRID ── -->
-      <div style="margin-top:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div class="sl" style="margin:0;font-size:.72rem;">Your Categories</div>
-          <button onclick="confirmParOrder(this)" style="background:#00465E;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#006580'" onmouseout="this.style.background='#00465E'">✓ Confirm This Week</button>
-        </div>
-        <div id="plCategoryGrid" style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:.75rem;color:#7A8F9C;margin-bottom:10px;line-height:1.4;">Menu changes weekly with fresh new options. We'll rotate dishes to keep things exciting — click any category to preview or pick specific items.</div>
+        <div class="pl-group-grid" id="plGroupMeals">
           <!-- Populated by JS -->
         </div>
       </div>
 
-      <!-- ── ONE-TIME OVERRIDE TOGGLE ── -->
-      <div style="margin-top:12px;padding:10px 14px;background:#FFF8F0;border:1px solid rgba(212,160,41,.15);border-radius:10px;display:flex;align-items:center;gap:10px;">
-        <label style="position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0;">
-          <input type="checkbox" id="plOverrideToggle" style="opacity:0;width:0;height:0;" onchange="toggleOverrideMode()">
-          <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:20px;transition:.3s;"></span>
-          <span style="position:absolute;content:'';height:16px;width:16px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s;" id="plToggleKnob"></span>
+      <!-- ══════ BREAKFAST & SNACKS GROUP ══════ -->
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">☀️ Breakfast & Snacks</div>
+          <div style="flex:1;height:1px;background:#E8DFD2;"></div>
+        </div>
+        <div style="font-size:.75rem;color:#7A8F9C;margin-bottom:10px;line-height:1.4;">Reliable favorites, always stocked. These items stay consistent week to week.</div>
+        <div class="pl-group-grid" id="plGroupSnacks">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ── ACTIONS BAR ── -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <button onclick="confirmParOrder(this)" style="flex:1;background:#00465E;color:#fff;border:none;border-radius:10px;padding:12px 18px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#006580'" onmouseout="this.style.background='#00465E'">✓ Confirm This Week's Order</button>
+        <button style="background:#fff;border:1.5px solid #E8DFD2;border-radius:10px;padding:12px 16px;font-size:.75rem;font-weight:700;color:#7A8F9C;font-family:'DM Sans',sans-serif;opacity:.5;cursor:not-allowed;white-space:nowrap;" title="Available for orders $1,000+">📦 Dual Delivery</button>
+      </div>
+
+      <!-- ── ONE-TIME OVERRIDE ── -->
+      <div style="padding:10px 14px;background:#FFF8F0;border:1px solid rgba(212,160,41,.15);border-radius:10px;display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <label class="pl-toggle">
+          <input type="checkbox" id="plOverrideToggle" onchange="toggleOverrideMode()">
+          <span class="pl-toggle-track"></span>
         </label>
-        <span style="font-size:.78rem;color:#5a4a2a;line-height:1.3;">
-          <strong>One-time adjustment</strong> — changes this week only, standing order stays the same
+        <span style="font-size:.75rem;color:#5a4a2a;line-height:1.3;">
+          <strong>One-time adjustment</strong> — changes this week only, your standing order stays the same
         </span>
       </div>
 
       <!-- ── DELIVERY HISTORY ── -->
-      <div class="card" style="margin-top:16px;">
+      <div class="card">
         <div class="card-title">Delivery History</div>
         <div id="plHistoryBody" style="font-size:.82rem;">
           <div style="color:#7A8F9C;text-align:center;padding:16px;">No deliveries yet.</div>
@@ -1825,14 +1847,14 @@ sidebarNav = function(name, el) {
 // OFFICE PAR LEVELS MODULE
 // ═══════════════════════════════════════
 const PL_CATEGORIES = [
-  { id: 'meat_entree',   name: 'Meat Entrees',       icon: '🥩', cls: 'meat',      rotating: true,  unitPrice: 16.99 },
-  { id: 'plant_entree',  name: 'Plant Entrees',      icon: '🌱', cls: 'plant',     rotating: true,  unitPrice: 16.99 },
-  { id: 'chia_oats',     name: 'Chia Cup / Oats',    icon: '🥣', cls: 'chia',      rotating: false, unitPrice: 8.99 },
-  { id: 'sandwich_wrap', name: 'Sandwiches & Wraps',  icon: '🥪', cls: 'sandwich',  rotating: true,  unitPrice: 12.99 },
-  { id: 'hot_breakfast', name: 'Hot Breakfast',       icon: '🍳', cls: 'breakfast', rotating: false, unitPrice: 10.99 },
-  { id: 'cookie',        name: 'Cookies',             icon: '🍪', cls: 'cookie',    rotating: false, unitPrice: 4.99 },
-  { id: 'snack',         name: 'Snacks',              icon: '🥜', cls: 'snack',     rotating: false, unitPrice: 5.99 },
-  { id: 'juice',         name: 'Juices',              icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 7.99 },
+  { id: 'meat_entree',   name: 'Meat Entrees',        icon: '🥩', cls: 'meat',      rotating: true,  unitPrice: 16.99, group: 'meals' },
+  { id: 'plant_entree',  name: 'Plant-Based Entrees', icon: '🌱', cls: 'plant',     rotating: true,  unitPrice: 16.99, group: 'meals' },
+  { id: 'sandwich_wrap', name: 'Sandwiches & Wraps',  icon: '🥪', cls: 'sandwich',  rotating: true,  unitPrice: 12.99, group: 'meals' },
+  { id: 'hot_breakfast', name: 'Hot Breakfast',        icon: '🍳', cls: 'breakfast', rotating: false, unitPrice: 10.99, group: 'snacks' },
+  { id: 'chia_oats',     name: 'Chia Cups & Oats',    icon: '🥣', cls: 'chia',      rotating: false, unitPrice: 8.99,  group: 'snacks' },
+  { id: 'cookie',        name: 'Cookies',              icon: '🍪', cls: 'cookie',    rotating: false, unitPrice: 4.99,  group: 'snacks' },
+  { id: 'snack',         name: 'Snacks',               icon: '🥜', cls: 'snack',     rotating: false, unitPrice: 5.99,  group: 'snacks' },
+  { id: 'juice',         name: 'Drinks',               icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 7.99,  group: 'snacks' },
 ];
 
 let plData = {};  // categoryId → { qty, status, mode, items:[] }
@@ -1868,29 +1890,36 @@ async function loadParLevels() {
 }
 
 function renderParGrid() {
-  const grid = document.getElementById('plCategoryGrid');
-  if (!grid) return;
-  grid.innerHTML = PL_CATEGORIES.map(cat => {
+  const mealsGrid = document.getElementById('plGroupMeals');
+  const snacksGrid = document.getElementById('plGroupSnacks');
+  if (!mealsGrid || !snacksGrid) return;
+  function buildCard(cat) {
     const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
     const isPaused = d.status === 'paused';
+    const hasItems = (d.qty || 0) > 0;
+    const lineTotal = ((d.qty || 0) * cat.unitPrice);
     return `
-      <div class="pl-cat-card ${isPaused ? 'paused' : ''}" id="plCat_${cat.id}">
+      <div class="pl-cat-card ${isPaused ? 'paused' : ''} ${hasItems ? 'has-items' : ''}" id="plCat_${cat.id}" onclick="openCatDetail('${cat.id}')">
         <div class="pl-cat-icon ${cat.cls}">${cat.icon}</div>
-        <div class="pl-cat-info" onclick="openCatDetail('${cat.id}')">
-          <div class="pl-cat-name">${cat.name}</div>
-          <div class="pl-cat-sub">${cat.rotating ? '↻ Rotates weekly' : '🔒 Static items'} · $${cat.unitPrice.toFixed(2)}/ea</div>
+        <div class="pl-cat-info" style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="pl-cat-name">${cat.name}</div>
+            ${isPaused ? '<span style="font-size:.6rem;font-weight:700;color:#EF4444;background:rgba(239,68,68,.08);padding:1px 6px;border-radius:4px;">PAUSED</span>' : ''}
+          </div>
+          <div class="pl-cat-sub">${cat.rotating ? '↻ Rotates weekly' : '📌 Same items weekly'} · $${cat.unitPrice.toFixed(2)}/ea${hasItems ? ' · <strong style="color:#00465E;">$'+lineTotal.toFixed(2)+'</strong>' : ''}</div>
         </div>
-        <div class="pl-cat-right">
-          <span class="pl-status-pill ${d.mode === 'custom' ? 'custom' : (isPaused ? 'paused' : 'active')}">${isPaused ? 'Paused' : (d.mode === 'custom' ? 'Custom' : 'Auto')}</span>
+        <div class="pl-cat-right" style="display:flex;align-items:center;gap:6px;">
           <div class="pl-qty-ctrl">
             <button class="pl-qty-btn" onclick="event.stopPropagation();adjustQty('${cat.id}',-1)">−</button>
             <input class="pl-qty-val" type="number" min="0" value="${d.qty}" onchange="setQty('${cat.id}',this.value)" onclick="event.stopPropagation()">
             <button class="pl-qty-btn" onclick="event.stopPropagation();adjustQty('${cat.id}',1)">+</button>
           </div>
-          <button class="pl-pause-btn" onclick="event.stopPropagation();toggleCatPause('${cat.id}')" title="${isPaused ? 'Resume' : 'Pause'}">${isPaused ? '▶' : '⏸'}</button>
+          <button class="pl-pause-btn" onclick="event.stopPropagation();toggleCatPause('${cat.id}')" title="${isPaused ? 'Resume' : 'Pause'}" style="width:28px;height:28px;border:1.5px solid #E8DFD2;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:#7A8F9C;transition:.15s;display:flex;align-items:center;justify-content:center;">${isPaused ? '▶' : '⏸'}</button>
         </div>
       </div>`;
-  }).join('');
+  }
+  mealsGrid.innerHTML = PL_CATEGORIES.filter(c => c.group === 'meals').map(buildCard).join('');
+  snacksGrid.innerHTML = PL_CATEGORIES.filter(c => c.group === 'snacks').map(buildCard).join('');
 }
 
 function adjustQty(catId, delta) {
@@ -1943,7 +1972,8 @@ function updateParTotals() {
   let discountPct = 0;
   if (subtotal >= 1500) discountPct = 25;
   else if (subtotal >= 1000) discountPct = 20;
-  else if (subtotal >= 500) discountPct = 15;
+  else if (subtotal >= 750) discountPct = 15;
+  else if (subtotal >= 500) discountPct = 10;
   const savings = subtotal * (discountPct / 100);
   const total = subtotal - savings;
   // Update UI
