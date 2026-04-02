@@ -136,9 +136,11 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 #monthlyTotalsTable th{color:rgba(255,255,255,.6)}
 .tier-table .tier-free{color:#167421;font-weight:800}
 .note-box{background:#FFF8F0;border:1px solid rgba(212,160,41,.2);border-radius:10px;padding:14px 18px;font-size:.8rem;color:#5a4a2a;margin-top:14px;line-height:1.5}
-.meal-input{width:56px;padding:5px 4px;border:1.5px solid #E8DFD2;border-radius:6px;font-size:.78rem;font-family:'DM Sans',sans-serif;text-align:center;color:#00465E;font-weight:700;background:#fff;transition:.15s}
-.meal-input:focus{border-color:#00465E;box-shadow:0 0 0 2px rgba(0,70,94,.1);outline:none}
-.meal-input::-webkit-inner-spin-button{opacity:1}
+.meal-input{width:64px;height:40px;padding:6px 4px;border:2px solid #E8DFD2;border-radius:10px;font-size:1rem;font-family:'DM Sans',sans-serif;text-align:center;color:#00465E;font-weight:900;background:#fff;transition:.2s}
+.meal-input:focus{border-color:#00465E;box-shadow:0 0 0 3px rgba(0,70,94,.12);outline:none;background:#F0F7FA}
+.meal-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.meal-input[type=number]{-moz-appearance:textfield}
+.meal-input:not(:placeholder-shown):not([value=""]):not([value="0"]){border-color:#00465E;background:#F0F7FA}
 .log-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,49,65,.05);align-items:flex-start}
 .log-date{font-size:.7rem;color:#7A8F9C;white-space:nowrap;min-width:100px}
 .log-detail{font-size:.78rem;color:#2E4A5A;line-height:1.4}
@@ -812,79 +814,39 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
           {% endif %}
         </div>
         <p style="font-size:.82rem;color:#7A8F9C;margin-bottom:16px;line-height:1.5;">
-          Number of meals each {{ 'employee level' if has_levels else 'employee' }} receives at each pricing tier per week.
-          {% if can_edit %}<br><span style="font-size:.75rem;color:#B56B10;">✏️ You can adjust meal counts below. Pricing cannot be changed here.</span>{% endif %}
+          How many meals per week at each pricing tier.
+          {% if can_edit %}<span style="color:#B56B10;"> Adjust counts below — pricing changes require BetterDay admin.</span>{% endif %}
         </p>
 
-        <table class="tier-table" id="mealAllowanceTable">
-          <thead>
-            <tr>
-              <th>{{ 'Level' if has_levels else '' }}</th>
-              <th>Free</th>
-              <th>Tier 1</th>
-              <th>Tier 2</th>
-              <th>Tier 3</th>
-              <th>Max/Wk</th>
-            </tr>
-          </thead>
-          <tbody>
-          {% if has_levels %}
-            <!-- Default row from company settings -->
-            <tr data-level="default">
-              <td><span style="font-weight:700;color:#00465E;">Default</span></td>
-              {% if can_edit %}
-              <td><input type="number" min="0" class="meal-input" data-field="FreeMealsPerWeek" value="{{ company.FreeMealsPerWeek or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier1_Meals" value="{{ company.Tier1_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier2_Meals" value="{{ company.Tier2_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier3_Meals" value="{{ company.Tier3_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="MaxMealsPerWeek" value="{{ company.MaxMealsPerWeek or '' }}" placeholder="∞" onchange="showSaveBtn()"></td>
-              {% else %}
-              <td>{{ company.FreeMealsPerWeek or 0 }}</td>
-              <td>{{ company.Tier1_Meals or 0 }}</td>
-              <td>{{ company.Tier2_Meals or 0 }}</td>
-              <td>{{ company.Tier3_Meals or 0 }}</td>
-              <td>{{ company.MaxMealsPerWeek or '∞' }}</td>
-              {% endif %}
-            </tr>
-            {% for lv in benefit_levels %}
-            <tr data-level="{{ lv.LevelID }}" data-level-name="{{ lv.LevelName }}">
-              <td><span style="font-size:.72rem;font-weight:700;color:#00465E;background:rgba(0,70,94,.06);padding:2px 10px;border-radius:99px;">{{ lv.LevelName }}</span></td>
-              {% if can_edit %}
-              <td><input type="number" min="0" class="meal-input" data-field="FreeMealsPerWeek" value="{{ lv.FreeMealsPerWeek or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier1_Meals" value="{{ lv.Tier1_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier2_Meals" value="{{ lv.Tier2_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier3_Meals" value="{{ lv.Tier3_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="MaxMealsPerWeek" value="{{ lv.MaxMealsPerWeek or '' }}" placeholder="∞" onchange="showSaveBtn()"></td>
-              {% else %}
-              <td>{{ lv.FreeMealsPerWeek or 0 }}</td>
-              <td>{{ lv.Tier1_Meals or 0 }}</td>
-              <td>{{ lv.Tier2_Meals or 0 }}</td>
-              <td>{{ lv.Tier3_Meals or 0 }}</td>
-              <td>{{ lv.MaxMealsPerWeek or '∞' }}</td>
-              {% endif %}
-            </tr>
-            {% endfor %}
-          {% else %}
-            <!-- Single row — no benefit levels -->
-            <tr data-level="default">
-              <td><span style="font-weight:700;color:#00465E;">All Employees</span></td>
-              {% if can_edit %}
-              <td><input type="number" min="0" class="meal-input" data-field="FreeMealsPerWeek" value="{{ company.FreeMealsPerWeek or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier1_Meals" value="{{ company.Tier1_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier2_Meals" value="{{ company.Tier2_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="Tier3_Meals" value="{{ company.Tier3_Meals or 0 }}" onchange="showSaveBtn()"></td>
-              <td><input type="number" min="0" class="meal-input" data-field="MaxMealsPerWeek" value="{{ company.MaxMealsPerWeek or '' }}" placeholder="∞" onchange="showSaveBtn()"></td>
-              {% else %}
-              <td>{{ company.FreeMealsPerWeek or 0 }}</td>
-              <td>{{ company.Tier1_Meals or 0 }}</td>
-              <td>{{ company.Tier2_Meals or 0 }}</td>
-              <td>{{ company.Tier3_Meals or 0 }}</td>
-              <td>{{ company.MaxMealsPerWeek or '∞' }}</td>
-              {% endif %}
-            </tr>
-          {% endif %}
-          </tbody>
-        </table>
+        <div id="mealAllowanceTable" style="display:flex;flex-direction:column;gap:12px;">
+        {% macro level_row(level_id, level_name, free_val, t1_val, t2_val, t3_val, max_val, is_default=false) %}
+          <div data-level="{{ level_id }}" {% if not is_default %}data-level-name="{{ level_name }}"{% endif %}
+               style="background:{{ '#F0F7FA' if is_default else '#fff' }};border:1.5px solid {{ '#00465E' if is_default else '#E8DFD2' }};border-radius:12px;padding:16px 20px;">
+            <div style="font-size:.88rem;font-weight:800;color:#00465E;margin-bottom:12px;">{{ level_name }}</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+              {% for label, field, val in [('Free', 'FreeMealsPerWeek', free_val), ('Tier 1', 'Tier1_Meals', t1_val), ('Tier 2', 'Tier2_Meals', t2_val), ('Tier 3', 'Tier3_Meals', t3_val), ('Max/Wk', 'MaxMealsPerWeek', max_val)] %}
+              <div style="text-align:center;">
+                <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:6px;">{{ label }}</div>
+                {% if can_edit %}
+                <input type="number" min="0" class="meal-input" data-field="{{ field }}" value="{{ val }}" {% if field == 'MaxMealsPerWeek' %}placeholder="∞"{% endif %} onchange="showSaveBtn()" style="width:100%;max-width:72px;">
+                {% else %}
+                <div style="font-size:1.1rem;font-weight:900;color:#00465E;">{{ val if val and val|string not in ('', '0', 'None') else ('∞' if field == 'MaxMealsPerWeek' else '0') }}</div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endmacro %}
+
+        {% if has_levels %}
+          {{ level_row('default', 'Default — All Employees', company.FreeMealsPerWeek or 0, company.Tier1_Meals or 0, company.Tier2_Meals or 0, company.Tier3_Meals or 0, company.MaxMealsPerWeek or '', is_default=true) }}
+          {% for lv in benefit_levels %}
+            {{ level_row(lv.LevelID, lv.LevelName, lv.FreeMealsPerWeek or 0, lv.Tier1_Meals or 0, lv.Tier2_Meals or 0, lv.Tier3_Meals or 0, lv.MaxMealsPerWeek or '') }}
+          {% endfor %}
+        {% else %}
+          {{ level_row('default', 'All Employees', company.FreeMealsPerWeek or 0, company.Tier1_Meals or 0, company.Tier2_Meals or 0, company.Tier3_Meals or 0, company.MaxMealsPerWeek or '', is_default=true) }}
+        {% endif %}
+        </div>
 
         {% if can_edit %}
         <div style="margin-top:12px;font-size:.72rem;color:#7A8F9C;line-height:1.5;">

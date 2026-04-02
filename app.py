@@ -1638,11 +1638,15 @@ def company_editor(company_id):
     success = None
 
     if request.method == 'POST':
-        fields = dict(request.form)
+        # Use last value for each key to handle hidden+checkbox pattern
+        fields = {k: v[-1] for k, v in request.form.to_dict(flat=False).items()}
         fields['action'] = 'save_company'
         result = _gas_post(fields, timeout=12)
         if result and result.get('success'):
             success = 'Company saved successfully.'
+            # Clear cache so reload shows fresh data
+            with _company_cache_lock:
+                _company_cache.pop(company_id.upper(), None)
         else:
             error = (result.get('error') if result else None) or 'Save failed — check Apps Script logs.'
 
