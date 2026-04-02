@@ -13,7 +13,6 @@ import secrets
 from functools import wraps
 
 app = Flask(__name__)
-
 @app.template_filter('nicedate')
 def nicedate_filter(s):
     """Convert '2026-03-30' to 'March 30, 2026'."""
@@ -57,6 +56,7 @@ HELCIM_API_TOKEN = os.environ.get('HELCIM_API_TOKEN', '')
 SMTP_EMAIL       = os.environ.get('SMTP_EMAIL', '')
 SMTP_PASSWORD    = os.environ.get('SMTP_PASSWORD', '')
 app.secret_key  = os.environ.get('FLASK_SECRET_KEY', 'bd-dev-secret-change-in-prod')
+CULINARY_SYNC_KEY = os.environ.get('CULINARY_SYNC_KEY', 'bd-culinary-sync-2026')
 
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
@@ -760,6 +760,60 @@ def report_production():
                            week=week, delivery_date=_nice_delivery_date(week),
                            dishes=sorted_dishes, total=total,
                            all_weeks=_get_sorted_weeks())
+@app.route('/api/internal/orders')
+def api_internal_orders():
+    """Culinary-ops sync endpoint — returns aggregated order counts for the week."""
+    key = request.headers.get('X-Sync-Key', '') or request.args.get('key', '')
+    if key != CULINARY_SYNC_KEY:
+        return jsonify({'error': 'unauthorized'}), 401
+
+    week = request.args.get('week', '')
+    if not week:
+        # Default to current week's sunday anchor
+        monday = _current_monday()
+        week = (monday - timedelta(days=1)).strftime('%Y-%m-%d')
+
+    orders = _get_week_orders(week)
+
+    # Aggregate: one row per order → group by MealID
+    meals = {}
+    for o in orders:
+        sku = str(o.get('MealID', '')).strip()        # e.g. "#509"
+        if not sku:
+            continue
+        company = o.get('CompanyName', o.get('CompanyID', 'Unknown'))
+        diet_raw = o.get('DietType', '').lower()
+        diet = 'vegan' if 'vegan' in diet_raw or 'plant' in diet_raw else 'meat'
+        if sku not in meals:
+            meals[sku] = {
+                'meal_id':   sku,
+                'dish_name': o.get('DishName', 'Unknown'),
+                'diet':      diet,
+                'count':     0,
+                'by_company': defaultdict(int),
+            }
+        meals[sku]['count'] += 1
+        meals[sku]['by_company'][company] += 1
+
+    result_meals = []
+    for m in meals.values():
+        result_meals.append({
+            'meal_id':    m['meal_id'],
+            'dish_name':  m['dish_name'],
+            'diet':       m['diet'],
+            'count':      m['count'],
+            'by_company': [{'company': c, 'count': n} for c, n in m['by_company'].items()],
+        })
+
+    companies = list({o.get('CompanyName', o.get('CompanyID', '')) for o in orders if o.get('CompanyName') or o.get('CompanyID')})
+
+    return jsonify({
+        'ok':           True,
+        'week':         week,
+        'total_orders': sum(m['count'] for m in result_meals),
+        'companies':    companies,
+        'meals':        result_meals,
+    })
 
 
 @app.route('/bd-admin/report/picklists')
