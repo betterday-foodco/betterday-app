@@ -710,8 +710,9 @@ function doPost(e) {
         "Chia & Parfait":   "chia_oats",
         "Protein Pack":     "snack",
         "Bulk Prep":        "snack",
-        "Cookie":           "cookie",
-        "Juice":            "juice"
+        "Cookie":           "snack",
+        "Juice":            "juice",
+        "Drink":            "juice"
       };
       var catalog = {};
       for (var i = 1; i < rows.length; i++) {
@@ -734,27 +735,8 @@ function doPost(e) {
           tags:  String(rows[i][32] || "").trim()
         });
       }
-      // Placeholder items for categories not yet extracted to 9.0 sheet
-      var placeholders = {
-        cookie: [
-          {id:"#PH-C1", name:"Chocolate Chip Cookie", diet:"snack", type:"Cookie", image:"", description:"Classic chocolate chip, baked fresh.", cal:220, protein:3, carbs:28, fat:12, tags:""},
-          {id:"#PH-C2", name:"Oatmeal Raisin Cookie", diet:"snack", type:"Cookie", image:"", description:"Chewy oatmeal with plump raisins.", cal:200, protein:3, carbs:30, fat:9, tags:""},
-          {id:"#PH-C3", name:"Double Chocolate Cookie", diet:"snack", type:"Cookie", image:"", description:"Rich double chocolate indulgence.", cal:240, protein:4, carbs:32, fat:13, tags:""},
-          {id:"#PH-C4", name:"Peanut Butter Cookie", diet:"snack", type:"Cookie", image:"", description:"Nutty, crumbly peanut butter classic.", cal:210, protein:5, carbs:24, fat:12, tags:"Gluten Free"}
-        ],
-        juice: [
-          {id:"#PH-J1", name:"Green Machine Juice", diet:"juice", type:"Juice", image:"", description:"Spinach, apple, ginger, lemon.", cal:120, protein:2, carbs:28, fat:0, tags:"Dairy Free, Gluten Free"},
-          {id:"#PH-J2", name:"Berry Blast Juice", diet:"juice", type:"Juice", image:"", description:"Mixed berries, banana, coconut water.", cal:140, protein:1, carbs:34, fat:0, tags:"Dairy Free, Gluten Free"},
-          {id:"#PH-J3", name:"Orange Sunrise Juice", diet:"juice", type:"Juice", image:"", description:"Fresh orange, carrot, turmeric.", cal:110, protein:1, carbs:26, fat:0, tags:"Dairy Free, Gluten Free"},
-          {id:"#PH-J4", name:"Tropical Mango Juice", diet:"juice", type:"Juice", image:"", description:"Mango, pineapple, lime, coconut.", cal:150, protein:1, carbs:36, fat:0, tags:"Dairy Free, Gluten Free"}
-        ]
-      };
-      // Merge placeholders for empty categories
-      Object.keys(placeholders).forEach(function(catId) {
-        if (!catalog[catId] || catalog[catId].length === 0) {
-          catalog[catId] = placeholders[catId];
-        }
-      });
+      // No placeholders needed — all categories now pull from 9.0 sheet
+      // Cookies map to "snack", Drinks map to "juice"
       return jsonOut({catalog: catalog});
     }
 

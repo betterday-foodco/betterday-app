@@ -153,7 +153,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .pl-cat-icon.chia{background:#E0E7FF;color:#6366F1}
 .pl-cat-icon.sandwich{background:#FFE4E6;color:#E11D48}
 .pl-cat-icon.breakfast{background:#FEF9C3;color:#CA8A04}
-.pl-cat-icon.cookie{background:#FCE7F3;color:#DB2777}
+.pl-cat-icon.cookie{background:#FCE7F3;color:#DB2777} /* legacy, kept for compat */
 .pl-cat-icon.snack{background:#F3E8FF;color:#9333EA}
 .pl-cat-icon.juice{background:#CCFBF1;color:#0D9488}
 .pl-cat-info{flex:1;min-width:0}
@@ -1852,8 +1852,7 @@ const PL_CATEGORIES = [
   { id: 'sandwich_wrap', name: 'Sandwiches & Wraps',  icon: '🥪', cls: 'sandwich',  rotating: true,  unitPrice: 12.99, group: 'meals' },
   { id: 'hot_breakfast', name: 'Hot Breakfast',        icon: '🍳', cls: 'breakfast', rotating: false, unitPrice: 10.99, group: 'snacks' },
   { id: 'chia_oats',     name: 'Chia Cups & Oats',    icon: '🥣', cls: 'chia',      rotating: false, unitPrice: 8.99,  group: 'snacks' },
-  { id: 'cookie',        name: 'Cookies',              icon: '🍪', cls: 'cookie',    rotating: false, unitPrice: 4.99,  group: 'snacks' },
-  { id: 'snack',         name: 'Snacks',               icon: '🥜', cls: 'snack',     rotating: false, unitPrice: 5.99,  group: 'snacks' },
+  { id: 'snack',         name: 'Snacks & Cookies',      icon: '🥜', cls: 'snack',     rotating: false, unitPrice: 5.99,  group: 'snacks' },
   { id: 'juice',         name: 'Drinks',               icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 7.99,  group: 'snacks' },
 ];
 
