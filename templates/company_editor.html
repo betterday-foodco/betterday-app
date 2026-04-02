@@ -465,6 +465,36 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
 
             <!-- ═══ SECTION 1: PRICING STRUCTURE ═══ -->
             <div class="sl">Pricing Structure</div>
+
+            <!-- ── OFFICE PAR LEVELS TOGGLE ── -->
+            {% set pl_on = company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
+            <div style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border:1.5px solid rgba(59,130,246,.25);border-radius:14px;padding:18px 20px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#3B82F6,#2563EB);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📦</div>
+                        <div>
+                            <div style="font-size:.95rem;font-weight:800;color:#1E3A5F;">Office Par Levels</div>
+                            <div style="font-size:.75rem;color:#4B7399;line-height:1.4;margin-top:2px;">Bulk category ordering for office managers — snacks, sandwiches, breakfasts, juices & more. Sets weekly standing quantities by category.</div>
+                        </div>
+                    </div>
+                    <label style="position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0;cursor:pointer;">
+                        <input type="hidden" name="EnableParLevels" value="FALSE">
+                        <input type="checkbox" name="EnableParLevels" value="TRUE" {% if pl_on %}checked{% endif %}
+                               style="opacity:0;width:0;height:0;position:absolute;"
+                               onchange="this.nextElementSibling.style.background=this.checked?'#2563EB':'#ccc';this.nextElementSibling.lastElementChild.style.left=this.checked?'24px':'2px'">
+                        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:{{ '#2563EB' if pl_on else '#ccc' }};border-radius:26px;transition:.3s;">
+                            <span style="position:absolute;height:22px;width:22px;left:{{ '24px' if pl_on else '2px' }};bottom:2px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2);"></span>
+                        </span>
+                    </label>
+                </div>
+                {% if pl_on %}
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(59,130,246,.15);font-size:.72rem;color:#4B7399;line-height:1.5;">
+                    ✓ Office Orders tab is visible in the manager portal. Managers can set quantities per category and confirm weekly orders.
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ── PER-MEAL PRICING ── -->
             <div class="form-section" id="companyTiersSection">
                 <div class="form-section-header">
                     <div class="fs-icon">&#128176;</div>
@@ -493,14 +523,6 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                             <option value="TRUE" {% if company.ManagerCanEditMeals|string|upper in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>Yes — managers can adjust meal counts per tier</option>
                         </select>
                         <span class="field-hint">When enabled, office managers can change meal-per-tier counts from their portal. All changes are logged.</span>
-                    </div>
-                    <div class="field">
-                        <label>Enable Office Par Levels?</label>
-                        <select name="EnableParLevels">
-                            <option value="FALSE" {% if company.EnableParLevels|string|upper not in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>No — employee ordering only</option>
-                            <option value="TRUE" {% if company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}selected{% endif %}>Yes — office manager can set weekly category quantities</option>
-                        </select>
-                        <span class="field-hint">Adds an "Office Orders" tab to the manager portal for bulk category-based ordering (snacks, sandwiches, etc.)</span>
                     </div>
                 </div>
 
