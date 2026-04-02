@@ -1361,6 +1361,21 @@ def confirm_par_order():
 # Par level catalog cache (items from 9.0 sheet)
 _par_catalog_cache = {'data': None, 'ts': 0}
 
+@app.route('/api/test-par-catalog')
+def test_par_catalog():
+    """Debug endpoint — no auth required. Remove after testing."""
+    import logging
+    logging.warning("Testing par catalog fetch...")
+    result = _gas_post({'action': 'get_par_catalog'}, timeout=25)
+    if result:
+        cats = result.get('catalog', {})
+        summary = {k: len(v) for k, v in cats.items()} if isinstance(cats, dict) else str(cats)[:200]
+        logging.warning("Par catalog result: %s", summary)
+        return jsonify({'ok': True, 'summary': summary, 'raw_keys': list(cats.keys()) if isinstance(cats, dict) else None})
+    else:
+        logging.warning("Par catalog returned None — GAS timeout or error")
+        return jsonify({'ok': False, 'error': 'GAS returned nothing — timeout or error'})
+
 @app.route('/manager/par-catalog')
 @manager_required
 def get_par_catalog():
