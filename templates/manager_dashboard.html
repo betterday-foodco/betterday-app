@@ -1764,9 +1764,9 @@ async function loadChangeLog() {
 // Load change log on tab switch to mealplan
 const _origSidebarNav = sidebarNav;
 sidebarNav = function(name, el) {
-  _origSidebarNav(name, el);
-  if (name === 'mealplan') loadChangeLog();
-  if (name === 'parlevel') initParLevels();
+  try { _origSidebarNav(name, el); } catch(e) { console.error('sidebarNav error:', e); }
+  try { if (name === 'mealplan') loadChangeLog(); } catch(e) {}
+  try { if (name === 'parlevel') initParLevels(); } catch(e) {}
 };
 
 // ═══════════════════════════════════════
@@ -1913,7 +1913,7 @@ function openFullCartEditor() {
             </div>
           </div>
           ${qty > 0 ? '<div style="font-size:.72rem;font-weight:700;color:#00465E;">$' + (qty * cat.unitPrice).toFixed(2) + '/week</div>' : ''}
-          ${qty > 0 ? '<button onclick="event.stopPropagation();openCatDetail(\\'' + cat.id + '\\')" style="margin-top:6px;font-size:.68rem;font-weight:700;color:#2563EB;background:none;border:none;cursor:pointer;padding:0;font-family:\'DM Sans\',sans-serif;">Choose specific items →</button>' : ''}
+          ${qty > 0 ? '<button onclick="event.stopPropagation();openCatDetail(\'' + cat.id + '\')" style="margin-top:6px;font-size:.68rem;font-weight:700;color:#2563EB;background:none;border:none;cursor:pointer;padding:0;">Choose specific items</button>' : ''}
         </div>`;
       }).join('')}
     </div>
