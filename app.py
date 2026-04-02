@@ -129,6 +129,7 @@ _token_store      = {}   # token → {email, company_id, created_at, used}
 _token_store_lock = threading.Lock()
 _TOKEN_TTL        = 900  # 15 minutes
 _menu_cache       = {}   # 'menu_{anchor}' → {data, ts}
+_available_meals  = {}   # 'YYYY-MM-DD' → ['#509', '#388', ...]  pushed from culinary-ops
 
 def _store_magic_token(token, email, company_id):
     with _token_store_lock:
@@ -309,21 +310,33 @@ def gas_proxy():
         # Token not in Flask store — fall through to GAS (handles tokens from old emails)
         # (fall through to the requests.post below)
 
-    # ── get_menu: cache on Flask for 10 minutes to avoid GAS cold-starts ──
     if payload.get('action') == 'get_menu':
         anchor = payload.get('sunday_anchor', '')
         cache_key = f'menu_{anchor}'
         cached = _menu_cache.get(cache_key)
-        if cached and (time.time() - cached['ts'] < 600):  # 10 min TTL
-            return jsonify(cached['data']), 200
+        if cached and (time.time() - cached['ts'] < 600):
+            data = cached['data']
+            if anchor in _available_meals:
+                allowed = set(_available_meals[anchor])
+                data = {
+                    'meat':  [m for m in (data.get('meat')  or []) if str(m.get('MealID','')).strip() in allowed],
+                    'vegan': [m for m in (data.get('vegan') or []) if str(m.get('MealID','')).strip() in allowed],
+                }
+            return jsonify(data), 200
         try:
             r = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=20)
             data = r.json()
             if r.status_code == 200 and (data.get('meat') or data.get('vegan')):
                 _menu_cache[cache_key] = {'data': data, 'ts': time.time()}
+            if anchor in _available_meals and r.status_code == 200:
+                allowed = set(_available_meals[anchor])
+                data = {
+                    'meat':  [m for m in (data.get('meat')  or []) if str(m.get('MealID','')).strip() in allowed],
+                    'vegan': [m for m in (data.get('vegan') or []) if str(m.get('MealID','')).strip() in allowed],
+                }
             return jsonify(data), r.status_code
         except requests.Timeout:
-            if cached:  # return stale cache rather than error
+            if cached:
                 return jsonify(cached['data']), 200
             return jsonify({'error': 'Menu loading timed out — please try again.'}), 504
         except Exception as ex:
@@ -331,6 +344,7 @@ def gas_proxy():
             if cached:
                 return jsonify(cached['data']), 200
             return jsonify({'error': 'Could not load menu.'}), 500
+
 
     try:
         r = requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=15)
@@ -814,6 +828,26 @@ def api_internal_orders():
         'companies':    companies,
         'meals':        result_meals,
     })
+  @app.route('/api/internal/menu', methods=['POST'])
+def api_internal_menu():
+    """Culinary-ops pushes available meal IDs so employees only see those meals."""
+    key = request.headers.get('X-Sync-Key', '') or request.args.get('key', '')
+    if key != CULINARY_SYNC_KEY:
+        return jsonify({'error': 'unauthorized'}), 401
+
+    data = request.get_json(force=True) or {}
+    anchor = data.get('week')
+    meal_ids = data.get('meal_ids', [])
+
+    if not anchor or not meal_ids:
+        return jsonify({'error': 'week and meal_ids are required'}), 400
+
+    _available_meals[anchor] = meal_ids
+    _menu_cache.pop(f'menu_{anchor}', None)  # bust cache so filter applies immediately
+
+    log.info('Menu pushed for week %s: %d meals', anchor, len(meal_ids))
+    return jsonify({'ok': True, 'week': anchor, 'meals_published': len(meal_ids)})
+
 
 
 @app.route('/bd-admin/report/picklists')
