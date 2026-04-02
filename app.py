@@ -828,7 +828,9 @@ def api_internal_orders():
         'companies':    companies,
         'meals':        result_meals,
     })
-  @app.route('/api/internal/menu', methods=['POST'])
+
+
+@app.route('/api/internal/menu', methods=['POST'])
 def api_internal_menu():
     """Culinary-ops pushes available meal IDs so employees only see those meals."""
     key = request.headers.get('X-Sync-Key', '') or request.args.get('key', '')
