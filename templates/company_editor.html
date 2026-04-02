@@ -494,6 +494,14 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                         </select>
                         <span class="field-hint">When enabled, office managers can change meal-per-tier counts from their portal. All changes are logged.</span>
                     </div>
+                    <div class="field">
+                        <label>Enable Office Par Levels?</label>
+                        <select name="EnableParLevels">
+                            <option value="FALSE" {% if company.EnableParLevels != 'TRUE' %}selected{% endif %}>No — employee ordering only</option>
+                            <option value="TRUE" {% if company.EnableParLevels == 'TRUE' %}selected{% endif %}>Yes — office manager can set weekly category quantities</option>
+                        </select>
+                        <span class="field-hint">Adds an "Office Orders" tab to the manager portal for bulk category-based ordering (snacks, sandwiches, etc.)</span>
+                    </div>
                 </div>
 
                 <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="tierGrid">

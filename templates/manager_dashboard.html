@@ -143,6 +143,55 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .log-date{font-size:.7rem;color:#7A8F9C;white-space:nowrap;min-width:100px}
 .log-detail{font-size:.78rem;color:#2E4A5A;line-height:1.4}
 .log-detail strong{color:#00465E}
+/* ═══ PAR LEVEL MODULE ═══ */
+.pl-cat-card{background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:.15s;cursor:pointer}
+.pl-cat-card:hover{border-color:#00465E;box-shadow:0 2px 8px rgba(0,70,94,.08)}
+.pl-cat-card.paused{opacity:.5;border-style:dashed}
+.pl-cat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.pl-cat-icon.meat{background:#FEF3C7;color:#D97706}
+.pl-cat-icon.plant{background:#DCFCE7;color:#16A34A}
+.pl-cat-icon.chia{background:#E0E7FF;color:#6366F1}
+.pl-cat-icon.sandwich{background:#FFE4E6;color:#E11D48}
+.pl-cat-icon.breakfast{background:#FEF9C3;color:#CA8A04}
+.pl-cat-icon.cookie{background:#FCE7F3;color:#DB2777}
+.pl-cat-icon.snack{background:#F3E8FF;color:#9333EA}
+.pl-cat-icon.juice{background:#CCFBF1;color:#0D9488}
+.pl-cat-info{flex:1;min-width:0}
+.pl-cat-name{font-size:.85rem;font-weight:800;color:#00465E}
+.pl-cat-sub{font-size:.7rem;color:#7A8F9C;margin-top:1px}
+.pl-cat-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pl-qty-ctrl{display:flex;align-items:center;gap:0;border:1.5px solid #E8DFD2;border-radius:8px;overflow:hidden}
+.pl-qty-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#00465E;background:#F9F5F0;border:none;cursor:pointer;transition:.1s;font-family:'DM Sans',sans-serif}
+.pl-qty-btn:hover{background:#E8DFD2}
+.pl-qty-val{width:36px;text-align:center;font-size:.85rem;font-weight:900;color:#00465E;border:none;background:#fff;font-family:'DM Sans',sans-serif;padding:0}
+.pl-qty-val:focus{outline:none}
+.pl-status-pill{font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
+.pl-status-pill.active{background:rgba(22,163,74,.1);color:#16A34A}
+.pl-status-pill.paused{background:rgba(239,68,68,.1);color:#EF4444}
+.pl-status-pill.custom{background:rgba(99,102,241,.1);color:#6366F1}
+.pl-pause-btn{width:28px;height:28px;border-radius:6px;border:1px solid #E8DFD2;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:.15s}
+.pl-pause-btn:hover{background:#FEF2F2;border-color:#EF4444}
+/* Slide-in detail panel */
+.pl-detail-panel{position:fixed;top:0;right:-480px;width:460px;max-width:90vw;height:100vh;background:#fff;z-index:300;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.15)}
+.pl-detail-panel.open{right:0}
+.pl-detail-header{background:#00465E;color:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between}
+.pl-detail-header h3{font-size:1rem;font-weight:800}
+.pl-detail-close{color:#fff;font-size:20px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;border:none;background:none;transition:.2s}
+.pl-detail-close:hover{background:rgba(255,255,255,.15)}
+.pl-detail-body{flex:1;overflow-y:auto;padding:16px 20px}
+.pl-dish-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F0F0F0}
+.pl-dish-row:last-child{border-bottom:none}
+.pl-dish-img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#f3f3f3}
+.pl-dish-info{flex:1;min-width:0}
+.pl-dish-name{font-size:.82rem;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-dish-meta{font-size:.7rem;color:#7A8F9C;margin-top:2px}
+.pl-dish-swap{font-size:.7rem;font-weight:700;color:#2563EB;padding:4px 8px;border-radius:6px;border:1px solid #DBEAFE;background:#EFF6FF;cursor:pointer;transition:.15s;white-space:nowrap}
+.pl-dish-swap:hover{background:#DBEAFE}
+.pl-dish-badge{font-size:.55rem;font-weight:800;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
+.pl-dish-badge.locked{background:#F3F4F6;color:#6B7280}
+.pl-dish-badge.swapped{background:#FEF3C7;color:#B45309}
+.pl-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);z-index:299;display:none}
+.pl-overlay.open{display:block}
 
 /* ════════ ORDER DETAIL MODAL ════════ */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,20,30,.45);backdrop-filter:blur(3px);z-index:100;display:none;align-items:center;justify-content:center}
@@ -239,6 +288,9 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
   <div class="ni" onclick="sidebarNav('invoices', this)">&#9670; &nbsp;Invoices</div>
   <div class="ni" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
   <div class="ni" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees</div>
+  {% if company.EnableParLevels and company.EnableParLevels|string|upper == 'TRUE' %}
+  <div class="ni" onclick="sidebarNav('parlevel', this)">&#128230; &nbsp;Office Orders</div>
+  {% endif %}
   <div class="sb-div"></div>
   <div class="sb-sec">Settings</div>
   <div class="ni" onclick="sidebarNav('mealplan', this)">&#127860; &nbsp;Subsidy Tiers</div>
@@ -601,6 +653,93 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     </div>
 
     <!-- ════════════════════════════════════════ -->
+    <!-- TAB: OFFICE PAR LEVELS                  -->
+    <!-- ════════════════════════════════════════ -->
+    {% if company.EnableParLevels and company.EnableParLevels|string|upper == 'TRUE' %}
+    <div class="tab-panel" id="tab-parlevel">
+      <div class="sl" style="margin-top:0">Office Orders</div>
+
+      <!-- ── DISCOUNT PROGRESS BAR ── -->
+      <div class="card" style="background:linear-gradient(135deg,#FFF8F0 0%,#FEF3C7 50%,#FDE68A 100%);border:1.5px solid rgba(212,160,41,.2);position:relative;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:.9rem;font-weight:800;color:#92400E;">Order More, Save More</div>
+          <div id="plDiscountPill" style="background:#B56B10;color:#fff;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:99px;">SAVE 0%</div>
+        </div>
+        <div style="position:relative;margin-bottom:6px;">
+          <div style="height:12px;background:rgba(0,0,0,.08);border-radius:12px;overflow:hidden;">
+            <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#F59E0B,#D97706,#B45309);border-radius:12px;transition:width .5s;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.6rem;font-weight:700;color:#92400E;">
+            <span>$0</span>
+            <span style="position:absolute;left:33%;transform:translateX(-50%);">$500 <span style="font-size:.55rem;color:#B45309;">15% off</span></span>
+            <span style="position:absolute;left:66%;transform:translateX(-50%);">$1,000 <span style="font-size:.55rem;color:#B45309;">20% off</span></span>
+            <span>$1,500+ <span style="font-size:.55rem;color:#B45309;">25% off</span></span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-top:10px;">
+          <span style="font-size:1.3rem;font-weight:900;color:#1a1a1a;" id="plTotalDisplay">$0.00</span>
+          <span style="font-size:.78rem;color:#92400E;" id="plSavingsDisplay"></span>
+        </div>
+      </div>
+
+      <!-- ── DELIVERY INFO ── -->
+      <div class="card" style="margin-top:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;">Next Delivery</div>
+            <div style="font-size:1.1rem;font-weight:900;color:#00465E;" id="plNextDelivery">Monday, Apr 7</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <div style="text-align:center;padding:6px 14px;background:rgba(0,70,94,.05);border-radius:8px;">
+              <div style="font-size:.6rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Frequency</div>
+              <div style="font-size:.82rem;font-weight:800;color:#00465E;">Weekly</div>
+            </div>
+            <div style="text-align:center;padding:6px 14px;background:rgba(0,70,94,.05);border-radius:8px;">
+              <div style="font-size:.6rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Status</div>
+              <div style="font-size:.82rem;font-weight:800;color:#167421;" id="plStatusDisplay">Active</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="flex:1;padding:8px;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;color:#7A8F9C;background:#fff;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">⏸ Pause All</button>
+          <button style="flex:1;padding:8px;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;color:#7A8F9C;background:#fff;font-family:'DM Sans',sans-serif;opacity:.5;cursor:not-allowed;" title="Available for orders $1,000+">📦 Dual Delivery</button>
+        </div>
+      </div>
+
+      <!-- ── CATEGORY GRID ── -->
+      <div style="margin-top:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="sl" style="margin:0;font-size:.72rem;">Your Categories</div>
+          <button onclick="confirmParOrder(this)" style="background:#00465E;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#006580'" onmouseout="this.style.background='#00465E'">✓ Confirm This Week</button>
+        </div>
+        <div id="plCategoryGrid" style="display:flex;flex-direction:column;gap:8px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- ── ONE-TIME OVERRIDE TOGGLE ── -->
+      <div style="margin-top:12px;padding:10px 14px;background:#FFF8F0;border:1px solid rgba(212,160,41,.15);border-radius:10px;display:flex;align-items:center;gap:10px;">
+        <label style="position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0;">
+          <input type="checkbox" id="plOverrideToggle" style="opacity:0;width:0;height:0;" onchange="toggleOverrideMode()">
+          <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:20px;transition:.3s;"></span>
+          <span style="position:absolute;content:'';height:16px;width:16px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s;" id="plToggleKnob"></span>
+        </label>
+        <span style="font-size:.78rem;color:#5a4a2a;line-height:1.3;">
+          <strong>One-time adjustment</strong> — changes this week only, standing order stays the same
+        </span>
+      </div>
+
+      <!-- ── DELIVERY HISTORY ── -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title">Delivery History</div>
+        <div id="plHistoryBody" style="font-size:.82rem;">
+          <div style="color:#7A8F9C;text-align:center;padding:16px;">No deliveries yet.</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════════════════════════════ -->
     <!-- TAB: MEAL PLAN                          -->
     <!-- ════════════════════════════════════════ -->
     <div class="tab-panel" id="tab-mealplan">
@@ -902,7 +1041,7 @@ function sidebarNav(name, el) {
   const saved = params.get('saved');
   if (saved) {
     const items = document.querySelectorAll('.sb .ni');
-    const map = {overview:0, orders:1, invoices:2, monthly:3, employees:4, mealplan:6, account:7};
+    const map = {overview:0, orders:1, invoices:2, monthly:3, employees:4, parlevel:5, mealplan:7, account:8};
     if (map[saved] !== undefined && items[map[saved]]) sidebarNav(saved, items[map[saved]]);
   }
 })();
@@ -1679,7 +1818,286 @@ const _origSidebarNav = sidebarNav;
 sidebarNav = function(name, el) {
   _origSidebarNav(name, el);
   if (name === 'mealplan') loadChangeLog();
+  if (name === 'parlevel') initParLevels();
 };
+
+// ═══════════════════════════════════════
+// OFFICE PAR LEVELS MODULE
+// ═══════════════════════════════════════
+const PL_CATEGORIES = [
+  { id: 'meat_entree',   name: 'Meat Entrees',       icon: '🥩', cls: 'meat',      rotating: true,  unitPrice: 16.99 },
+  { id: 'plant_entree',  name: 'Plant Entrees',      icon: '🌱', cls: 'plant',     rotating: true,  unitPrice: 16.99 },
+  { id: 'chia_oats',     name: 'Chia Cup / Oats',    icon: '🥣', cls: 'chia',      rotating: false, unitPrice: 8.99 },
+  { id: 'sandwich_wrap', name: 'Sandwiches & Wraps',  icon: '🥪', cls: 'sandwich',  rotating: true,  unitPrice: 12.99 },
+  { id: 'hot_breakfast', name: 'Hot Breakfast',       icon: '🍳', cls: 'breakfast', rotating: false, unitPrice: 10.99 },
+  { id: 'cookie',        name: 'Cookies',             icon: '🍪', cls: 'cookie',    rotating: false, unitPrice: 4.99 },
+  { id: 'snack',         name: 'Snacks',              icon: '🥜', cls: 'snack',     rotating: false, unitPrice: 5.99 },
+  { id: 'juice',         name: 'Juices',              icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 7.99 },
+];
+
+let plData = {};  // categoryId → { qty, status, mode, items:[] }
+let plInitialized = false;
+let plOverrideMode = false;
+
+function initParLevels() {
+  if (plInitialized) return;
+  plInitialized = true;
+  // Load saved par levels from server or init defaults
+  loadParLevels();
+}
+
+async function loadParLevels() {
+  try {
+    const r = await fetch('/manager/par-levels');
+    const d = await r.json();
+    if (d.levels && Object.keys(d.levels).length > 0) {
+      plData = d.levels;
+    } else {
+      // Init with zeros
+      PL_CATEGORIES.forEach(c => {
+        if (!plData[c.id]) plData[c.id] = { qty: 0, status: 'active', mode: 'auto', items: [] };
+      });
+    }
+  } catch(e) {
+    PL_CATEGORIES.forEach(c => {
+      if (!plData[c.id]) plData[c.id] = { qty: 0, status: 'active', mode: 'auto', items: [] };
+    });
+  }
+  renderParGrid();
+  updateParTotals();
+}
+
+function renderParGrid() {
+  const grid = document.getElementById('plCategoryGrid');
+  if (!grid) return;
+  grid.innerHTML = PL_CATEGORIES.map(cat => {
+    const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
+    const isPaused = d.status === 'paused';
+    return `
+      <div class="pl-cat-card ${isPaused ? 'paused' : ''}" id="plCat_${cat.id}">
+        <div class="pl-cat-icon ${cat.cls}">${cat.icon}</div>
+        <div class="pl-cat-info" onclick="openCatDetail('${cat.id}')">
+          <div class="pl-cat-name">${cat.name}</div>
+          <div class="pl-cat-sub">${cat.rotating ? '↻ Rotates weekly' : '🔒 Static items'} · $${cat.unitPrice.toFixed(2)}/ea</div>
+        </div>
+        <div class="pl-cat-right">
+          <span class="pl-status-pill ${d.mode === 'custom' ? 'custom' : (isPaused ? 'paused' : 'active')}">${isPaused ? 'Paused' : (d.mode === 'custom' ? 'Custom' : 'Auto')}</span>
+          <div class="pl-qty-ctrl">
+            <button class="pl-qty-btn" onclick="event.stopPropagation();adjustQty('${cat.id}',-1)">−</button>
+            <input class="pl-qty-val" type="number" min="0" value="${d.qty}" onchange="setQty('${cat.id}',this.value)" onclick="event.stopPropagation()">
+            <button class="pl-qty-btn" onclick="event.stopPropagation();adjustQty('${cat.id}',1)">+</button>
+          </div>
+          <button class="pl-pause-btn" onclick="event.stopPropagation();toggleCatPause('${cat.id}')" title="${isPaused ? 'Resume' : 'Pause'}">${isPaused ? '▶' : '⏸'}</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function adjustQty(catId, delta) {
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
+  d.qty = Math.max(0, (d.qty || 0) + delta);
+  plData[catId] = d;
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function setQty(catId, val) {
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
+  d.qty = Math.max(0, parseInt(val) || 0);
+  plData[catId] = d;
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function toggleCatPause(catId) {
+  const d = plData[catId];
+  if (!d) return;
+  d.status = d.status === 'paused' ? 'active' : 'paused';
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function toggleAllParLevels() {
+  const allPaused = PL_CATEGORIES.every(c => (plData[c.id] || {}).status === 'paused');
+  PL_CATEGORIES.forEach(c => {
+    if (plData[c.id]) plData[c.id].status = allPaused ? 'active' : 'paused';
+  });
+  const btn = document.getElementById('plPauseAllBtn');
+  if (btn) btn.textContent = allPaused ? '⏸ Pause All' : '▶ Resume All';
+  document.getElementById('plStatusDisplay').textContent = allPaused ? 'Active' : 'Paused';
+  document.getElementById('plStatusDisplay').style.color = allPaused ? '#167421' : '#EF4444';
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function updateParTotals() {
+  let subtotal = 0;
+  PL_CATEGORIES.forEach(cat => {
+    const d = plData[cat.id];
+    if (d && d.status !== 'paused') subtotal += (d.qty || 0) * cat.unitPrice;
+  });
+  // Discount tiers
+  let discountPct = 0;
+  if (subtotal >= 1500) discountPct = 25;
+  else if (subtotal >= 1000) discountPct = 20;
+  else if (subtotal >= 500) discountPct = 15;
+  const savings = subtotal * (discountPct / 100);
+  const total = subtotal - savings;
+  // Update UI
+  document.getElementById('plTotalDisplay').textContent = '$' + total.toFixed(2);
+  const savingsEl = document.getElementById('plSavingsDisplay');
+  savingsEl.textContent = discountPct > 0 ? ('You save $' + savings.toFixed(2) + ' (' + discountPct + '% off)') : 'Add items to unlock savings';
+  document.getElementById('plDiscountPill').textContent = discountPct > 0 ? ('SAVE ' + discountPct + '%') : 'SAVE 0%';
+  // Progress bar (capped at 1500)
+  const pct = Math.min(100, (subtotal / 1500) * 100);
+  document.getElementById('plProgressFill').style.width = pct + '%';
+}
+
+function toggleOverrideMode() {
+  plOverrideMode = document.getElementById('plOverrideToggle').checked;
+  const knob = document.getElementById('plToggleKnob');
+  if (knob) {
+    knob.style.left = plOverrideMode ? '18px' : '2px';
+    knob.parentElement.previousElementSibling.nextElementSibling.style.background = plOverrideMode ? '#B56B10' : '#ccc';
+  }
+}
+
+let _plSaveTimer = null;
+function autoSaveParLevels() {
+  clearTimeout(_plSaveTimer);
+  _plSaveTimer = setTimeout(() => {
+    fetch('/manager/par-levels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ levels: plData, override: plOverrideMode })
+    }).catch(e => console.warn('Par level save failed:', e));
+  }, 800);
+}
+
+async function confirmParOrder(btn) {
+  const totalItems = PL_CATEGORIES.reduce((sum, c) => {
+    const d = plData[c.id];
+    return sum + ((d && d.status !== 'paused') ? (d.qty || 0) : 0);
+  }, 0);
+  if (totalItems === 0) { alert('Add items to at least one category first.'); return; }
+  if (!confirm('Confirm your weekly order of ' + totalItems + ' items?')) return;
+  btn.disabled = true; btn.textContent = 'Confirming…';
+  try {
+    const r = await fetch('/manager/par-levels/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ levels: plData })
+    });
+    const d = await r.json();
+    if (d.success) {
+      btn.textContent = '✓ Confirmed';
+      btn.style.background = '#167421';
+      setTimeout(() => { btn.textContent = '✓ Confirm This Week'; btn.style.background = '#00465E'; btn.disabled = false; }, 2500);
+    } else {
+      alert('Error: ' + (d.error || 'Unknown')); btn.textContent = '✓ Confirm This Week'; btn.disabled = false;
+    }
+  } catch(e) {
+    alert('Error: ' + e.message); btn.textContent = '✓ Confirm This Week'; btn.disabled = false;
+  }
+}
+
+// ── Category detail slide-in panel ──
+function openCatDetail(catId) {
+  const cat = PL_CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  const d = plData[catId] || { qty: 0, items: [] };
+  // Create overlay + panel if not exists
+  let overlay = document.querySelector('.pl-overlay');
+  let panel = document.querySelector('.pl-detail-panel');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'pl-overlay';
+    overlay.onclick = () => closeCatDetail();
+    document.body.appendChild(overlay);
+  }
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.className = 'pl-detail-panel';
+    document.body.appendChild(panel);
+  }
+  // Build items — for demo, generate placeholder items based on qty
+  const items = d.items && d.items.length > 0 ? d.items : generateDemoItems(cat, d.qty);
+  panel.innerHTML = `
+    <div class="pl-detail-header">
+      <h3>${cat.icon} ${cat.name}</h3>
+      <button class="pl-detail-close" onclick="closeCatDetail()">✕</button>
+    </div>
+    <div style="padding:12px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <span style="font-size:.75rem;font-weight:700;color:#00465E;">Weekly: ${d.qty} items</span>
+        <span style="font-size:.7rem;color:#7A8F9C;margin-left:8px;">$${cat.unitPrice.toFixed(2)}/ea → $${((d.qty || 0) * cat.unitPrice).toFixed(2)}</span>
+      </div>
+      <span class="pl-dish-badge ${cat.rotating ? 'swapped' : 'locked'}">${cat.rotating ? '↻ Rotates' : '🔒 Static'}</span>
+    </div>
+    <div class="pl-detail-body">
+      ${items.length === 0 ? '<div style="text-align:center;padding:40px 20px;color:#7A8F9C;">Set a quantity above to see items here.</div>' :
+        items.map((item, i) => `
+          <div class="pl-dish-row">
+            <img class="pl-dish-img" src="${item.image || ''}" alt="" onerror="this.style.background='#E8DFD2';this.alt='🍽'">
+            <div class="pl-dish-info">
+              <div class="pl-dish-name">${item.name}</div>
+              <div class="pl-dish-meta">${item.sku || ''} · ${item.diet || cat.name} · $${cat.unitPrice.toFixed(2)}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${cat.rotating ? '<button class="pl-dish-swap" onclick="swapDish(\'' + catId + '\',' + i + ')">Swap</button>' : ''}
+              <div class="pl-qty-ctrl" style="transform:scale(.85);">
+                <button class="pl-qty-btn" onclick="adjustDishQty(\'' + catId + '\',' + i + ',-1)">−</button>
+                <span class="pl-qty-val" style="width:24px;font-size:.78rem;">${item.qty || 1}</span>
+                <button class="pl-qty-btn" onclick="adjustDishQty(\'' + catId + '\',' + i + ',1)">+</button>
+              </div>
+            </div>
+          </div>`).join('')}
+    </div>
+  `;
+  requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
+}
+
+function closeCatDetail() {
+  const overlay = document.querySelector('.pl-overlay');
+  const panel = document.querySelector('.pl-detail-panel');
+  if (overlay) overlay.classList.remove('open');
+  if (panel) panel.classList.remove('open');
+}
+
+function generateDemoItems(cat, qty) {
+  if (!qty || qty === 0) return [];
+  // Demo placeholder items
+  const demoNames = {
+    meat_entree: ['Casanova Chicken Parm', 'Halifax Hero Donair Bowl', 'Hot Dang Hoisin Beef Udon', 'Seoul-ful Korean BBQ', 'Butter Chicken Bowl'],
+    plant_entree: ['Jamaican Tempeh Curry', 'Mediterranean Falafel Plate', 'Thai Green Curry Tofu', 'Black Bean Burrito Bowl'],
+    chia_oats: ['Vanilla Chia Pudding', 'Mango Overnight Oats', 'Berry Chia Cup', 'PB Chocolate Oats'],
+    sandwich_wrap: ['Turkey Club Wrap', 'Chicken Caesar Wrap', 'Veggie Hummus Wrap', 'BLT Sandwich'],
+    hot_breakfast: ['Egg & Cheese Muffin', 'Sausage Breakfast Bowl', 'Veggie Scramble'],
+    cookie: ['Chocolate Chip', 'Oatmeal Raisin', 'Double Chocolate', 'Peanut Butter'],
+    snack: ['Trail Mix Cup', 'Protein Bites', 'Granola Bar', 'Veggie Cup & Hummus'],
+    juice: ['Green Machine', 'Berry Blast', 'Orange Sunrise', 'Tropical Mango'],
+  };
+  const names = demoNames[cat.id] || ['Item'];
+  const items = [];
+  let remaining = qty;
+  for (let i = 0; i < names.length && remaining > 0; i++) {
+    const q = i === names.length - 1 ? remaining : Math.max(1, Math.round(remaining / (names.length - i)));
+    items.push({ name: names[i], sku: '#' + (400 + i), diet: cat.name, qty: q, image: '' });
+    remaining -= q;
+  }
+  return items;
+}
+
+function swapDish(catId, idx) {
+  alert('Swap panel coming soon — will show available alternatives from this week\'s menu.');
+}
+function adjustDishQty(catId, idx, delta) {
+  // For demo, just show feedback
+  alert('Dish quantity adjustment — will update when connected to live menu data.');
+}
 </script>
 </body>
 </html>

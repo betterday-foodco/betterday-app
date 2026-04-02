@@ -1259,6 +1259,137 @@ function doPost(e) {
       return jsonOut({log: result});
     }
 
+    // ─────────────────────────────────────────
+    // GET PAR LEVELS
+    // ─────────────────────────────────────────
+    if (data.action === "get_par_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var sheet = ssHub.getSheetByName("ParLevels");
+      if (!sheet) return jsonOut({levels: {}});
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0];
+      var levels = {};
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toUpperCase() !== companyId) continue;
+        var catId = String(rows[i][1]).trim();
+        levels[catId] = {
+          qty: parseInt(rows[i][2]) || 0,
+          status: String(rows[i][3] || "active").trim(),
+          mode: String(rows[i][4] || "auto").trim(),
+          items: rows[i][5] ? JSON.parse(rows[i][5]) : []
+        };
+      }
+      return jsonOut({levels: levels});
+    }
+
+    // ─────────────────────────────────────────
+    // SAVE PAR LEVELS
+    // ─────────────────────────────────────────
+    if (data.action === "save_par_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      if (!companyId) return jsonOut({success: false, error: "CompanyID required"});
+      var levels = data.levels || {};
+      var sheet = ssHub.getSheetByName("ParLevels");
+      if (!sheet) {
+        sheet = ssHub.insertSheet("ParLevels");
+        sheet.appendRow(["CompanyID","CategoryID","WeeklyQty","Status","Mode","ItemsJSON","LastModified","ModifiedBy"]);
+        sheet.setFrozenRows(1);
+        sheet.getRange(1,1,1,8).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+      }
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0];
+      // Delete existing rows for this company (bottom-up)
+      for (var i = rows.length - 1; i >= 1; i--) {
+        if (String(rows[i][0]).trim().toUpperCase() === companyId) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+      // Append new rows
+      var changedBy = String(data.changed_by || "manager").trim();
+      Object.keys(levels).forEach(function(catId) {
+        var lv = levels[catId];
+        sheet.appendRow([
+          companyId,
+          catId,
+          parseInt(lv.qty) || 0,
+          String(lv.status || "active"),
+          String(lv.mode || "auto"),
+          lv.items ? JSON.stringify(lv.items) : "[]",
+          new Date(),
+          changedBy
+        ]);
+      });
+      return jsonOut({success: true});
+    }
+
+    // ─────────────────────────────────────────
+    // CONFIRM PAR ORDER (creates order rows for this week)
+    // ─────────────────────────────────────────
+    if (data.action === "confirm_par_order") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var changedBy = String(data.changed_by || "manager").trim();
+      var levels = data.levels || {};
+      // Get company name
+      var compSheet = ssHub.getSheetByName("Companies");
+      var compRows = compSheet.getDataRange().getValues();
+      var compHeaders = compRows[0];
+      var compNameIdx = compHeaders.indexOf("CompanyName");
+      var companyName = "";
+      for (var i = 1; i < compRows.length; i++) {
+        if (String(compRows[i][0]).trim().toUpperCase() === companyId) {
+          companyName = String(compRows[i][compNameIdx] || "");
+          break;
+        }
+      }
+      // Calculate Sunday anchor (next Sunday)
+      var today = new Date();
+      var daysUntilSun = (7 - today.getDay()) % 7;
+      if (daysUntilSun === 0) daysUntilSun = 7;
+      var nextSunday = new Date(today);
+      nextSunday.setDate(today.getDate() + daysUntilSun);
+      var sundayAnchor = Utilities.formatDate(nextSunday, Session.getScriptTimeZone(), "yyyy-MM-dd");
+      // Delivery date = Monday after Sunday
+      var deliveryDate = new Date(nextSunday);
+      deliveryDate.setDate(deliveryDate.getDate() + 1);
+      var deliveryStr = Utilities.formatDate(deliveryDate, Session.getScriptTimeZone(), "yyyy-MM-dd");
+      // Get or create order ID
+      var orderId = getNextOrderId(ssHub);
+      // Get CorporateOrders sheet
+      var corpSheet = ssHub.getSheetByName("CorporateOrders");
+      if (!corpSheet) {
+        corpSheet = ssHub.insertSheet("CorporateOrders");
+        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","PaymentTransactionID","Status","OrderID","EmployeeLevel"]);
+      }
+      var totalItems = 0;
+      Object.keys(levels).forEach(function(catId) {
+        var lv = levels[catId];
+        if (!lv || lv.status === 'paused' || !lv.qty || lv.qty <= 0) return;
+        // One row per category with total qty
+        corpSheet.appendRow([
+          new Date(),
+          companyId,
+          companyName,
+          deliveryStr,
+          sundayAnchor,
+          "Office Order (" + changedBy + ")",
+          changedBy,
+          "PAR-" + catId,
+          catId + " x" + lv.qty,
+          "par_level",
+          "office",
+          "0.00",
+          "0.00",
+          "0.00",
+          "",
+          "confirmed",
+          orderId,
+          "par_level"
+        ]);
+        totalItems += parseInt(lv.qty) || 0;
+      });
+      return jsonOut({success: true, orderId: orderId, totalItems: totalItems, deliveryDate: deliveryStr});
+    }
+
     return ContentService.createTextOutput("Error: Unknown Action");
   } catch (err) {
     return ContentService.createTextOutput("Error: " + err.toString());

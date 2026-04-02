@@ -1313,6 +1313,51 @@ def manager_meal_change_log():
     return jsonify(result or {'log': []})
 
 
+@app.route('/manager/par-levels', methods=['GET'])
+@manager_required
+def get_par_levels():
+    """Load par level data for this company."""
+    company_id = session.get('manager_company_id')
+    result = _gas_post({
+        'action': 'get_par_levels',
+        'company_id': company_id
+    }, timeout=10)
+    return jsonify(result or {'levels': {}})
+
+
+@app.route('/manager/par-levels', methods=['POST'])
+@manager_required
+def save_par_levels():
+    """Save par level quantities/status for this company."""
+    company_id = session.get('manager_company_id')
+    manager_email = session.get('manager_email', 'manager')
+    data = request.get_json(force=True)
+    result = _gas_post({
+        'action': 'save_par_levels',
+        'company_id': company_id,
+        'levels': data.get('levels', {}),
+        'override': data.get('override', False),
+        'changed_by': manager_email
+    }, timeout=12)
+    return jsonify(result or {'success': False, 'error': 'GAS timeout'})
+
+
+@app.route('/manager/par-levels/confirm', methods=['POST'])
+@manager_required
+def confirm_par_order():
+    """Confirm the weekly par level order."""
+    company_id = session.get('manager_company_id')
+    manager_email = session.get('manager_email', 'manager')
+    data = request.get_json(force=True)
+    result = _gas_post({
+        'action': 'confirm_par_order',
+        'company_id': company_id,
+        'levels': data.get('levels', {}),
+        'changed_by': manager_email
+    }, timeout=15)
+    return jsonify(result or {'success': False, 'error': 'GAS timeout'})
+
+
 @app.route('/manager/invoice-status', methods=['POST'])
 @manager_required
 def manager_invoice_status():
