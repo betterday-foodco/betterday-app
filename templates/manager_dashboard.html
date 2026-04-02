@@ -1827,7 +1827,7 @@ function renderParGrid() {
 
   // Group categories
   const groups = [
-    { label: 'Weekly Menu', sub: 'Dishes rotate weekly', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
+    { label: 'Weekly Menu', sub: 'Rotating Menu', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
     { label: 'Breakfast & Snacks', sub: 'Same items every week', cats: PL_CATEGORIES.filter(c => c.group === 'snacks') },
   ];
 
@@ -1911,7 +1911,7 @@ function openFullCartEditor() {
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
             <div>
               <div style="font-size:.82rem;font-weight:800;color:#00465E;">${cat.name}</div>
-              <div style="font-size:.65rem;color:#94A3B8;">${cat.rotating ? 'Rotates weekly' : 'Same items'} · $${cat.unitPrice.toFixed(2)}/ea</div>
+              <div style="font-size:.65rem;color:#94A3B8;">${cat.rotating ? 'Rotating Menu' : 'Same items'} · $${cat.unitPrice.toFixed(2)}/ea</div>
             </div>
             <div style="display:flex;align-items:center;gap:0;border:2px solid ${qty > 0 ? '#00465E' : '#E8DFD2'};border-radius:10px;overflow:hidden;">
               <button onclick="adjustQty('${cat.id}',-1);openFullCartEditor()" style="width:36px;height:36px;border:none;background:${qty > 0 ? '#F0F7FA' : '#F9F5F0'};font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
@@ -2127,7 +2127,7 @@ async function openCatDetail(catId) {
           <button onclick="adjustQty('${catId}',1);openCatDetail('${catId}')" style="width:34px;height:34px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
         </div>
       </div>
-      <div style="font-size:.72rem;color:#7A8F9C;margin-top:4px;">${cat.rotating ? 'Dishes rotate weekly — swap any item below' : 'Same items every week'} · ${catItems.length} available</div>
+      <div style="font-size:.72rem;color:#7A8F9C;margin-top:4px;">${cat.rotating ? 'Rotating Menu — swap any item below' : 'Same items every week'} · ${catItems.length} available</div>
     </div>
     <div class="pl-detail-body">
       ${catItems.length === 0 ? '<div style="text-align:center;padding:60px 20px;"><div style="font-size:.88rem;font-weight:700;color:#94A3B8;margin-bottom:8px;">No items available yet</div><div style="font-size:.75rem;color:#CBD5E1;">Items will appear here once your menu is published.</div></div>' :
