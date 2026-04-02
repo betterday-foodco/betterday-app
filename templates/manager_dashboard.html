@@ -2064,12 +2064,48 @@ async function confirmParOrder(btn) {
 // ── Category detail slide-in panel ──
 let _parCatalog = null;  // cached catalog from 9.0 sheet
 
+let _weeklyMenu = null;
+
+function _getCurrentSundayAnchor() {
+  const now = new Date();
+  const d = new Date(now); d.setDate(d.getDate() - d.getDay());
+  return d.toISOString().slice(0,10);
+}
+
+async function loadWeeklyMenu() {
+  if (_weeklyMenu) return _weeklyMenu;
+  try {
+    const anchor = _getCurrentSundayAnchor();
+    const r = await fetch('/api/gas', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'get_menu', sunday_anchor: anchor})
+    });
+    const d = await r.json();
+    _weeklyMenu = {
+      meat_entree: (d.meat || []).map(m => ({
+        id: m.id, name: m.name, diet: m.diet || 'meat', type: 'Weekly Menu',
+        image: m.image || '', description: m.description || '',
+        cal: m.cal || 0, protein: m.protein || 0, carbs: m.carbs || 0, fat: m.fat || 0,
+        tags: m.tags || ''
+      })),
+      plant_entree: (d.vegan || []).map(m => ({
+        id: m.id, name: m.name, diet: m.diet || 'vegan', type: 'Weekly Menu',
+        image: m.image || '', description: m.description || '',
+        cal: m.cal || 0, protein: m.protein || 0, carbs: m.carbs || 0, fat: m.fat || 0,
+        tags: m.tags || ''
+      }))
+    };
+    console.log('Weekly menu loaded:', _weeklyMenu.meat_entree.length, 'meat,', _weeklyMenu.plant_entree.length, 'plant');
+    return _weeklyMenu;
+  } catch(e) { console.error('Weekly menu fetch failed:', e); return {meat_entree:[], plant_entree:[]}; }
+}
+
 async function loadParCatalog() {
   if (_parCatalog) return _parCatalog;
   try {
     const r = await fetch('/manager/par-catalog');
     const d = await r.json();
-    console.log('Par catalog response:', d);
     _parCatalog = d.catalog || {};
     if (d.error) console.warn('Catalog error:', d.error);
     return _parCatalog;
@@ -2099,9 +2135,16 @@ async function openCatDetail(catId) {
   panel.innerHTML = `<div class="pl-detail-header"><h3>${cat.name}</h3><button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button></div><div class="pl-detail-body" style="display:flex;align-items:center;justify-content:center;padding:60px 20px;"><div style="color:#7A8F9C;">Loading items...</div></div>`;
   requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
 
-  // Load real catalog from 9.0 sheet
-  const catalog = await loadParCatalog();
-  const catItems = catalog[catId] || [];
+  // For entrees: pull from weekly menu rotation (same as /work app)
+  // For everything else: pull from 9.0 masterlist
+  let catItems = [];
+  if (catId === 'meat_entree' || catId === 'plant_entree') {
+    const menu = await loadWeeklyMenu();
+    catItems = menu[catId] || [];
+  } else {
+    const catalog = await loadParCatalog();
+    catItems = catalog[catId] || [];
+  }
 
   panel.innerHTML = `
     <div class="pl-detail-header">
