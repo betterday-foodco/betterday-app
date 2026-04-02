@@ -1364,17 +1364,36 @@ _par_catalog_cache = {'data': None, 'ts': 0}
 @app.route('/api/test-par-catalog')
 def test_par_catalog():
     """Debug endpoint — no auth required. Remove after testing."""
-    import logging
-    logging.warning("Testing par catalog fetch...")
-    result = _gas_post({'action': 'get_par_catalog'}, timeout=25)
-    if result:
+    import logging, time as _time
+    # Test 1: basic GAS connectivity with a simple action
+    logging.warning("Test 1: basic GAS ping...")
+    t0 = _time.time()
+    ping = _gas_post({'action': 'get_company', 'company_id': 'DEMO'}, timeout=15)
+    t1 = _time.time()
+    ping_ok = bool(ping and (ping.get('found') is not None))
+    logging.warning("Ping result: %s (%.1fs)", 'OK' if ping_ok else 'FAIL', t1-t0)
+
+    # Test 2: par catalog
+    logging.warning("Test 2: get_par_catalog...")
+    t2 = _time.time()
+    result = _gas_post({'action': 'get_par_catalog'}, timeout=30)
+    t3 = _time.time()
+    if result and result.get('catalog'):
         cats = result.get('catalog', {})
         summary = {k: len(v) for k, v in cats.items()} if isinstance(cats, dict) else str(cats)[:200]
-        logging.warning("Par catalog result: %s", summary)
-        return jsonify({'ok': True, 'summary': summary, 'raw_keys': list(cats.keys()) if isinstance(cats, dict) else None})
+        return jsonify({'ping_ok': ping_ok, 'ping_time': round(t1-t0,1), 'catalog_ok': True, 'catalog_time': round(t3-t2,1), 'summary': summary})
+    elif result and result.get('error'):
+        return jsonify({'ping_ok': ping_ok, 'ping_time': round(t1-t0,1), 'catalog_ok': False, 'catalog_time': round(t3-t2,1), 'gas_error': result.get('error')})
     else:
-        logging.warning("Par catalog returned None — GAS timeout or error")
-        return jsonify({'ok': False, 'error': 'GAS returned nothing — timeout or error'})
+        # Check if GAS returned raw text (error message)
+        raw = None
+        try:
+            import requests as _req
+            r = _req.post(GOOGLE_SCRIPT_URL, json={'action': 'get_par_catalog'}, timeout=30)
+            raw = r.text[:500]
+        except Exception as e:
+            raw = str(e)
+        return jsonify({'ping_ok': ping_ok, 'ping_time': round(t1-t0,1), 'catalog_ok': False, 'catalog_time': round(t3-t2,1), 'raw_response': raw})
 
 @app.route('/manager/par-catalog')
 @manager_required
