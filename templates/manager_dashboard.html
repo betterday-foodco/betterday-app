@@ -146,44 +146,34 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .log-detail{font-size:.78rem;color:#2E4A5A;line-height:1.4}
 .log-detail strong{color:#00465E}
 /* ═══ PAR LEVEL MODULE ═══ */
-.pl-cat-card{background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:.15s;cursor:pointer}
-.pl-cat-card:hover{border-color:#00465E;box-shadow:0 2px 8px rgba(0,70,94,.08)}
-.pl-cat-card.paused{opacity:.5;border-style:dashed}
-.pl-cat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.pl-cat-icon.meat{background:#FEF3C7;color:#D97706}
-.pl-cat-icon.plant{background:#DCFCE7;color:#16A34A}
-.pl-cat-icon.chia{background:#E0E7FF;color:#6366F1}
-.pl-cat-icon.sandwich{background:#FFE4E6;color:#E11D48}
-.pl-cat-icon.breakfast{background:#FEF9C3;color:#CA8A04}
-.pl-cat-icon.cookie{background:#FCE7F3;color:#DB2777} /* legacy, kept for compat */
-.pl-cat-icon.snack{background:#F3E8FF;color:#9333EA}
-.pl-cat-icon.juice{background:#CCFBF1;color:#0D9488}
-.pl-cat-info{flex:1;min-width:0}
-.pl-cat-name{font-size:.85rem;font-weight:800;color:#00465E}
-.pl-cat-sub{font-size:.7rem;color:#7A8F9C;margin-top:1px}
-.pl-cat-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.pl-qty-ctrl{display:flex;align-items:center;gap:0;border:1.5px solid #E8DFD2;border-radius:8px;overflow:hidden}
-.pl-qty-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#00465E;background:#F9F5F0;border:none;cursor:pointer;transition:.1s;font-family:'DM Sans',sans-serif}
-.pl-qty-btn:hover{background:#E8DFD2}
-.pl-qty-val{width:36px;text-align:center;font-size:.85rem;font-weight:900;color:#00465E;border:none;background:#fff;font-family:'DM Sans',sans-serif;padding:0}
-.pl-qty-val:focus{outline:none}
-.pl-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
-.pl-cat-card{padding:12px 14px;gap:10px}
-.pl-cat-card.has-items{border-color:#00465E;border-width:2px;background:rgba(0,70,94,.02)}
-.pl-cat-name{font-size:.82rem}
-.pl-cat-sub{font-size:.68rem}
+.pl-group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.pl-cat-card{background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;padding:18px;transition:.2s;cursor:pointer}
+.pl-cat-card:hover{border-color:#00465E;box-shadow:0 4px 16px rgba(0,70,94,.08)}
+.pl-cat-card.has-items{border-color:#00465E;background:#F8FCFF}
+.pl-cat-card.paused{opacity:.4;border-style:dashed}
+.pl-cat-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.pl-cat-name{font-size:.82rem;font-weight:800;color:#00465E;line-height:1.2}
+.pl-cat-tag{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.pl-cat-tag.rotating{background:#FEF3C7;color:#92400E}
+.pl-cat-tag.static{background:#F1F5F9;color:#64748B}
+.pl-cat-bignum{font-size:2.2rem;font-weight:900;color:#00465E;line-height:1}
+.pl-cat-bignum.zero{color:#CBD5E1}
+.pl-cat-subtotal{font-size:.7rem;color:#7A8F9C;margin-top:4px}
+.pl-cat-actions{display:flex;gap:6px;margin-top:14px}
+.pl-cat-btn{flex:1;padding:8px 0;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.7rem;font-weight:700;color:#00465E;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;text-align:center}
+.pl-cat-btn:hover{background:#F0F7FA;border-color:#00465E}
+.pl-cat-btn.primary{background:#00465E;color:#fff;border-color:#00465E}
+.pl-cat-btn.primary:hover{background:#006580}
+.pl-confirm-btn{flex:1;background:#00465E;color:#fff;border:none;border-radius:10px;padding:14px 18px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s}
+.pl-confirm-btn:hover{background:#006580}
+.pl-action-btn{background:#fff;border:1.5px solid #E8DFD2;border-radius:10px;padding:14px 18px;font-size:.78rem;font-weight:700;color:#7A8F9C;font-family:'DM Sans',sans-serif;cursor:pointer;transition:.15s;white-space:nowrap}
+.pl-action-btn:hover{border-color:#EF4444;color:#EF4444}
 .pl-toggle{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0}
 .pl-toggle input{opacity:0;width:0;height:0}
 .pl-toggle-track{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:22px;transition:.3s}
 .pl-toggle-track:before{content:'';position:absolute;height:18px;width:18px;left:2px;bottom:2px;background:#fff;border-radius:50%;transition:.3s}
 .pl-toggle input:checked+.pl-toggle-track{background:#B56B10}
 .pl-toggle input:checked+.pl-toggle-track:before{left:18px}
-.pl-status-pill{font-size:.6rem;font-weight:800;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
-.pl-status-pill.active{background:rgba(22,163,74,.1);color:#16A34A}
-.pl-status-pill.paused{background:rgba(239,68,68,.1);color:#EF4444}
-.pl-status-pill.custom{background:rgba(99,102,241,.1);color:#6366F1}
-.pl-pause-btn{width:28px;height:28px;border-radius:6px;border:1px solid #E8DFD2;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:.15s}
-.pl-pause-btn:hover{background:#FEF2F2;border-color:#EF4444}
 /* Slide-in detail panel */
 .pl-detail-panel{position:fixed;top:0;right:-480px;width:460px;max-width:90vw;height:100vh;background:#fff;z-index:300;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.15)}
 .pl-detail-panel.open{right:0}
@@ -200,9 +190,6 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .pl-dish-meta{font-size:.7rem;color:#7A8F9C;margin-top:2px}
 .pl-dish-swap{font-size:.7rem;font-weight:700;color:#2563EB;padding:4px 8px;border-radius:6px;border:1px solid #DBEAFE;background:#EFF6FF;cursor:pointer;transition:.15s;white-space:nowrap}
 .pl-dish-swap:hover{background:#DBEAFE}
-.pl-dish-badge{font-size:.55rem;font-weight:800;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
-.pl-dish-badge.locked{background:#F3F4F6;color:#6B7280}
-.pl-dish-badge.swapped{background:#FEF3C7;color:#B45309}
 .pl-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);z-index:299;display:none}
 .pl-overlay.open{display:block}
 
@@ -670,90 +657,78 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     <!-- ════════════════════════════════════════ -->
     {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
     <div class="tab-panel" id="tab-parlevel">
-      <div class="sl" style="margin-top:0">Office Orders</div>
 
-      <!-- ── DELIVERY + STATUS BAR ── -->
-      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:14px 18px;">
-          <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;">Next Delivery</div>
-          <div style="font-size:1rem;font-weight:900;color:#00465E;" id="plNextDelivery">Monday, Apr 7</div>
+      <!-- ═══════ SECTION 1: ORDER SUMMARY ═══════ -->
+      <div class="card" style="background:#00465E;color:#fff;border:none;padding:20px 24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);">Weekly Standing Order</div>
+            <div style="display:flex;align-items:baseline;gap:16px;margin-top:4px;">
+              <span style="font-size:1.8rem;font-weight:900;" id="plTotalDisplay">$0.00</span>
+              <span style="font-size:.82rem;color:rgba(255,255,255,.7);" id="plItemCountDisplay">0 items</span>
+            </div>
+            <div style="font-size:.75rem;color:rgba(255,255,255,.5);margin-top:2px;" id="plSavingsDisplay"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div style="text-align:center;padding:8px 14px;background:rgba(255,255,255,.1);border-radius:8px;">
+              <div style="font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.5);">Delivery</div>
+              <div style="font-size:.78rem;font-weight:800;" id="plNextDelivery">Mon, Apr 7</div>
+            </div>
+            <div style="text-align:center;padding:8px 14px;background:rgba(255,255,255,.1);border-radius:8px;">
+              <div style="font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.5);">Status</div>
+              <div style="font-size:.78rem;font-weight:800;color:#86EFAC;" id="plStatusDisplay">Active</div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;align-items:stretch;">
-          <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:10px 16px;text-align:center;min-width:80px;">
-            <div style="font-size:.55rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Frequency</div>
-            <div style="font-size:.82rem;font-weight:800;color:#00465E;">Weekly</div>
+        <!-- Savings progress -->
+        <div style="margin-top:14px;">
+          <div style="height:6px;background:rgba(255,255,255,.15);border-radius:6px;overflow:hidden;">
+            <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B);border-radius:6px;transition:width .5s;"></div>
           </div>
-          <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:10px 16px;text-align:center;min-width:80px;">
-            <div style="font-size:.55rem;font-weight:700;color:#7A8F9C;text-transform:uppercase;">Status</div>
-            <div style="font-size:.82rem;font-weight:800;color:#167421;" id="plStatusDisplay">Active</div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.55rem;font-weight:600;color:rgba(255,255,255,.35);position:relative;">
+            <span>$0</span>
+            <span style="position:absolute;left:25%;transform:translateX(-50%);">$500 10%</span>
+            <span style="position:absolute;left:50%;transform:translateX(-50%);">$750 15%</span>
+            <span style="position:absolute;left:75%;transform:translateX(-50%);">$1K 20%</span>
+            <span>$1.5K+ 25%</span>
           </div>
-          <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;padding:10px 16px;font-size:.72rem;font-weight:700;color:#7A8F9C;font-family:'DM Sans',sans-serif;cursor:pointer;transition:.15s;white-space:nowrap;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">⏸ Pause All</button>
         </div>
       </div>
 
-      <!-- ── DISCOUNT PROGRESS BAR ── -->
-      <div style="background:linear-gradient(135deg,#FFF8F0 0%,#FEF3C7 50%,#FDE68A 100%);border:1.5px solid rgba(212,160,41,.2);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div style="display:flex;align-items:baseline;gap:10px;">
-            <span style="font-size:1.4rem;font-weight:900;color:#1a1a1a;" id="plTotalDisplay">$0.00</span>
-            <span style="font-size:.78rem;color:#92400E;font-weight:600;" id="plSavingsDisplay">Add items to unlock savings</span>
-          </div>
-          <div id="plDiscountPill" style="background:#B56B10;color:#fff;font-size:.68rem;font-weight:800;padding:4px 12px;border-radius:99px;">SAVE 0%</div>
-        </div>
-        <div style="height:10px;background:rgba(0,0,0,.08);border-radius:10px;overflow:hidden;margin-bottom:6px;">
-          <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B,#D97706,#B45309);border-radius:10px;transition:width .5s;"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:.58rem;font-weight:700;color:#92400E;position:relative;">
-          <span>$0</span>
-          <span style="position:absolute;left:25%;transform:translateX(-50%);">$500 · <span style="color:#B45309;">10%</span></span>
-          <span style="position:absolute;left:50%;transform:translateX(-50%);">$750 · <span style="color:#B45309;">15%</span></span>
-          <span style="position:absolute;left:75%;transform:translateX(-50%);">$1,000 · <span style="color:#B45309;">20%</span></span>
-          <span>$1,500+ · <span style="color:#B45309;">25%</span></span>
-        </div>
-      </div>
-
-      <!-- ══════ WEEKLY MENU GROUP ══════ -->
+      <!-- ═══════ SECTION 2: BUILD YOUR ORDER ═══════ -->
       <div style="margin-bottom:20px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">🍽️ Weekly Menu</div>
-          <div style="flex:1;height:1px;background:#E8DFD2;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">Weekly Menu</div>
+          <span style="font-size:.68rem;color:#7A8F9C;">Dishes rotate weekly</span>
         </div>
-        <div style="font-size:.75rem;color:#7A8F9C;margin-bottom:10px;line-height:1.4;">Menu changes weekly with fresh new options. We'll rotate dishes to keep things exciting — click any category to preview or pick specific items.</div>
-        <div class="pl-group-grid" id="plGroupMeals">
-          <!-- Populated by JS -->
-        </div>
+        <div class="pl-group-grid" id="plGroupMeals"></div>
       </div>
 
-      <!-- ══════ BREAKFAST & SNACKS GROUP ══════ -->
-      <div style="margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">☀️ Breakfast & Snacks</div>
-          <div style="flex:1;height:1px;background:#E8DFD2;"></div>
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#00465E;">Breakfast & Snacks</div>
+          <span style="font-size:.68rem;color:#7A8F9C;">Same items every week</span>
         </div>
-        <div style="font-size:.75rem;color:#7A8F9C;margin-bottom:10px;line-height:1.4;">Reliable favorites, always stocked. These items stay consistent week to week.</div>
-        <div class="pl-group-grid" id="plGroupSnacks">
-          <!-- Populated by JS -->
-        </div>
+        <div class="pl-group-grid" id="plGroupSnacks"></div>
       </div>
 
-      <!-- ── ACTIONS BAR ── -->
-      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-        <button onclick="confirmParOrder(this)" style="flex:1;background:#00465E;color:#fff;border:none;border-radius:10px;padding:12px 18px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#006580'" onmouseout="this.style.background='#00465E'">✓ Confirm This Week's Order</button>
-        <button style="background:#fff;border:1.5px solid #E8DFD2;border-radius:10px;padding:12px 16px;font-size:.75rem;font-weight:700;color:#7A8F9C;font-family:'DM Sans',sans-serif;opacity:.5;cursor:not-allowed;white-space:nowrap;" title="Available for orders $1,000+">📦 Dual Delivery</button>
+      <!-- ═══════ SECTION 3: ACTIONS ═══════ -->
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button onclick="confirmParOrder(this)" class="pl-confirm-btn">Confirm This Week's Order</button>
+        <button onclick="toggleAllParLevels()" id="plPauseAllBtn" class="pl-action-btn">Pause All</button>
       </div>
 
-      <!-- ── ONE-TIME OVERRIDE ── -->
-      <div style="padding:10px 14px;background:#FFF8F0;border:1px solid rgba(212,160,41,.15);border-radius:10px;display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <div style="display:flex;gap:12px;align-items:center;padding:10px 16px;background:#F9F5F0;border-radius:10px;margin-bottom:16px;">
         <label class="pl-toggle">
           <input type="checkbox" id="plOverrideToggle" onchange="toggleOverrideMode()">
           <span class="pl-toggle-track"></span>
         </label>
-        <span style="font-size:.75rem;color:#5a4a2a;line-height:1.3;">
-          <strong>One-time adjustment</strong> — changes this week only, your standing order stays the same
+        <span style="font-size:.75rem;color:#5a4a2a;">
+          <strong>One-time adjustment</strong> — changes this week only, standing order stays the same
         </span>
       </div>
 
-      <!-- ── DELIVERY HISTORY ── -->
+      <!-- ═══════ SECTION 4: HISTORY ═══════ -->
       <div class="card">
         <div class="card-title">Delivery History</div>
         <div id="plHistoryBody" style="font-size:.82rem;">
@@ -1857,30 +1832,98 @@ function renderParGrid() {
   function buildCard(cat) {
     const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
     const isPaused = d.status === 'paused';
-    const hasItems = (d.qty || 0) > 0;
-    const lineTotal = ((d.qty || 0) * cat.unitPrice);
+    const qty = d.qty || 0;
+    const hasItems = qty > 0;
+    const lineTotal = qty * cat.unitPrice;
     return `
-      <div class="pl-cat-card ${isPaused ? 'paused' : ''} ${hasItems ? 'has-items' : ''}" id="plCat_${cat.id}" onclick="openCatDetail('${cat.id}')">
-        <div class="pl-cat-icon ${cat.cls}">${cat.icon}</div>
-        <div class="pl-cat-info" style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;">
+      <div class="pl-cat-card ${isPaused ? 'paused' : ''} ${hasItems ? 'has-items' : ''}" id="plCat_${cat.id}">
+        <div class="pl-cat-header">
+          <div>
             <div class="pl-cat-name">${cat.name}</div>
-            ${isPaused ? '<span style="font-size:.6rem;font-weight:700;color:#EF4444;background:rgba(239,68,68,.08);padding:1px 6px;border-radius:4px;">PAUSED</span>' : ''}
+            <div style="font-size:.68rem;color:#7A8F9C;margin-top:2px;">$${cat.unitPrice.toFixed(2)}/ea</div>
           </div>
-          <div class="pl-cat-sub">${cat.rotating ? '↻ Rotates weekly' : '📌 Same items weekly'} · $${cat.unitPrice.toFixed(2)}/ea${hasItems ? ' · <strong style="color:#00465E;">$'+lineTotal.toFixed(2)+'</strong>' : ''}</div>
+          <span class="pl-cat-tag ${cat.rotating ? 'rotating' : 'static'}">${cat.rotating ? 'Rotates' : 'Static'}</span>
         </div>
-        <div class="pl-cat-right" style="display:flex;align-items:center;gap:6px;">
-          <div class="pl-qty-ctrl">
-            <button class="pl-qty-btn" onclick="event.stopPropagation();adjustQty('${cat.id}',-1)">−</button>
-            <input class="pl-qty-val" type="number" min="0" value="${d.qty}" onchange="setQty('${cat.id}',this.value)" onclick="event.stopPropagation()">
-            <button class="pl-qty-btn" onclick="event.stopPropagation();adjustQty('${cat.id}',1)">+</button>
-          </div>
-          <button class="pl-pause-btn" onclick="event.stopPropagation();toggleCatPause('${cat.id}')" title="${isPaused ? 'Resume' : 'Pause'}" style="width:28px;height:28px;border:1.5px solid #E8DFD2;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:#7A8F9C;transition:.15s;display:flex;align-items:center;justify-content:center;">${isPaused ? '▶' : '⏸'}</button>
+        <div class="pl-cat-bignum ${qty === 0 ? 'zero' : ''}">${qty}</div>
+        <div class="pl-cat-subtotal">${hasItems ? '$' + lineTotal.toFixed(2) + '/week' : 'No items set'}</div>
+        <div class="pl-cat-actions">
+          <button class="pl-cat-btn" onclick="event.stopPropagation();openQtyEditor('${cat.id}')">Edit Qty</button>
+          <button class="pl-cat-btn primary" onclick="event.stopPropagation();openCatDetail('${cat.id}')">View Items</button>
         </div>
       </div>`;
   }
   mealsGrid.innerHTML = PL_CATEGORIES.filter(c => c.group === 'meals').map(buildCard).join('');
   snacksGrid.innerHTML = PL_CATEGORIES.filter(c => c.group === 'snacks').map(buildCard).join('');
+}
+
+function openQtyEditor(catId) {
+  const cat = PL_CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
+  const qty = d.qty || 0;
+
+  let overlay = document.querySelector('.pl-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'pl-overlay';
+    document.body.appendChild(overlay);
+  }
+
+  let modal = document.getElementById('plQtyModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'plQtyModal';
+    document.body.appendChild(modal);
+  }
+
+  overlay.onclick = () => closeQtyEditor();
+  overlay.classList.add('open');
+
+  modal.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:301;background:#fff;border-radius:16px;padding:28px 32px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;min-width:280px;';
+  modal.innerHTML = `
+    <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;margin-bottom:4px;">${cat.name}</div>
+    <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:20px;">$${cat.unitPrice.toFixed(2)} per item</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;">
+      <button onclick="qtyEditorAdjust('${catId}',-1)" style="width:48px;height:48px;border-radius:12px;border:2px solid #E8DFD2;background:#fff;font-size:22px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">−</button>
+      <input id="plQtyEditorVal" type="number" min="0" value="${qty}" style="width:80px;height:56px;border:2.5px solid #00465E;border-radius:14px;font-size:1.8rem;font-weight:900;color:#00465E;text-align:center;font-family:'DM Sans',sans-serif;background:#F8FCFF;outline:none;" onchange="qtyEditorSet('${catId}',this.value)">
+      <button onclick="qtyEditorAdjust('${catId}',1)" style="width:48px;height:48px;border-radius:12px;border:2px solid #E8DFD2;background:#fff;font-size:22px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.borderColor='#00465E'" onmouseout="this.style.borderColor='#E8DFD2'">+</button>
+    </div>
+    <div style="font-size:.85rem;font-weight:700;color:#00465E;margin-bottom:16px;" id="plQtyEditorTotal">$${(qty * cat.unitPrice).toFixed(2)}/week</div>
+    <button onclick="closeQtyEditor()" style="width:100%;padding:12px;background:#00465E;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Done</button>
+  `;
+}
+
+function qtyEditorAdjust(catId, delta) {
+  const cat = PL_CATEGORIES.find(c => c.id === catId);
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
+  d.qty = Math.max(0, (d.qty || 0) + delta);
+  plData[catId] = d;
+  const inp = document.getElementById('plQtyEditorVal');
+  if (inp) inp.value = d.qty;
+  const tot = document.getElementById('plQtyEditorTotal');
+  if (tot && cat) tot.textContent = '$' + (d.qty * cat.unitPrice).toFixed(2) + '/week';
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function qtyEditorSet(catId, val) {
+  const cat = PL_CATEGORIES.find(c => c.id === catId);
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
+  d.qty = Math.max(0, parseInt(val) || 0);
+  plData[catId] = d;
+  const tot = document.getElementById('plQtyEditorTotal');
+  if (tot && cat) tot.textContent = '$' + (d.qty * cat.unitPrice).toFixed(2) + '/week';
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function closeQtyEditor() {
+  const overlay = document.querySelector('.pl-overlay');
+  const modal = document.getElementById('plQtyModal');
+  if (overlay) overlay.classList.remove('open');
+  if (modal) modal.remove();
 }
 
 function adjustQty(catId, delta) {
@@ -1938,10 +1981,14 @@ function updateParTotals() {
   const savings = subtotal * (discountPct / 100);
   const total = subtotal - savings;
   // Update UI
+  const totalItems = PL_CATEGORIES.reduce((s, c) => {
+    const d = plData[c.id];
+    return s + ((d && d.status !== 'paused') ? (d.qty || 0) : 0);
+  }, 0);
   document.getElementById('plTotalDisplay').textContent = '$' + total.toFixed(2);
+  document.getElementById('plItemCountDisplay').textContent = totalItems + ' item' + (totalItems !== 1 ? 's' : '');
   const savingsEl = document.getElementById('plSavingsDisplay');
-  savingsEl.textContent = discountPct > 0 ? ('You save $' + savings.toFixed(2) + ' (' + discountPct + '% off)') : 'Add items to unlock savings';
-  document.getElementById('plDiscountPill').textContent = discountPct > 0 ? ('SAVE ' + discountPct + '%') : 'SAVE 0%';
+  savingsEl.textContent = discountPct > 0 ? ('Saving $' + savings.toFixed(2) + ' (' + discountPct + '% off)') : (subtotal > 0 ? 'Add more to unlock savings' : '');
   // Progress bar (capped at 1500)
   const pct = Math.min(100, (subtotal / 1500) * 100);
   document.getElementById('plProgressFill').style.width = pct + '%';
