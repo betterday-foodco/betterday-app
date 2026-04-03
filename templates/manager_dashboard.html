@@ -186,10 +186,10 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .pl-dish-row:last-child{border-bottom:none}
 .pl-dish-img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#f3f3f3}
 .pl-dish-info{flex:1;min-width:0}
-.pl-dish-name{font-size:.92rem;font-weight:800;color:#00465E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-dish-name{font-size:.92rem;font-weight:800;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'DM Sans',sans-serif}
 .pl-dish-meta{font-size:.7rem;color:#7A8F9C;margin-top:2px}
-.pl-dish-swap{font-size:.7rem;font-weight:700;color:#2563EB;padding:4px 8px;border-radius:6px;border:1px solid #DBEAFE;background:#EFF6FF;cursor:pointer;transition:.15s;white-space:nowrap}
-.pl-dish-swap:hover{background:#DBEAFE}
+.pl-dish-swap{font-size:.7rem;font-weight:700;color:#00465E;padding:4px 8px;border-radius:6px;border:1px solid #E8DFD2;background:#F9F5F0;cursor:pointer;transition:.15s;white-space:nowrap}
+.pl-dish-swap:hover{background:#E8DFD2}
 .pl-cart-row{cursor:pointer;transition:.1s}
 .pl-cart-row:hover{background:#F8FCFF}
 .pl-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.3);z-index:299;display:none}
@@ -1913,7 +1913,7 @@ function openFullCartEditor() {
             </div>
           </div>
           ${qty > 0 ? '<div style="font-size:.72rem;font-weight:700;color:#00465E;">$' + (qty * cat.unitPrice).toFixed(2) + '/week</div>' : ''}
-          ${qty > 0 ? '<button onclick="event.stopPropagation();openCatDetail(\'' + cat.id + '\')" style="margin-top:6px;font-size:.68rem;font-weight:700;color:#2563EB;background:none;border:none;cursor:pointer;padding:0;">Choose specific items</button>' : ''}
+          ${qty > 0 ? '<button onclick="event.stopPropagation();openCatDetail(\'' + cat.id + '\')" style="margin-top:6px;font-size:.68rem;font-weight:700;color:#00465E;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;">Choose specific items</button>' : ''}
         </div>`;
       }).join('')}
     </div>
@@ -2201,16 +2201,17 @@ function adjustDishQty(catId, idx, delta) {
   let qty = Math.max(0, (parseInt(valEl.textContent) || 0) + delta);
   valEl.textContent = qty;
   if (wrapEl) {
+    const btns = wrapEl.querySelectorAll('button');
     if (qty > 0) {
       wrapEl.style.borderColor = '#D4A029';
-      wrapEl.style.background = '#FEF3C7';
-      valEl.style.background = '#FEF3C7';
-      valEl.style.color = '#92400E';
+      valEl.style.background = '#D4A029';
+      valEl.style.color = '#fff';
+      btns.forEach(b => { b.style.background = '#FEF3C7'; b.style.color = '#92400E'; });
     } else {
       wrapEl.style.borderColor = '#E8DFD2';
-      wrapEl.style.background = '';
       valEl.style.background = '#fff';
       valEl.style.color = '#00465E';
+      btns.forEach(b => { b.style.background = '#F9F5F0'; b.style.color = '#00465E'; });
     }
   }
   // Update category total qty
