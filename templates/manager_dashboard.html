@@ -186,7 +186,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .pl-dish-row:last-child{border-bottom:none}
 .pl-dish-img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#f3f3f3}
 .pl-dish-info{flex:1;min-width:0}
-.pl-dish-name{font-size:.82rem;font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-dish-name{font-size:.92rem;font-weight:800;color:#00465E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pl-dish-meta{font-size:.7rem;color:#7A8F9C;margin-top:2px}
 .pl-dish-swap{font-size:.7rem;font-weight:700;color:#2563EB;padding:4px 8px;border-radius:6px;border:1px solid #DBEAFE;background:#EFF6FF;cursor:pointer;transition:.15s;white-space:nowrap}
 .pl-dish-swap:hover{background:#DBEAFE}
@@ -2184,12 +2184,52 @@ async function openCatDetail(catId) {
               <div class="pl-dish-meta">${item.cal ? item.cal + ' cal' : ''} ${item.protein ? '· ' + item.protein + 'g P' : ''} · $${cat.unitPrice.toFixed(2)}</div>
               ${item.tags ? '<div style="font-size:.58rem;color:#94A3B8;margin-top:1px;">' + item.tags + '</div>' : ''}
             </div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <button class="pl-dish-swap" onclick="event.stopPropagation()" style="font-size:.68rem;font-weight:700;color:#fff;background:#00465E;padding:6px 12px;border-radius:6px;border:none;cursor:pointer;">+ Add</button>
+            <div class="pl-dish-qty-wrap" id="dishQty_${catId}_${i}" style="display:flex;align-items:center;gap:0;border:2px solid #E8DFD2;border-radius:8px;overflow:hidden;">
+              <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},-1)" style="width:30px;height:30px;border:none;background:#F9F5F0;font-size:14px;font-weight:900;color:#00465E;cursor:pointer;">−</button>
+              <span style="width:28px;text-align:center;font-size:.82rem;font-weight:900;color:#00465E;background:#fff;" id="dishQtyVal_${catId}_${i}">0</span>
+              <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},1)" style="width:30px;height:30px;border:none;background:#F9F5F0;font-size:14px;font-weight:900;color:#00465E;cursor:pointer;">+</button>
             </div>
           </div>`).join('')}
     </div>
   `;
+}
+
+function adjustDishQty(catId, idx, delta) {
+  const valEl = document.getElementById('dishQtyVal_' + catId + '_' + idx);
+  const wrapEl = document.getElementById('dishQty_' + catId + '_' + idx);
+  if (!valEl) return;
+  let qty = Math.max(0, (parseInt(valEl.textContent) || 0) + delta);
+  valEl.textContent = qty;
+  if (wrapEl) {
+    if (qty > 0) {
+      wrapEl.style.borderColor = '#D4A029';
+      wrapEl.style.background = '#FEF3C7';
+      valEl.style.background = '#FEF3C7';
+      valEl.style.color = '#92400E';
+    } else {
+      wrapEl.style.borderColor = '#E8DFD2';
+      wrapEl.style.background = '';
+      valEl.style.background = '#fff';
+      valEl.style.color = '#00465E';
+    }
+  }
+  // Update category total qty
+  let totalQty = 0;
+  document.querySelectorAll('[id^="dishQtyVal_' + catId + '_"]').forEach(el => {
+    totalQty += parseInt(el.textContent) || 0;
+  });
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
+  d.qty = totalQty;
+  plData[catId] = d;
+  // Update header qty display
+  const headerQty = document.querySelector('.pl-detail-panel .pl-detail-header + div');
+  if (headerQty) {
+    const qtySpan = headerQty.querySelector('span:first-child');
+    if (qtySpan) qtySpan.innerHTML = '<strong>' + totalQty + ' items</strong>';
+  }
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
 }
 
 function closeCatDetail() {
