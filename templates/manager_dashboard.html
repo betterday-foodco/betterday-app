@@ -1892,7 +1892,8 @@ function renderParGrid() {
 
     g.cats.forEach(cat => {
       const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
-      const qty = d.qty || 0;
+      // Main page pill always shows par level (target)
+      const qty = d.target || d.qty || 0;
       const mode = d.mode || 'auto';
       const isHandPick = mode === 'handpick';
       const lineTotal = qty * cat.unitPrice;
@@ -2237,8 +2238,13 @@ async function openCatDetail(catId) {
     catItems = catalog[catId] || [];
   }
 
-  const currentQty = d.qty || 0;
-  const target = d.target || currentQty || 0;
+  // Compute actual dishes picked from saved item selections, NOT from d.qty
+  // d.qty on the main page reflects par level, not actual picks
+  const pickedFromItems = (d.items && d.items.length > 0)
+    ? d.items.reduce((sum, it) => sum + (it.qty || 1), 0)
+    : 0;
+  const currentQty = pickedFromItems;
+  const target = d.target || 0;
   const remaining = Math.max(0, target - currentQty);
   const progressText = target > 0
     ? (currentQty >= target ? `<span style="color:#167421;font-weight:900;">${currentQty} ${cat.name} selected</span>` : `<span style="font-weight:900;color:#00465E;">${currentQty}</span> <span style="color:#7A8F9C;">of</span> <span style="font-weight:900;color:#00465E;">${target}</span> <span style="color:#7A8F9C;">selected</span>`)
