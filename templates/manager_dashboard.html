@@ -2675,35 +2675,19 @@ function randomizeCategory(catId) {
 function closeCatDetail() {
   const overlay = document.querySelector('.pl-overlay');
   const panel = document.querySelector('.pl-detail-panel');
-  // Save picks to server when closing
+  // Close immediately
+  if (overlay) overlay.classList.remove('open');
+  if (panel) panel.classList.remove('open');
+  // Save in background (don't block the UI)
   if (_plPanelCatId) {
-    // Brief saving indicator
-    if (panel) {
-      const header = panel.querySelector('.pl-detail-header');
-      if (header) {
-        const badge = document.createElement('span');
-        badge.textContent = 'Saving...';
-        badge.style.cssText = 'font-size:.7rem;font-weight:700;color:#FBBF24;margin-left:8px;';
-        header.querySelector('h3')?.appendChild(badge);
-      }
-    }
-    const catId = _plPanelCatId;
     _plPanelCatId = null;
     _plPanelItems = [];
-    // Save then close
     clearTimeout(_plSaveTimer);
     fetch('/manager/par-levels', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ levels: plData, override: plOverrideMode })
-    }).catch(e => console.warn('Save failed:', e))
-    .finally(() => {
-      if (overlay) overlay.classList.remove('open');
-      if (panel) panel.classList.remove('open');
-    });
-  } else {
-    if (overlay) overlay.classList.remove('open');
-    if (panel) panel.classList.remove('open');
+    }).catch(e => console.warn('Save failed:', e));
   }
 }
 
