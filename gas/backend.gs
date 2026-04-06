@@ -742,6 +742,201 @@ function doPost(e) {
     }
 
     // ─────────────────────────────────────────
+    // COMPUTE WEEKLY SWAPS (compare two weeks in 8.0 Menu Schedule)
+    // Returns: { swaps: [{oldId, newId, oldName, newName, diet}], fromAnchor, toAnchor }
+    // ─────────────────────────────────────────
+    if (data.action === "compute_weekly_swaps") {
+      var fromAnchor = String(data.from_anchor || "").trim();
+      var toAnchor = String(data.to_anchor || "").trim();
+      if (!fromAnchor || !toAnchor) return jsonOut({error: "from_anchor and to_anchor required"});
+
+      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+      var schedSheet = ssBuffer.getSheetByName("8.0 Menu Schedule");
+      var schedRows = schedSheet.getDataRange().getValues();
+      var MEAT_COL = 35;
+      var VEGAN_COL = 36;
+
+      function extractIds(cellVal) {
+        if (!cellVal) return [];
+        var matches = cellVal.toString().match(/#\d+/g);
+        return matches || [];
+      }
+      function findWeekIds(anchor) {
+        var anchorMs = new Date(anchor + 'T12:00:00Z').getTime();
+        for (var i = 1; i < schedRows.length; i++) {
+          var cellVal = schedRows[i][7];
+          if (!cellVal) continue;
+          var dt = new Date(cellVal);
+          if (isNaN(dt.getTime())) continue;
+          if (Math.abs(dt.getTime() - anchorMs) <= 24*60*60*1000) {
+            return { meat: extractIds(schedRows[i][MEAT_COL]), vegan: extractIds(schedRows[i][VEGAN_COL]) };
+          }
+        }
+        return { meat: [], vegan: [] };
+      }
+
+      var fromIds = findWeekIds(fromAnchor);
+      var toIds = findWeekIds(toAnchor);
+
+      // Build dish name lookup from 7.1 masterlist
+      var masterSheet = ssBuffer.getSheetByName("7.1 Dish Masterlist");
+      var masterRows = masterSheet.getDataRange().getValues();
+      var nameMap = {};
+      for (var m = 1; m < masterRows.length; m++) {
+        var dId = String(masterRows[m][0]).trim();
+        if (dId) nameMap[dId] = String(masterRows[m][2] || "").trim();
+      }
+
+      // Also check 9.0 for names not in 7.1
+      var master9 = ssBuffer.getSheetByName("9.0 Merged Masterlist");
+      if (master9) {
+        var m9Rows = master9.getDataRange().getValues();
+        for (var m = 1; m < m9Rows.length; m++) {
+          var dId = String(m9Rows[m][0]).trim();
+          if (dId && !nameMap[dId]) nameMap[dId] = String(m9Rows[m][2] || "").trim();
+        }
+      }
+
+      // Compare position-by-position for meat and vegan
+      var swaps = [];
+      function compareSlots(fromList, toList, diet) {
+        var maxLen = Math.max(fromList.length, toList.length);
+        for (var i = 0; i < maxLen; i++) {
+          var oldId = fromList[i] || null;
+          var newId = toList[i] || null;
+          if (oldId && newId && oldId !== newId) {
+            swaps.push({
+              oldId: oldId, newId: newId,
+              oldName: nameMap[oldId] || oldId,
+              newName: nameMap[newId] || newId,
+              diet: diet, status: "direct"
+            });
+          } else if (oldId && !newId) {
+            swaps.push({ oldId: oldId, newId: null, oldName: nameMap[oldId] || oldId, newName: null, diet: diet, status: "removed" });
+          } else if (!oldId && newId) {
+            swaps.push({ oldId: null, newId: newId, oldName: null, newName: nameMap[newId] || newId, diet: diet, status: "added" });
+          }
+          // oldId === newId → no swap, dish stays
+        }
+      }
+      compareSlots(fromIds.meat, toIds.meat, "meat");
+      compareSlots(fromIds.vegan, toIds.vegan, "vegan");
+
+      return jsonOut({
+        swaps: swaps,
+        fromAnchor: fromAnchor, toAnchor: toAnchor,
+        fromMeatCount: fromIds.meat.length, toMeatCount: toIds.meat.length,
+        fromVeganCount: fromIds.vegan.length, toVeganCount: toIds.vegan.length,
+        unchanged: {
+          meat: fromIds.meat.filter(function(id, i) { return toIds.meat[i] === id; }).length,
+          vegan: fromIds.vegan.filter(function(id, i) { return toIds.vegan[i] === id; }).length
+        }
+      });
+    }
+
+    // ─────────────────────────────────────────
+    // REBUILD PAR CARTS (Friday AM auto-trigger — apply swaps to all company carts)
+    // ─────────────────────────────────────────
+    if (data.action === "rebuild_par_carts") {
+      var tz = Session.getScriptTimeZone();
+      // Determine current and next week anchors
+      var today = new Date();
+      var sun = new Date(today); sun.setDate(sun.getDate() - sun.getDay()); sun.setHours(0,0,0,0);
+      var currentAnchor = Utilities.formatDate(sun, tz, "yyyy-MM-dd");
+      var nextSun = new Date(sun); nextSun.setDate(nextSun.getDate() + 7);
+      var nextAnchor = Utilities.formatDate(nextSun, tz, "yyyy-MM-dd");
+
+      // Get swap map
+      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+      var schedSheet = ssBuffer.getSheetByName("8.0 Menu Schedule");
+      var schedRows = schedSheet.getDataRange().getValues();
+      var MEAT_COL = 35, VEGAN_COL = 36;
+      function extractIds2(cellVal) {
+        if (!cellVal) return [];
+        return cellVal.toString().match(/#\d+/g) || [];
+      }
+      function findIds2(anchor) {
+        var anchorMs = new Date(anchor + 'T12:00:00Z').getTime();
+        for (var i = 1; i < schedRows.length; i++) {
+          var dt = new Date(schedRows[i][7]);
+          if (!isNaN(dt.getTime()) && Math.abs(dt.getTime() - anchorMs) <= 24*60*60*1000) {
+            return { meat: extractIds2(schedRows[i][MEAT_COL]), vegan: extractIds2(schedRows[i][VEGAN_COL]) };
+          }
+        }
+        return { meat: [], vegan: [] };
+      }
+      var fromIds = findIds2(currentAnchor);
+      var toIds = findIds2(nextAnchor);
+
+      // Build swap map: oldId → newId
+      var swapMap = {};
+      function buildSwapMap(fromList, toList) {
+        for (var i = 0; i < Math.min(fromList.length, toList.length); i++) {
+          if (fromList[i] !== toList[i]) swapMap[fromList[i]] = toList[i];
+        }
+      }
+      buildSwapMap(fromIds.meat, toIds.meat);
+      buildSwapMap(fromIds.vegan, toIds.vegan);
+
+      // Get all companies with par levels
+      var parSheet = ssHub.getSheetByName("ParLevels");
+      if (!parSheet) return jsonOut({success: true, message: "No ParLevels sheet", rebuilt: 0});
+      var parRows = parSheet.getDataRange().getValues();
+      var parHeaders = parRows[0];
+      var coIdx = parHeaders.indexOf("CompanyID");
+      var catIdx = parHeaders.indexOf("CategoryID");
+      var itemsIdx = parHeaders.indexOf("ItemsJSON");
+      var weekIdx = parHeaders.indexOf("CartWeekAnchor");
+      var swapLogIdx = parHeaders.indexOf("SwapLog");
+
+      // Add CartWeekAnchor and SwapLog columns if missing
+      if (weekIdx < 0) {
+        weekIdx = parHeaders.length;
+        parSheet.getRange(1, weekIdx + 1).setValue("CartWeekAnchor");
+      }
+      if (swapLogIdx < 0) {
+        swapLogIdx = parHeaders.length + (weekIdx === parHeaders.length ? 1 : 0);
+        parSheet.getRange(1, swapLogIdx + 1).setValue("SwapLog");
+      }
+
+      var rebuilt = 0;
+      for (var i = 1; i < parRows.length; i++) {
+        var catId = String(parRows[i][catIdx]).trim();
+        // Only swap rotating categories (entrees, sandwiches)
+        if (catId !== "meat_entree" && catId !== "plant_entree" && catId !== "sandwich_wrap") continue;
+        var itemsJson = String(parRows[i][itemsIdx] || "[]");
+        var items = [];
+        try { items = JSON.parse(itemsJson); } catch(e) { continue; }
+        if (items.length === 0) continue;
+
+        var swapLog = [];
+        var newItems = items.map(function(item) {
+          var id = item.id || item;
+          if (swapMap[id]) {
+            swapLog.push({ old: id, new: swapMap[id] });
+            return typeof item === 'string' ? swapMap[id] : Object.assign({}, item, { id: swapMap[id], swapped: true });
+          }
+          return item;
+        });
+
+        if (swapLog.length > 0) {
+          parSheet.getRange(i + 1, itemsIdx + 1).setValue(JSON.stringify(newItems));
+          parSheet.getRange(i + 1, weekIdx + 1).setValue(nextAnchor);
+          parSheet.getRange(i + 1, swapLogIdx + 1).setValue(JSON.stringify(swapLog));
+          rebuilt++;
+        }
+      }
+
+      return jsonOut({
+        success: true,
+        rebuilt: rebuilt,
+        swapCount: Object.keys(swapMap).length,
+        currentAnchor: currentAnchor,
+        nextAnchor: nextAnchor
+      });
+    }
+
+    // ─────────────────────────────────────────
     // GET BENEFIT LEVELS (for a company)
     // ─────────────────────────────────────────
     if (data.action === "get_benefit_levels") {
@@ -1892,4 +2087,93 @@ function generateWeeklyInvoices() {
   });
   Logger.log("generateWeeklyInvoices: anchor=" + sundayAnchor + " created=" + created + " skipped=" + skipped + " errors=" + errors.length);
   if (errors.length > 0) Logger.log("  Errors: " + errors.join("; "));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FRIDAY AUTO-TRIGGER — rebuild par level carts with SKU swaps
+//   Triggers → Add trigger → rebuildParLevelCarts
+//   Time-based → Week timer → Every Friday → 5am–6am
+// ─────────────────────────────────────────────────────────────────────────────
+function rebuildParLevelCarts() {
+  var ssHub = SpreadsheetApp.getActiveSpreadsheet();
+  // Call the rebuild action internally
+  var result = _rebuildParCartsInternal(ssHub);
+  Logger.log("rebuildParLevelCarts: " + JSON.stringify(result));
+}
+
+function _rebuildParCartsInternal(ssHub) {
+  var tz = Session.getScriptTimeZone();
+  var today = new Date();
+  var sun = new Date(today); sun.setDate(sun.getDate() - sun.getDay()); sun.setHours(0,0,0,0);
+  var currentAnchor = Utilities.formatDate(sun, tz, "yyyy-MM-dd");
+  var nextSun = new Date(sun); nextSun.setDate(nextSun.getDate() + 7);
+  var nextAnchor = Utilities.formatDate(nextSun, tz, "yyyy-MM-dd");
+
+  var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+  var schedSheet = ssBuffer.getSheetByName("8.0 Menu Schedule");
+  var schedRows = schedSheet.getDataRange().getValues();
+  var MEAT_COL = 35, VEGAN_COL = 36;
+
+  function extractIds(cellVal) {
+    return cellVal ? (cellVal.toString().match(/#\d+/g) || []) : [];
+  }
+  function findIds(anchor) {
+    var ms = new Date(anchor + 'T12:00:00Z').getTime();
+    for (var i = 1; i < schedRows.length; i++) {
+      var dt = new Date(schedRows[i][7]);
+      if (!isNaN(dt.getTime()) && Math.abs(dt.getTime() - ms) <= 24*60*60*1000) {
+        return { meat: extractIds(schedRows[i][MEAT_COL]), vegan: extractIds(schedRows[i][VEGAN_COL]) };
+      }
+    }
+    return { meat: [], vegan: [] };
+  }
+
+  var fromIds = findIds(currentAnchor);
+  var toIds = findIds(nextAnchor);
+  var swapMap = {};
+  function buildMap(fromList, toList) {
+    for (var i = 0; i < Math.min(fromList.length, toList.length); i++) {
+      if (fromList[i] !== toList[i]) swapMap[fromList[i]] = toList[i];
+    }
+  }
+  buildMap(fromIds.meat, toIds.meat);
+  buildMap(fromIds.vegan, toIds.vegan);
+
+  var parSheet = ssHub.getSheetByName("ParLevels");
+  if (!parSheet) return { rebuilt: 0, message: "No ParLevels sheet" };
+  var parRows = parSheet.getDataRange().getValues();
+  var parHeaders = parRows[0];
+  var catIdx = parHeaders.indexOf("CategoryID");
+  var itemsIdx = parHeaders.indexOf("ItemsJSON");
+  var weekIdx = parHeaders.indexOf("CartWeekAnchor");
+  var swapLogIdx = parHeaders.indexOf("SwapLog");
+  if (weekIdx < 0) { weekIdx = parHeaders.length; parSheet.getRange(1, weekIdx+1).setValue("CartWeekAnchor"); }
+  if (swapLogIdx < 0) { swapLogIdx = weekIdx + 1; parSheet.getRange(1, swapLogIdx+1).setValue("SwapLog"); }
+
+  var rebuilt = 0;
+  for (var i = 1; i < parRows.length; i++) {
+    var catId = String(parRows[i][catIdx]).trim();
+    if (catId !== "meat_entree" && catId !== "plant_entree" && catId !== "sandwich_wrap") continue;
+    var items = [];
+    try { items = JSON.parse(String(parRows[i][itemsIdx] || "[]")); } catch(e) { continue; }
+    if (items.length === 0) continue;
+
+    var log = [];
+    var newItems = items.map(function(item) {
+      var id = item.id || item;
+      if (swapMap[id]) {
+        log.push({ old: id, "new": swapMap[id] });
+        return typeof item === 'string' ? swapMap[id] : Object.assign({}, item, { id: swapMap[id], swapped: true, swappedFrom: id });
+      }
+      return item;
+    });
+
+    if (log.length > 0) {
+      parSheet.getRange(i+1, itemsIdx+1).setValue(JSON.stringify(newItems));
+      parSheet.getRange(i+1, weekIdx+1).setValue(nextAnchor);
+      parSheet.getRange(i+1, swapLogIdx+1).setValue(JSON.stringify(log));
+      rebuilt++;
+    }
+  }
+  return { rebuilt: rebuilt, swaps: Object.keys(swapMap).length, from: currentAnchor, to: nextAnchor };
 }

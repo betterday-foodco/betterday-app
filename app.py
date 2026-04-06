@@ -1409,6 +1409,32 @@ def get_par_catalog():
     return jsonify(result or {'catalog': {}})
 
 
+@app.route('/manager/weekly-swaps')
+@manager_required
+def get_weekly_swaps():
+    """Get swap pairs between current and next week's menu."""
+    from datetime import date, timedelta
+    today = date.today()
+    # Current Sunday
+    sun = today - timedelta(days=today.weekday() + 1) if today.weekday() != 6 else today
+    current_anchor = sun.isoformat()
+    next_anchor = (sun + timedelta(days=7)).isoformat()
+    result = _gas_post({
+        'action': 'compute_weekly_swaps',
+        'from_anchor': current_anchor,
+        'to_anchor': next_anchor
+    }, timeout=15)
+    return jsonify(result or {'swaps': []})
+
+
+@app.route('/bd-admin/rebuild-par-carts', methods=['POST'])
+@admin_required
+def admin_rebuild_par_carts():
+    """Manual trigger to rebuild par level carts with swaps (same as Friday auto-trigger)."""
+    result = _gas_post({'action': 'rebuild_par_carts'}, timeout=20)
+    return jsonify(result or {'success': False, 'error': 'Timeout'})
+
+
 @app.route('/manager/invoice-status', methods=['POST'])
 @manager_required
 def manager_invoice_status():

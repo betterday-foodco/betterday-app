@@ -660,12 +660,20 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
     <div class="tab-panel" id="tab-parlevel">
 
+      <!-- ═══════ LOCKED STATE BANNER (Thu-Sun) ═══════ -->
+      <div id="plLockedBanner" style="display:none;background:#FEF3C7;border:1.5px solid #FBBF24;border-radius:12px;padding:18px 22px;margin-bottom:16px;">
+        <div style="font-size:.88rem;font-weight:800;color:#92400E;">Orders locked for this week</div>
+        <div style="font-size:.78rem;color:#92400E;margin-top:4px;line-height:1.5;">Your order for this Sunday is confirmed and in production. Come back <strong>Monday morning</strong> to review and edit your order for the following week.</div>
+        <button onclick="document.getElementById('plLockedBanner').style.display='none'" style="margin-top:10px;font-size:.72rem;font-weight:700;color:#92400E;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);border-radius:8px;padding:6px 14px;cursor:pointer;">View order (read-only)</button>
+      </div>
+
       <!-- ═══════ YOUR NEXT DELIVERY (unified header) ═══════ -->
       <div class="card" style="border:none;background:#fff;padding:24px;margin-bottom:0;border-radius:14px 14px 0 0;border-bottom:1px solid #E8DFD2;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
           <div>
             <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;">Your Next Delivery</div>
             <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-top:2px;" id="plNextDelivery">Monday, April 7</div>
+            <div id="plEditWindow" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px;"></div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</div>
@@ -1789,7 +1797,27 @@ let plOverrideMode = false;
 function initParLevels() {
   if (plInitialized) return;
   plInitialized = true;
-  // Load saved par levels from server or init defaults
+
+  // Calendar-aware state
+  const state = getOrderWindowState();
+  const banner = document.getElementById('plLockedBanner');
+  const editWin = document.getElementById('plEditWindow');
+  if (state === 'locked') {
+    if (banner) banner.style.display = 'block';
+    if (editWin) { editWin.textContent = 'Editing closed — reopens Monday'; editWin.style.color = '#DC2626'; }
+  } else {
+    if (editWin) { editWin.textContent = 'Editing open until Wednesday midnight'; editWin.style.color = '#167421'; }
+  }
+
+  // Compute delivery date dynamically
+  const now = new Date();
+  const sun = new Date(now); sun.setDate(sun.getDate() - sun.getDay()); sun.setHours(0,0,0,0);
+  // Next delivery = next Monday (sun + 8 days if open, sun + 1 if we're already past)
+  const nextMon = new Date(sun);
+  nextMon.setDate(sun.getDate() + (state === 'locked' ? 8 : 1));
+  const delivEl = document.getElementById('plNextDelivery');
+  if (delivEl) delivEl.textContent = nextMon.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
   loadParLevels();
 }
 
@@ -1814,14 +1842,23 @@ async function loadParLevels() {
   updateParTotals();
 }
 
+function getOrderWindowState() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  // Mon(1)-Wed(3) = open, Thu(4)-Sun(0) = locked
+  if (day >= 1 && day <= 3) return 'open';
+  return 'locked';
+}
+
 function renderParGrid() {
   const container = document.getElementById('plCartSummary');
   if (!container) return;
+  const windowState = getOrderWindowState();
 
   // Group categories
   const groups = [
-    { label: 'Weekly Menu', sub: 'Rotating Menu', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
-    { label: 'Breakfast & Snacks', sub: 'Same items every week', cats: PL_CATEGORIES.filter(c => c.group === 'snacks') },
+    { label: 'Weekly Menu', sub: 'Menu changes weekly with fresh options', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
+    { label: 'Breakfast & Snacks', sub: 'Reliable favorites, always stocked', cats: PL_CATEGORIES.filter(c => c.group === 'snacks') },
   ];
 
   let html = '';
@@ -2179,11 +2216,16 @@ async function openCatDetail(catId) {
     </div>
     <div class="pl-detail-body">
       ${catItems.length === 0 ? '<div style="text-align:center;padding:60px 20px;"><div style="font-size:.88rem;font-weight:700;color:#94A3B8;margin-bottom:8px;">No items available yet</div><div style="font-size:.75rem;color:#CBD5E1;">Items will appear here once your menu is published.</div></div>' :
-        catItems.map((item, i) => `
-          <div class="pl-dish-row" data-item-id="${item.id}">
+        catItems.map((item, i) => {
+          const isSwapped = item.swapped || (d.items && d.items.find && d.items.find(di => di.id === item.id && di.swapped));
+          const swapFrom = item.swappedFrom || (isSwapped && d.items && d.items.find && (() => { const m = d.items.find(di => di.id === item.id && di.swappedFrom); return m ? m.swappedFrom : null; })());
+          return `
+          <div class="pl-dish-row" data-item-id="${item.id}" style="${isSwapped ? 'background:#FFFBEB;' : ''}">
+            ${isSwapped ? '<div style="position:absolute;top:6px;right:8px;font-size:.55rem;font-weight:700;color:#92400E;background:#FEF3C7;padding:1px 8px;border-radius:99px;">Swapped this week</div>' : ''}
             <img class="pl-dish-img" src="${item.image || ''}" alt="" onerror="this.style.background='#F1F5F9';this.src=''">
             <div class="pl-dish-info">
               <div class="pl-dish-name">${item.name}</div>
+              ${isSwapped && swapFrom ? '<div style="font-size:.6rem;color:#B45309;margin-bottom:2px;">Replaced ' + (swapFrom || '') + '</div>' : ''}
               <div class="pl-dish-meta">${item.cal ? item.cal + ' cal' : ''} ${item.protein ? '· ' + item.protein + 'g P' : ''} · $${cat.unitPrice.toFixed(2)}</div>
               ${item.tags ? '<div style="font-size:.58rem;color:#94A3B8;margin-top:1px;">' + item.tags + '</div>' : ''}
             </div>
@@ -2192,7 +2234,7 @@ async function openCatDetail(catId) {
               <span style="width:28px;text-align:center;font-size:.82rem;font-weight:900;color:#00465E;background:#fff;" id="dishQtyVal_${catId}_${i}">0</span>
               <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},1)" style="width:30px;height:30px;border:none;background:#F9F5F0;font-size:14px;font-weight:900;color:#00465E;cursor:pointer;">+</button>
             </div>
-          </div>`).join('')}
+          </div>`;}).join('')}
     </div>
   `;
 }
