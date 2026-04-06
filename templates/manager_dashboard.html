@@ -682,37 +682,44 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         <div style="display:grid;grid-template-columns:2fr 1fr;grid-template-rows:auto auto;">
 
           <!-- TOP-LEFT: Weekly Summary (2/3 wide, 2/3 tall) -->
-          <div style="padding:22px 24px;border-right:1px solid #E8DFD2;border-bottom:1px solid #E8DFD2;">
-            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;">Your Next Delivery</div>
-            <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-top:2px;" id="plNextDelivery">Monday, April 7</div>
-            <div id="plEditWindow" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px;"></div>
-            <div style="display:flex;align-items:baseline;gap:16px;margin-top:14px;flex-wrap:wrap;">
+          <div style="padding:20px 24px;border-right:1px solid #E8DFD2;border-bottom:1px solid #E8DFD2;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
               <div>
-                <span style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</span>
+                <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;">Your Next Delivery</div>
+                <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-top:2px;" id="plNextDelivery">Monday, April 7</div>
+                <div id="plEditWindow" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px;"></div>
               </div>
-              <div>
-                <span style="font-size:1.4rem;font-weight:900;color:#00465E;" id="plTotalDisplay">$0.00</span>
-              </div>
-              <div>
-                <span style="font-size:.78rem;font-weight:700;color:#167421;" id="plSavingsDisplay"></span>
+              <div style="text-align:right;">
+                <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</span>
+                <div style="font-size:1.4rem;font-weight:900;color:#00465E;margin-top:1px;" id="plTotalDisplay">$0.00</div>
+                <div style="font-size:.75rem;font-weight:700;color:#167421;" id="plSavingsDisplay"></div>
+                <button onclick="openOrderSummary()" style="margin-top:6px;padding:5px 14px;background:none;color:#00465E;border:1.5px solid #BAD6E0;border-radius:8px;font-size:.68rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='none'">View Summary</button>
               </div>
             </div>
-            <button onclick="openOrderSummary()" style="margin-top:12px;padding:6px 16px;background:none;color:#00465E;border:1.5px solid #BAD6E0;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='none'">View Summary</button>
           </div>
 
           <!-- TOP-RIGHT: Reduced Week (1/3 wide, 2/3 tall) -->
-          <div style="padding:22px 20px;border-bottom:1px solid #E8DFD2;">
-            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:10px;">Reduced Week</div>
-            <div style="font-size:.72rem;color:#5A6B75;line-height:1.4;margin-bottom:12px;">Short week? Reduce all categories by a preset amount. Reverts automatically next week.</div>
-            <div id="plReductionBtns" style="display:flex;flex-wrap:wrap;gap:6px;">
-              <button onclick="applyReduction(100)" class="pl-reduce-btn" data-pct="100" style="padding:6px 12px;font-size:.68rem;font-weight:800;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #00465E;background:#00465E;color:#fff;transition:.15s;">Full</button>
-              <button onclick="applyReduction(80)" class="pl-reduce-btn" data-pct="80" style="padding:6px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;">80%</button>
-              <button onclick="applyReduction(60)" class="pl-reduce-btn" data-pct="60" style="padding:6px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;">60%</button>
-              <button onclick="applyReduction(40)" class="pl-reduce-btn" data-pct="40" style="padding:6px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;">40%</button>
+          <div style="padding:20px 20px;border-bottom:1px solid #E8DFD2;">
+            <div style="display:flex;align-items:flex-start;gap:14px;">
+              <div style="flex:1;">
+                <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:6px;">Reduced Week</div>
+                <div style="font-size:.68rem;color:#5A6B75;line-height:1.35;">Short week or holiday? Reduce all categories at once.</div>
+              </div>
+              <div id="plReductionBtns" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;flex-shrink:0;">
+                <button onclick="applyReduction(100)" class="pl-reduce-btn" data-pct="100" style="padding:7px 14px;font-size:.68rem;font-weight:800;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #00465E;background:#00465E;color:#fff;transition:.15s;text-align:center;">Full</button>
+                <button onclick="applyReduction(80)" class="pl-reduce-btn" data-pct="80" style="padding:7px 14px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">80%</button>
+                <button onclick="applyReduction(60)" class="pl-reduce-btn" data-pct="60" style="padding:7px 14px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">60%</button>
+                <button onclick="applyReduction(40)" class="pl-reduce-btn" data-pct="40" style="padding:7px 14px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">40%</button>
+              </div>
             </div>
-            <div id="plReductionBanner" style="display:none;margin-top:10px;padding:8px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;">
-              <div style="font-size:.68rem;font-weight:700;color:#92400E;" id="plReductionText"></div>
-              <button onclick="applyReduction(100)" style="font-size:.62rem;font-weight:700;color:#92400E;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;margin-top:2px;">Remove reduction</button>
+            <div id="plReductionBanner" style="display:none;margin-top:12px;padding:10px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;display:none;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div>
+                  <div style="font-size:.72rem;font-weight:700;color:#92400E;" id="plReductionText"></div>
+                  <div style="font-size:.62rem;color:#B45309;margin-top:1px;">Reverts automatically next week</div>
+                </div>
+                <button onclick="applyReduction(100)" style="padding:5px 14px;font-size:.65rem;font-weight:700;color:#92400E;background:#fff;border:1.5px solid #FDE68A;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;">Remove</button>
+              </div>
             </div>
           </div>
 
@@ -2266,7 +2273,8 @@ function applyReduction(pct) {
     if (banner) {
       banner.style.display = 'block';
       const txt = document.getElementById('plReductionText');
-      if (txt) txt.textContent = 'Reduced to ' + pct + '% — reverts automatically next week';
+      const delivDate = document.getElementById('plNextDelivery')?.textContent || 'This week';
+      if (txt) txt.textContent = delivDate + ' reduced to ' + pct + '%';
     }
   }
 
