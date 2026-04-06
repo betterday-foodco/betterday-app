@@ -702,23 +702,26 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
           <div style="padding:20px 20px;border-bottom:1px solid #E8DFD2;">
             <div style="display:flex;align-items:flex-start;gap:14px;">
               <div style="flex:1;">
-                <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:6px;">Reduced Week</div>
-                <div style="font-size:.68rem;color:#5A6B75;line-height:1.35;">Short week or holiday? Reduce all categories at once.</div>
+                <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:6px;">Reduce This Week</div>
+                <div style="font-size:.68rem;color:#5A6B75;line-height:1.35;">Holiday or short week? Reduce all par levels and selections for this delivery only.</div>
               </div>
               <div id="plReductionBtns" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;flex-shrink:0;">
-                <button onclick="applyReduction(100)" class="pl-reduce-btn" data-pct="100" style="padding:7px 14px;font-size:.68rem;font-weight:800;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #00465E;background:#00465E;color:#fff;transition:.15s;text-align:center;">Full</button>
-                <button onclick="applyReduction(80)" class="pl-reduce-btn" data-pct="80" style="padding:7px 14px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">80%</button>
-                <button onclick="applyReduction(60)" class="pl-reduce-btn" data-pct="60" style="padding:7px 14px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">60%</button>
-                <button onclick="applyReduction(40)" class="pl-reduce-btn" data-pct="40" style="padding:7px 14px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">40%</button>
+                <button onclick="applyReduction(0)" class="pl-reduce-btn" data-reduce="0" style="padding:7px 12px;font-size:.68rem;font-weight:800;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #00465E;background:#00465E;color:#fff;transition:.15s;text-align:center;">Full Week</button>
+                <button onclick="applyReduction(20)" class="pl-reduce-btn" data-reduce="20" style="padding:7px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">-20%</button>
+                <button onclick="applyReduction(40)" class="pl-reduce-btn" data-reduce="40" style="padding:7px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">-40%</button>
+                <button onclick="applyReduction(80)" class="pl-reduce-btn" data-reduce="80" style="padding:7px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;text-align:center;">-80%</button>
               </div>
             </div>
-            <div id="plReductionBanner" style="display:none;margin-top:12px;padding:10px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;display:none;">
+            <div style="margin-top:6px;text-align:center;">
+              <button onclick="applyReduction(100)" class="pl-reduce-btn" data-reduce="100" style="padding:6px 0;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#DC2626;transition:.15s;text-align:center;width:100%;">Skip Week</button>
+            </div>
+            <div id="plReductionBanner" style="display:none;margin-top:10px;padding:10px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
                 <div>
                   <div style="font-size:.72rem;font-weight:700;color:#92400E;" id="plReductionText"></div>
                   <div style="font-size:.62rem;color:#B45309;margin-top:1px;">Reverts automatically next week</div>
                 </div>
-                <button onclick="applyReduction(100)" style="padding:5px 14px;font-size:.65rem;font-weight:700;color:#92400E;background:#fff;border:1.5px solid #FDE68A;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;">Remove</button>
+                <button onclick="applyReduction(0)" style="padding:5px 14px;font-size:.65rem;font-weight:700;color:#92400E;background:#fff;border:1.5px solid #FDE68A;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0;">Remove</button>
               </div>
             </div>
           </div>
@@ -2223,55 +2226,84 @@ function updateParTotals() {
 
 let _plOriginalLevels = null;
 
-function applyReduction(pct) {
-  pct = Math.max(0, Math.min(100, pct));
+// reduceBy: 0 = full week (restore), 20/40/80 = reduce by %, 100 = skip week
+function applyReduction(reduceBy) {
+  reduceBy = Math.max(0, Math.min(100, reduceBy));
+  const keepPct = 100 - reduceBy; // 0=full, 20=keep80%, 100=keep0%
   const banner = document.getElementById('plReductionBanner');
   const btns = document.querySelectorAll('.pl-reduce-btn');
 
-  if (pct === 100) {
-    // Restore original levels
+  if (reduceBy === 0) {
+    // Restore originals (full week)
     if (_plOriginalLevels) {
       Object.keys(_plOriginalLevels).forEach(k => {
         if (plData[k]) {
-          plData[k].qty = _plOriginalLevels[k];
-          plData[k].target = _plOriginalLevels[k];
+          plData[k].qty = _plOriginalLevels[k].target;
+          plData[k].target = _plOriginalLevels[k].target;
+          plData[k].items = _plOriginalLevels[k].items || [];
         }
       });
       _plOriginalLevels = null;
     }
     if (banner) banner.style.display = 'none';
   } else {
-    // Save originals if first time
+    // Save originals (targets + dish selections) if first time
     if (!_plOriginalLevels) {
       _plOriginalLevels = {};
       PL_CATEGORIES.forEach(c => {
-        _plOriginalLevels[c.id] = plData[c.id]?.target || plData[c.id]?.qty || 0;
+        const d = plData[c.id] || {};
+        _plOriginalLevels[c.id] = {
+          target: d.target || d.qty || 0,
+          items: JSON.parse(JSON.stringify(d.items || []))
+        };
       });
     }
-    // Apply reduction
+    // Apply reduction to targets AND trim dish selections
     PL_CATEGORIES.forEach(c => {
-      const orig = _plOriginalLevels[c.id] || 0;
-      const reduced = Math.round(orig * pct / 100);
+      const orig = _plOriginalLevels[c.id] || { target: 0, items: [] };
+      const reducedTarget = Math.round(orig.target * keepPct / 100);
       if (plData[c.id]) {
-        plData[c.id].qty = reduced;
-        plData[c.id].target = reduced;
+        plData[c.id].qty = reducedTarget;
+        plData[c.id].target = reducedTarget;
+        // Trim hand-pick items to fit reduced target
+        if (plData[c.id].items && plData[c.id].items.length > 0) {
+          let remaining = reducedTarget;
+          const trimmed = [];
+          // Keep items in order, reduce quantities proportionally
+          for (const item of plData[c.id].items) {
+            if (remaining <= 0) break;
+            const kept = Math.min(item.qty || 1, Math.max(1, Math.round((item.qty || 1) * keepPct / 100)));
+            const actualKept = Math.min(kept, remaining);
+            trimmed.push({ ...item, qty: actualKept });
+            remaining -= actualKept;
+          }
+          plData[c.id].items = trimmed;
+        }
       }
     });
     if (banner) {
       banner.style.display = 'block';
       const txt = document.getElementById('plReductionText');
       const delivDate = document.getElementById('plNextDelivery')?.textContent || 'This week';
-      if (txt) txt.textContent = delivDate + ' reduced to ' + pct + '%';
+      if (reduceBy === 100) {
+        if (txt) txt.textContent = delivDate + ' — skipping this week';
+      } else {
+        if (txt) txt.textContent = delivDate + ' reduced by ' + reduceBy + '%';
+      }
     }
   }
 
   // Highlight active button
   btns.forEach(b => {
-    const bPct = parseInt(b.dataset.pct);
-    if (bPct === pct) {
-      b.style.background = '#00465E'; b.style.color = '#fff'; b.style.borderColor = '#00465E';
+    const bReduce = parseInt(b.dataset.reduce);
+    if (bReduce === reduceBy) {
+      b.style.background = reduceBy === 100 ? '#DC2626' : '#00465E';
+      b.style.color = '#fff';
+      b.style.borderColor = reduceBy === 100 ? '#DC2626' : '#00465E';
     } else {
-      b.style.background = '#fff'; b.style.color = '#00465E'; b.style.borderColor = '#E8DFD2';
+      b.style.background = '#fff';
+      b.style.color = b.dataset.reduce === '100' ? '#DC2626' : '#00465E';
+      b.style.borderColor = '#E8DFD2';
     }
   });
 
