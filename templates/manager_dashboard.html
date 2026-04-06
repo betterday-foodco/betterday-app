@@ -946,28 +946,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         </div>
       </form>
 
-      <!-- Tier structure (read-only) -->
-      <div class="card">
-        <div class="card-title">Meal Subsidy Tiers</div>
-        <table class="tier-table">
-          <thead><tr><th>Tier</th><th>Meals/Week</th><th>Employee Pays</th><th>Company Covers</th><th>BD Contributes</th></tr></thead>
-          <tbody>
-            {% if company.FreeMealsPerWeek and company.FreeMealsPerWeek|string not in ('', '0') %}
-            <tr><td class="tier-free">Free</td><td>{{ company.FreeMealsPerWeek }}</td><td>$0.00</td><td>${{ '%.2f'|format((company.BasePrice or company.FullPrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.BDContribution or 0)|float) }}</td></tr>
-            {% endif %}
-            {% if company.Tier1_EmployeePrice %}
-            <tr><td>Tier 1</td><td>{{ company.Tier1_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier1_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier1_BDContribution or company.BDContribution or 0)|float) }}</td></tr>
-            {% endif %}
-            {% if company.Tier2_EmployeePrice %}
-            <tr><td>Tier 2</td><td>{{ company.Tier2_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier2_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier2_BDContribution or company.BDContribution or 0)|float) }}</td></tr>
-            {% endif %}
-            {% if company.Tier3_EmployeePrice %}
-            <tr><td>Tier 3</td><td>{{ company.Tier3_Meals or '—' }}</td><td>${{ '%.2f'|format((company.Tier3_EmployeePrice or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_CompanySubsidy or 0)|float) }}</td><td>${{ '%.2f'|format((company.Tier3_BDContribution or company.BDContribution or 0)|float) }}</td></tr>
-            {% endif %}
-          </tbody>
-        </table>
-        <div class="note-box">Need to adjust your meal tier allocation? Contact your BetterDay account manager at <a href="mailto:hello@eatbetterday.ca" style="color:#00465E;font-weight:700">hello@eatbetterday.ca</a></div>
-      </div>
+      <!-- Tier info removed — lives in Subsidy Tiers tab now -->
     </div>
 
   </div><!-- /cont -->
