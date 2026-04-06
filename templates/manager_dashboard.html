@@ -677,7 +677,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       <!-- ═══════ WEEKLY OVERVIEW — 4-QUADRANT HEADER ═══════ -->
       <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;overflow:hidden;margin-bottom:20px;">
         <div style="background:rgba(0,70,94,.08);padding:12px 24px;border-bottom:1px solid #E8DFD2;">
-          <div style="font-size:.95rem;font-weight:900;color:#00465E;">Weekly Overview</div>
+          <div style="font-size:1.3rem;font-weight:900;color:#00465E;">Weekly Overview</div>
         </div>
         <div style="display:grid;grid-template-columns:2fr 1fr;grid-template-rows:auto auto;">
 
@@ -758,7 +758,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       <!-- ═══════ WHAT'S IN YOUR ORDER ═══════ -->
       <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;overflow:hidden;margin-bottom:16px;">
         <div style="background:rgba(0,70,94,.08);padding:16px 24px;border-bottom:1px solid #E8DFD2;">
-          <div style="font-size:1.3rem;font-weight:900;color:#00465E;">What's in your order</div>
+          <div style="font-size:1.3rem;font-weight:900;color:#00465E;">Weekly Par Levels & Selections</div>
         </div>
         <div style="padding:20px 24px 20px;">
           <div id="plCartSummary">
@@ -1927,39 +1927,47 @@ function renderParGrid() {
           <div style="font-size:1rem;font-weight:900;color:#00465E;letter-spacing:-.01em;">${g.label}</div>
           <div style="font-size:.68rem;color:#7A8F9C;margin-top:2px;font-style:italic;">${g.sub}</div>
         </div>
-        <span style="font-size:.75rem;font-weight:800;color:${groupTotal > 0 ? '#00465E' : '#CBD5E1'};">${groupTotal} items &middot; $${groupCost.toFixed(2)}/wk</span>
+        <span style="font-size:.75rem;font-weight:800;color:${groupTotal > 0 ? '#00465E' : '#CBD5E1'};">$${groupCost.toFixed(2)}/wk</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">`;
 
+    // Compute current discount for display
+    const _totalSub = PL_CATEGORIES.reduce((s, c) => s + ((plData[c.id]?.target || plData[c.id]?.qty || 0) * c.unitPrice), 0);
+    const _discPct = _totalSub >= 1000 ? 25 : _totalSub >= 500 ? 20 : _totalSub >= 250 ? 15 : _totalSub > 0 ? 10 : 0;
+
     g.cats.forEach(cat => {
       const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
-      // Main page pill always shows par level (target)
       const qty = d.target || d.qty || 0;
       const mode = d.mode || 'auto';
       const isHandPick = mode === 'handpick';
-      const lineTotal = qty * cat.unitPrice;
+      const discountedPrice = cat.unitPrice * (1 - _discPct / 100);
+      const lineTotal = qty * discountedPrice;
       const dishCount = (d.items && d.items.length > 0) ? d.items.filter(i => (i.qty || 1) > 0).length : 0;
       const hasItems = qty > 0;
 
       html += `
         <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;padding:18px 16px 16px;position:relative;transition:.15s;box-shadow:0 1px 4px rgba(0,70,94,.04);" class="pl-cat-card">
-          <!-- Category name + price on one row -->
-          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;">
+          <!-- Category name + discounted price -->
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
             <span style="font-size:.84rem;font-weight:800;color:#00465E;">${cat.name}</span>
-            <span style="font-size:.68rem;font-weight:400;color:#7A8F9C;">$${cat.unitPrice.toFixed(2)}/ea</span>
+            <span style="font-size:.68rem;font-weight:400;color:#7A8F9C;">${_discPct > 0 ? '<span style="text-decoration:line-through;color:#CBD5E1;">$' + cat.unitPrice.toFixed(2) + '</span> ' : ''}$${discountedPrice.toFixed(2)}/ea</span>
           </div>
+          <div style="font-size:.62rem;color:#94A3B8;margin-bottom:12px;">Set weekly par level for this category</div>
 
-          <!-- Compact pill: ─ | # | + | items/wk · $total -->
+          <!-- Compact pill: ─ | #/per week | + | Weekly total/$total -->
           <div style="display:flex;align-items:stretch;border:2px solid ${hasItems ? '#D4A029' : '#D4D4D4'};border-radius:12px;overflow:hidden;margin-bottom:16px;${hasItems ? 'box-shadow:0 2px 8px rgba(212,160,41,.15);' : ''}">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:38px;border:none;background:${hasItems ? '#FEF3C7' : '#F0F7FA'};font-size:17px;font-weight:900;color:${hasItems ? '#92400E' : '#00465E'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">−</button>
-            <input type="number" min="0" max="999" value="${qty}" id="plCatQty_${cat.id}"
-              onclick="event.stopPropagation();this.select();"
-              onchange="event.stopPropagation();setCatQtyDirect('${cat.id}',parseInt(this.value)||0)"
-              style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:${hasItems ? '#92400E' : '#CBD5E1'};background:${hasItems ? '#FBBF24' : '#fff'};border:none;border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-right:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:6px 0;flex-shrink:0;">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:38px;border:none;background:${hasItems ? '#FEF3C7' : '#F0F7FA'};font-size:17px;font-weight:900;color:${hasItems ? '#92400E' : '#00465E'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;background:${hasItems ? '#FFFBEB' : '#FAFAFA'};border-left:1px solid ${hasItems ? '#FDE68A' : '#E8DFD2'};min-height:42px;">
-              <span style="font-size:.6rem;font-weight:400;color:#7A8F9C;white-space:nowrap;">items/wk</span>
-              ${hasItems ? `<span style="font-size:.75rem;font-weight:800;color:#00465E;white-space:nowrap;">$${lineTotal.toFixed(2)}</span>` : ''}
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:40px;border:none;background:${hasItems ? '#FEF3C7' : '#F0F7FA'};font-size:17px;font-weight:900;color:${hasItems ? '#92400E' : '#00465E'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">−</button>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;background:${hasItems ? '#FBBF24' : '#fff'};border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-right:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};padding:4px 0;flex-shrink:0;min-width:54px;">
+              <input type="number" min="0" max="999" value="${qty}" id="plCatQty_${cat.id}"
+                onclick="event.stopPropagation();this.select();"
+                onchange="event.stopPropagation();setCatQtyDirect('${cat.id}',parseInt(this.value)||0)"
+                style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:${hasItems ? '#92400E' : '#CBD5E1'};background:transparent;border:none;outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:0;">
+              <span style="font-size:.48rem;font-weight:600;color:${hasItems ? '#92400E' : '#94A3B8'};text-transform:uppercase;letter-spacing:.5px;margin-top:-2px;">per week</span>
+            </div>
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:40px;border:none;background:${hasItems ? '#FEF3C7' : '#F0F7FA'};font-size:17px;font-weight:900;color:${hasItems ? '#92400E' : '#00465E'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
+            <div style="width:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 6px;background:${hasItems ? '#FFFBEB' : '#FAFAFA'};border-left:1px solid ${hasItems ? '#FDE68A' : '#E8DFD2'};min-height:42px;flex-shrink:0;">
+              <span style="font-size:.5rem;font-weight:400;color:#7A8F9C;white-space:nowrap;">Weekly total</span>
+              ${hasItems ? `<span style="font-size:.72rem;font-weight:800;color:#00465E;white-space:nowrap;">$${lineTotal.toFixed(2)}</span>` : ''}
             </div>
           </div>
 
