@@ -687,23 +687,26 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
             <div style="font-size:.72rem;font-weight:700;color:#167421;" id="plSavingsDisplay"></div>
           </div>
         </div>
+        <button onclick="openOrderSummary()" style="width:100%;margin-top:16px;padding:14px;background:#00465E;color:#fff;border:none;border-radius:10px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#003A4E'" onmouseout="this.style.background='#00465E'">View Weekly Order Summary</button>
       </div>
 
-      <!-- ═══════ SAVINGS PROGRESS (thin, inline) ═══════ -->
-      <div style="background:#fff;padding:12px 24px 16px;border-radius:0 0 14px 14px;margin-bottom:20px;">
+      <!-- ═══════ VOLUME DISCOUNT TIERS ═══════ -->
+      <div style="background:#fff;padding:14px 24px 18px;border-radius:0 0 14px 14px;margin-bottom:20px;">
+        <div style="font-size:.68rem;font-weight:700;color:#00465E;margin-bottom:8px;">Volume Discount — order more, save more</div>
         <div style="display:flex;align-items:center;gap:12px;">
           <div style="flex:1;">
-            <div style="height:8px;background:#F1F5F9;border-radius:8px;overflow:hidden;">
+            <div style="height:10px;background:#F1F5F9;border-radius:8px;overflow:hidden;">
               <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B,#D97706);border-radius:8px;transition:width .5s;"></div>
             </div>
-            <div style="display:flex;justify-content:space-between;margin-top:3px;font-size:.55rem;font-weight:600;color:#94A3B8;position:relative;">
-              <span>10%</span>
-              <span style="position:absolute;left:33%;transform:translateX(-50%);">$500 · 15%</span>
-              <span style="position:absolute;left:66%;transform:translateX(-50%);">$750 · 20%</span>
-              <span>$1K+ · 25%</span>
+            <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.58rem;font-weight:600;color:#5A6B75;position:relative;">
+              <span style="color:#94A3B8;">Under $250<br><span style="color:#CBD5E1;">No discount</span></span>
+              <span style="position:absolute;left:25%;transform:translateX(-50%);text-align:center;">$250+<br><span style="color:#D4A029;font-weight:800;">10% off</span></span>
+              <span style="position:absolute;left:50%;transform:translateX(-50%);text-align:center;">$500+<br><span style="color:#D4A029;font-weight:800;">15% off</span></span>
+              <span style="position:absolute;left:75%;transform:translateX(-50%);text-align:center;">$750+<br><span style="color:#D4A029;font-weight:800;">20% off</span></span>
+              <span style="text-align:right;">$1,000+<br><span style="color:#167421;font-weight:800;">25% off</span></span>
             </div>
           </div>
-          <div id="plDiscountBadge" style="background:#F1F5F9;color:#94A3B8;font-size:.72rem;font-weight:800;padding:6px 14px;border-radius:8px;white-space:nowrap;min-width:80px;text-align:center;">0% off</div>
+          <div id="plDiscountBadge" style="background:#F1F5F9;color:#94A3B8;font-size:.78rem;font-weight:900;padding:8px 16px;border-radius:8px;white-space:nowrap;min-width:80px;text-align:center;">0% off</div>
         </div>
       </div>
 
@@ -1909,14 +1912,14 @@ function renderParGrid() {
           </div>
 
           <!-- Compact pill: ─ | # | + | items/wk · $total -->
-          <div style="display:flex;align-items:stretch;border:2px solid ${hasItems ? '#00465E' : '#D4D4D4'};border-radius:12px;overflow:hidden;margin-bottom:16px;">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:38px;border:none;background:#F0F7FA;font-size:17px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">−</button>
+          <div style="display:flex;align-items:stretch;border:2px solid ${hasItems ? '#D4A029' : '#D4D4D4'};border-radius:12px;overflow:hidden;margin-bottom:16px;${hasItems ? 'box-shadow:0 2px 8px rgba(212,160,41,.15);' : ''}">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:38px;border:none;background:${hasItems ? '#FEF3C7' : '#F0F7FA'};font-size:17px;font-weight:900;color:${hasItems ? '#92400E' : '#00465E'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">−</button>
             <input type="number" min="0" max="999" value="${qty}" id="plCatQty_${cat.id}"
               onclick="event.stopPropagation();this.select();"
               onchange="event.stopPropagation();setCatQtyDirect('${cat.id}',parseInt(this.value)||0)"
-              style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:#00465E;background:${hasItems ? '#FEF9C3' : '#fff'};border:none;border-left:1px solid #E8DFD2;border-right:1px solid #E8DFD2;outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:6px 0;flex-shrink:0;">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:38px;border:none;background:#F0F7FA;font-size:17px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;background:#FAFAF5;border-left:1px solid #E8DFD2;min-height:42px;">
+              style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:${hasItems ? '#92400E' : '#CBD5E1'};background:${hasItems ? '#FBBF24' : '#fff'};border:none;border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-right:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:6px 0;flex-shrink:0;">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:38px;border:none;background:${hasItems ? '#FEF3C7' : '#F0F7FA'};font-size:17px;font-weight:900;color:${hasItems ? '#92400E' : '#00465E'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;background:${hasItems ? '#FFFBEB' : '#FAFAFA'};border-left:1px solid ${hasItems ? '#FDE68A' : '#E8DFD2'};min-height:42px;">
               <span style="font-size:.6rem;font-weight:400;color:#7A8F9C;white-space:nowrap;">items/wk</span>
               ${hasItems ? `<span style="font-size:.75rem;font-weight:800;color:#00465E;white-space:nowrap;">$${lineTotal.toFixed(2)}</span>` : ''}
             </div>
@@ -1951,6 +1954,87 @@ function renderParGrid() {
     html += '</div></div>';
   });
   container.innerHTML = html;
+}
+
+function openOrderSummary() {
+  let overlay = document.querySelector('.pl-overlay');
+  let panel = document.querySelector('.pl-detail-panel');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.className = 'pl-overlay';
+    overlay.onclick = () => closeCatDetail();
+    document.body.appendChild(overlay);
+  }
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.className = 'pl-detail-panel';
+    panel.style.width = '520px';
+    document.body.appendChild(panel);
+  }
+
+  const deliveryDate = document.getElementById('plNextDelivery')?.textContent || 'This Week';
+  const totalItems = PL_CATEGORIES.reduce((s, c) => s + ((plData[c.id]?.target || plData[c.id]?.qty || 0)), 0);
+  const subtotal = PL_CATEGORIES.reduce((s, c) => s + ((plData[c.id]?.target || plData[c.id]?.qty || 0) * c.unitPrice), 0);
+  const discountPct = subtotal >= 1000 ? 25 : subtotal >= 750 ? 20 : subtotal >= 500 ? 15 : subtotal >= 250 ? 10 : 0;
+  const savings = subtotal * discountPct / 100;
+  const finalTotal = subtotal - savings;
+
+  const groups = [
+    { label: 'Mains', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
+    { label: 'Snacks & Extras', cats: PL_CATEGORIES.filter(c => c.group === 'snacks') },
+  ];
+
+  panel.innerHTML = `
+    <div class="pl-detail-header" style="padding:18px 20px;">
+      <h3 style="font-size:1.3rem;font-weight:900;color:#fff;margin:0;">Weekly Order Summary</h3>
+      <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
+    </div>
+    <div style="padding:16px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
+      <div style="font-size:.88rem;font-weight:800;color:#00465E;">Delivery: ${deliveryDate}</div>
+      <div style="font-size:.72rem;color:#7A8F9C;margin-top:2px;">${totalItems} items across ${PL_CATEGORIES.filter(c => (plData[c.id]?.target || plData[c.id]?.qty || 0) > 0).length} categories</div>
+    </div>
+    <div class="pl-detail-body" style="padding:0;">
+      ${groups.map(g => {
+        const cats = g.cats.filter(c => (plData[c.id]?.target || plData[c.id]?.qty || 0) > 0);
+        if (cats.length === 0) return '';
+        const groupTotal = cats.reduce((s, c) => s + (plData[c.id]?.target || plData[c.id]?.qty || 0) * c.unitPrice, 0);
+        return '<div style="padding:16px 20px;border-bottom:1px solid #F1F5F9;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+            '<span style="font-size:.82rem;font-weight:900;color:#00465E;">' + g.label + '</span>' +
+            '<span style="font-size:.78rem;font-weight:800;color:#00465E;">$' + groupTotal.toFixed(2) + '</span>' +
+          '</div>' +
+          cats.map(c => {
+            const qty = plData[c.id]?.target || plData[c.id]?.qty || 0;
+            const mode = plData[c.id]?.mode || 'auto';
+            const picked = (plData[c.id]?.items?.length || 0);
+            const line = qty * c.unitPrice;
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0 6px 12px;border-left:3px solid #FBBF24;">' +
+              '<div>' +
+                '<div style="font-size:.78rem;font-weight:700;color:#00465E;">' + c.name + '</div>' +
+                '<div style="font-size:.62rem;color:#7A8F9C;">' + qty + ' items &middot; ' + (mode === 'handpick' ? picked + ' hand-picked' : 'Auto-selected') + '</div>' +
+              '</div>' +
+              '<span style="font-size:.78rem;font-weight:800;color:#00465E;">$' + line.toFixed(2) + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }).join('')}
+      ${PL_CATEGORIES.every(c => (plData[c.id]?.target || plData[c.id]?.qty || 0) === 0)
+        ? '<div style="padding:40px 20px;text-align:center;"><div style="font-size:.88rem;font-weight:700;color:#94A3B8;">No items in your order yet</div><div style="font-size:.72rem;color:#CBD5E1;margin-top:4px;">Set par levels on the categories below to get started.</div></div>'
+        : ''}
+    </div>
+    <div style="padding:16px 20px;border-top:2px solid #E8DFD2;background:#F9F5F0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:.78rem;font-weight:600;color:#7A8F9C;">Subtotal</span>
+        <span style="font-size:.78rem;font-weight:700;color:#00465E;">$${subtotal.toFixed(2)}</span>
+      </div>
+      ${discountPct > 0 ? '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-size:.78rem;font-weight:600;color:#167421;">Volume discount (' + discountPct + '% off)</span><span style="font-size:.78rem;font-weight:700;color:#167421;">-$' + savings.toFixed(2) + '</span></div>' : ''}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid #E8DFD2;margin-top:4px;">
+        <span style="font-size:.92rem;font-weight:900;color:#00465E;">Weekly Total</span>
+        <span style="font-size:1.1rem;font-weight:900;color:#00465E;">$${finalTotal.toFixed(2)}</span>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
 }
 
 function openFullCartEditor() {
