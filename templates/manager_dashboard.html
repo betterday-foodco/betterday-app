@@ -2199,24 +2199,38 @@ async function openCatDetail(catId) {
     catItems = catalog[catId] || [];
   }
 
+  const currentQty = d.qty || 0;
+  const target = d.target || currentQty || 0;
+  const remaining = Math.max(0, target - currentQty);
+  const progressText = target > 0
+    ? (currentQty >= target ? `<span style="color:#167421;font-weight:900;">${currentQty} ${cat.name} selected</span>` : `<span style="font-weight:900;color:#00465E;">${currentQty}</span> <span style="color:#7A8F9C;">of</span> <span style="font-weight:900;color:#00465E;">${target}</span> <span style="color:#7A8F9C;">selected</span>`)
+    : (currentQty > 0 ? `<span style="color:#00465E;font-weight:900;">${currentQty} selected</span>` : '');
+  const progressPct = target > 0 ? Math.min(100, (currentQty / target) * 100) : 0;
+
   panel.innerHTML = `
     <div class="pl-detail-header">
       <h3>${cat.name}</h3>
       <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
     </div>
-    <div style="padding:14px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <span style="font-size:.88rem;font-weight:900;color:#00465E;">${d.qty || 0} items</span>
-          <span style="font-size:.75rem;color:#7A8F9C;margin-left:8px;">$${cat.unitPrice.toFixed(2)}/ea</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:0;border:2px solid #00465E;border-radius:10px;overflow:hidden;">
-          <button onclick="adjustQty('${catId}',-1);openCatDetail('${catId}')" style="width:34px;height:34px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
-          <span style="width:36px;text-align:center;font-size:.95rem;font-weight:900;color:#00465E;background:#fff;">${d.qty || 0}</span>
-          <button onclick="adjustQty('${catId}',1);openCatDetail('${catId}')" style="width:34px;height:34px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
-        </div>
+    <div style="padding:16px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
+      <!-- Target setter -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="font-size:.72rem;font-weight:700;color:#7A8F9C;white-space:nowrap;">Weekly target</div>
+        <input type="number" min="0" max="999" value="${target}" id="plTargetInput_${catId}"
+          onclick="this.select()" onchange="setCatTarget('${catId}',parseInt(this.value)||0)"
+          style="width:56px;height:34px;text-align:center;font-size:1rem;font-weight:900;color:#00465E;border:2px solid #E8DFD2;border-radius:8px;background:#fff;font-family:'DM Sans',sans-serif;outline:none;">
+        <div style="flex:1;font-size:.72rem;color:#7A8F9C;">$${cat.unitPrice.toFixed(2)}/ea</div>
+        ${remaining > 0 ? `<button onclick="autoFillRemaining('${catId}')" style="font-size:.68rem;font-weight:700;color:#00465E;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Auto-fill ${remaining} remaining</button>` : ''}
       </div>
-      <div style="font-size:.72rem;color:#7A8F9C;margin-top:4px;">${cat.rotating ? 'Rotating Menu — swap any item below' : 'Same items every week'} · ${catItems.length} available</div>
+      <!-- Progress bar + count -->
+      ${target > 0 ? `
+      <div style="height:6px;background:#E8DFD2;border-radius:6px;overflow:hidden;margin-bottom:6px;">
+        <div style="height:100%;width:${progressPct}%;background:${currentQty >= target ? '#167421' : '#D4A029'};border-radius:6px;transition:width .3s;"></div>
+      </div>` : ''}
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:.78rem;">${progressText}</div>
+        <div style="font-size:.68rem;color:#7A8F9C;">${cat.rotating ? 'Rotates weekly' : 'Same items'} · ${catItems.length} available</div>
+      </div>
     </div>
     <div class="pl-detail-body">
       ${catItems.length === 0 ? '<div style="text-align:center;padding:60px 20px;"><div style="font-size:.88rem;font-weight:700;color:#94A3B8;margin-bottom:8px;">No items available yet</div><div style="font-size:.75rem;color:#CBD5E1;">Items will appear here once your menu is published.</div></div>' :
@@ -2241,6 +2255,59 @@ async function openCatDetail(catId) {
           </div>`;}).join('')}
     </div>
   `;
+}
+
+function setCatTarget(catId, target) {
+  target = Math.max(0, target);
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto', items: [] };
+  d.target = target;
+  plData[catId] = d;
+  // If target > current qty, the "auto-fill remaining" button will show on re-render
+  // If target < current qty, just update — the total keeps climbing naturally
+  openCatDetail(catId); // re-render the panel with updated progress
+}
+
+function autoFillRemaining(catId) {
+  const d = plData[catId] || { qty: 0, target: 0 };
+  const target = d.target || 0;
+  const currentQty = d.qty || 0;
+  const remaining = Math.max(0, target - currentQty);
+  if (remaining <= 0) return;
+
+  // Get all dish qty inputs for this category
+  const inputs = document.querySelectorAll('[id^="dishQtyVal_' + catId + '_"]');
+  if (inputs.length === 0) return;
+
+  // Find dishes that currently have 0 qty
+  const zeroInputs = [];
+  inputs.forEach((inp, i) => {
+    if ((parseInt(inp.value) || 0) === 0) zeroInputs.push({ el: inp, idx: i });
+  });
+
+  if (zeroInputs.length === 0) {
+    // All dishes already have qty — distribute evenly across all
+    let left = remaining;
+    let i = 0;
+    while (left > 0) {
+      const inp = inputs[i % inputs.length];
+      const idx = parseInt(inp.id.split('_').pop());
+      adjustDishQty(catId, idx, 1);
+      left--;
+      i++;
+    }
+  } else {
+    // Distribute evenly across zero-qty dishes
+    const perDish = Math.floor(remaining / zeroInputs.length);
+    let extra = remaining % zeroInputs.length;
+    zeroInputs.forEach(({ el, idx }) => {
+      const qty = perDish + (extra > 0 ? 1 : 0);
+      if (extra > 0) extra--;
+      const realIdx = parseInt(el.id.split('_').pop());
+      setDishQty(catId, realIdx, qty);
+    });
+  }
+  // Re-render the panel to update progress
+  setTimeout(() => openCatDetail(catId), 50);
 }
 
 function setDishQty(catId, idx, qty) {
@@ -2285,13 +2352,15 @@ function _recalcCatTotal(catId) {
   });
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
   d.qty = totalQty;
+  // If qty exceeds target, silently bump target up
+  if (d.target && totalQty > d.target) d.target = totalQty;
   plData[catId] = d;
-  // Update header qty display
-  const headerQty = document.querySelector('.pl-detail-panel .pl-detail-header + div');
-  if (headerQty) {
-    const qtySpan = headerQty.querySelector('span:first-child');
-    if (qtySpan) qtySpan.innerHTML = '<strong>' + totalQty + ' items</strong>';
-  }
+
+  // Update the progress bar + counter in the panel header
+  const targetInput = document.getElementById('plTargetInput_' + catId);
+  const target = d.target || 0;
+  if (targetInput && totalQty > target) targetInput.value = totalQty;
+
   renderParGrid();
   updateParTotals();
   autoSaveParLevels();
