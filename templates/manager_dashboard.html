@@ -674,39 +674,80 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         <button onclick="document.getElementById('plLockedBanner').style.display='none'" style="margin-top:10px;font-size:.72rem;font-weight:700;color:#92400E;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);border-radius:8px;padding:6px 14px;cursor:pointer;">View order (read-only)</button>
       </div>
 
-      <!-- ═══════ YOUR NEXT DELIVERY (unified header) ═══════ -->
-      <div class="card" style="border:none;background:#fff;padding:24px;margin-bottom:0;border-radius:14px 14px 0 0;border-bottom:1px solid #E8DFD2;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <div>
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;">Your Next Delivery</div>
+      <!-- ═══════ WEEKLY OVERVIEW — 4-QUADRANT HEADER ═══════ -->
+      <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;overflow:hidden;margin-bottom:20px;">
+        <div style="background:rgba(0,70,94,.08);padding:12px 24px;border-bottom:1px solid #E8DFD2;">
+          <div style="font-size:.95rem;font-weight:900;color:#00465E;">Weekly Overview</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;grid-template-rows:auto auto;">
+
+          <!-- TOP-LEFT: Weekly Summary (2/3 wide, 2/3 tall) -->
+          <div style="padding:22px 24px;border-right:1px solid #E8DFD2;border-bottom:1px solid #E8DFD2;">
+            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;">Your Next Delivery</div>
             <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-top:2px;" id="plNextDelivery">Monday, April 7</div>
             <div id="plEditWindow" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px;"></div>
+            <div style="display:flex;align-items:baseline;gap:16px;margin-top:14px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</span>
+              </div>
+              <div>
+                <span style="font-size:1.4rem;font-weight:900;color:#00465E;" id="plTotalDisplay">$0.00</span>
+              </div>
+              <div>
+                <span style="font-size:.78rem;font-weight:700;color:#167421;" id="plSavingsDisplay"></span>
+              </div>
+            </div>
+            <button onclick="openOrderSummary()" style="margin-top:12px;padding:6px 16px;background:none;color:#00465E;border:1.5px solid #BAD6E0;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='none'">View Summary</button>
           </div>
-          <div style="text-align:right;">
-            <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</div>
-            <div style="font-size:1.3rem;font-weight:900;color:#00465E;" id="plTotalDisplay">$0.00</div>
-            <div style="font-size:.72rem;font-weight:700;color:#167421;" id="plSavingsDisplay"></div>
-            <button onclick="openOrderSummary()" style="margin-top:6px;padding:5px 14px;background:none;color:#00465E;border:1.5px solid #BAD6E0;border-radius:8px;font-size:.68rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='none'">View Summary</button>
-          </div>
-        </div>
-      </div>
 
-      <!-- ═══════ VOLUME DISCOUNT TIERS ═══════ -->
-      <div style="background:#fff;padding:14px 24px 18px;border-radius:0 0 14px 14px;margin-bottom:20px;">
-        <div style="font-size:.68rem;font-weight:700;color:#00465E;margin-bottom:8px;">Volume Discount — order more, save more</div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="flex:1;">
-            <div style="height:10px;background:#F1F5F9;border-radius:8px;overflow:hidden;">
-              <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B,#D97706);border-radius:8px;transition:width .5s;"></div>
+          <!-- TOP-RIGHT: Reduced Week (1/3 wide, 2/3 tall) -->
+          <div style="padding:22px 20px;border-bottom:1px solid #E8DFD2;">
+            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:10px;">Reduced Week</div>
+            <div style="font-size:.72rem;color:#5A6B75;line-height:1.4;margin-bottom:12px;">Short week? Reduce all categories by a preset amount. Reverts automatically next week.</div>
+            <div id="plReductionBtns" style="display:flex;flex-wrap:wrap;gap:6px;">
+              <button onclick="applyReduction(100)" class="pl-reduce-btn" data-pct="100" style="padding:6px 12px;font-size:.68rem;font-weight:800;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #00465E;background:#00465E;color:#fff;transition:.15s;">Full</button>
+              <button onclick="applyReduction(80)" class="pl-reduce-btn" data-pct="80" style="padding:6px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;">80%</button>
+              <button onclick="applyReduction(60)" class="pl-reduce-btn" data-pct="60" style="padding:6px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;">60%</button>
+              <button onclick="applyReduction(40)" class="pl-reduce-btn" data-pct="40" style="padding:6px 12px;font-size:.68rem;font-weight:700;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1.5px solid #E8DFD2;background:#fff;color:#00465E;transition:.15s;">40%</button>
             </div>
-            <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.58rem;font-weight:600;color:#5A6B75;">
-              <span style="text-align:center;">Under $250<br><span style="color:#D4A029;font-weight:800;">10% off</span></span>
-              <span style="text-align:center;">$250+<br><span style="color:#D4A029;font-weight:800;">15% off</span></span>
-              <span style="text-align:center;">$500+<br><span style="color:#D4A029;font-weight:800;">20% off</span></span>
-              <span style="text-align:center;">$1,000+<br><span style="color:#167421;font-weight:800;">25% off</span></span>
+            <div id="plReductionBanner" style="display:none;margin-top:10px;padding:8px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;">
+              <div style="font-size:.68rem;font-weight:700;color:#92400E;" id="plReductionText"></div>
+              <button onclick="applyReduction(100)" style="font-size:.62rem;font-weight:700;color:#92400E;background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;margin-top:2px;">Remove reduction</button>
             </div>
           </div>
-          <div id="plDiscountBadge" style="background:#F1F5F9;color:#94A3B8;font-size:.78rem;font-weight:900;padding:8px 16px;border-radius:8px;white-space:nowrap;min-width:80px;text-align:center;">0% off</div>
+
+          <!-- BOTTOM-LEFT: Volume Discount (2/3 wide, 1/3 tall) -->
+          <div style="padding:16px 24px;border-right:1px solid #E8DFD2;">
+            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:8px;">Volume Discount</div>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="flex:1;">
+                <div style="height:10px;background:#F1F5F9;border-radius:8px;overflow:hidden;">
+                  <div id="plProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#FBBF24,#F59E0B,#D97706);border-radius:8px;transition:width .5s;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.55rem;font-weight:600;color:#5A6B75;">
+                  <span>Under $250<br><span style="color:#D4A029;font-weight:800;">10% off</span></span>
+                  <span style="text-align:center;">$250+<br><span style="color:#D4A029;font-weight:800;">15% off</span></span>
+                  <span style="text-align:center;">$500+<br><span style="color:#D4A029;font-weight:800;">20% off</span></span>
+                  <span style="text-align:right;">$1,000+<br><span style="color:#167421;font-weight:800;">25% off</span></span>
+                </div>
+              </div>
+              <div id="plDiscountBadge" style="text-align:center;min-width:80px;">
+                <div style="font-size:.58rem;font-weight:600;color:#7A8F9C;">You're saving</div>
+                <div style="font-size:1.1rem;font-weight:900;color:#00465E;">0% off</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM-RIGHT: Past Office Orders (1/3 wide, 1/3 tall) -->
+          <div style="padding:16px 20px;">
+            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:8px;">Past Office Orders</div>
+            <div id="plPastOrders" style="font-size:.72rem;">
+              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F1F5F9;color:#00465E;font-weight:600;cursor:pointer;" onmouseover="this.style.color='#FBBF24'" onmouseout="this.style.color='#00465E'">Mar 31 delivery <span style="color:#7A8F9C;font-weight:400;">$947</span></div>
+              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F1F5F9;color:#00465E;font-weight:600;cursor:pointer;" onmouseover="this.style.color='#FBBF24'" onmouseout="this.style.color='#00465E'">Mar 24 delivery <span style="color:#7A8F9C;font-weight:400;">$891</span></div>
+              <div style="display:flex;justify-content:space-between;padding:5px 0;color:#00465E;font-weight:600;cursor:pointer;" onmouseover="this.style.color='#FBBF24'" onmouseout="this.style.color='#00465E'">Mar 17 delivery <span style="color:#7A8F9C;font-weight:400;">$1,024</span></div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -722,20 +763,10 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         </div>
       </div>
 
-      <!-- Order info + manage -->
-      <div style="background:#F9F5F0;border:1px solid #E8DFD2;border-radius:10px;padding:14px 18px;margin-bottom:16px;">
-        <div style="font-size:.75rem;color:#5a4a2a;line-height:1.5;margin-bottom:10px;">
+      <!-- Standing order note -->
+      <div style="background:#F9F5F0;border:1px solid #E8DFD2;border-radius:10px;padding:12px 18px;margin-bottom:16px;">
+        <div style="font-size:.72rem;color:#5a4a2a;line-height:1.5;">
           Your standing order auto-submits every <strong>Wednesday at midnight</strong> for the following week's delivery. Changes save automatically.
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button onclick="toggleAllParLevels()" id="plPauseAllBtn" style="padding:8px 16px;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.72rem;font-weight:700;color:#7A8F9C;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.borderColor='#EF4444';this.style.color='#EF4444'" onmouseout="this.style.borderColor='#E8DFD2';this.style.color='#7A8F9C'">Pause All</button>
-          <div style="padding:8px 16px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;display:flex;align-items:center;gap:8px;">
-            <label class="pl-toggle">
-              <input type="checkbox" id="plOverrideToggle" onchange="toggleOverrideMode()">
-              <span class="pl-toggle-track"></span>
-            </label>
-            <span style="font-size:.72rem;color:#5a4a2a;font-weight:600;">One-time change only</span>
-          </div>
         </div>
       </div>
 
@@ -2192,22 +2223,69 @@ function updateParTotals() {
   savingsEl.textContent = discountPct > 0 ? ('Saving $' + savings.toFixed(2)) : '';
   const badge = document.getElementById('plDiscountBadge');
   if (badge) {
-    badge.textContent = discountPct > 0 ? (discountPct + '% off') : '0% off';
-    badge.style.background = discountPct > 0 ? '#FEF3C7' : '#F1F5F9';
-    badge.style.color = discountPct > 0 ? '#92400E' : '#94A3B8';
+    badge.innerHTML = '<div style="font-size:.58rem;font-weight:600;color:#7A8F9C;">You\'re saving</div><div style="font-size:1.1rem;font-weight:900;color:' + (discountPct > 0 ? '#00465E' : '#CBD5E1') + ';">' + discountPct + '% off</div>';
   }
   // Progress bar (capped at 1500)
   const pct = Math.min(100, (subtotal / 1000) * 100);
   document.getElementById('plProgressFill').style.width = pct + '%';
 }
 
-function toggleOverrideMode() {
-  plOverrideMode = document.getElementById('plOverrideToggle').checked;
-  const knob = document.getElementById('plToggleKnob');
-  if (knob) {
-    knob.style.left = plOverrideMode ? '18px' : '2px';
-    knob.parentElement.previousElementSibling.nextElementSibling.style.background = plOverrideMode ? '#B56B10' : '#ccc';
+let _plOriginalLevels = null;
+
+function applyReduction(pct) {
+  pct = Math.max(0, Math.min(100, pct));
+  const banner = document.getElementById('plReductionBanner');
+  const btns = document.querySelectorAll('.pl-reduce-btn');
+
+  if (pct === 100) {
+    // Restore original levels
+    if (_plOriginalLevels) {
+      Object.keys(_plOriginalLevels).forEach(k => {
+        if (plData[k]) {
+          plData[k].qty = _plOriginalLevels[k];
+          plData[k].target = _plOriginalLevels[k];
+        }
+      });
+      _plOriginalLevels = null;
+    }
+    if (banner) banner.style.display = 'none';
+  } else {
+    // Save originals if first time
+    if (!_plOriginalLevels) {
+      _plOriginalLevels = {};
+      PL_CATEGORIES.forEach(c => {
+        _plOriginalLevels[c.id] = plData[c.id]?.target || plData[c.id]?.qty || 0;
+      });
+    }
+    // Apply reduction
+    PL_CATEGORIES.forEach(c => {
+      const orig = _plOriginalLevels[c.id] || 0;
+      const reduced = Math.round(orig * pct / 100);
+      if (plData[c.id]) {
+        plData[c.id].qty = reduced;
+        plData[c.id].target = reduced;
+      }
+    });
+    if (banner) {
+      banner.style.display = 'block';
+      const txt = document.getElementById('plReductionText');
+      if (txt) txt.textContent = 'Reduced to ' + pct + '% — reverts automatically next week';
+    }
   }
+
+  // Highlight active button
+  btns.forEach(b => {
+    const bPct = parseInt(b.dataset.pct);
+    if (bPct === pct) {
+      b.style.background = '#00465E'; b.style.color = '#fff'; b.style.borderColor = '#00465E';
+    } else {
+      b.style.background = '#fff'; b.style.color = '#00465E'; b.style.borderColor = '#E8DFD2';
+    }
+  });
+
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
 }
 
 let _plSaveTimer = null;
