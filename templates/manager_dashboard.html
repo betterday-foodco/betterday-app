@@ -1899,35 +1899,37 @@ function renderParGrid() {
 
       html += `
         <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;padding:18px 16px 16px;position:relative;transition:.15s;box-shadow:0 1px 4px rgba(0,70,94,.04);" class="pl-cat-card">
-          <!-- Category name -->
-          <div style="font-size:.84rem;font-weight:800;color:#00465E;margin-bottom:2px;">${cat.name}</div>
-          <div style="font-size:.6rem;color:#94A3B8;margin-bottom:14px;">$${cat.unitPrice.toFixed(2)}/ea</div>
+          <!-- Category name + price on one row -->
+          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;">
+            <span style="font-size:.84rem;font-weight:800;color:#00465E;">${cat.name}</span>
+            <span style="font-size:.68rem;font-weight:400;color:#7A8F9C;">$${cat.unitPrice.toFixed(2)}/ea</span>
+          </div>
 
           <!-- Compact pill: ─ | # | + | items/wk · $total -->
-          <div style="display:flex;align-items:stretch;border:2px solid ${hasItems ? '#00465E' : '#E2E2E2'};border-radius:12px;overflow:hidden;margin-bottom:14px;">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:38px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:17px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">−</button>
+          <div style="display:flex;align-items:stretch;border:2px solid ${hasItems ? '#00465E' : '#D4D4D4'};border-radius:12px;overflow:hidden;margin-bottom:16px;">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:38px;border:none;background:#F0F7FA;font-size:17px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">−</button>
             <input type="number" min="0" max="999" value="${qty}" id="plCatQty_${cat.id}"
               onclick="event.stopPropagation();this.select();"
               onchange="event.stopPropagation();setCatQtyDirect('${cat.id}',parseInt(this.value)||0)"
-              style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};background:${hasItems ? '#FEF9C3' : '#fff'};border:none;border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-right:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:6px 0;flex-shrink:0;">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:38px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:17px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
-            <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 10px;background:${hasItems ? '#FAFAF5' : '#FAFAFA'};border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};gap:4px;min-height:42px;">
-              <span style="font-size:.65rem;font-weight:700;color:${hasItems ? '#00465E' : '#94A3B8'};white-space:nowrap;">items/wk</span>
+              style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:#00465E;background:${hasItems ? '#FEF9C3' : '#fff'};border:none;border-left:1px solid #E8DFD2;border-right:1px solid #E8DFD2;outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:6px 0;flex-shrink:0;">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:38px;border:none;background:#F0F7FA;font-size:17px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 10px;background:#FAFAF5;border-left:1px solid #E8DFD2;gap:4px;min-height:42px;">
+              <span style="font-size:.65rem;font-weight:700;color:#00465E;white-space:nowrap;">items/wk</span>
               ${hasItems ? `<span style="font-size:.65rem;color:#94A3B8;">&middot;</span><span style="font-size:.72rem;font-weight:800;color:#00465E;white-space:nowrap;">$${lineTotal.toFixed(2)}</span>` : ''}
             </div>
           </div>
 
           <!-- Auto / Hand-pick toggle -->
-          <div style="display:flex;align-items:center;gap:0;border:1.5px solid #E8DFD2;border-radius:10px;overflow:hidden;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:0;border:1.5px solid #E8DFD2;border-radius:10px;overflow:hidden;margin-bottom:12px;">
             <button onclick="event.stopPropagation();setCatMode('${cat.id}','auto')" style="flex:1;padding:8px 4px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;transition:.15s;border-right:1px solid #E8DFD2;${!isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Auto</button>
             <button onclick="event.stopPropagation();setCatMode('${cat.id}','handpick')" style="flex:1;padding:8px 4px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;transition:.15s;${isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Hand-pick</button>
           </div>
 
-          <!-- Mode description -->
-          <div style="font-size:.58rem;color:#94A3B8;line-height:1.45;min-height:28px;margin-bottom:6px;">
+          <!-- Mode description — prominent, readable -->
+          <div style="font-size:.72rem;color:#5A6B75;line-height:1.35;min-height:32px;margin-bottom:10px;">
             ${!isHandPick
               ? 'We auto-select a balanced mix each week from the rotating menu.'
-              : 'Pick your dishes — selections carry over weekly with smart swaps for menu changes.'}
+              : 'Hand-pick your dishes. Selections carry over weekly with smart swaps for menu changes.'}
           </div>
 
           <!-- Action area -->
@@ -1937,8 +1939,8 @@ function renderParGrid() {
                    Select dishes${dishCount > 0 ? ' (' + dishCount + ' chosen)' : ''}
                  </button>`
               : hasItems
-              ? `<div style="font-size:.62rem;color:#167421;font-weight:700;">Auto-selected</div>`
-              : `<div style="font-size:.62rem;color:#CBD5E1;">Set a quantity above</div>`
+              ? `<div style="font-size:.65rem;color:#167421;font-weight:700;">Auto-selected</div>`
+              : `<div style="font-size:.65rem;color:#94A3B8;">Set a quantity above</div>`
             }
           </div>
         </div>`;
@@ -2247,14 +2249,25 @@ async function openCatDetail(catId) {
       <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
     </div>
     <div style="padding:16px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
-      <!-- Target setter -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <div style="font-size:.72rem;font-weight:700;color:#7A8F9C;white-space:nowrap;">Weekly target</div>
-        <input type="number" min="0" max="999" value="${target}" id="plTargetInput_${catId}"
-          onclick="this.select()" onchange="setCatTarget('${catId}',parseInt(this.value)||0)"
-          style="width:56px;height:34px;text-align:center;font-size:1rem;font-weight:900;color:#00465E;border:2px solid #E8DFD2;border-radius:8px;background:#fff;font-family:'DM Sans',sans-serif;outline:none;">
-        <div style="flex:1;font-size:.72rem;color:#7A8F9C;">$${cat.unitPrice.toFixed(2)}/ea</div>
-        ${remaining > 0 ? `<button onclick="autoFillRemaining('${catId}')" style="font-size:.68rem;font-weight:700;color:#00465E;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:8px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Auto-fill ${remaining} remaining</button>` : ''}
+      <!-- Par level info -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="flex:1;">
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;margin-bottom:4px;">Weekly par level</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="number" min="0" max="999" value="${target}" id="plTargetInput_${catId}"
+              onclick="this.select()" onchange="setCatTarget('${catId}',parseInt(this.value)||0)"
+              style="width:56px;height:36px;text-align:center;font-size:1.1rem;font-weight:900;color:#00465E;border:2px solid #E8DFD2;border-radius:8px;background:#fff;font-family:'DM Sans',sans-serif;outline:none;">
+            <span style="font-size:.72rem;color:#7A8F9C;">items &middot; $${cat.unitPrice.toFixed(2)}/ea</span>
+          </div>
+        </div>
+        ${currentQty !== target && target > 0 ? `
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div style="font-size:.6rem;color:#7A8F9C;">Previous: <strong>${d._prevTarget || target}</strong></div>
+          <div style="display:flex;gap:4px;">
+            <button onclick="document.getElementById('plTargetInput_${catId}').value=${d._prevTarget || target};setCatTarget('${catId}',${d._prevTarget || target})" style="font-size:.58rem;font-weight:700;color:#7A8F9C;background:#fff;border:1px solid #E8DFD2;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;">Keep previous</button>
+            <button onclick="plData['${catId}']._prevTarget=${target};renderParGrid();autoSaveParLevels();" style="font-size:.58rem;font-weight:700;color:#fff;background:#00465E;border:1px solid #00465E;border-radius:6px;padding:3px 8px;cursor:pointer;font-family:'DM Sans',sans-serif;">Set as new par</button>
+          </div>
+        </div>` : ''}
       </div>
       <!-- Progress bar + count -->
       ${target > 0 ? `
@@ -2263,8 +2276,13 @@ async function openCatDetail(catId) {
       </div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="font-size:.78rem;">${progressText}</div>
-        <div style="font-size:.68rem;color:#7A8F9C;">${cat.rotating ? 'Rotates weekly' : 'Same items'} · ${catItems.length} available</div>
+        <div style="font-size:.68rem;color:#7A8F9C;">${cat.rotating ? 'Rotates weekly' : 'Same items'} &middot; ${catItems.length} available</div>
       </div>
+      ${remaining > 0 ? `
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;">
+        <span style="font-size:.7rem;color:#92400E;font-weight:600;">${remaining} unfilled &mdash; will be auto-topped up at cutoff with random picks</span>
+        <button onclick="autoFillRemaining('${catId}')" style="font-size:.68rem;font-weight:700;color:#00465E;background:#fff;border:1.5px solid #BAD6E0;border-radius:8px;padding:5px 12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Fill now</button>
+      </div>` : ''}
     </div>
     <div class="pl-detail-body">
       ${catItems.length === 0 ? '<div style="text-align:center;padding:60px 20px;"><div style="font-size:.88rem;font-weight:700;color:#94A3B8;margin-bottom:8px;">No items available yet</div><div style="font-size:.75rem;color:#CBD5E1;">Items will appear here once your menu is published.</div></div>' :
@@ -2314,6 +2332,17 @@ function setCatQtyDirect(catId, qty) {
 
 function setCatMode(catId, mode) {
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto', items: [] };
+  const oldMode = d.mode || 'auto';
+  if (mode === oldMode) return;
+
+  if (oldMode === 'handpick' && mode === 'auto' && d.items && d.items.length > 0) {
+    // Hand-pick → Auto: warn that manual picks will be replaced by balanced distribution
+    if (!confirm('Switch to Auto? This will replace your manual picks with an evenly balanced selection across all available dishes.')) return;
+    d.items = []; // clear manual selections — auto will redistribute
+  }
+  // Auto → Hand-pick: preserve current auto-selections so they can edit from there
+  // (items stay as-is or are empty — openCatDetail will show them)
+
   d.mode = mode;
   plData[catId] = d;
   renderParGrid();
@@ -2323,11 +2352,13 @@ function setCatMode(catId, mode) {
 function setCatTarget(catId, target) {
   target = Math.max(0, target);
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto', items: [] };
+  // Track previous target for the "keep previous / set as new" toggle
+  if (d.target && d.target !== target && !d._prevTarget) {
+    d._prevTarget = d.target;
+  }
   d.target = target;
   plData[catId] = d;
-  // If target > current qty, the "auto-fill remaining" button will show on re-render
-  // If target < current qty, just update — the total keeps climbing naturally
-  openCatDetail(catId); // re-render the panel with updated progress
+  openCatDetail(catId);
 }
 
 function autoFillRemaining(catId) {

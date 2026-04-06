@@ -319,8 +319,8 @@ def gas_proxy():
             if anchor in _available_meals:
                 allowed = set(_available_meals[anchor])
                 data = {
-                    'meat':  [m for m in (data.get('meat')  or []) if str(m.get('MealID','')).strip() in allowed],
-                    'vegan': [m for m in (data.get('vegan') or []) if str(m.get('MealID','')).strip() in allowed],
+                    'meat':  [m for m in (data.get('meat')  or []) if str(m.get('id','')).strip() in allowed],
+                    'vegan': [m for m in (data.get('vegan') or []) if str(m.get('id','')).strip() in allowed],
                 }
             return jsonify(data), 200
         try:
@@ -331,8 +331,8 @@ def gas_proxy():
             if anchor in _available_meals and r.status_code == 200:
                 allowed = set(_available_meals[anchor])
                 data = {
-                    'meat':  [m for m in (data.get('meat')  or []) if str(m.get('MealID','')).strip() in allowed],
-                    'vegan': [m for m in (data.get('vegan') or []) if str(m.get('MealID','')).strip() in allowed],
+                    'meat':  [m for m in (data.get('meat')  or []) if str(m.get('id','')).strip() in allowed],
+                    'vegan': [m for m in (data.get('vegan') or []) if str(m.get('id','')).strip() in allowed],
                 }
             return jsonify(data), r.status_code
         except requests.Timeout:

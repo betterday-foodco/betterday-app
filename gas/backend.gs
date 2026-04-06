@@ -919,6 +919,38 @@ function doPost(e) {
           return item;
         });
 
+        // Auto-top-up: if hand-pick mode and total qty < target, fill remaining with random picks
+        var qtyIdx = parHeaders.indexOf("Qty");
+        var targetIdx = parHeaders.indexOf("Target");
+        var modeIdx = parHeaders.indexOf("Mode");
+        var currentQty = parseInt(parRows[i][qtyIdx]) || 0;
+        var targetQty = parseInt(parRows[i][targetIdx]) || 0;
+        var mode = String(parRows[i][modeIdx] || "auto").trim();
+
+        if (mode === "handpick" && targetQty > 0 && currentQty < targetQty) {
+          // Get available dishes for this category from the next week's menu
+          var availableIds = catId === "meat_entree" ? toIds.meat :
+                            catId === "plant_entree" ? toIds.vegan : [];
+          var pickedIds = newItems.map(function(it) { return it.id || it; });
+          var unpicked = availableIds.filter(function(id) { return pickedIds.indexOf(id) < 0; });
+          // Shuffle unpicked for randomness
+          for (var s = unpicked.length - 1; s > 0; s--) {
+            var j = Math.floor(Math.random() * (s + 1));
+            var tmp = unpicked[s]; unpicked[s] = unpicked[j]; unpicked[j] = tmp;
+          }
+          var toFill = targetQty - currentQty;
+          var filled = 0;
+          for (var f = 0; f < unpicked.length && filled < toFill; f++) {
+            newItems.push({ id: unpicked[f], qty: 1, autoFilled: true });
+            filled++;
+          }
+          if (filled > 0) {
+            currentQty += filled;
+            if (qtyIdx >= 0) parSheet.getRange(i + 1, qtyIdx + 1).setValue(currentQty);
+            swapLog.push({ action: "auto_topup", filled: filled });
+          }
+        }
+
         if (swapLog.length > 0) {
           parSheet.getRange(i + 1, itemsIdx + 1).setValue(JSON.stringify(newItems));
           parSheet.getRange(i + 1, weekIdx + 1).setValue(nextAnchor);
