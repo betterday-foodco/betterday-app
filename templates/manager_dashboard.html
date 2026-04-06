@@ -139,6 +139,8 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .meal-input{width:64px;height:40px;padding:6px 4px;border:2px solid #E8DFD2;border-radius:10px;font-size:1rem;font-family:'DM Sans',sans-serif;text-align:center;color:#00465E;font-weight:900;background:#fff;transition:.2s}
 .meal-input:focus{border-color:#00465E;box-shadow:0 0 0 3px rgba(0,70,94,.12);outline:none;background:#F0F7FA}
 .meal-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pl-dish-qty-wrap input[type=number]::-webkit-inner-spin-button,.pl-dish-qty-wrap input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.pl-dish-qty-wrap input[type=number]{-moz-appearance:textfield}
 .meal-input[type=number]{-moz-appearance:textfield}
 .meal-input:not(:placeholder-shown):not([value=""]):not([value="0"]){border-color:#00465E;background:#F0F7FA}
 .log-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,49,65,.05);align-items:flex-start}
@@ -2233,7 +2235,7 @@ async function openCatDetail(catId) {
             </div>
             <div class="pl-dish-qty-wrap" id="dishQty_${catId}_${i}" style="display:flex;align-items:center;gap:0;border:2px solid #E8DFD2;border-radius:8px;overflow:hidden;">
               <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},-1)" style="width:30px;height:30px;border:none;background:#F9F5F0;font-size:14px;font-weight:900;color:#00465E;cursor:pointer;">−</button>
-              <span style="width:28px;text-align:center;font-size:.82rem;font-weight:900;color:#00465E;background:#fff;" id="dishQtyVal_${catId}_${i}">0</span>
+              <input type="number" min="0" max="999" value="0" id="dishQtyVal_${catId}_${i}" onclick="event.stopPropagation();this.select();" onchange="event.stopPropagation();setDishQty('${catId}',${i},parseInt(this.value)||0)" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:36px;text-align:center;font-size:.82rem;font-weight:900;color:#00465E;background:#fff;border:none;outline:none;-moz-appearance:textfield;padding:0;font-family:'DM Sans',sans-serif;">
               <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},1)" style="width:30px;height:30px;border:none;background:#F9F5F0;font-size:14px;font-weight:900;color:#00465E;cursor:pointer;">+</button>
             </div>
           </div>`;}).join('')}
@@ -2241,30 +2243,45 @@ async function openCatDetail(catId) {
   `;
 }
 
+function setDishQty(catId, idx, qty) {
+  qty = Math.max(0, qty);
+  const valEl = document.getElementById('dishQtyVal_' + catId + '_' + idx);
+  if (valEl) valEl.value = qty;
+  _styleDishQty(catId, idx, qty);
+  _recalcCatTotal(catId);
+}
+
 function adjustDishQty(catId, idx, delta) {
   const valEl = document.getElementById('dishQtyVal_' + catId + '_' + idx);
-  const wrapEl = document.getElementById('dishQty_' + catId + '_' + idx);
   if (!valEl) return;
-  let qty = Math.max(0, (parseInt(valEl.textContent) || 0) + delta);
-  valEl.textContent = qty;
-  if (wrapEl) {
-    const btns = wrapEl.querySelectorAll('button');
-    if (qty > 0) {
-      wrapEl.style.borderColor = '#D4A029';
-      valEl.style.background = '#D4A029';
-      valEl.style.color = '#fff';
-      btns.forEach(b => { b.style.background = '#FEF3C7'; b.style.color = '#92400E'; });
-    } else {
-      wrapEl.style.borderColor = '#E8DFD2';
-      valEl.style.background = '#fff';
-      valEl.style.color = '#00465E';
-      btns.forEach(b => { b.style.background = '#F9F5F0'; b.style.color = '#00465E'; });
-    }
+  let qty = Math.max(0, (parseInt(valEl.value) || 0) + delta);
+  valEl.value = qty;
+  _styleDishQty(catId, idx, qty);
+  _recalcCatTotal(catId);
+}
+
+function _styleDishQty(catId, idx, qty) {
+  const valEl = document.getElementById('dishQtyVal_' + catId + '_' + idx);
+  const wrapEl = document.getElementById('dishQty_' + catId + '_' + idx);
+  if (!valEl || !wrapEl) return;
+  const btns = wrapEl.querySelectorAll('button');
+  if (qty > 0) {
+    wrapEl.style.borderColor = '#D4A029';
+    valEl.style.background = '#D4A029';
+    valEl.style.color = '#fff';
+    btns.forEach(b => { b.style.background = '#FEF3C7'; b.style.color = '#92400E'; });
+  } else {
+    wrapEl.style.borderColor = '#E8DFD2';
+    valEl.style.background = '#fff';
+    valEl.style.color = '#00465E';
+    btns.forEach(b => { b.style.background = '#F9F5F0'; b.style.color = '#00465E'; });
   }
-  // Update category total qty
+}
+
+function _recalcCatTotal(catId) {
   let totalQty = 0;
   document.querySelectorAll('[id^="dishQtyVal_' + catId + '_"]').forEach(el => {
-    totalQty += parseInt(el.textContent) || 0;
+    totalQty += parseInt(el.value) || 0;
   });
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
   d.qty = totalQty;
