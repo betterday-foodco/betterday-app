@@ -706,11 +706,11 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       </div>
 
       <!-- ═══════ WHAT'S IN YOUR ORDER ═══════ -->
-      <div style="font-size:.88rem;font-weight:900;color:#00465E;margin-bottom:12px;">What's in your order</div>
-
-      <!-- Category summary cards (clickable to edit) -->
-      <div id="plCartSummary" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
-        <!-- Populated by JS -->
+      <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;padding:28px 24px 20px;margin-bottom:16px;">
+        <div style="font-size:1.1rem;font-weight:900;color:#00465E;margin-bottom:20px;">What's in your order</div>
+        <div id="plCartSummary">
+          <!-- Populated by JS -->
+        </div>
       </div>
 
       <!-- Order info + manage -->
@@ -1861,10 +1861,9 @@ function renderParGrid() {
   if (!container) return;
   const windowState = getOrderWindowState();
 
-  // Group categories
   const groups = [
-    { label: 'Weekly Menu', sub: 'Menu changes weekly with fresh options', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
-    { label: 'Breakfast & Snacks', sub: 'Reliable favorites, always stocked', cats: PL_CATEGORIES.filter(c => c.group === 'snacks') },
+    { label: 'Mains', sub: 'Menu changes weekly with fresh options', cats: PL_CATEGORIES.filter(c => c.group === 'meals') },
+    { label: 'Snacks & Extras', sub: 'Reliable favorites, always stocked', cats: PL_CATEGORIES.filter(c => c.group === 'snacks') },
   ];
 
   let html = '';
@@ -1879,15 +1878,15 @@ function renderParGrid() {
     }, 0);
 
     html += `
-    <div style="margin-bottom:20px;">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+    <div style="margin-bottom:28px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #E8DFD2;">
         <div>
-          <div style="font-size:.82rem;font-weight:900;color:#00465E;">${g.label}</div>
-          <div style="font-size:.65rem;color:#7A8F9C;margin-top:1px;">${g.sub}</div>
+          <div style="font-size:1rem;font-weight:900;color:#00465E;letter-spacing:-.01em;">${g.label}</div>
+          <div style="font-size:.68rem;color:#7A8F9C;margin-top:2px;font-style:italic;">${g.sub}</div>
         </div>
-        <span style="font-size:.72rem;font-weight:700;color:${groupTotal > 0 ? '#00465E' : '#CBD5E1'};">${groupTotal} items · $${groupCost.toFixed(2)}</span>
+        <span style="font-size:.75rem;font-weight:800;color:${groupTotal > 0 ? '#00465E' : '#CBD5E1'};">${groupTotal} items &middot; $${groupCost.toFixed(2)}/wk</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">`;
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">`;
 
     g.cats.forEach(cat => {
       const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
@@ -1899,40 +1898,46 @@ function renderParGrid() {
       const hasItems = qty > 0;
 
       html += `
-        <div style="background:${hasItems ? '#fff' : '#FAFAFA'};border:1.5px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-radius:14px;padding:18px;position:relative;transition:.15s;${hasItems ? 'box-shadow:0 2px 8px rgba(0,70,94,.06);' : 'opacity:.7;'}" class="pl-cat-card">
-          <!-- Category name + price -->
-          <div style="font-size:.82rem;font-weight:800;color:${hasItems ? '#00465E' : '#94A3B8'};">${cat.name}</div>
-          <div style="font-size:.62rem;color:#94A3B8;margin-top:1px;">${cat.rotating ? 'Rotates weekly' : 'Same every week'} · $${cat.unitPrice.toFixed(2)}/ea</div>
+        <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;padding:18px 16px 16px;position:relative;transition:.15s;box-shadow:0 1px 4px rgba(0,70,94,.04);" class="pl-cat-card">
+          <!-- Category name -->
+          <div style="font-size:.84rem;font-weight:800;color:#00465E;margin-bottom:2px;">${cat.name}</div>
+          <div style="font-size:.6rem;color:#94A3B8;margin-bottom:14px;">$${cat.unitPrice.toFixed(2)}/ea</div>
 
-          <!-- Big qty + controls -->
-          <div style="display:flex;align-items:center;justify-content:center;gap:0;margin:16px 0 8px;border:2px solid ${hasItems ? '#00465E' : '#E8DFD2'};border-radius:12px;overflow:hidden;">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:40px;height:44px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:18px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
+          <!-- Compact pill: ─ | # | + | items/wk · $total -->
+          <div style="display:flex;align-items:stretch;border:2px solid ${hasItems ? '#00465E' : '#E2E2E2'};border-radius:12px;overflow:hidden;margin-bottom:14px;">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:38px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:17px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">−</button>
             <input type="number" min="0" max="999" value="${qty}" id="plCatQty_${cat.id}"
               onclick="event.stopPropagation();this.select();"
               onchange="event.stopPropagation();setCatQtyDirect('${cat.id}',parseInt(this.value)||0)"
-              style="width:52px;height:44px;text-align:center;font-size:1.3rem;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};background:#fff;border:none;border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-right:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:0;">
-            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:40px;height:44px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:18px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
-          </div>
-          <div style="text-align:center;font-size:.65rem;color:#7A8F9C;">items per week</div>
-
-          <!-- Cost -->
-          ${hasItems ? `<div style="text-align:center;font-size:.88rem;font-weight:900;color:#00465E;margin-top:6px;">$${lineTotal.toFixed(2)}<span style="font-size:.65rem;font-weight:600;color:#7A8F9C;">/wk</span></div>` : ''}
-
-          <!-- Mode toggle -->
-          <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;border:1.5px solid #E8DFD2;border-radius:8px;overflow:hidden;font-size:.65rem;font-weight:700;">
-            <button onclick="event.stopPropagation();setCatMode('${cat.id}','auto')" style="flex:1;padding:6px 0;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;transition:.15s;${!isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Auto</button>
-            <button onclick="event.stopPropagation();setCatMode('${cat.id}','handpick')" style="flex:1;padding:6px 0;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;transition:.15s;${isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Hand-pick</button>
+              style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};background:${hasItems ? '#FEF9C3' : '#fff'};border:none;border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-right:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:6px 0;flex-shrink:0;">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:38px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:17px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 10px;background:${hasItems ? '#FAFAF5' : '#FAFAFA'};border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};gap:4px;min-height:42px;">
+              <span style="font-size:.65rem;font-weight:700;color:${hasItems ? '#00465E' : '#94A3B8'};white-space:nowrap;">items/wk</span>
+              ${hasItems ? `<span style="font-size:.65rem;color:#94A3B8;">&middot;</span><span style="font-size:.72rem;font-weight:800;color:#00465E;white-space:nowrap;">$${lineTotal.toFixed(2)}</span>` : ''}
+            </div>
           </div>
 
-          <!-- Status line + action -->
-          <div style="text-align:center;margin-top:8px;">
-            ${isHandPick && hasItems
-              ? `<div style="font-size:.62rem;color:#7A8F9C;margin-bottom:6px;">${dishCount} dish${dishCount !== 1 ? 'es' : ''} chosen</div>
-                 <button onclick="event.stopPropagation();openCatDetail('${cat.id}')" style="font-size:.7rem;font-weight:700;color:#00465E;background:#F0F7FA;border:1px solid #BAE6FD;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Select dishes</button>`
-              : isHandPick && !hasItems
-              ? `<button onclick="event.stopPropagation();openCatDetail('${cat.id}')" style="font-size:.7rem;font-weight:700;color:#7A8F9C;background:#F9F9F9;border:1px solid #E8DFD2;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Select dishes</button>`
+          <!-- Auto / Hand-pick toggle -->
+          <div style="display:flex;align-items:center;gap:0;border:1.5px solid #E8DFD2;border-radius:10px;overflow:hidden;margin-bottom:6px;">
+            <button onclick="event.stopPropagation();setCatMode('${cat.id}','auto')" style="flex:1;padding:8px 4px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;transition:.15s;border-right:1px solid #E8DFD2;${!isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Auto</button>
+            <button onclick="event.stopPropagation();setCatMode('${cat.id}','handpick')" style="flex:1;padding:8px 4px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.68rem;font-weight:700;transition:.15s;${isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Hand-pick</button>
+          </div>
+
+          <!-- Mode description -->
+          <div style="font-size:.58rem;color:#94A3B8;line-height:1.45;min-height:28px;margin-bottom:6px;">
+            ${!isHandPick
+              ? 'We auto-select a balanced mix each week from the rotating menu.'
+              : 'Pick your dishes — selections carry over weekly with smart swaps for menu changes.'}
+          </div>
+
+          <!-- Action area -->
+          <div style="text-align:center;">
+            ${isHandPick
+              ? `<button onclick="event.stopPropagation();openCatDetail('${cat.id}')" style="width:100%;padding:8px 0;font-size:.72rem;font-weight:700;color:#00465E;background:#F0F7FA;border:1.5px solid #BAD6E0;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;">
+                   Select dishes${dishCount > 0 ? ' (' + dishCount + ' chosen)' : ''}
+                 </button>`
               : hasItems
-              ? `<div style="font-size:.62rem;color:#167421;font-weight:600;">Auto-selected</div>`
+              ? `<div style="font-size:.62rem;color:#167421;font-weight:700;">Auto-selected</div>`
               : `<div style="font-size:.62rem;color:#CBD5E1;">Set a quantity above</div>`
             }
           </div>
