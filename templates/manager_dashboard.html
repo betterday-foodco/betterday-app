@@ -2273,7 +2273,7 @@ async function openCatDetail(catId) {
           ${currentQty < target && target > 0
             ? '<button onclick="randomizeCategory(\'' + catId + '\')" style="padding:8px 16px;font-size:.72rem;font-weight:800;color:#00465E;background:#FBBF24;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Randomize ' + remaining + '</button>'
             : currentQty > target && target > 0
-            ? '<button onclick="_updateParToSelected(\'' + catId + '\')" style="padding:8px 16px;font-size:.7rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Set par to ' + currentQty + '</button>'
+            ? '<button onclick="_updateParToSelected(\'' + catId + '\')" style="padding:8px 16px;font-size:.7rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Update par to ' + currentQty + '?</button>'
             : target > 0
             ? '<span style="font-size:.7rem;font-weight:700;color:#167421;">Par met</span>'
             : ''}
@@ -2308,9 +2308,11 @@ async function openCatDetail(catId) {
 }
 
 function adjustCatQty(catId, delta) {
+  // Main page pill adjusts PAR LEVEL (target), not dish selections
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto', items: [] };
-  d.qty = Math.max(0, (d.qty || 0) + delta);
-  if (d.target && d.qty > d.target) d.target = d.qty;
+  const newPar = Math.max(0, (d.target || d.qty || 0) + delta);
+  d.target = newPar;
+  d.qty = newPar; // main page display reflects par level
   plData[catId] = d;
   renderParGrid();
   updateParTotals();
@@ -2444,12 +2446,10 @@ function _recalcCatTotal(catId) {
   });
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
   d.qty = totalQty;
-  if (d.target && totalQty > d.target) d.target = totalQty;
+  // Par level NEVER auto-bumps — only changes via explicit _updateParToSelected
   plData[catId] = d;
 
-  const targetInput = document.getElementById('plTargetInput_' + catId);
   const target = d.target || 0;
-  if (targetInput && totalQty > target) targetInput.value = totalQty;
 
   // Live-update the panel header
   const progressText = document.getElementById('plProgressText_' + catId);
@@ -2464,9 +2464,9 @@ function _recalcCatTotal(catId) {
     if (totalQty < target && target > 0) {
       ctxBtn.innerHTML = '<button onclick="randomizeCategory(\'' + catId + '\')" style="padding:7px 14px;font-size:.7rem;font-weight:800;color:#00465E;background:#FBBF24;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Randomize ' + remaining + '</button>';
     } else if (totalQty > target && target > 0) {
-      ctxBtn.innerHTML = '<button onclick="_updateParToSelected(\'' + catId + '\')" style="padding:7px 14px;font-size:.68rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Set par to ' + totalQty + '</button>';
+      ctxBtn.innerHTML = '<button onclick="_updateParToSelected(\'' + catId + '\')" style="padding:8px 16px;font-size:.7rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Update par to ' + totalQty + '?</button>';
     } else if (target > 0) {
-      ctxBtn.innerHTML = '<span style="font-size:.68rem;font-weight:700;color:#167421;">Par met</span>';
+      ctxBtn.innerHTML = '<span style="font-size:.7rem;font-weight:700;color:#167421;">Par met</span>';
     } else {
       ctxBtn.innerHTML = '';
     }
