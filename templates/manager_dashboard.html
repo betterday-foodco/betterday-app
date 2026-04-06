@@ -843,32 +843,32 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         </p>
 
         <div id="mealAllowanceTable" style="display:flex;flex-direction:column;gap:12px;">
-        {% macro level_row(level_id, level_name, free_val, t1_val, t2_val, t3_val, max_val, is_default=false) %}
-          <div data-level="{{ level_id }}" {% if not is_default %}data-level-name="{{ level_name }}"{% endif %}
-               style="background:{{ '#F0F7FA' if is_default else '#fff' }};border:1.5px solid {{ '#00465E' if is_default else '#E8DFD2' }};border-radius:12px;padding:16px 20px;">
-            <div style="font-size:.88rem;font-weight:800;color:#00465E;margin-bottom:12px;">{{ level_name }}</div>
+        {% for lv in benefit_levels %}
+          <div data-level="{{ lv.LevelID }}" data-level-name="{{ lv.LevelName }}"
+               style="background:{{ '#F0F7FA' if lv.LevelName == 'General' else '#fff' }};border:1.5px solid {{ '#00465E' if lv.LevelName == 'General' else '#E8DFD2' }};border-radius:12px;padding:16px 20px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div style="font-size:.88rem;font-weight:800;color:#00465E;">{{ lv.LevelName }}{% if lv.LevelName == 'General' %} <span style="font-size:.65rem;font-weight:400;color:#7A8F9C;">— Default for all employees</span>{% endif %}</div>
+              {% if lv.LevelName != 'General' and can_edit %}
+              <button type="button" onclick="deleteBenefitLevel('{{ lv.LevelID }}', '{{ lv.LevelName }}')" style="font-size:.62rem;font-weight:700;color:#DC2626;background:none;border:1px solid #FECACA;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#FEF2F2'" onmouseout="this.style.background='none'">Delete</button>
+              {% endif %}
+            </div>
             <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
-              {% for label, field, val in [('Free', 'FreeMealsPerWeek', free_val), ('Tier 1', 'Tier1_Meals', t1_val), ('Tier 2', 'Tier2_Meals', t2_val), ('Tier 3', 'Tier3_Meals', t3_val), ('Max/Wk', 'MaxMealsPerWeek', max_val)] %}
+              {% for label, field in [('Free', 'FreeMealsPerWeek'), ('Tier 1', 'Tier1_Meals'), ('Tier 2', 'Tier2_Meals'), ('Tier 3', 'Tier3_Meals'), ('Max/Wk', 'MaxMealsPerWeek')] %}
               <div style="text-align:center;">
                 <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:6px;">{{ label }}</div>
                 {% if can_edit %}
-                <input type="number" min="0" class="meal-input" data-field="{{ field }}" value="{{ val }}" {% if field == 'MaxMealsPerWeek' %}placeholder="∞"{% endif %} onchange="showSaveBtn()" style="width:100%;max-width:72px;">
+                <input type="number" min="0" class="meal-input" data-field="{{ field }}" value="{{ lv[field] or 0 }}" {% if field == 'MaxMealsPerWeek' %}placeholder="∞"{% endif %} onchange="showSaveBtn()" style="width:100%;max-width:72px;">
                 {% else %}
+                {% set val = lv[field] %}
                 <div style="font-size:1.1rem;font-weight:900;color:#00465E;">{{ val if val and val|string not in ('', '0', 'None') else ('∞' if field == 'MaxMealsPerWeek' else '0') }}</div>
                 {% endif %}
               </div>
               {% endfor %}
             </div>
           </div>
-        {% endmacro %}
-
-        {% if has_levels %}
-          {{ level_row('default', 'Default — All Employees', company.FreeMealsPerWeek or 0, company.Tier1_Meals or 0, company.Tier2_Meals or 0, company.Tier3_Meals or 0, company.MaxMealsPerWeek or '', is_default=true) }}
-          {% for lv in benefit_levels %}
-            {{ level_row(lv.LevelID, lv.LevelName, lv.FreeMealsPerWeek or 0, lv.Tier1_Meals or 0, lv.Tier2_Meals or 0, lv.Tier3_Meals or 0, lv.MaxMealsPerWeek or '') }}
-          {% endfor %}
-        {% else %}
-          {{ level_row('default', 'All Employees', company.FreeMealsPerWeek or 0, company.Tier1_Meals or 0, company.Tier2_Meals or 0, company.Tier3_Meals or 0, company.MaxMealsPerWeek or '', is_default=true) }}
+        {% endfor %}
+        {% if not benefit_levels %}
+          <div style="text-align:center;padding:20px;color:#7A8F9C;font-size:.82rem;">Loading benefit levels...</div>
         {% endif %}
         </div>
 
@@ -1749,6 +1749,37 @@ function bulkExportCSV() {
 function showSaveBtn() {
   const btn = document.getElementById('saveMealsBtn');
   if (btn) btn.style.display = 'inline-block';
+}
+
+async function deleteBenefitLevel(levelId, levelName) {
+  // First get employee count on this level
+  try {
+    const r = await fetch('/manager/level-employee-count?level_name=' + encodeURIComponent(levelName));
+    const d = await r.json();
+    const count = d.count || 0;
+    const msg = count > 0
+      ? 'Delete "' + levelName + '" level?\n\n' + count + ' employee' + (count !== 1 ? 's' : '') + ' on this tier will be reassigned to General.'
+      : 'Delete "' + levelName + '" level?';
+    if (!confirm(msg)) return;
+  } catch(e) {
+    if (!confirm('Delete "' + levelName + '" level? Employees on this tier will be reassigned to General.')) return;
+  }
+  try {
+    const r = await fetch('/manager/delete-benefit-level', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ level_id: levelId, level_name: levelName })
+    });
+    const d = await r.json();
+    if (d.success) {
+      alert('"' + levelName + '" deleted.' + (d.reassigned > 0 ? ' ' + d.reassigned + ' employee(s) moved to General.' : ''));
+      window.location.reload();
+    } else {
+      alert('Delete failed: ' + (d.error || 'Unknown error'));
+    }
+  } catch(e) {
+    alert('Delete failed: ' + e.message);
+  }
 }
 
 async function saveMealAllowances(btn) {

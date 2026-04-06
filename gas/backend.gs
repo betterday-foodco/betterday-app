@@ -973,7 +973,37 @@ function doPost(e) {
     // ─────────────────────────────────────────
     if (data.action === "get_benefit_levels") {
       var companyId = String(data.company_id || "").trim().toUpperCase();
-      return jsonOut({levels: _getBenefitLevels(ssHub, companyId)});
+      var levels = _getBenefitLevels(ssHub, companyId);
+      // Auto-create "General" level from Companies columns if missing
+      var hasGeneral = levels.some(function(l) { return l.LevelName === "General"; });
+      if (!hasGeneral && companyId) {
+        var compSheet = ssHub.getSheetByName("Companies");
+        if (compSheet) {
+          var compRows = compSheet.getDataRange().getValues();
+          var compHeaders = compRows[0];
+          var compRow = null;
+          for (var ci = 1; ci < compRows.length; ci++) {
+            if (String(compRows[ci][0]).trim().toUpperCase() === companyId) { compRow = compRows[ci]; break; }
+          }
+          if (compRow) {
+            var lvSheet = ssHub.getSheetByName("BenefitLevels");
+            if (!lvSheet) {
+              lvSheet = ssHub.insertSheet("BenefitLevels");
+              lvSheet.appendRow(["CompanyID","LevelID","LevelName","LevelOrder","FreeMealsPerWeek","FreeTier_EmployeePrice","FreeTier_BDSubsidy","FreeTier_CompanySubsidy","Tier1_Meals","Tier1_EmployeePrice","Tier1_BDSubsidy","Tier1_CompanySubsidy","Tier2_Meals","Tier2_EmployeePrice","Tier2_BDSubsidy","Tier2_CompanySubsidy","Tier3_Meals","Tier3_EmployeePrice","Tier3_BDSubsidy","Tier3_CompanySubsidy","MaxMealsPerWeek","FullPrice"]);
+              lvSheet.setFrozenRows(1);
+            }
+            var g = function(f) { var idx = compHeaders.indexOf(f); return idx >= 0 ? (compRow[idx] || "") : ""; };
+            lvSheet.appendRow([companyId, "general", "General", 0,
+              g("FreeMealsPerWeek"), g("FreeTier_EmployeePrice"), g("FreeTier_BDSubsidy"), g("FreeTier_CompanySubsidy"),
+              g("Tier1_Meals"), g("Tier1_EmployeePrice"), g("Tier1_BDSubsidy"), g("Tier1_CompanySubsidy"),
+              g("Tier2_Meals"), g("Tier2_EmployeePrice"), g("Tier2_BDSubsidy"), g("Tier2_CompanySubsidy"),
+              g("Tier3_Meals"), g("Tier3_EmployeePrice"), g("Tier3_BDSubsidy"), g("Tier3_CompanySubsidy"),
+              g("MaxMealsPerWeek"), g("FullPrice")]);
+            levels = _getBenefitLevels(ssHub, companyId);
+          }
+        }
+      }
+      return jsonOut({levels: levels});
     }
     // ─────────────────────────────────────────
     // SAVE BENEFIT LEVELS (bulk replace for a company)
@@ -1006,6 +1036,74 @@ function doPost(e) {
         sheet.appendRow(row);
       });
       return jsonOut({success: true});
+    }
+    // ─────────────────────────────────────────
+    // DELETE BENEFIT LEVEL (with employee reassignment)
+    // ─────────────────────────────────────────
+    if (data.action === "delete_benefit_level") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var levelId = String(data.level_id || "").trim();
+      var levelName = String(data.level_name || "").trim();
+      if (!companyId || !levelId) return jsonOut({success: false, error: "CompanyID and level_id required"});
+      if (levelName === "General") return jsonOut({success: false, error: "Cannot delete the General level"});
+
+      // Count employees on this level
+      var empSheet = ssHub.getSheetByName("Employees");
+      var reassigned = 0;
+      if (empSheet) {
+        var empRows = empSheet.getDataRange().getValues();
+        var empHeaders = empRows[0];
+        var empCoIdx = empHeaders.indexOf("CompanyID");
+        var empLvIdx = empHeaders.indexOf("BenefitLevel");
+        if (empLvIdx >= 0) {
+          for (var e = 1; e < empRows.length; e++) {
+            if (String(empRows[e][empCoIdx]).trim().toUpperCase() !== companyId) continue;
+            if (String(empRows[e][empLvIdx]).trim() === levelName) {
+              empSheet.getRange(e + 1, empLvIdx + 1).setValue("General");
+              reassigned++;
+            }
+          }
+        }
+      }
+
+      // Delete the level row from BenefitLevels
+      var lvSheet = ssHub.getSheetByName("BenefitLevels");
+      if (lvSheet) {
+        var lvRows = lvSheet.getDataRange().getValues();
+        var lvHeaders = lvRows[0];
+        var lvIdIdx = lvHeaders.indexOf("LevelID");
+        for (var d = lvRows.length - 1; d >= 1; d--) {
+          if (String(lvRows[d][0]).trim().toUpperCase() === companyId &&
+              String(lvRows[d][lvIdIdx]).trim() === levelId) {
+            lvSheet.deleteRow(d + 1);
+          }
+        }
+      }
+
+      return jsonOut({success: true, reassigned: reassigned, deletedLevel: levelName});
+    }
+    // ─────────────────────────────────────────
+    // GET EMPLOYEE COUNT PER BENEFIT LEVEL
+    // ─────────────────────────────────────────
+    if (data.action === "get_level_employee_count") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var levelName = String(data.level_name || "").trim();
+      var empSheet = ssHub.getSheetByName("Employees");
+      var count = 0;
+      if (empSheet) {
+        var empRows = empSheet.getDataRange().getValues();
+        var empHeaders = empRows[0];
+        var empCoIdx = empHeaders.indexOf("CompanyID");
+        var empLvIdx = empHeaders.indexOf("BenefitLevel");
+        if (empLvIdx >= 0) {
+          for (var e = 1; e < empRows.length; e++) {
+            if (String(empRows[e][empCoIdx]).trim().toUpperCase() !== companyId) continue;
+            var empLv = String(empRows[e][empLvIdx] || "General").trim();
+            if (empLv === levelName) count++;
+          }
+        }
+      }
+      return jsonOut({count: count, levelName: levelName});
     }
     // ─────────────────────────────────────────
     // UPDATE EMPLOYEE BENEFIT LEVEL
@@ -1464,44 +1562,31 @@ function doPost(e) {
       var mealFields = ["FreeMealsPerWeek","Tier1_Meals","Tier2_Meals","Tier3_Meals","MaxMealsPerWeek"];
       var logEntries = [];
 
+      // All levels now live in BenefitLevels sheet (including General/default)
+      var lvSheet = ssHub.getSheetByName("BenefitLevels");
+      if (!lvSheet) return jsonOut({success: false, error: "BenefitLevels sheet not found"});
+      var lvRows = lvSheet.getDataRange().getValues();
+      var lvHeaders = lvRows[0];
+
       changes.forEach(function(ch) {
-        if (ch.level === "default") {
-          // Update company-level defaults
+        // Find matching row — "default"/"general" maps to LevelName="General"
+        var targetId = (ch.level === "default" || ch.level === "general") ? "general" : String(ch.level);
+        for (var j = 1; j < lvRows.length; j++) {
+          if (String(lvRows[j][0]).trim().toUpperCase() !== companyId) continue;
+          if (String(lvRows[j][lvHeaders.indexOf("LevelID")]).trim() !== targetId) continue;
           mealFields.forEach(function(f) {
             if (ch[f] === undefined) return;
-            var colIdx = compHeaders.indexOf(f);
+            var colIdx = lvHeaders.indexOf(f);
             if (colIdx < 0) return;
-            var oldVal = String(compRows[compRowIdx][colIdx] || "0");
+            var oldVal = String(lvRows[j][colIdx] || "0");
             var newVal = String(ch[f] || "0");
             if (oldVal !== newVal) {
-              compSheet.getRange(compRowIdx + 1, colIdx + 1).setValue(ch[f]);
-              logEntries.push([new Date(), companyId, changedBy, "default", "Default", f, oldVal, newVal,
-                f + ": " + oldVal + " → " + newVal]);
+              lvSheet.getRange(j + 1, colIdx + 1).setValue(ch[f]);
+              logEntries.push([new Date(), companyId, changedBy, "level", ch.levelName || "General", f, oldVal, newVal,
+                (ch.levelName || "General") + " " + f + ": " + oldVal + " → " + newVal]);
             }
           });
-        } else {
-          // Update a benefit level row
-          var lvSheet = ssHub.getSheetByName("BenefitLevels");
-          if (!lvSheet) return;
-          var lvRows = lvSheet.getDataRange().getValues();
-          var lvHeaders = lvRows[0];
-          for (var j = 1; j < lvRows.length; j++) {
-            if (String(lvRows[j][0]).trim().toUpperCase() !== companyId) continue;
-            if (String(lvRows[j][lvHeaders.indexOf("LevelID")]) !== String(ch.level)) continue;
-            mealFields.forEach(function(f) {
-              if (ch[f] === undefined) return;
-              var colIdx = lvHeaders.indexOf(f);
-              if (colIdx < 0) return;
-              var oldVal = String(lvRows[j][colIdx] || "0");
-              var newVal = String(ch[f] || "0");
-              if (oldVal !== newVal) {
-                lvSheet.getRange(j + 1, colIdx + 1).setValue(ch[f]);
-                logEntries.push([new Date(), companyId, changedBy, "level", ch.levelName || "Level", f, oldVal, newVal,
-                  (ch.levelName || "Level") + " " + f + ": " + oldVal + " → " + newVal]);
-              }
-            });
-            break;
-          }
+          break;
         }
       });
 

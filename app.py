@@ -1313,6 +1313,37 @@ def manager_meal_change_log():
     return jsonify(result or {'log': []})
 
 
+@app.route('/manager/delete-benefit-level', methods=['POST'])
+@manager_required
+def delete_benefit_level():
+    """Delete a benefit level and reassign employees to General."""
+    company_id = session.get('manager_company_id')
+    data = request.get_json(force=True)
+    result = _gas_post({
+        'action': 'delete_benefit_level',
+        'company_id': company_id,
+        'level_id': data.get('level_id'),
+        'level_name': data.get('level_name')
+    }, timeout=12)
+    if result and result.get('success'):
+        _company_cache.pop(company_id, None)
+    return jsonify(result or {'success': False, 'error': 'GAS timeout'})
+
+
+@app.route('/manager/level-employee-count')
+@manager_required
+def level_employee_count():
+    """Get count of employees on a specific benefit level."""
+    company_id = session.get('manager_company_id')
+    level_name = request.args.get('level_name', '')
+    result = _gas_post({
+        'action': 'get_level_employee_count',
+        'company_id': company_id,
+        'level_name': level_name
+    }, timeout=8)
+    return jsonify(result or {'count': 0})
+
+
 @app.route('/manager/par-levels', methods=['GET'])
 @manager_required
 def get_par_levels():
