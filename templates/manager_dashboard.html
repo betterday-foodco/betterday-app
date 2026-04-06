@@ -2245,32 +2245,37 @@ async function openCatDetail(catId) {
 
   panel.innerHTML = `
     <div class="pl-detail-header" style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;">
-      <button class="pl-detail-close" onclick="closeCatDetail()" style="order:2;">&#10005;</button>
       <h3 style="font-size:1.05rem;font-weight:900;color:#00465E;margin:0;">${cat.name}</h3>
+      <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
     </div>
-    <div style="padding:12px 20px 14px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
+    <div style="padding:14px 20px 16px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
+      <!-- Explainer -->
+      <div style="font-size:.72rem;color:#5A6B75;line-height:1.4;margin-bottom:12px;">Set how many <strong>${cat.name.toLowerCase()}</strong> your office receives each week. Pick specific dishes below, or hit <strong>Randomize</strong> to auto-fill a balanced mix.</div>
       <div style="display:flex;align-items:center;gap:12px;">
-        <!-- Par level pill -->
-        <div style="display:flex;align-items:stretch;border:2px solid #00465E;border-radius:10px;overflow:hidden;flex-shrink:0;">
-          <button onclick="event.stopPropagation();_adjustParInPanel('${catId}',-1)" style="width:34px;height:38px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
-          <input type="number" min="0" max="999" value="${target}" id="plTargetInput_${catId}"
-            onclick="this.select()" onchange="setCatTarget('${catId}',parseInt(this.value)||0)"
-            style="width:44px;height:38px;text-align:center;font-size:1.1rem;font-weight:900;color:#00465E;background:#fff;border:none;border-left:1px solid #E8DFD2;border-right:1px solid #E8DFD2;outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:0;">
-          <button onclick="event.stopPropagation();_adjustParInPanel('${catId}',1)" style="width:34px;height:38px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
+        <!-- Par level pill with label -->
+        <div style="flex-shrink:0;">
+          <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:4px;">Weekly par level</div>
+          <div style="display:flex;align-items:stretch;border:2px solid #00465E;border-radius:10px;overflow:hidden;">
+            <button onclick="event.stopPropagation();_adjustParInPanel('${catId}',-1)" style="width:34px;height:38px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
+            <input type="number" min="0" max="999" value="${target}" id="plTargetInput_${catId}"
+              onclick="this.select()" onchange="setCatTarget('${catId}',parseInt(this.value)||0)"
+              style="width:44px;height:38px;text-align:center;font-size:1.1rem;font-weight:900;color:#00465E;background:#fff;border:none;border-left:1px solid #E8DFD2;border-right:1px solid #E8DFD2;outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:0;">
+            <button onclick="event.stopPropagation();_adjustParInPanel('${catId}',1)" style="width:34px;height:38px;border:none;background:#F0F7FA;font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
+          </div>
         </div>
-        <!-- Running total -->
+        <!-- Running total with label -->
         <div style="flex:1;">
-          <div style="font-size:.6rem;font-weight:600;color:#7A8F9C;text-transform:uppercase;letter-spacing:.5px;">Selected</div>
+          <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:4px;">Dishes picked</div>
           <div style="font-size:1.1rem;font-weight:900;color:#00465E;" id="plProgressText_${catId}">${currentQty} <span style="font-size:.78rem;font-weight:600;color:#7A8F9C;">of ${target}</span></div>
         </div>
         <!-- Context button -->
-        <div id="plContextBtn_${catId}">
+        <div id="plContextBtn_${catId}" style="flex-shrink:0;">
           ${currentQty < target && target > 0
-            ? '<button onclick="randomizeCategory(\'' + catId + '\')" style="padding:7px 14px;font-size:.7rem;font-weight:800;color:#00465E;background:#FBBF24;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Randomize ' + remaining + '</button>'
+            ? '<button onclick="randomizeCategory(\'' + catId + '\')" style="padding:8px 16px;font-size:.72rem;font-weight:800;color:#00465E;background:#FBBF24;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Randomize ' + remaining + '</button>'
             : currentQty > target && target > 0
-            ? '<button onclick="_updateParToSelected(\'' + catId + '\')" style="padding:7px 14px;font-size:.68rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Set par to ' + currentQty + '</button>'
+            ? '<button onclick="_updateParToSelected(\'' + catId + '\')" style="padding:8px 16px;font-size:.7rem;font-weight:700;color:#fff;background:#00465E;border:none;border-radius:8px;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap;">Set par to ' + currentQty + '</button>'
             : target > 0
-            ? '<span style="font-size:.68rem;font-weight:700;color:#167421;">Par met</span>'
+            ? '<span style="font-size:.7rem;font-weight:700;color:#167421;">Par met</span>'
             : ''}
         </div>
       </div>
