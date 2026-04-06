@@ -1754,12 +1754,12 @@ function showSaveBtn() {
 async function saveMealAllowances(btn) {
   btn.disabled = true;
   btn.textContent = 'Saving…';
-  const rows = document.querySelectorAll('#mealAllowanceTable tbody tr');
+  const rows = document.querySelectorAll('#mealAllowanceTable > div[data-level]');
   const changes = [];
-  rows.forEach(tr => {
-    const level = tr.dataset.level;
-    const levelName = tr.dataset.levelName || 'Default';
-    const inputs = tr.querySelectorAll('.meal-input');
+  rows.forEach(row => {
+    const level = row.dataset.level;
+    const levelName = row.dataset.levelName || 'Default';
+    const inputs = row.querySelectorAll('.meal-input');
     const data = { level: level, levelName: levelName };
     inputs.forEach(inp => { data[inp.dataset.field] = inp.value || '0'; });
     changes.push(data);
