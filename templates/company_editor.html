@@ -580,42 +580,8 @@ body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-heigh
                     </div>
                 </div>
 
-                <!-- Default level — always shown, pre-filled from pricing above -->
-                <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:8px;">Default Allowance</div>
-                <table style="width:100%;border-collapse:collapse;font-size:.82rem;" id="defaultAllowanceGrid">
-                    <thead>
-                        <tr style="border-bottom:2px solid #E8DFD2;">
-                            <th style="text-align:left;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Level</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#167421;">Free</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 1</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 2</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Tier 3</th>
-                            <th style="text-align:center;padding:6px 8px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Max/Week</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="background:#FAF6F0;">
-                            <td style="padding:8px;font-weight:800;color:#003141;">Default</td>
-                            <td style="padding:8px;text-align:center;"><input type="number" name="FreeMealsPerWeek" id="freeMeals" value="{{ company.FreeMealsPerWeek or '' }}" placeholder="0" style="width:60px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;text-align:center;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;text-align:center;"><input type="number" name="Tier1_Meals" id="t1Meals" value="{{ company.Tier1_Meals or '' }}" placeholder="0" style="width:60px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;text-align:center;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;text-align:center;"><input type="number" name="Tier2_Meals" id="t2Meals" value="{{ company.Tier2_Meals or '' }}" placeholder="0" style="width:60px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;text-align:center;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;text-align:center;"><input type="number" name="Tier3_Meals" id="t3Meals" value="{{ company.Tier3_Meals or '' }}" placeholder="0" style="width:60px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;text-align:center;" oninput="updatePreview()"></td>
-                            <td style="padding:8px;text-align:center;"><input type="number" name="MaxMealsPerEmployeePerWeek" value="{{ company.MaxMealsPerEmployeePerWeek or '' }}" placeholder="&#8734;" style="width:60px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;text-align:center;"></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <!-- Additional levels toggle -->
-                <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,49,65,.07);">
-                    <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;cursor:pointer;color:#003141;">
-                        <input type="checkbox" id="enableLevels" name="EnableEmployeeLevels"
-                               {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}checked{% endif %}
-                               onchange="toggleLevelsSection(this.checked)" style="width:18px;height:18px;accent-color:#00465E;">
-                        Add additional employee levels
-                    </label>
-                    <span class="field-hint" style="margin-left:26px;">Create different meal allowances for management, executives, etc.</span>
-                </div>
-                <div id="levelsSection" {% if not company.EnableEmployeeLevels or company.EnableEmployeeLevels|string|upper not in ('TRUE', '1', '1.0', 'ON') %}style="display:none"{% endif %}>
+                <!-- All levels (including General) now live in BenefitLevels sheet -->
+                <div id="levelsSection">
                     <table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-top:12px;" id="levelsGrid">
                         <thead>
                             <tr style="border-bottom:2px solid #E8DFD2;">
@@ -822,19 +788,26 @@ function addLevel(data) {
   _levelCounter++;
   var id = _levelCounter;
   var lv = data || {};
+  var isGeneral = (lv.LevelName === 'General' || lv.LevelID === 'general');
   var tr = document.createElement('tr');
   tr.id = 'lvl-' + id;
   tr.style.borderBottom = '1px solid rgba(0,49,65,.06)';
+  if (isGeneral) tr.style.background = '#F0F7FA';
+  var nameCell = isGeneral
+    ? '<td style="padding:6px 8px;font-weight:800;color:#003141;">General <span style="font-size:.6rem;font-weight:400;color:#7A8F9C;">— Default</span><input type="hidden" data-field="LevelName" value="General"></td>'
+    : '<td style="padding:6px 8px;"><input type="text" value="'+(lv.LevelName||'')+'" data-field="LevelName" placeholder="e.g. Leadership" style="width:130px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;font-weight:700;color:#003141;font-family:inherit;"></td>';
+  var deleteCell = isGeneral
+    ? '<td></td>'
+    : '<td style="padding:6px 8px;"><button type="button" onclick="removeLevel('+id+')" style="font-size:.65rem;color:#B56B10;background:none;border:1px solid rgba(181,107,16,.15);border-radius:5px;padding:3px 8px;cursor:pointer;">\u2715</button></td>';
   tr.innerHTML =
-    '<td style="padding:6px 8px;"><input type="text" value="'+(lv.LevelName||'')+'" data-field="LevelName" placeholder="e.g. Leadership" style="width:130px;padding:5px 8px;border:1px solid #E8DFD2;border-radius:6px;font-size:.82rem;font-weight:700;color:#003141;font-family:inherit;"></td>' +
+    nameCell +
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.FreeMealsPerWeek||0)+'" data-field="FreeMealsPerWeek" style="'+_s+'"></td>' +
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier1_Meals||0)+'" data-field="Tier1_Meals" style="'+_s+'"></td>' +
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier2_Meals||0)+'" data-field="Tier2_Meals" style="'+_s+'"></td>' +
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.Tier3_Meals||0)+'" data-field="Tier3_Meals" style="'+_s+'"></td>' +
     '<td style="padding:6px 8px;text-align:center;"><input type="number" value="'+(lv.MaxMealsPerWeek||'')+'" data-field="MaxMealsPerWeek" placeholder="\u221E" style="'+_s+'"></td>' +
-    '<td style="padding:6px 8px;"><button type="button" onclick="removeLevel('+id+')" style="font-size:.65rem;color:#B56B10;background:none;border:1px solid rgba(181,107,16,.15);border-radius:5px;padding:3px 8px;cursor:pointer;">\u2715</button></td>';
-  // Store LevelID as a hidden data attribute
-  tr.dataset.levelId = lv.LevelID || id;
+    deleteCell;
+  tr.dataset.levelId = lv.LevelID || (isGeneral ? 'general' : id);
   document.getElementById('levelsContainer').appendChild(tr);
 }
 
@@ -893,7 +866,7 @@ function loadExistingLevels() {
 // Init on load
 document.addEventListener('DOMContentLoaded', function() {
   updatePreview();
-  if (document.getElementById('enableLevels')?.checked) loadExistingLevels();
+  loadExistingLevels();
 });
 </script>
 </body>
