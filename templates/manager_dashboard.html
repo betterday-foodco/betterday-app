@@ -707,7 +707,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 
       <!-- ═══════ WHAT'S IN YOUR ORDER ═══════ -->
       <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;padding:28px 24px 20px;margin-bottom:16px;">
-        <div style="font-size:1.1rem;font-weight:900;color:#00465E;margin-bottom:20px;">What's in your order</div>
+        <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-bottom:20px;">What's in your order</div>
         <div id="plCartSummary">
           <!-- Populated by JS -->
         </div>
@@ -1913,9 +1913,9 @@ function renderParGrid() {
               onchange="event.stopPropagation();setCatQtyDirect('${cat.id}',parseInt(this.value)||0)"
               style="width:46px;text-align:center;font-size:1.15rem;font-weight:900;color:#00465E;background:${hasItems ? '#FEF9C3' : '#fff'};border:none;border-left:1px solid #E8DFD2;border-right:1px solid #E8DFD2;outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:6px 0;flex-shrink:0;">
             <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:38px;border:none;background:#F0F7FA;font-size:17px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;">+</button>
-            <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 10px;background:#FAFAF5;border-left:1px solid #E8DFD2;gap:4px;min-height:42px;">
-              <span style="font-size:.65rem;font-weight:700;color:#00465E;white-space:nowrap;">items/wk</span>
-              ${hasItems ? `<span style="font-size:.65rem;color:#94A3B8;">&middot;</span><span style="font-size:.72rem;font-weight:800;color:#00465E;white-space:nowrap;">$${lineTotal.toFixed(2)}</span>` : ''}
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 10px;background:#FAFAF5;border-left:1px solid #E8DFD2;min-height:42px;">
+              <span style="font-size:.6rem;font-weight:400;color:#7A8F9C;white-space:nowrap;">items/wk</span>
+              ${hasItems ? `<span style="font-size:.75rem;font-weight:800;color:#00465E;white-space:nowrap;">$${lineTotal.toFixed(2)}</span>` : ''}
             </div>
           </div>
 
@@ -2244,9 +2244,12 @@ async function openCatDetail(catId) {
   const progressPct = target > 0 ? Math.min(100, (currentQty / target) * 100) : 0;
 
   panel.innerHTML = `
-    <div class="pl-detail-header">
+    <div class="pl-detail-header" style="display:flex;align-items:center;justify-content:space-between;">
       <h3>${cat.name}</h3>
-      <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="randomizeCategory('${catId}')" style="padding:6px 14px;font-size:.7rem;font-weight:800;color:#00465E;background:#FBBF24;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">Randomize</button>
+        <button class="pl-detail-close" onclick="closeCatDetail()">&#10005;</button>
+      </div>
     </div>
     <div style="padding:16px 20px;background:#F9F5F0;border-bottom:1px solid #E8DFD2;">
       <!-- Par level info -->
@@ -2269,20 +2272,19 @@ async function openCatDetail(catId) {
           </div>
         </div>` : ''}
       </div>
-      <!-- Progress bar + count -->
+      <!-- Progress bar + count (live-updated via id) -->
       ${target > 0 ? `
       <div style="height:6px;background:#E8DFD2;border-radius:6px;overflow:hidden;margin-bottom:6px;">
-        <div style="height:100%;width:${progressPct}%;background:${currentQty >= target ? '#167421' : '#D4A029'};border-radius:6px;transition:width .3s;"></div>
+        <div id="plProgressBar_${catId}" style="height:100%;width:${progressPct}%;background:${currentQty >= target ? '#167421' : '#D4A029'};border-radius:6px;transition:width .3s;"></div>
       </div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:.78rem;">${progressText}</div>
+        <div style="font-size:.78rem;" id="plProgressText_${catId}">${progressText}</div>
         <div style="font-size:.68rem;color:#7A8F9C;">${cat.rotating ? 'Rotates weekly' : 'Same items'} &middot; ${catItems.length} available</div>
       </div>
-      ${remaining > 0 ? `
-      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;">
-        <span style="font-size:.7rem;color:#92400E;font-weight:600;">${remaining} unfilled &mdash; will be auto-topped up at cutoff with random picks</span>
+      <div id="plAutoTopUp_${catId}" style="${remaining > 0 ? '' : 'display:none;'}margin-top:8px;display:flex;align-items:center;justify-content:space-between;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:8px 12px;">
+        <span style="font-size:.7rem;color:#92400E;font-weight:600;" id="plAutoTopUpText_${catId}">${remaining > 0 ? remaining + ' unfilled &mdash; auto-topped up at cutoff with random picks' : ''}</span>
         <button onclick="autoFillRemaining('${catId}')" style="font-size:.68rem;font-weight:700;color:#00465E;background:#fff;border:1.5px solid #BAD6E0;border-radius:8px;padding:5px 12px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;">Fill now</button>
-      </div>` : ''}
+      </div>
     </div>
     <div class="pl-detail-body">
       ${catItems.length === 0 ? '<div style="text-align:center;padding:60px 20px;"><div style="font-size:.88rem;font-weight:700;color:#94A3B8;margin-bottom:8px;">No items available yet</div><div style="font-size:.75rem;color:#CBD5E1;">Items will appear here once your menu is published.</div></div>' :
@@ -2446,18 +2448,80 @@ function _recalcCatTotal(catId) {
   });
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
   d.qty = totalQty;
-  // If qty exceeds target, silently bump target up
   if (d.target && totalQty > d.target) d.target = totalQty;
   plData[catId] = d;
 
-  // Update the progress bar + counter in the panel header
   const targetInput = document.getElementById('plTargetInput_' + catId);
   const target = d.target || 0;
   if (targetInput && totalQty > target) targetInput.value = totalQty;
 
+  // Live-update progress bar + text in the panel header
+  const cat = PL_CATEGORIES.find(c => c.id === catId);
+  const catName = cat ? cat.name : catId;
+  const progressBar = document.getElementById('plProgressBar_' + catId);
+  const progressText = document.getElementById('plProgressText_' + catId);
+  const topUpEl = document.getElementById('plAutoTopUp_' + catId);
+  const topUpTextEl = document.getElementById('plAutoTopUpText_' + catId);
+  if (progressBar && target > 0) {
+    const pct = Math.min(100, (totalQty / target) * 100);
+    progressBar.style.width = pct + '%';
+    progressBar.style.background = totalQty >= target ? '#167421' : '#D4A029';
+  }
+  if (progressText) {
+    if (target > 0 && totalQty >= target) {
+      progressText.innerHTML = '<span style="color:#167421;font-weight:900;">' + totalQty + ' ' + catName + ' selected</span>';
+    } else if (target > 0) {
+      progressText.innerHTML = '<span style="font-weight:900;color:#00465E;">' + totalQty + '</span> <span style="color:#7A8F9C;">of</span> <span style="font-weight:900;color:#00465E;">' + target + '</span> <span style="color:#7A8F9C;">selected</span>';
+    } else if (totalQty > 0) {
+      progressText.innerHTML = '<span style="color:#00465E;font-weight:900;">' + totalQty + ' selected</span>';
+    } else {
+      progressText.innerHTML = '';
+    }
+  }
+  const remaining = Math.max(0, target - totalQty);
+  if (topUpEl) {
+    topUpEl.style.display = remaining > 0 ? 'flex' : 'none';
+  }
+  if (topUpTextEl && remaining > 0) {
+    topUpTextEl.textContent = remaining + ' unfilled \u2014 auto-topped up at cutoff with random picks';
+  }
+
   renderParGrid();
   updateParTotals();
   autoSaveParLevels();
+}
+
+function randomizeCategory(catId) {
+  const d = plData[catId] || { qty: 0, target: 0 };
+  const target = d.target || d.qty || 0;
+  if (target <= 0) { alert('Set a weekly par level first.'); return; }
+
+  // Get all dish inputs for this category
+  const inputs = document.querySelectorAll('[id^="dishQtyVal_' + catId + '_"]');
+  if (inputs.length === 0) return;
+
+  // Reset all to 0 first
+  inputs.forEach(inp => { inp.value = 0; });
+
+  // Distribute target evenly, then randomly assign remainder
+  const perDish = Math.floor(target / inputs.length);
+  let extra = target % inputs.length;
+
+  // Shuffle indices for random distribution of extras
+  const indices = Array.from({length: inputs.length}, (_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  inputs.forEach((inp, i) => {
+    const bonus = indices.indexOf(i) < extra ? 1 : 0;
+    const qty = perDish + bonus;
+    inp.value = qty;
+    _styleDishQty(catId, i, qty);
+  });
+
+  _recalcCatTotal(catId);
 }
 
 function closeCatDetail() {
