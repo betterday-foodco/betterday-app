@@ -89,10 +89,9 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .rc-label-sub{font-size:9px;font-weight:600;color:#7A8F9C}
 .rc-desc{font-size:9.5px;color:#7A8F9C;line-height:1.4}
 .rc-source{font-size:8px;color:#B0BEC5;margin-top:4px;font-style:italic}
-.carousel-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:rgba(0,49,65,.08);border:1px solid rgba(0,49,65,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#00465E;transition:.15s;z-index:2}
+.carousel-nav{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid rgba(0,49,65,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#00465E;transition:.15s;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .carousel-nav:hover{background:rgba(0,49,65,.15);border-color:rgba(0,49,65,.2)}
 .carousel-nav.prev{left:6px}.carousel-nav.next{right:6px}
-.carousel-nav{width:30px;height:30px;font-size:15px;background:rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .carousel-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
 .carousel-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,49,65,.15);transition:.2s}
 .carousel-dot.active{background:#00465E;width:16px;border-radius:3px}
@@ -590,7 +589,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       </div>
 
       <!-- Bulk actions bar — hidden until checkboxes are selected -->
-      <div id="bulkActionsBar" style="display:none;background:#003141;border-radius:10px;padding:12px 18px;margin-bottom:10px;display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div id="bulkActionsBar" style="display:none;background:#003141;border-radius:10px;padding:12px 18px;margin-bottom:10px;align-items:center;gap:12px;flex-wrap:wrap;">
         <span style="font-size:.8rem;font-weight:800;color:#FFC600;" id="bulkCount">0 selected</span>
         <div style="width:1px;height:22px;background:rgba(255,255,255,.15);"></div>
         {% if company.EnableEmployeeLevels and company.EnableEmployeeLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
@@ -1595,7 +1594,7 @@ requestAnimationFrame(function(){
     var dotsWrap = document.getElementById('carouselDots');
     var prevBtn = document.getElementById('carPrev');
     var nextBtn = document.getElementById('carNext');
-    if (!track || !dotsWrap || !prevBtn || !nextBtn) { console.warn('Carousel elements missing'); return; }
+    if (!track || !dotsWrap || !prevBtn || !nextBtn) return;
     var slides = track.querySelectorAll('.impact-slide');
     var total = slides.length;
     var maxIdx = total - 2;
@@ -1841,7 +1840,7 @@ async function loadChangeLog() {
 // Load change log on tab switch to mealplan
 const _origSidebarNav = sidebarNav;
 sidebarNav = function(name, el) {
-  try { _origSidebarNav(name, el); } catch(e) { console.error('sidebarNav error:', e); }
+  try { _origSidebarNav(name, el); } catch(e) {}
   try { if (name === 'mealplan') loadChangeLog(); } catch(e) {}
   try { if (name === 'parlevel') initParLevels(); } catch(e) {}
 };
@@ -2209,20 +2208,6 @@ function toggleCatPause(catId) {
   autoSaveParLevels();
 }
 
-function toggleAllParLevels() {
-  const allPaused = PL_CATEGORIES.every(c => (plData[c.id] || {}).status === 'paused');
-  PL_CATEGORIES.forEach(c => {
-    if (plData[c.id]) plData[c.id].status = allPaused ? 'active' : 'paused';
-  });
-  const btn = document.getElementById('plPauseAllBtn');
-  if (btn) btn.textContent = allPaused ? '⏸ Pause All' : '▶ Resume All';
-  document.getElementById('plStatusDisplay').textContent = allPaused ? 'Active' : 'Paused';
-  document.getElementById('plStatusDisplay').style.color = allPaused ? '#167421' : '#EF4444';
-  renderParGrid();
-  updateParTotals();
-  autoSaveParLevels();
-}
-
 function updateParTotals() {
   let subtotal = 0;
   PL_CATEGORIES.forEach(cat => {
@@ -2351,7 +2336,7 @@ function autoSaveParLevels() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ levels: plData, override: plOverrideMode })
-    }).catch(e => console.warn('Par level save failed:', e));
+    }).catch(() => {});
   }, 800);
 }
 
@@ -2429,9 +2414,9 @@ async function loadWeeklyMenu() {
     ['meat_entree','plant_entree'].forEach(k => {
       _weeklyMenu[k] = _weeklyMenu[k].filter(m => { if (seen[m.id]) return false; seen[m.id] = true; return true; });
     });
-    console.log('Weekly menu loaded:', _weeklyMenu.meat_entree.length, 'meat,', _weeklyMenu.plant_entree.length, 'plant');
+    // menu loaded
     return _weeklyMenu;
-  } catch(e) { console.error('Weekly menu fetch failed:', e); return {meat_entree:[], plant_entree:[]}; }
+  } catch(e) { return {meat_entree:[], plant_entree:[]}; }
 }
 
 async function loadParCatalog() {
@@ -2440,9 +2425,9 @@ async function loadParCatalog() {
     const r = await fetch('/manager/par-catalog');
     const d = await r.json();
     _parCatalog = d.catalog || {};
-    if (d.error) console.warn('Catalog error:', d.error);
+    // catalog loaded
     return _parCatalog;
-  } catch(e) { console.error('Catalog fetch failed:', e); return {}; }
+  } catch(e) { return {}; }
 }
 
 async function openCatDetail(catId) {
@@ -2547,7 +2532,7 @@ async function openCatDetail(catId) {
           return `
           <div class="pl-dish-row" data-item-id="${item.id}" style="${isSwapped ? 'background:#FFFBEB;' : ''}">
             ${isSwapped ? '<div style="position:absolute;top:6px;right:8px;font-size:.55rem;font-weight:700;color:#92400E;background:#FEF3C7;padding:1px 8px;border-radius:99px;">Swapped this week</div>' : ''}
-            <img class="pl-dish-img" src="${item.image || ''}" alt="" onerror="this.style.background='#F1F5F9';this.src=''">
+            <img class="pl-dish-img" src="${item.image || ''}" alt="${item.name}" onerror="this.style.background='#F1F5F9';this.src=''">
             <div class="pl-dish-info">
               <div class="pl-dish-name">${item.name}</div>
               ${isSwapped && swapFrom ? '<div style="font-size:.6rem;color:#B45309;margin-bottom:2px;">Replaced ' + (swapFrom || '') + '</div>' : ''}
@@ -2820,7 +2805,7 @@ function closeCatDetail() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ levels: plData, override: plOverrideMode })
-    }).catch(e => console.warn('Save failed:', e));
+    }).catch(() => {});
   }
 }
 
