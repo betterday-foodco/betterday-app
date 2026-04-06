@@ -2091,20 +2091,23 @@ async function loadWeeklyMenu() {
       body: JSON.stringify({action:'get_menu', sunday_anchor: anchor})
     });
     const d = await r.json();
+    // Combine both arrays — GAS may return all dishes under one key
+    const allDishes = [...(d.meat || []), ...(d.vegan || [])].map(m => ({
+      id: m.id, name: m.name, diet: m.diet || '', type: 'Weekly Menu',
+      image: m.image || '', description: m.description || '',
+      cal: m.cal || 0, protein: m.protein || 0, carbs: m.carbs || 0, fat: m.fat || 0,
+      tags: m.tags || ''
+    }));
+    // Split by actual diet field, not by which array GAS put them in
     _weeklyMenu = {
-      meat_entree: (d.meat || []).map(m => ({
-        id: m.id, name: m.name, diet: m.diet || 'meat', type: 'Weekly Menu',
-        image: m.image || '', description: m.description || '',
-        cal: m.cal || 0, protein: m.protein || 0, carbs: m.carbs || 0, fat: m.fat || 0,
-        tags: m.tags || ''
-      })),
-      plant_entree: (d.vegan || []).map(m => ({
-        id: m.id, name: m.name, diet: m.diet || 'vegan', type: 'Weekly Menu',
-        image: m.image || '', description: m.description || '',
-        cal: m.cal || 0, protein: m.protein || 0, carbs: m.carbs || 0, fat: m.fat || 0,
-        tags: m.tags || ''
-      }))
+      meat_entree: allDishes.filter(m => m.diet.toLowerCase().indexOf('veg') === -1 && m.diet.toLowerCase().indexOf('plant') === -1),
+      plant_entree: allDishes.filter(m => m.diet.toLowerCase().indexOf('veg') !== -1 || m.diet.toLowerCase().indexOf('plant') !== -1)
     };
+    // Deduplicate by ID
+    const seen = {};
+    ['meat_entree','plant_entree'].forEach(k => {
+      _weeklyMenu[k] = _weeklyMenu[k].filter(m => { if (seen[m.id]) return false; seen[m.id] = true; return true; });
+    });
     console.log('Weekly menu loaded:', _weeklyMenu.meat_entree.length, 'meat,', _weeklyMenu.plant_entree.length, 'plant');
     return _weeklyMenu;
   } catch(e) { console.error('Weekly menu fetch failed:', e); return {meat_entree:[], plant_entree:[]}; }
