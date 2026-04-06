@@ -686,9 +686,9 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
             <div style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</div>
             <div style="font-size:1.3rem;font-weight:900;color:#00465E;" id="plTotalDisplay">$0.00</div>
             <div style="font-size:.72rem;font-weight:700;color:#167421;" id="plSavingsDisplay"></div>
+            <button onclick="openOrderSummary()" style="margin-top:6px;padding:5px 14px;background:none;color:#00465E;border:1.5px solid #BAD6E0;border-radius:8px;font-size:.68rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='none'">View Summary</button>
           </div>
         </div>
-        <button onclick="openOrderSummary()" style="width:100%;margin-top:16px;padding:14px;background:#00465E;color:#fff;border:none;border-radius:10px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;" onmouseover="this.style.background='#003A4E'" onmouseout="this.style.background='#00465E'">View Weekly Order Summary</button>
       </div>
 
       <!-- ═══════ VOLUME DISCOUNT TIERS ═══════ -->
@@ -711,10 +711,14 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
       </div>
 
       <!-- ═══════ WHAT'S IN YOUR ORDER ═══════ -->
-      <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;padding:28px 24px 20px;margin-bottom:16px;">
-        <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-bottom:20px;">What's in your order</div>
-        <div id="plCartSummary">
-          <!-- Populated by JS -->
+      <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;overflow:hidden;margin-bottom:16px;">
+        <div style="background:rgba(0,70,94,.08);padding:16px 24px;border-bottom:1px solid #E8DFD2;">
+          <div style="font-size:1.3rem;font-weight:900;color:#00465E;">What's in your order</div>
+        </div>
+        <div style="padding:20px 24px 20px;">
+          <div id="plCartSummary">
+            <!-- Populated by JS -->
+          </div>
         </div>
       </div>
 
@@ -1851,8 +1855,12 @@ async function loadParLevels() {
     const r = await fetch('/manager/par-levels');
     const d = await r.json();
     if (d.levels && Object.keys(d.levels).length > 0) {
-      // Merge server data over defaults
-      Object.keys(d.levels).forEach(k => { plData[k] = d.levels[k]; });
+      // Merge server data over defaults, ensure target is synced from qty
+      Object.keys(d.levels).forEach(k => {
+        plData[k] = d.levels[k];
+        // If target was never set, initialize it from qty (par level)
+        if (plData[k].qty && !plData[k].target) plData[k].target = plData[k].qty;
+      });
     }
   } catch(e) { /* grid already rendered with zeros */ }
   // Re-render with server data (updates quantities)
@@ -1949,7 +1957,7 @@ function renderParGrid() {
           <div style="text-align:center;">
             ${isHandPick
               ? `<button onclick="event.stopPropagation();openCatDetail('${cat.id}')" style="width:100%;padding:8px 0;font-size:.72rem;font-weight:700;color:#00465E;background:#F0F7FA;border:1.5px solid #BAD6E0;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;">
-                   Select dishes${dishCount > 0 ? ' (' + dishCount + ' chosen)' : ''}
+                   Select / View Dishes${dishCount > 0 ? ' (' + dishCount + ' chosen)' : ''}
                  </button>`
               : hasItems
               ? `<div style="font-size:.65rem;color:#167421;font-weight:700;">Auto-selected</div>`
