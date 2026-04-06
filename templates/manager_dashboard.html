@@ -297,11 +297,12 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
   <div class="ni" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
   <div class="ni" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees</div>
   {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
-  <div class="ni" onclick="sidebarNav('parlevel', this)">&#128230; &nbsp;Office Orders</div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">Par Levels</div>
+  <div class="ni" onclick="sidebarNav('parlevel', this)">&#9670; &nbsp;Office Par Levels</div>
+  <div class="ni" onclick="sidebarNav('mealplan', this)">&#9733; &nbsp;Subsidy Tiers</div>
   {% endif %}
   <div class="sb-div"></div>
-  <div class="sb-sec">Settings</div>
-  <div class="ni" onclick="sidebarNav('mealplan', this)">&#127860; &nbsp;Subsidy Tiers</div>
   <div class="ni" onclick="sidebarNav('account', this)">&#9881; &nbsp;Account Details</div>
   <div class="ni" onclick="window.location='/manager/logout'">&#8594; &nbsp;Sign out</div>
 </aside>
@@ -1005,7 +1006,14 @@ function sidebarNav(name, el) {
   const saved = params.get('saved');
   if (saved) {
     const items = document.querySelectorAll('.sb .ni');
-    const map = {overview:0, orders:1, invoices:2, monthly:3, employees:4, parlevel:5, mealplan:7, account:8};
+    // Map tab names to sidebar .ni index — must match sidebar order
+    const items_arr = Array.from(items);
+    const map = {};
+    items_arr.forEach((el, i) => {
+      const onclick = el.getAttribute('onclick') || '';
+      const m = onclick.match(/sidebarNav\('(\w+)'/);
+      if (m) map[m[1]] = i;
+    });
     if (map[saved] !== undefined && items[map[saved]]) sidebarNav(saved, items[map[saved]]);
   }
 })();
