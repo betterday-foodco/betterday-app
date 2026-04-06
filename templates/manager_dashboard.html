@@ -1838,17 +1838,28 @@ function initParLevels() {
   const delivEl = document.getElementById('plNextDelivery');
   if (delivEl) delivEl.textContent = nextMon.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-  // INSTANT: render grid immediately with zeros
+  // Show loading overlay instead of rendering zeros
   PL_CATEGORIES.forEach(c => {
     if (!plData[c.id]) plData[c.id] = { qty: 0, status: 'active', mode: 'auto', items: [] };
   });
-  renderParGrid();
-  updateParTotals();
+  const plTab = document.getElementById('tab-parlevel');
+  const loadingEl = document.createElement('div');
+  loadingEl.id = 'plLoadingOverlay';
+  loadingEl.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;';
+  loadingEl.innerHTML = '<div style="width:36px;height:36px;border:3px solid #E8DFD2;border-top-color:#00465E;border-radius:50%;animation:plSpin .8s linear infinite;margin-bottom:16px;"></div><div style="font-size:.88rem;font-weight:700;color:#00465E;">Loading your par levels...</div><style>@keyframes plSpin{to{transform:rotate(360deg)}}</style>';
+  // Hide main content, show spinner
+  const plContent = plTab.querySelectorAll(':scope > *:not(#plLoadingOverlay)');
+  plContent.forEach(el => el.style.display = 'none');
+  plTab.appendChild(loadingEl);
 
-  // BACKGROUND: fetch saved data + pre-warm menu cache in parallel
-  loadParLevels();
-  loadWeeklyMenu();   // pre-fetch entrees so clicking a category is instant
-  loadParCatalog();    // pre-fetch snack/breakfast catalog
+  // Fetch data, then reveal
+  Promise.all([loadParLevels(), loadWeeklyMenu(), loadParCatalog()]).finally(() => {
+    const overlay = document.getElementById('plLoadingOverlay');
+    if (overlay) overlay.remove();
+    plContent.forEach(el => el.style.display = '');
+    renderParGrid();
+    updateParTotals();
+  });
 }
 
 async function loadParLevels() {
@@ -1863,10 +1874,7 @@ async function loadParLevels() {
         if (plData[k].qty && !plData[k].target) plData[k].target = plData[k].qty;
       });
     }
-  } catch(e) { /* grid already rendered with zeros */ }
-  // Re-render with server data (updates quantities)
-  renderParGrid();
-  updateParTotals();
+  } catch(e) { /* will render from initParLevels finally block */ }
 }
 
 function getOrderWindowState() {
