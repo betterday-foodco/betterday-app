@@ -2337,11 +2337,18 @@ async function openCatDetail(catId) {
     catItems = catalog[catId] || [];
   }
 
-  // Compute actual dishes picked from saved item selections, NOT from d.qty
-  // d.qty on the main page reflects par level, not actual picks
-  const pickedFromItems = (d.items && d.items.length > 0)
-    ? d.items.reduce((sum, it) => sum + (it.qty || 1), 0)
-    : 0;
+  // Store panel context for _recalcCatTotal to save picks back
+  _plPanelCatId = catId;
+  _plPanelItems = catItems;
+
+  // Build a lookup of saved picks: item id → qty
+  const savedPicks = {};
+  if (d.items && d.items.length > 0) {
+    d.items.forEach(it => { savedPicks[it.id] = it.qty || 1; });
+  }
+
+  // Compute actual dishes picked from saved item selections
+  const pickedFromItems = Object.values(savedPicks).reduce((s, q) => s + q, 0);
   const currentQty = pickedFromItems;
   const target = d.target || 0;
   const remaining = Math.max(0, target - currentQty);
@@ -2393,6 +2400,8 @@ async function openCatDetail(catId) {
           const isSwapped = item.swapped || (d.items && d.items.find && d.items.find(di => di.id === item.id && di.swapped));
           const swapFrom = item.swappedFrom || (isSwapped && d.items && d.items.find && (() => { const m = d.items.find(di => di.id === item.id && di.swappedFrom); return m ? m.swappedFrom : null; })());
           const macros = [item.cal ? item.cal + ' cal' : '', item.protein ? item.protein + 'g P' : '', item.carbs ? item.carbs + 'g C' : '', item.fat ? item.fat + 'g F' : ''].filter(Boolean).join(' · ');
+          const savedQty = savedPicks[item.id] || 0;
+          const hasQty = savedQty > 0;
           return `
           <div class="pl-dish-row" data-item-id="${item.id}" style="${isSwapped ? 'background:#FFFBEB;' : ''}">
             ${isSwapped ? '<div style="position:absolute;top:6px;right:8px;font-size:.55rem;font-weight:700;color:#92400E;background:#FEF3C7;padding:1px 8px;border-radius:99px;">Swapped this week</div>' : ''}
@@ -2404,10 +2413,10 @@ async function openCatDetail(catId) {
               ${item.tags ? '<div style="font-size:.58rem;color:#94A3B8;margin-top:1px;">' + item.tags + '</div>' : ''}
             </div>
             <button onclick="event.stopPropagation();clearDish('${catId}',${i})" title="Remove" style="width:28px;height:28px;border:none;background:none;cursor:pointer;font-size:14px;padding:0;flex-shrink:0;opacity:.4;transition:.15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'">&#128465;</button>
-            <div class="pl-dish-qty-wrap" id="dishQty_${catId}_${i}" style="display:flex;align-items:center;gap:0;border:2px solid #E8DFD2;border-radius:8px;overflow:hidden;">
-              <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},-1)" style="width:30px;height:30px;border:none;background:#F9F5F0;font-size:14px;font-weight:900;color:#00465E;cursor:pointer;">−</button>
-              <input type="number" min="0" max="999" value="0" id="dishQtyVal_${catId}_${i}" onclick="event.stopPropagation();this.select();" onchange="event.stopPropagation();setDishQty('${catId}',${i},parseInt(this.value)||0)" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:36px;text-align:center;font-size:.82rem;font-weight:900;color:#00465E;background:#fff;border:none;outline:none;-moz-appearance:textfield;padding:0;font-family:'DM Sans',sans-serif;">
-              <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},1)" style="width:30px;height:30px;border:none;background:#F9F5F0;font-size:14px;font-weight:900;color:#00465E;cursor:pointer;">+</button>
+            <div class="pl-dish-qty-wrap" id="dishQty_${catId}_${i}" style="display:flex;align-items:center;gap:0;border:2px solid ${hasQty ? '#D4A029' : '#E8DFD2'};border-radius:8px;overflow:hidden;">
+              <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},-1)" style="width:30px;height:30px;border:none;background:${hasQty ? '#FEF3C7' : '#F9F5F0'};font-size:14px;font-weight:900;color:${hasQty ? '#92400E' : '#00465E'};cursor:pointer;">−</button>
+              <input type="number" min="0" max="999" value="${savedQty}" id="dishQtyVal_${catId}_${i}" onclick="event.stopPropagation();this.select();" onchange="event.stopPropagation();setDishQty('${catId}',${i},parseInt(this.value)||0)" onkeydown="if(event.key==='Enter'){this.blur();}" style="width:36px;text-align:center;font-size:.82rem;font-weight:900;color:${hasQty ? '#fff' : '#00465E'};background:${hasQty ? '#D4A029' : '#fff'};border:none;outline:none;-moz-appearance:textfield;padding:0;font-family:'DM Sans',sans-serif;">
+              <button onclick="event.stopPropagation();adjustDishQty('${catId}',${i},1)" style="width:30px;height:30px;border:none;background:${hasQty ? '#FEF3C7' : '#F9F5F0'};font-size:14px;font-weight:900;color:${hasQty ? '#92400E' : '#00465E'};cursor:pointer;">+</button>
             </div>
           </div>`;}).join('')}
     </div>
@@ -2546,14 +2555,27 @@ function _styleDishQty(catId, idx, qty) {
   }
 }
 
+// Track which items are loaded in the current panel for index→id mapping
+let _plPanelCatId = null;
+let _plPanelItems = [];
+
 function _recalcCatTotal(catId) {
   let totalQty = 0;
-  document.querySelectorAll('[id^="dishQtyVal_' + catId + '_"]').forEach(el => {
-    totalQty += parseInt(el.value) || 0;
+  const savedItems = [];
+  document.querySelectorAll('[id^="dishQtyVal_' + catId + '_"]').forEach((el, i) => {
+    const q = parseInt(el.value) || 0;
+    totalQty += q;
+    // Save each dish's selection back to plData.items
+    if (q > 0 && _plPanelItems[i]) {
+      savedItems.push({ id: _plPanelItems[i].id, name: _plPanelItems[i].name, qty: q });
+    }
   });
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
   d.qty = totalQty;
-  // Par level NEVER auto-bumps — only changes via explicit _updateParToSelected
+  // Persist dish picks so they survive panel close/reopen
+  if (_plPanelCatId === catId && _plPanelItems.length > 0) {
+    d.items = savedItems;
+  }
   plData[catId] = d;
 
   const target = d.target || 0;
@@ -2645,6 +2667,12 @@ function closeCatDetail() {
   const panel = document.querySelector('.pl-detail-panel');
   if (overlay) overlay.classList.remove('open');
   if (panel) panel.classList.remove('open');
+  // Save picks to server when closing
+  if (_plPanelCatId) {
+    autoSaveParLevels();
+    _plPanelCatId = null;
+    _plPanelItems = [];
+  }
 }
 
 function generateDemoItems(cat, qty) {
