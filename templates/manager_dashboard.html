@@ -739,13 +739,10 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
           </div>
 
           <!-- BOTTOM-RIGHT: Past Office Orders (1/3 wide, 1/3 tall) -->
-          <div style="padding:16px 20px;">
-            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:8px;">Past Office Orders</div>
-            <div id="plPastOrders" style="font-size:.72rem;">
-              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F1F5F9;color:#00465E;font-weight:600;cursor:pointer;" onmouseover="this.style.color='#FBBF24'" onmouseout="this.style.color='#00465E'">Mar 31 delivery <span style="color:#7A8F9C;font-weight:400;">$947</span></div>
-              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #F1F5F9;color:#00465E;font-weight:600;cursor:pointer;" onmouseover="this.style.color='#FBBF24'" onmouseout="this.style.color='#00465E'">Mar 24 delivery <span style="color:#7A8F9C;font-weight:400;">$891</span></div>
-              <div style="display:flex;justify-content:space-between;padding:5px 0;color:#00465E;font-weight:600;cursor:pointer;" onmouseover="this.style.color='#FBBF24'" onmouseout="this.style.color='#00465E'">Mar 17 delivery <span style="color:#7A8F9C;font-weight:400;">$1,024</span></div>
-            </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+            <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;margin-bottom:10px;align-self:flex-start;">Past Office Orders</div>
+            <button onclick="sidebarNav('invoices', document.querySelectorAll('.sb .ni')[2])" style="padding:10px 20px;background:none;color:#00465E;border:1.5px solid #BAD6E0;border-radius:10px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;width:100%;" onmouseover="this.style.background='#F0F7FA'" onmouseout="this.style.background='none'">View Past Invoices</button>
+            <div style="font-size:.6rem;color:#94A3B8;margin-top:6px;text-align:center;">View all weekly office order invoices and payment history</div>
           </div>
 
         </div>
