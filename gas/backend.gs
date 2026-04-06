@@ -639,8 +639,9 @@ function doPost(e) {
       var meatIds = [], veganIds = [];
       // AI (index 34) = single cell with comma-separated meat IDs (e.g. "#509, #319, #508...")
       // AJ (index 35) = single cell with comma-separated vegan IDs (e.g. "#196, #517, #473...")
-      var AI_COL = 34;
-      var AJ_COL = 35;
+      // AJ (index 35) = Meat ID Summary, AK (index 36) = Vegan ID Summary
+      var MEAT_COL = 35;
+      var VEGAN_COL = 36;
       function extractIdsFromCell(cellVal) {
         if (!cellVal) return [];
         var ids = [];
@@ -660,8 +661,8 @@ function doPost(e) {
         var sundayMatchMs = new Date(sundayMatch + 'T12:00:00Z').getTime();
         var diffMs = Math.abs(sundayDate.getTime() - sundayMatchMs);
         if (diffMs <= 24 * 60 * 60 * 1000) {
-          meatIds  = extractIdsFromCell(schedRows[i][AI_COL]);
-          veganIds = extractIdsFromCell(schedRows[i][AJ_COL]);
+          meatIds  = extractIdsFromCell(schedRows[i][MEAT_COL]);
+          veganIds = extractIdsFromCell(schedRows[i][VEGAN_COL]);
           break;
         }
       }
