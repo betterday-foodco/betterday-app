@@ -1812,13 +1812,22 @@ function initParLevels() {
   // Compute delivery date dynamically
   const now = new Date();
   const sun = new Date(now); sun.setDate(sun.getDate() - sun.getDay()); sun.setHours(0,0,0,0);
-  // Next delivery = next Monday (sun + 8 days if open, sun + 1 if we're already past)
   const nextMon = new Date(sun);
   nextMon.setDate(sun.getDate() + (state === 'locked' ? 8 : 1));
   const delivEl = document.getElementById('plNextDelivery');
   if (delivEl) delivEl.textContent = nextMon.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
+  // INSTANT: render grid immediately with zeros
+  PL_CATEGORIES.forEach(c => {
+    if (!plData[c.id]) plData[c.id] = { qty: 0, status: 'active', mode: 'auto', items: [] };
+  });
+  renderParGrid();
+  updateParTotals();
+
+  // BACKGROUND: fetch saved data + pre-warm menu cache in parallel
   loadParLevels();
+  loadWeeklyMenu();   // pre-fetch entrees so clicking a category is instant
+  loadParCatalog();    // pre-fetch snack/breakfast catalog
 }
 
 async function loadParLevels() {
@@ -1826,18 +1835,11 @@ async function loadParLevels() {
     const r = await fetch('/manager/par-levels');
     const d = await r.json();
     if (d.levels && Object.keys(d.levels).length > 0) {
-      plData = d.levels;
-    } else {
-      // Init with zeros
-      PL_CATEGORIES.forEach(c => {
-        if (!plData[c.id]) plData[c.id] = { qty: 0, status: 'active', mode: 'auto', items: [] };
-      });
+      // Merge server data over defaults
+      Object.keys(d.levels).forEach(k => { plData[k] = d.levels[k]; });
     }
-  } catch(e) {
-    PL_CATEGORIES.forEach(c => {
-      if (!plData[c.id]) plData[c.id] = { qty: 0, status: 'active', mode: 'auto', items: [] };
-    });
-  }
+  } catch(e) { /* grid already rendered with zeros */ }
+  // Re-render with server data (updates quantities)
   renderParGrid();
   updateParTotals();
 }
