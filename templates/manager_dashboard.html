@@ -141,6 +141,8 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .meal-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .pl-dish-qty-wrap input[type=number]::-webkit-inner-spin-button,.pl-dish-qty-wrap input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .pl-dish-qty-wrap input[type=number]{-moz-appearance:textfield}
+.pl-cat-card:hover{border-color:#B8C9D1 !important;box-shadow:0 4px 16px rgba(0,70,94,.08) !important;opacity:1 !important}
+.pl-cat-card input[type=number]::-webkit-inner-spin-button,.pl-cat-card input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .meal-input[type=number]{-moz-appearance:textfield}
 .meal-input:not(:placeholder-shown):not([value=""]):not([value="0"]){border-color:#00465E;background:#F0F7FA}
 .log-row{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(0,49,65,.05);align-items:flex-start}
@@ -1867,49 +1869,76 @@ function renderParGrid() {
 
   let html = '';
   groups.forEach(g => {
-    const activeCats = g.cats.filter(c => {
-      const d = plData[c.id];
-      return d && (d.qty || 0) > 0 && d.status !== 'paused';
-    });
     const groupTotal = g.cats.reduce((s, c) => {
       const d = plData[c.id];
       return s + ((d && d.status !== 'paused') ? (d.qty || 0) : 0);
     }, 0);
+    const groupCost = g.cats.reduce((s, c) => {
+      const d = plData[c.id];
+      return s + ((d && d.status !== 'paused') ? (d.qty || 0) * c.unitPrice : 0);
+    }, 0);
 
-    html += `<div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:12px;overflow:hidden;">
-      <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #F1F5F9;">
+    html += `
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
         <div>
-          <div style="font-size:.78rem;font-weight:800;color:#00465E;">${g.label}</div>
-          <div style="font-size:.65rem;color:#7A8F9C;">${g.sub}</div>
+          <div style="font-size:.82rem;font-weight:900;color:#00465E;">${g.label}</div>
+          <div style="font-size:.65rem;color:#7A8F9C;margin-top:1px;">${g.sub}</div>
         </div>
-        <span style="font-size:.72rem;font-weight:800;color:${groupTotal > 0 ? '#00465E' : '#CBD5E1'};">${groupTotal} items</span>
-      </div>`;
+        <span style="font-size:.72rem;font-weight:700;color:${groupTotal > 0 ? '#00465E' : '#CBD5E1'};">${groupTotal} items · $${groupCost.toFixed(2)}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">`;
 
     g.cats.forEach(cat => {
-      const d = plData[cat.id] || { qty: 0, status: 'active' };
+      const d = plData[cat.id] || { qty: 0, status: 'active', mode: 'auto' };
       const qty = d.qty || 0;
-      const isPaused = d.status === 'paused';
+      const mode = d.mode || 'auto';
+      const isHandPick = mode === 'handpick';
       const lineTotal = qty * cat.unitPrice;
-      // Get item names preview
-      const itemNames = (d.items && d.items.length > 0)
-        ? d.items.map(i => i.name || i).slice(0, 3).join(', ') + (d.items.length > 3 ? '...' : '')
-        : (qty > 0 ? 'Auto-selected' : '');
+      const dishCount = (d.items && d.items.length > 0) ? d.items.filter(i => (i.qty || 1) > 0).length : 0;
+      const hasItems = qty > 0;
 
       html += `
-        <div style="padding:14px 18px;display:flex;align-items:center;gap:14px;border-bottom:1px solid ${qty > 0 ? '#E8DFD2' : '#F8F8F8'};background:${qty > 0 ? '#F8FCFF' : '#FAFAFA'};${isPaused ? 'opacity:.35;' : (qty === 0 ? 'opacity:.6;' : '')}" onclick="openCatDetail('${cat.id}')" class="pl-cart-row">
-          <div style="width:40px;height:40px;border-radius:10px;background:${qty > 0 ? '#00465E' : '#E8E8E8'};color:${qty > 0 ? '#fff' : '#B0B0B0'};display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900;flex-shrink:0;">${qty}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:.85rem;font-weight:${qty > 0 ? '800' : '600'};color:${qty > 0 ? '#00465E' : '#94A3B8'};">${cat.name}</div>
-            <div style="font-size:.68rem;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${qty > 0 ? (itemNames || 'Auto-selected') : 'Tap to add items'}</div>
+        <div style="background:${hasItems ? '#fff' : '#FAFAFA'};border:1.5px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-radius:14px;padding:18px;position:relative;transition:.15s;${hasItems ? 'box-shadow:0 2px 8px rgba(0,70,94,.06);' : 'opacity:.7;'}" class="pl-cat-card">
+          <!-- Category name + price -->
+          <div style="font-size:.82rem;font-weight:800;color:${hasItems ? '#00465E' : '#94A3B8'};">${cat.name}</div>
+          <div style="font-size:.62rem;color:#94A3B8;margin-top:1px;">${cat.rotating ? 'Rotates weekly' : 'Same every week'} · $${cat.unitPrice.toFixed(2)}/ea</div>
+
+          <!-- Big qty + controls -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:0;margin:16px 0 8px;border:2px solid ${hasItems ? '#00465E' : '#E8DFD2'};border-radius:12px;overflow:hidden;">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',-1)" style="width:40px;height:44px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:18px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;">−</button>
+            <input type="number" min="0" max="999" value="${qty}" id="plCatQty_${cat.id}"
+              onclick="event.stopPropagation();this.select();"
+              onchange="event.stopPropagation();setCatQtyDirect('${cat.id}',parseInt(this.value)||0)"
+              style="width:52px;height:44px;text-align:center;font-size:1.3rem;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};background:#fff;border:none;border-left:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};border-right:1px solid ${hasItems ? '#E8DFD2' : '#F1F5F9'};outline:none;-moz-appearance:textfield;font-family:'DM Sans',sans-serif;padding:0;">
+            <button onclick="event.stopPropagation();adjustCatQty('${cat.id}',1)" style="width:40px;height:44px;border:none;background:${hasItems ? '#F0F7FA' : '#F9F9F9'};font-size:18px;font-weight:900;color:${hasItems ? '#00465E' : '#CBD5E1'};cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
           </div>
-          <div style="text-align:right;flex-shrink:0;">
-            ${qty > 0 ? '<div style="font-size:.88rem;font-weight:900;color:#00465E;">$' + lineTotal.toFixed(2) + '</div>' : ''}
-            <div style="font-size:.6rem;color:#94A3B8;">$${cat.unitPrice.toFixed(2)}/ea</div>
+          <div style="text-align:center;font-size:.65rem;color:#7A8F9C;">items per week</div>
+
+          <!-- Cost -->
+          ${hasItems ? `<div style="text-align:center;font-size:.88rem;font-weight:900;color:#00465E;margin-top:6px;">$${lineTotal.toFixed(2)}<span style="font-size:.65rem;font-weight:600;color:#7A8F9C;">/wk</span></div>` : ''}
+
+          <!-- Mode toggle -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-top:12px;border:1.5px solid #E8DFD2;border-radius:8px;overflow:hidden;font-size:.65rem;font-weight:700;">
+            <button onclick="event.stopPropagation();setCatMode('${cat.id}','auto')" style="flex:1;padding:6px 0;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;transition:.15s;${!isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Auto</button>
+            <button onclick="event.stopPropagation();setCatMode('${cat.id}','handpick')" style="flex:1;padding:6px 0;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;transition:.15s;${isHandPick ? 'background:#00465E;color:#fff;' : 'background:#fff;color:#7A8F9C;'}">Hand-pick</button>
           </div>
-          <div style="color:${qty > 0 ? '#00465E' : '#CBD5E1'};font-size:16px;flex-shrink:0;font-weight:700;">›</div>
+
+          <!-- Status line + action -->
+          <div style="text-align:center;margin-top:8px;">
+            ${isHandPick && hasItems
+              ? `<div style="font-size:.62rem;color:#7A8F9C;margin-bottom:6px;">${dishCount} dish${dishCount !== 1 ? 'es' : ''} chosen</div>
+                 <button onclick="event.stopPropagation();openCatDetail('${cat.id}')" style="font-size:.7rem;font-weight:700;color:#00465E;background:#F0F7FA;border:1px solid #BAE6FD;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Select dishes</button>`
+              : isHandPick && !hasItems
+              ? `<button onclick="event.stopPropagation();openCatDetail('${cat.id}')" style="font-size:.7rem;font-weight:700;color:#7A8F9C;background:#F9F9F9;border:1px solid #E8DFD2;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;">Select dishes</button>`
+              : hasItems
+              ? `<div style="font-size:.62rem;color:#167421;font-weight:600;">Auto-selected</div>`
+              : `<div style="font-size:.62rem;color:#CBD5E1;">Set a quantity above</div>`
+            }
+          </div>
         </div>`;
     });
-    html += '</div>';
+    html += '</div></div>';
   });
   container.innerHTML = html;
 }
@@ -2255,6 +2284,35 @@ async function openCatDetail(catId) {
           </div>`;}).join('')}
     </div>
   `;
+}
+
+function adjustCatQty(catId, delta) {
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto', items: [] };
+  d.qty = Math.max(0, (d.qty || 0) + delta);
+  if (d.target && d.qty > d.target) d.target = d.qty;
+  plData[catId] = d;
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function setCatQtyDirect(catId, qty) {
+  qty = Math.max(0, qty);
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto', items: [] };
+  d.qty = qty;
+  d.target = qty;
+  plData[catId] = d;
+  renderParGrid();
+  updateParTotals();
+  autoSaveParLevels();
+}
+
+function setCatMode(catId, mode) {
+  const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto', items: [] };
+  d.mode = mode;
+  plData[catId] = d;
+  renderParGrid();
+  autoSaveParLevels();
 }
 
 function setCatTarget(catId, target) {
