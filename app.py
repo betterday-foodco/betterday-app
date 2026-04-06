@@ -1342,6 +1342,20 @@ def save_par_levels():
     return jsonify(result or {'success': False, 'error': 'GAS timeout'})
 
 
+@app.route('/manager/par-levels/reset', methods=['POST'])
+@manager_required
+def reset_par_levels():
+    """Reset all par level data for this company (demo/testing)."""
+    company_id = session.get('manager_company_id')
+    result = _gas_post({
+        'action': 'save_par_levels',
+        'company_id': company_id,
+        'levels': {},
+        'changed_by': 'reset'
+    }, timeout=12)
+    return jsonify({'success': True, 'message': 'Par levels reset'})
+
+
 @app.route('/manager/par-levels/confirm', methods=['POST'])
 @manager_required
 def confirm_par_order():
