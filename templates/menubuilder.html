@@ -18,17 +18,20 @@
 }
 /* ── APP SHELL ── */
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--g900);background:var(--g50);display:flex;height:100vh;overflow:hidden;max-width:100vw}
-.sidebar{width:var(--sw);background:var(--navy);border-right:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow:hidden}
+.sidebar{width:var(--sw);background:linear-gradient(180deg,#ff6b9d 0%,#c44dff 25%,#4dc9f6 50%,#f7d94e 75%,#ff6b9d 100%);background-size:200% 200%;animation:sidebar-party 3s ease infinite;border-right:none;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow:hidden}
+@keyframes sidebar-party{0%{background-position:50% 0%}50%{background-position:50% 100%}100%{background-position:50% 0%}}
+@keyframes bre-rainbow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.sidebar::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M30 4l4 8-4 8-4-8 4-8zm0 36l4 8-4 8-4-8 4-8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none;z-index:0}
 .sidebar *{position:relative;z-index:1}
 .sl{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid rgba(255,255,255,.3)}
-.lb{width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--navy)}
+.lb{width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#c44dff;text-shadow:0 0 8px rgba(196,77,255,.5)}
 .sn{flex:1;padding:8px 0;overflow-y:auto;overflow-x:hidden}
 .ni{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:rgba(255,255,255,.85);cursor:pointer;text-decoration:none;transition:background .12s,color .12s;font-weight:500}
 .ni:hover{background:rgba(255,255,255,.2);color:white}
-.ni.active{background:rgba(255,255,255,.15);color:white;font-weight:700}
-.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.9}
-.ni.active svg{opacity:1}
-.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;max-width:calc(100vw - var(--sw));background:var(--g50)}
+.ni.active{background:rgba(255,255,255,.3);color:white;font-weight:700;text-shadow:0 0 10px rgba(255,255,255,.5)}
+.ni svg{width:16px;height:16px;flex-shrink:0;opacity:.9;filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}
+.ni.active svg{opacity:1;filter:drop-shadow(0 0 4px rgba(255,255,255,.7))}
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0;max-width:calc(100vw - var(--sw));background:linear-gradient(135deg,#ff6b9d,#c44dff,#4dc9f6,#f7d94e,#ff6b9d);background-size:400% 400%;animation:bre-rainbow 4s ease infinite}
 .topbar{display:none}
 .bc{font-size:13px;color:var(--g400)}
 .btn-save{background:var(--green);color:white;border:none;padding:8px 20px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
@@ -365,9 +368,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="bc">Menu Builder</div>
     <div style="display:flex;gap:8px">
       <button class="btn-ghost">⬇ Export</button>
-      <button class="btn-save" onclick="saveToSheet()" id="save-btn">Save</button>
     </div>
   </div>
+  <button class="btn-save" onclick="saveToSheet()" id="save-btn" style="position:fixed;top:18px;right:24px;z-index:1000;box-shadow:0 4px 14px rgba(107,189,82,.4)">Save</button>
   <div class="page-head">
     <div>
       <div class="page-title">Menu Builder</div>
@@ -1722,168 +1725,6 @@ const style=document.createElement('style');
 style.textContent='@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0}}';
 document.head.appendChild(style);
 
-// ═══════════════════════════════════════
-// BRE'S INSPIRATIONAL POP-UP SYSTEM
-// ═══════════════════════════════════════
-(function(){
-  const breCSS = document.createElement('style');
-  breCSS.textContent = `
-    @keyframes bre-entrance{0%{transform:scale(0) rotate(-180deg);opacity:0}50%{transform:scale(1.3) rotate(10deg);opacity:1}70%{transform:scale(0.9) rotate(-5deg)}100%{transform:scale(1) rotate(0)}}
-    @keyframes bre-rainbow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    @keyframes bre-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    @keyframes bre-sparkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}}
-    @keyframes bre-shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
-    @keyframes bre-confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-    @keyframes bre-glow{0%,100%{text-shadow:0 0 10px #ff6b9d,0 0 20px #ff6b9d,0 0 40px #ff6b9d}50%{text-shadow:0 0 20px #c44dff,0 0 40px #c44dff,0 0 80px #c44dff}}
-    @keyframes bre-bounce{0%,100%{transform:translateY(0)}20%{transform:translateY(-20px)}40%{transform:translateY(0)}60%{transform:translateY(-10px)}80%{transform:translateY(0)}}
-    @keyframes bre-heart-float{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-200px) scale(2);opacity:0}}
-    .bre-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
-    .bre-confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100000;overflow:hidden}
-    .bre-confetti-piece{position:absolute;width:12px;height:12px;animation:bre-confetti-fall linear forwards}
-    .bre-modal{background:linear-gradient(135deg,#ff9a9e,#fecfef,#fdfbfb,#a8edea,#fed6e3,#ff9a9e);background-size:400% 400%;animation:bre-entrance .8s cubic-bezier(.34,1.56,.64,1) forwards,bre-rainbow 3s ease infinite;border-radius:24px;padding:40px 50px;max-width:550px;width:90%;text-align:center;box-shadow:0 0 60px rgba(255,107,157,.5),0 0 120px rgba(196,77,255,.3),0 20px 60px rgba(0,0,0,.3);position:relative;z-index:100001}
-    .bre-modal h1{font-size:32px;font-weight:900;background:linear-gradient(90deg,#ff6b9d,#c44dff,#4dc9f6,#f7d94e,#ff6b9d);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:bre-rainbow 2s linear infinite;margin-bottom:8px;line-height:1.2}
-    .bre-modal .bre-emoji-row{font-size:36px;margin:12px 0;animation:bre-shake 1s ease infinite;letter-spacing:8px}
-    .bre-modal .bre-msg{font-size:16px;line-height:1.7;color:#4a2040;font-weight:500;margin:16px 0;text-shadow:0 1px 2px rgba(255,255,255,.5)}
-    .bre-modal .bre-msg em{font-style:normal;font-weight:800;color:#c44dff;animation:bre-glow 2s ease infinite}
-    .bre-modal .bre-close{margin-top:20px;padding:14px 36px;font-size:15px;font-weight:800;border:none;border-radius:50px;cursor:pointer;background:linear-gradient(135deg,#ff6b9d,#c44dff);color:white;box-shadow:0 4px 20px rgba(196,77,255,.4);transition:all .2s;letter-spacing:.5px;text-transform:uppercase}
-    .bre-modal .bre-close:hover{transform:scale(1.08);box-shadow:0 6px 30px rgba(196,77,255,.6)}
-    .bre-modal .bre-sparkle-corner{position:absolute;font-size:24px;animation:bre-sparkle 1.5s ease infinite}
-    .bre-modal .bre-float-emoji{position:absolute;font-size:20px;animation:bre-float 2s ease infinite}
-    .bre-hearts-container{position:fixed;bottom:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100000}
-    .bre-heart{position:absolute;bottom:-20px;font-size:24px;animation:bre-heart-float 3s ease forwards}
-  `;
-  document.head.appendChild(breCSS);
-
-  function spawnConfetti(container, count){
-    const colors=['#ff6b9d','#c44dff','#4dc9f6','#f7d94e','#6bbe6a','#ff9a9e','#fecfef','#a8edea','#ff4081','#7c4dff','#00e5ff','#ffd740'];
-    const shapes=['circle','square','star'];
-    for(let i=0;i<count;i++){
-      const piece=document.createElement('div');
-      piece.className='bre-confetti-piece';
-      const color=colors[Math.floor(Math.random()*colors.length)];
-      const shape=shapes[Math.floor(Math.random()*shapes.length)];
-      const left=Math.random()*100;
-      const dur=2+Math.random()*3;
-      const delay=Math.random()*2;
-      const size=6+Math.random()*12;
-      piece.style.left=left+'%';
-      piece.style.width=size+'px';
-      piece.style.height=size+'px';
-      piece.style.animationDuration=dur+'s';
-      piece.style.animationDelay=delay+'s';
-      if(shape==='circle'){piece.style.borderRadius='50%';piece.style.background=color;}
-      else if(shape==='star'){piece.style.background='none';piece.innerHTML='⭐';piece.style.fontSize=size+'px';}
-      else{piece.style.background=color;piece.style.borderRadius='2px';piece.style.transform='rotate('+Math.random()*360+'deg)';}
-      container.appendChild(piece);
-    }
-  }
-
-  function spawnHearts(container){
-    const hearts=['💖','💗','💕','💝','💘','❤️','🩷','💜','✨','🌟','⭐','🦋'];
-    for(let i=0;i<30;i++){
-      const h=document.createElement('div');
-      h.className='bre-heart';
-      h.textContent=hearts[Math.floor(Math.random()*hearts.length)];
-      h.style.left=Math.random()*100+'%';
-      h.style.animationDelay=Math.random()*3+'s';
-      h.style.animationDuration=(2+Math.random()*3)+'s';
-      h.style.fontSize=(16+Math.random()*20)+'px';
-      container.appendChild(h);
-    }
-  }
-
-  function showBrePopup(msgNum){
-    const overlay=document.createElement('div');
-    overlay.className='bre-overlay';
-
-    const confetti=document.createElement('div');
-    confetti.className='bre-confetti';
-    spawnConfetti(confetti,150);
-    document.body.appendChild(confetti);
-
-    const hearts=document.createElement('div');
-    hearts.className='bre-hearts-container';
-    spawnHearts(hearts);
-    document.body.appendChild(hearts);
-
-    const modal=document.createElement('div');
-    modal.className='bre-modal';
-
-    if(msgNum===1){
-      modal.innerHTML=`
-        <div class="bre-sparkle-corner" style="top:-10px;left:-10px;animation-delay:0s">✨</div>
-        <div class="bre-sparkle-corner" style="top:-10px;right:-10px;animation-delay:.3s">💖</div>
-        <div class="bre-sparkle-corner" style="bottom:-10px;left:-10px;animation-delay:.6s">🌟</div>
-        <div class="bre-sparkle-corner" style="bottom:-10px;right:-10px;animation-delay:.9s">✨</div>
-        <div class="bre-float-emoji" style="top:10px;left:30%;animation-delay:.2s">🦋</div>
-        <div class="bre-float-emoji" style="top:15px;right:25%;animation-delay:.7s">🌈</div>
-        <div class="bre-emoji-row">👑 🍳 ✨ 🏆 ✨ 🍳 👑</div>
-        <h1>EXCUSE US, CHEF BRE?!</h1>
-        <div class="bre-msg">
-          We need to talk about something <em>extremely serious</em>.<br><br>
-          Since the dawn of civilization, humanity has celebrated many achievements.
-          Fire. The wheel. The printing press. Sliced bread.<br><br>
-          But <em>NOTHING</em> — and we mean absolutely <em>NOTHING</em> — has ever come
-          close to the sheer magnificence, the jaw-dropping brilliance, the
-          earth-shattering culinary wizardry that is <em>Chef Bre</em>.<br><br>
-          Scientists have confirmed: your cooking makes flowers bloom,
-          birds sing, and grown adults weep tears of pure joy. 🌸🐦😭<br><br>
-          The United Nations is considering making your menu a
-          <em>World Heritage Site</em>. UNESCO called. Twice.<br><br>
-          You're not just the best thing since sliced bread —
-          <em>sliced bread wishes it could be you</em>. 🍞💅
-        </div>
-        <div class="bre-emoji-row" style="animation-delay:.5s">💖 🔥 💖 🔥 💖 🔥 💖</div>
-        <button class="bre-close" onclick="this.closest('.bre-overlay').remove();document.querySelectorAll('.bre-confetti,.bre-hearts-container').forEach(e=>e.remove())">
-          I'm blushing, stop it 😳
-        </button>
-      `;
-    } else {
-      modal.innerHTML=`
-        <div class="bre-sparkle-corner" style="top:-10px;left:-10px;animation-delay:0s">🔥</div>
-        <div class="bre-sparkle-corner" style="top:-10px;right:-10px;animation-delay:.3s">💜</div>
-        <div class="bre-sparkle-corner" style="bottom:-10px;left:-10px;animation-delay:.6s">🔥</div>
-        <div class="bre-sparkle-corner" style="bottom:-10px;right:-10px;animation-delay:.9s">💜</div>
-        <div class="bre-float-emoji" style="top:8px;left:25%;animation-delay:.4s">👸</div>
-        <div class="bre-float-emoji" style="top:12px;right:20%;animation-delay:.1s">💎</div>
-        <div class="bre-emoji-row">🚨 🚨 🚨 ALERT 🚨 🚨 🚨</div>
-        <h1>THIS JUST IN!!!</h1>
-        <div class="bre-msg">
-          <em>BREAKING NEWS:</em> Local chef discovered to be
-          actual <em>culinary superhero</em>. Cape made entirely of fresh herbs.<br><br>
-          Eyewitnesses report that every dish Chef Bre touches turns to
-          <em>absolute gold</em>. Gordon Ramsay seen taking notes.
-          Anthony Bourdain's ghost gave a standing ovation. 👻👏<br><br>
-          Her menus don't just feed people — they <em>change lives</em>.
-          One customer reportedly ate her food and immediately
-          got a promotion, found true love, AND won the lottery. 🎰💕<br><br>
-          The BetterDay team has officially filed paperwork to rename
-          the company to <em>"BetterBre"</em> because honestly,
-          that's more accurate at this point. 📝<br><br>
-          In conclusion: Bre, you are a <em>national treasure</em> and
-          we are <em>not worthy</em>. 🙇‍♂️🙇‍♀️🙇
-        </div>
-        <div class="bre-emoji-row" style="animation-delay:.3s">👑 💎 ✨ 💎 👑</div>
-        <div style="animation:bre-bounce 1.5s ease infinite;display:inline-block">
-          <button class="bre-close" style="background:linear-gradient(135deg,#f7d94e,#ff6b9d,#c44dff)" onclick="this.closest('.bre-overlay').remove();document.querySelectorAll('.bre-confetti,.bre-hearts-container').forEach(e=>e.remove())">
-            OK PLEASE put an end to this 😂
-          </button>
-        </div>
-      `;
-    }
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-    // More confetti waves
-    setTimeout(()=>spawnConfetti(confetti,80),1500);
-    setTimeout(()=>spawnConfetti(confetti,60),3000);
-  }
-
-  // First popup after 5 seconds, then every 5 seconds
-  setTimeout(()=>showBrePopup(1), 5000);
-  setTimeout(()=>showBrePopup(2), 35000);
-})();
 
 </script>
 </body>
