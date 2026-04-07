@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>BetterDay for Work</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --cream:   #faebda;
@@ -18,6 +18,7 @@
       --radius:  20px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; max-width: 100vw; touch-action: manipulation; }
     body { font-family: 'DM Sans', sans-serif; background: var(--cream); min-height: 100vh; color: var(--dark); }
 
     .screen { display: none; }
@@ -25,22 +26,16 @@
     #sMagicVerify.active { display: flex; align-items: center; justify-content: center; min-height: 100dvh; background: #f4ede3; }
 
     /* ── SHARED AUTH SHELL ── */
-    .auth-bg { min-height: 100vh; display: grid; grid-template-rows: 130px 1fr; position: relative; }
-    .auth-bg-top { background: var(--dark); position: relative; overflow: hidden; }
-    .auth-bg-top::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 80% 50%, rgba(78,162,253,.25) 0%, transparent 65%),
-                  radial-gradient(ellipse at 20% 80%, rgba(250,235,218,.08) 0%, transparent 50%);
-    }
-    .auth-bg-dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px); background-size: 28px 28px; }
-    .auth-bg-bottom { background: var(--cream); }
-    .auth-card-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .auth-card { background: #fff; border-radius: 28px; padding: 32px 32px 28px; width: 100%; max-width: 420px; box-shadow: 0 24px 60px rgba(0,70,94,.16), 0 4px 16px rgba(0,70,94,.08); position: relative; z-index: 10; }
-    .auth-brand { position: absolute; top: 28px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; z-index: 5; }
-    .auth-logo-mark { width: 46px; height: 46px; border-radius: 14px; background: var(--primary); display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: 0 8px 24px rgba(78,162,253,.4); }
-    .auth-logo-mark svg { width: 24px; height: 24px; fill: #fff; }
-    .auth-wordmark { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: #fff; }
-    .auth-tagline { font-size: .75rem; color: rgba(255,255,255,.5); font-weight: 600; margin-top: 2px; letter-spacing: .4px; text-transform: uppercase; }
+    .auth-bg { min-height: 100vh; background: var(--cream); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+    .auth-bg-top { display: none; }
+    .auth-bg-dots { display: none; }
+    .auth-bg-bottom { display: none; }
+    .auth-card-wrap { width: 100%; max-width: 420px; }
+    .auth-card { background: #fff; border-radius: 16px; padding: 40px 36px; width: 100%; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 24px rgba(0,0,0,.06); border: 1px solid #E8DFD2; position: relative; z-index: 10; }
+    .auth-brand { text-align: center; background: #003141; margin: -40px -36px 28px; padding: 28px 36px; border-radius: 16px 16px 0 0; }
+    .auth-logo-mark { display: none; }
+    .auth-wordmark { display: none; }
+    .auth-tagline { font-size: .65rem; color: rgba(250,235,218,.5); font-weight: 400; margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
 
     /* ── MANAGER GATE SCREEN ── */
     .gate-cards { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
@@ -69,7 +64,7 @@
 
     /* ── FORM ELEMENTS ── */
     .card-eyebrow { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--primary); margin-bottom: 5px; }
-    .card-title { font-family: 'DM Serif Display', serif; font-size: 1.65rem; color: var(--dark); line-height: 1.15; margin-bottom: 5px; }
+    .card-title { font-family: 'DM Sans', sans-serif; font-size: 1.65rem; font-weight: 900; color: var(--dark); line-height: 1.15; margin-bottom: 5px; }
     .card-subtitle { font-size: .88rem; color: #7b8c9f; line-height: 1.5; margin-bottom: 22px; }
     .field-group { margin-bottom: 12px; }
     .field-group label { display: block; font-size: .75rem; font-weight: 800; color: var(--dark); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
@@ -101,7 +96,7 @@
     /* Magic link sent state */
     .magic-sent { text-align: center; padding: 8px 0 16px; }
     .magic-icon { font-size: 2.8rem; margin-bottom: 12px; }
-    .magic-title { font-family: 'DM Serif Display',serif; font-size: 1.4rem; color: var(--dark); margin-bottom: 6px; }
+    .magic-title { font-family: 'DM Sans', sans-serif; font-size: 1.4rem; color: var(--dark); margin-bottom: 6px; }
     .magic-sub { font-size: .85rem; color: #7b8c9f; line-height: 1.6; margin-bottom: 18px; }
     .magic-email-highlight { font-weight: 800; color: var(--dark); }
     .magic-resend { font-size: .78rem; color: var(--primary); cursor: pointer; border: none; background: transparent; font-family: 'DM Sans',sans-serif; font-weight: 700; }
@@ -149,7 +144,7 @@
     #sMenu.active { display: flex; flex-direction: column; height: 100dvh; }
     .menu-shell { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; background: var(--cream); }
     .menu-topbar { background: var(--dark); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 58px; flex-shrink: 0; }
-    .menu-topbar-brand { font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: #fff; }
+    .menu-topbar-brand { font-family: 'DM Sans', sans-serif; font-size: 1.25rem; color: #fff; }
     .menu-topbar-brand span { color: var(--primary); }
     .user-chip { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.1); border-radius: 999px; padding: 6px 14px 6px 8px; border: 1px solid rgba(255,255,255,.15); cursor: pointer; }
     .user-chip:hover { background: rgba(255,255,255,.15); }
@@ -248,7 +243,7 @@
     .info-modal-diet { font-size: .68rem; font-weight: 900; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
     .info-modal-diet-meat { color: var(--dark); }
     .info-modal-diet-veg  { color: var(--green); }
-    .info-modal-name { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--dark); line-height: 1.15; margin-bottom: 8px; }
+    .info-modal-name { font-family: 'DM Sans', sans-serif; font-size: 1.6rem; color: var(--dark); line-height: 1.15; margin-bottom: 8px; }
     .info-modal-desc { font-size: .9rem; color: #50657a; line-height: 1.6; margin-bottom: 16px; }
     .info-modal-macros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .info-modal-macros .macro-chip { font-size: .75rem; padding: 5px 10px; border-radius: 8px; }
@@ -259,8 +254,14 @@
     .info-modal-close:hover { background: rgba(0,0,0,.45); }
 
     /* Topbar */
-    .next-price-chip { font-size: .78rem; color: rgba(255,255,255,.7); background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 4px 12px; margin-right: 8px; }
+    .next-price-chip { font-size: .78rem; color: rgba(255,255,255,.7); background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 4px 12px; margin-right: 8px; white-space: nowrap; }
     .next-price-chip strong { color: #7dd8ff; }
+    @media (max-width: 600px) {
+      .menu-topbar-brand .for-work-label { display: none; }
+      .user-name, .user-chip .arrow-icon { display: none; }
+      .user-chip { padding: 4px; border-radius: 50%; gap: 0; }
+      .next-price-chip { margin-right: 6px; font-size: .74rem; padding: 6px 12px; }
+    }
 
     /* ── MENU BODY + SCROLL ── */
     .menu-body { flex: 1; display: flex; min-height: 0; }
@@ -271,7 +272,7 @@
     .side-cart { width: 290px; flex-shrink: 0; background: #fff; border-left: 1px solid rgba(0,70,94,.1); display: none; flex-direction: column; overflow: hidden; }
     @media (min-width: 900px) { .side-cart { display: flex; } }
     .sc-head { padding: 18px 18px 12px; border-bottom: 1px solid #f0f4f8; flex-shrink: 0; }
-    .sc-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--dark); }
+    .sc-title { font-family: 'DM Sans', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--dark); }
     .sc-delivery { font-size: .7rem; color: #9aabb8; margin-top: 3px; }
     .sc-items { flex: 1; overflow-y: auto; padding: 10px 14px; }
     .sc-empty-msg { font-size: .8rem; color: #b0c4cc; text-align: center; padding: 24px 0; }
@@ -297,19 +298,20 @@
     /* ── MOBILE BOTTOM CART BAR ── */
     .mob-cart-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 300; }
     @media (min-width: 900px) { .mob-cart-bar { display: none; } }
-    .mob-cart-toggle { background: var(--dark); padding: 14px 20px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 -4px 20px rgba(0,0,0,.25); border-radius: 20px 20px 0 0; position: relative; }
+    .mob-cart-toggle { background: var(--dark); padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 -4px 20px rgba(0,0,0,.25); border-radius: 20px 20px 0 0; position: relative; gap: 8px; }
     .mob-cart-toggle::before { content: ''; position: absolute; top: 7px; left: 50%; transform: translateX(-50%); width: 38px; height: 4px; background: rgba(255,255,255,.38); border-radius: 2px; }
-    .mob-toggle-left { display: flex; align-items: center; gap: 10px; }
-    .mob-cart-badge { background: var(--primary); color: #fff; font-size: .7rem; font-weight: 900; border-radius: 999px; padding: 2px 8px; min-width: 22px; text-align: center; }
-    .mob-toggle-label { font-size: .9rem; font-weight: 800; color: #fff; line-height: 1.2; }
-    .mob-cart-hint { font-size: .65rem; color: rgba(255,255,255,.45); font-weight: 500; margin-top: 1px; }
-    .mob-cart-total-label { font-size: 1rem; font-weight: 900; color: #fff; }
-    .mob-cart-chevron { font-size: 1.25rem; color: rgba(255,255,255,.8); margin-left: 8px; display: inline-block; transition: transform .25s; }
+    .mob-toggle-left { display: flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; }
+    .mob-cart-badge { background: var(--primary); color: #fff; font-size: .65rem; font-weight: 900; border-radius: 999px; padding: 2px 7px; min-width: 20px; text-align: center; }
+    .mob-toggle-label { font-size: .82rem; font-weight: 800; color: #fff; line-height: 1; }
+    .mob-cart-hint { display: none; }
+    .mob-cart-total-label { font-size: 1.05rem; font-weight: 900; color: #fff; flex: 1; text-align: center; }
+    .mob-cart-chevron { font-size: 1rem; color: rgba(255,255,255,.7); display: inline-block; transition: transform .25s; }
     .mob-cart-chevron.open { transform: rotate(180deg); }
-    .mob-cart-sheet { background: var(--cream); border-radius: 20px 20px 0 0; box-shadow: 0 -8px 40px rgba(0,0,0,.22); max-height: 72vh; overflow-y: auto; }
-    .mcs-drag-handle { width: 36px; height: 4px; background: rgba(0,70,94,.18); border-radius: 2px; margin: 10px auto 2px; }
+    .mob-review-btn { background: var(--primary); color: #fff; border: none; border-radius: 12px; padding: 10px 16px; font-size: .78rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; flex-shrink: 0; }
+    .mob-cart-sheet { background: #fff; border-radius: 20px 20px 0 0; box-shadow: 0 -8px 40px rgba(0,0,0,.22); max-height: 72vh; overflow-y: auto; }
+    .mcs-drag-handle { width: 36px; height: 4px; background: rgba(0,70,94,.15); border-radius: 2px; margin: 10px auto 2px; }
     .mcs-head { padding: 6px 20px 10px; border-bottom: 1px solid rgba(0,70,94,.07); }
-    .mcs-title { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--dark); }
+    .mcs-title { font-family: 'DM Sans', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--dark); }
     .mcs-delivery { font-size: .7rem; color: #9aabb8; margin-top: 2px; }
     .mcs-items { padding: 8px 16px; }
     .mcs-item-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(0,70,94,.06); }
@@ -326,30 +328,35 @@
     .mcs-total-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 16px 2px; }
     .mcs-total-row span:first-child { font-size: .88rem; font-weight: 700; color: var(--dark); }
     .mcs-total-row span:last-child { font-size: 1.3rem; font-weight: 900; color: var(--dark); }
-    .mcs-checkout-btn { width: calc(100% - 32px); display: block; margin: 10px 16px 16px; padding: 14px; background: var(--dark); color: #fff; border: none; border-radius: 14px; font-size: .95rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .mcs-checkout-btn { width: calc(100% - 32px); display: none; margin: 10px 16px 16px; padding: 14px; background: var(--dark); color: #fff; border: none; border-radius: 14px; font-size: .95rem; font-weight: 800; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    @media (min-width: 900px) { .mcs-checkout-btn { display: block; } }
+    .cart-qty-pill { display: flex; align-items: center; background: rgba(0,70,94,.08); border-radius: 999px; flex-shrink: 0; margin-right: 8px; }
+    .cart-qty-btn { background: transparent; border: none; color: var(--dark); font-size: .9rem; font-weight: 800; cursor: pointer; padding: 4px 9px; line-height: 1; font-family: 'DM Sans', sans-serif; }
+    .cart-qty-btn:hover { background: rgba(0,70,94,.12); border-radius: 999px; }
+    .cart-qty-val { font-size: .75rem; font-weight: 900; color: var(--dark); min-width: 14px; text-align: center; }
     .cart-week-header { font-size: .65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); padding: 8px 0 4px; margin-top: 4px; border-top: 1px solid rgba(0,70,94,.07); }
     .cart-week-header:first-child { border-top: none; margin-top: 0; }
 
     /* Closed week overlay */
     .closed-overlay { background: #fff; border-radius: 20px; padding: 36px 28px; text-align: center; max-width: 440px; margin: 40px auto; box-shadow: 0 8px 32px rgba(0,70,94,.1); }
     .closed-icon  { font-size: 3rem; margin-bottom: 16px; }
-    .closed-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--dark); margin-bottom: 8px; }
+    .closed-title { font-family: 'DM Sans', sans-serif; font-size: 1.6rem; font-weight: 900; color: var(--dark); margin-bottom: 8px; }
     .closed-sub   { font-size: .92rem; color: #7b8c9f; line-height: 1.6; margin-bottom: 24px; }
     .closed-cutoff { background: rgba(231,76,60,.08); border: 1px solid rgba(231,76,60,.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: .85rem; color: var(--red); font-weight: 700; }
     .btn-next-week { background: var(--primary); color: #fff; border: none; border-radius: 14px; padding: 14px 28px; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 800; cursor: pointer; transition: .15s; box-shadow: 0 6px 20px rgba(78,162,253,.35); }
     .btn-next-week:hover { background: #3b8cd9; transform: translateY(-2px); }
 
     /* Order summary modal */
-    .modal-overlay  { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay  { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: flex-start; justify-content: center; padding: 20px; padding-top: min(8vh, 80px); }
     .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.72); backdrop-filter: blur(3px); }
-    .modal-card { position: relative; z-index: 1; background: var(--cream); border-radius: 24px; width: 100%; max-width: 440px; box-shadow: 0 32px 80px rgba(0,0,0,.35); overflow: hidden; animation: slideUp .25s cubic-bezier(.34,1.3,.64,1); max-height: 90vh; overflow-y: auto; }
+    .modal-card { position: relative; z-index: 1; background: var(--cream); border-radius: 24px; width: 100%; max-width: 480px; box-shadow: 0 32px 80px rgba(0,0,0,.35); overflow: hidden; animation: slideUp .25s cubic-bezier(.34,1.3,.64,1); max-height: 90vh; overflow-y: auto; }
     @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .modal-close { position: absolute; top: 12px; right: 14px; border: none; background: rgba(0,70,94,.1); color: var(--dark); width: 30px; height: 30px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; }
     .modal-close:hover { background: rgba(0,70,94,.2); }
-    .modal-header   { padding: 22px 22px 14px; }
-    .modal-title    { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--dark); }
-    .modal-delivery { font-size: .82rem; color: #7b8c9f; margin-top: 3px; }
-    .modal-white-box { background: #fff; margin: 0 14px 14px; border-radius: 16px; padding: 14px 16px; box-shadow: 0 3px 12px rgba(0,0,0,.06); }
+    .modal-header   { padding: 26px 26px 14px; }
+    .modal-title    { font-family: 'DM Sans', sans-serif; font-size: 1.6rem; font-weight: 900; color: var(--dark); letter-spacing: -.3px; }
+    .modal-delivery { font-size: .82rem; color: #7b8c9f; margin-top: 4px; }
+    .modal-white-box { background: #fff; margin: 0 18px 14px; border-radius: 16px; padding: 16px 18px; box-shadow: 0 3px 12px rgba(0,0,0,.06); }
     .modal-row { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(0,70,94,.06); }
     .modal-row:last-child { border-bottom: none; }
     .modal-thumb { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; background: #eee; }
@@ -359,14 +366,14 @@
     .modal-meal-price { font-size: .9rem; font-weight: 800; color: var(--dark); }
     .modal-subtotals  { padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
     .modal-subtotal-row { display: flex; justify-content: space-between; font-size: .85rem; }
-    .modal-your-total { padding: 14px 22px 4px; display: flex; justify-content: space-between; align-items: baseline; }
+    .modal-your-total { padding: 16px 26px 6px; display: flex; justify-content: space-between; align-items: baseline; }
     .modal-total-label { font-size: 1rem; font-weight: 800; color: var(--dark); }
     .modal-total-amt   { font-size: 1.5rem; font-weight: 900; color: var(--dark); }
-    .modal-pay-wrap    { padding: 8px 22px 0; }
+    .modal-pay-wrap    { padding: 10px 26px 0; }
     .btn-pay { width: 100%; padding: 16px; background: var(--dark); color: #fff; border: none; border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: 1.05rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 20px rgba(0,70,94,.3); transition: .15s; }
     .btn-pay:hover { transform: translateY(-2px); }
     .btn-pay:disabled { background: #c5d0d8; cursor: not-allowed; transform: none; box-shadow: none; }
-    .modal-benefit { margin: 14px 22px 4px; background: #eaf7ef; border-radius: 12px; padding: 12px 14px; }
+    .modal-benefit { margin: 16px 26px 22px; background: #eaf7ef; border-radius: 12px; padding: 14px 16px; }
     .modal-benefit-label { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--green); margin-bottom: 7px; }
     .benefit-row { display: flex; justify-content: space-between; font-size: .82rem; padding: 3px 0; }
     .modal-proto-note { padding: 10px 22px 18px; font-size: .7rem; color: #bbb; text-align: center; }
@@ -376,7 +383,7 @@
     .thankyou-card { background: #fff; border-radius: 28px; padding: 40px 36px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 24px 60px rgba(0,70,94,.12); }
     .thankyou-icon { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #2ecc71); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px; box-shadow: 0 12px 32px rgba(39,174,96,.3); animation: bounceIn .5s cubic-bezier(.34,1.56,.64,1); }
     @keyframes bounceIn { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .thankyou-title { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--dark); margin-bottom: 8px; }
+    .thankyou-title { font-family: 'DM Sans', sans-serif; font-size: 2rem; color: var(--dark); margin-bottom: 8px; }
     .thankyou-sub { font-size: .95rem; color: #50657a; line-height: 1.5; margin-bottom: 24px; }
     .thankyou-detail { background: #f8fafc; border-radius: 14px; padding: 16px 20px; text-align: left; margin-bottom: 24px; }
     .thankyou-row { display: flex; justify-content: space-between; font-size: .85rem; padding: 4px 0; }
@@ -395,7 +402,7 @@
     .pay-sim-card { background: #fff; border-radius: 24px; width: 100%; max-width: 400px; padding: 28px 28px 22px; box-shadow: 0 40px 100px rgba(0,0,0,.45); }
     .pay-sim-back { background: none; border: none; color: #9aabb8; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 700; cursor: pointer; padding: 0; margin-bottom: 22px; display: block; }
     .pay-sim-back:hover { color: var(--dark); }
-    .pay-sim-brand { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--dark); margin-bottom: 18px; }
+    .pay-sim-brand { font-family: 'DM Sans', sans-serif; font-size: 1.05rem; color: var(--dark); margin-bottom: 18px; }
     .pay-sim-brand span { color: var(--primary); }
     .pay-sim-amount { font-size: 2.6rem; font-weight: 900; color: var(--dark); line-height: 1; }
     .pay-sim-desc { font-size: .82rem; color: #7b8c9f; margin: 4px 0 22px; }
@@ -556,9 +563,9 @@
   <div class="auth-bg">
     <div class="auth-bg-top"><div class="auth-bg-dots"></div>
       <div class="auth-brand">
-        <div class="auth-logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
-        <div class="auth-wordmark">BetterDay</div>
-        <div class="auth-tagline">for work</div>
+        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:36px;">
+        <div class="auth-wordmark" style="display:none;"></div>
+        <div class="auth-tagline">FOR WORK</div>
       </div>
     </div>
     <div class="auth-bg-bottom"></div>
@@ -571,7 +578,7 @@
         <div class="field-group">
           <label>Company Code</label>
           <div class="code-field-wrap">
-            <input type="text" id="companyCodeInput" placeholder="e.g. BROCK" autocomplete="off"
+            <input type="text" id="companyCodeInput" placeholder="Enter here" autocomplete="off"
               oninput="previewCompanyCode(this)" onkeydown="if(event.key==='Enter')doCompanyNext()">
             <span class="code-check" id="companyCodeCheck"></span>
           </div>
@@ -592,9 +599,9 @@
   <div class="auth-bg">
     <div class="auth-bg-top"><div class="auth-bg-dots"></div>
       <div class="auth-brand">
-        <div class="auth-logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
-        <div class="auth-wordmark">BetterDay</div>
-        <div class="auth-tagline">for work</div>
+        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:36px;">
+        <div class="auth-wordmark" style="display:none;"></div>
+        <div class="auth-tagline">FOR WORK</div>
       </div>
     </div>
     <div class="auth-bg-bottom"></div>
@@ -634,9 +641,9 @@
   <div class="auth-bg">
     <div class="auth-bg-top"><div class="auth-bg-dots"></div>
       <div class="auth-brand">
-        <div class="auth-logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
-        <div class="auth-wordmark">BetterDay</div>
-        <div class="auth-tagline">for work</div>
+        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:30px;">
+        <div class="auth-wordmark" style="display:none;"></div>
+        <div class="auth-tagline">FOR WORK</div>
       </div>
     </div>
     <div class="auth-bg-bottom"></div>
@@ -756,16 +763,16 @@
 <div id="sMenu" class="screen">
   <div class="menu-shell">
     <div class="menu-topbar">
-      <div class="menu-topbar-brand" style="display:flex;align-items:center;gap:8px;">
-        <img src="/static/Logo.svg" alt="BetterDay" style="height:26px;filter:brightness(0) invert(1);display:block;">
-        <span style="font-size:.72rem;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:.5px;font-family:'DM Sans',sans-serif;">for Work</span>
+      <div class="menu-topbar-brand" style="display:flex;align-items:center;gap:10px;">
+        <img src="/static/Cream%20Logo.png" alt="BetterDay" style="height:32px;display:block;">
+        <span class="for-work-label" style="font-size:.55rem;font-weight:400;text-transform:uppercase;letter-spacing:2px;color:rgba(250,235,218,.45);">For Work</span>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-left:auto;">
         <div class="next-price-chip">Next meal: <strong id="nextMealPrice">—</strong></div>
         <div class="user-chip" onclick="openProfile()">
           <div class="user-avatar" id="userAvatar">?</div>
           <div class="user-name" id="userName">—</div>
-          <span style="font-size:.7rem;color:rgba(255,255,255,.4);margin-left:2px;">↗</span>
+          <span class="arrow-icon" style="font-size:.7rem;color:rgba(255,255,255,.4);margin-left:2px;">↗</span>
         </div>
       </div>
     </div>
@@ -803,18 +810,15 @@
         <div class="mcs-total-row"><span>Your Total</span><span id="mcsTotal">$0.00</span></div>
         <button class="mcs-checkout-btn" onclick="closeMobCart();openSummary()">Review Order →</button>
       </div>
-      <div class="mob-cart-toggle" onclick="toggleMobCart()">
-        <div class="mob-toggle-left">
+      <div class="mob-cart-toggle">
+        <div class="mob-toggle-left" onclick="toggleMobCart()">
           <span class="mob-cart-badge" id="mobCartBadge">0</span>
-          <div>
-            <div class="mob-toggle-label">View Cart</div>
-            <div class="mob-cart-hint" id="mobCartHint">Tap to expand</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;">
-          <span class="mob-cart-total-label" id="mobCartTotalLabel">$0.00</span>
+          <span class="mob-toggle-label">View Cart</span>
           <span class="mob-cart-chevron" id="mobCartChevron">↑</span>
+          <span class="mob-cart-hint" id="mobCartHint">Tap to expand</span>
         </div>
+        <span class="mob-cart-total-label" id="mobCartTotalLabel">$0.00</span>
+        <button class="mob-review-btn" id="mobReviewBtn" onclick="closeMobCart();openSummary()">Review Order →</button>
       </div>
     </div>
   </div>
@@ -830,7 +834,7 @@
       <div class="thankyou-title">You're all set!</div>
       <div class="thankyou-sub">Your order is confirmed. We'll have it in the fridge by lunchtime on delivery day.</div>
       <div class="thankyou-detail" id="tyDetail"></div>
-      <p style="font-size:.8rem;color:#aab4be;margin-bottom:20px;line-height:1.5;">In the full build your card will be charged via Stripe and you'll get a confirmation email.</p>
+      <p style="font-size:.8rem;color:#aab4be;margin-bottom:20px;line-height:1.5;">Your meals will be ready at your office fridge on delivery day.</p>
       <button class="btn-back" onclick="goBackToMenu()">← Order for another week</button>
     </div>
   </div>
@@ -903,35 +907,20 @@
     <div class="pay-sim-brand">better<span>day</span> checkout</div>
     <div class="pay-sim-amount" id="paySimAmount">$0.00</div>
     <div class="pay-sim-desc" id="paySimDesc"></div>
-    <div class="pay-sim-field">
-      <label class="pay-sim-label">Card number</label>
-      <input class="pay-sim-input" id="paySimCard" type="text" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" value="4242 4242 4242 4242" autocomplete="cc-number">
-    </div>
-    <div class="pay-sim-row2">
-      <div class="pay-sim-field">
-        <label class="pay-sim-label">Expiry</label>
-        <input class="pay-sim-input" id="paySimExpiry" type="text" inputmode="numeric" maxlength="5" placeholder="MM/YY" value="12/28" autocomplete="cc-exp">
-      </div>
-      <div class="pay-sim-field">
-        <label class="pay-sim-label">CVC</label>
-        <input class="pay-sim-input" id="paySimCvc" type="text" inputmode="numeric" maxlength="3" placeholder="123" value="123" autocomplete="cc-csc">
-      </div>
-    </div>
-    <div class="pay-sim-field">
-      <label class="pay-sim-label">Cardholder name</label>
-      <input class="pay-sim-input" id="paySimName" type="text" placeholder="Jane Smith" autocomplete="cc-name">
-    </div>
-    <button class="pay-sim-btn" id="paySimBtn" onclick="submitPayment()">Pay $0.00</button>
+    <!-- HelcimPay.js renders its iframe here -->
+    <div id="helcimPayContainer"></div>
     <div class="pay-sim-processing hidden" id="paySimProcessing">
       <div class="pay-sim-spinner"></div>
-      <div class="pay-sim-proc-text">Processing payment…</div>
+      <div class="pay-sim-proc-text" id="paySimProcText">Initializing secure payment…</div>
     </div>
     <div class="pay-sim-footer">
-      <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="6.5" fill="#635BFF"/><path d="M5.4 9L3.2 6.8l.75-.75L5.4 7.5l3.65-3.65.75.75L5.4 9Z" fill="#fff"/></svg>
-      Powered by <strong>Stripe</strong> &nbsp;·&nbsp; 256-bit SSL
+      <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="6.5" fill="#7C6EF6"/><path d="M5.4 9L3.2 6.8l.75-.75L5.4 7.5l3.65-3.65.75.75L5.4 9Z" fill="#fff"/></svg>
+      Powered by <strong style="color:#7C6EF6">Helcim</strong> &nbsp;·&nbsp; 256-bit SSL &nbsp;·&nbsp; PCI Compliant
     </div>
   </div>
 </div>
+<!-- HelcimPay.js SDK -->
+<script src="https://secure.helcim.app/helcim-pay/services/start.js" type="text/javascript"></script>
 
 <!-- ══════════════════════════════════════════
      ORDER INVOICE MODAL  (profile — view order)
@@ -1011,7 +1000,6 @@
       <div class="modal-benefit-label">🎁 Your Benefit This Week</div>
       <div id="benefitRows"></div>
     </div>
-    <div class="modal-proto-note">Prototype — real build connects to Stripe for payment</div>
   </div>
 </div>
 
@@ -1623,14 +1611,15 @@ function setupMenu() {
 }
 
 function buildPricingBanner() {
-  const c=currentCompany; let tiers=[];
-  const free=parseInt(c.FreeMealsPerWeek)||0, t1=parseInt(c.Tier1_Meals)||0, t2=parseInt(c.Tier2_Meals)||0, t3=parseInt(c.Tier3_Meals)||0, fp=parseFloat(c.FullPrice)||16.99;
+  const src=_getPricingSource(); const c=currentCompany; let tiers=[];
+  const free=parseInt(src.FreeMealsPerWeek)||0, t1=parseInt(src.Tier1_Meals)||0, t2=parseInt(src.Tier2_Meals)||0, t3=parseInt(src.Tier3_Meals)||0, fp=parseFloat(src.FullPrice||c.FullPrice)||16.99;
   if(free>0) tiers.push({range:`Meals 1–${free}`, price:'FREE', green:true});
   let cur=free;
-  if(t1>0){tiers.push({range:`Meals ${cur+1}–${cur+t1}`, price:`$${parseFloat(c.Tier1_EmployeePrice).toFixed(2)}`});cur+=t1;}
-  if(t2>0){tiers.push({range:`Meals ${cur+1}–${cur+t2}`, price:`$${parseFloat(c.Tier2_EmployeePrice).toFixed(2)}`});cur+=t2;}
-  if(t3>0){tiers.push({range:`Meals ${cur+1}–${cur+t3}`, price:`$${parseFloat(c.Tier3_EmployeePrice).toFixed(2)}`});cur+=t3;}
-  if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) tiers.push({range:'Additional', price:`$${fp.toFixed(2)}`});
+  if(t1>0){tiers.push({range:`Meals ${cur+1}–${cur+t1}`, price:`$${parseFloat(src.Tier1_EmployeePrice).toFixed(2)}`});cur+=t1;}
+  if(t2>0){tiers.push({range:`Meals ${cur+1}–${cur+t2}`, price:`$${parseFloat(src.Tier2_EmployeePrice).toFixed(2)}`});cur+=t2;}
+  if(t3>0){tiers.push({range:`Meals ${cur+1}–${cur+t3}`, price:`$${parseFloat(src.Tier3_EmployeePrice).toFixed(2)}`});cur+=t3;}
+  const allowExtra = String(src.AllowExtraAtFullPrice||c.AllowExtraAtFullPrice||'').toUpperCase()==='TRUE';
+  if(allowExtra) tiers.push({range:'Additional', price:`$${fp.toFixed(2)}`});
   const tiersHtml = tiers.map((t,i)=>
     (i>0?'<span class="pricing-vsep"></span>':'')+
     `<span class="pricing-tier">`+
@@ -1638,9 +1627,11 @@ function buildPricingBanner() {
       `<span class="pricing-tier-price"${t.green?' style="color:#4cd97b"':''}>${t.price}</span>`+
     `</span>`
   ).join('');
+  const levelLabel = (String(c.EnableEmployeeLevels||'').toUpperCase()==='TRUE' && currentEmployee && currentEmployee.benefitLevel && currentEmployee.benefitLevel !== 'General')
+    ? currentEmployee.benefitLevel + ' Plan' : 'Employer Subsidy Plan';
   document.getElementById('pricingBannerInner').innerHTML=
     `<div class="pricing-company-block">`+
-      `<span class="pricing-plan-label">Employer Subsidy Plan</span>`+
+      `<span class="pricing-plan-label">${levelLabel}</span>`+
       `<span class="pricing-company">${c.CompanyName}</span>`+
     `</div>`+
     `<span class="pricing-vsep" style="height:30px;margin:0 14px"></span>`+
@@ -1666,6 +1657,11 @@ function buildWeekTabs() {
 
 async function switchWeek(i) { activeWeekIndex=i; buildWeekTabs(); buildPricingBanner(); renderWeek(i); document.getElementById('nextMealPrice').textContent=getNextPriceLabel(i); }
 
+function refreshMenu(index) {
+  var anchor = weeks[index]?.sundayAnchor;
+  if (anchor) delete menuCache[anchor];
+  renderWeek(index);
+}
 
 async function renderWeek(index) {
   const w=weeks[index], inner=document.getElementById('menuInner');
@@ -1680,11 +1676,16 @@ async function renderWeek(index) {
   }
   let menu=menuCache[w.sundayAnchor];
   if (!menu) {
-    try { menu=await apiFetch({action:'get_menu',sunday_anchor:w.sundayAnchor}); menuCache[w.sundayAnchor]=menu; }
-    catch(e) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">😕</div><div class="closed-title">Couldn't load menu</div></div>`; return; }
+    inner.innerHTML=`<div class="closed-overlay"><div style="width:36px;height:36px;border:4px solid rgba(0,70,94,.12);border-top-color:#4ea2fd;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><div class="closed-title" style="font-size:1rem;">Loading menu\u2026</div></div>`;
+    // Try up to 2 times with increasing timeout
+    for (let attempt=0; attempt<2; attempt++) {
+      try { menu=await apiFetch({action:'get_menu',sunday_anchor:w.sundayAnchor}); menuCache[w.sundayAnchor]=menu; break; }
+      catch(e) { if(attempt===0) await new Promise(r=>setTimeout(r,2000)); }
+    }
+    if (!menu) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">😕</div><div class="closed-title">Couldn't load menu</div><div class="closed-sub">Connection may be slow.</div><button onclick="refreshMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Try again</button></div>`; return; }
   }
   const meat=menu.meat||[], veg=menu.vegan||[];
-  if (!meat.length&&!veg.length) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">Check back soon!</div></div>`; return; }
+  if (!meat.length&&!veg.length) { inner.innerHTML=`<div class="closed-overlay"><div class="closed-icon">🗓️</div><div class="closed-title">Menu not set yet</div><div class="closed-sub">Check back soon — the menu for this week hasn't been published.</div><button onclick="refreshMenu(${index})" style="margin-top:14px;padding:10px 24px;background:#00465E;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:.85rem;cursor:pointer;font-family:DM Sans,sans-serif;">Refresh</button></div>`; return; }
   const hasBoth = meat.length>0 && veg.length>0;
   const slot = document.getElementById('pricingToggleSlot');
   if (slot) slot.innerHTML = hasBoth
@@ -1709,7 +1710,7 @@ function mealCardHTML(item, weekIndex) {
   if (item.cal||item.protein) {
     macros='<div class="macros-row" style="margin-bottom:2px;">';
     if(item.cal)     macros+=`<span class="macro-chip cal">${Math.round(item.cal)} cal</span>`;
-    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g protein</span>`;
+    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g pro</span>`;
     macros+='</div>';
   }
   const desc=item.description?`<div class="meal-desc">${item.description}</div>`:'';
@@ -1735,7 +1736,7 @@ function openInfoModal(item) {
   let macros='';
   if(item.cal||item.protein||item.carbs||item.fat){
     if(item.cal)     macros+=`<span class="macro-chip cal">${Math.round(item.cal)} cal</span>`;
-    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g protein</span>`;
+    if(item.protein) macros+=`<span class="macro-chip pro">${Math.round(item.protein)}g pro</span>`;
     if(item.carbs)   macros+=`<span class="macro-chip carb">${Math.round(item.carbs)}g carb</span>`;
     if(item.fat)     macros+=`<span class="macro-chip fat">${Math.round(item.fat)}g fat</span>`;
   }
@@ -1769,16 +1770,31 @@ function filterCategory(cat) {
 function closeInfoModal() { document.getElementById('infoModalOverlay')?.remove(); }
 
 // ══════════════════════════════════════════
-// TIER PRICING
+// TIER PRICING — supports employee benefit levels
 // ══════════════════════════════════════════
+// Returns the pricing source for the current employee.
+// If EnableEmployeeLevels is TRUE and benefitLevels exist, uses the employee's level.
+// Otherwise falls back to the company-wide tier structure.
+function _getPricingSource() {
+  const c = currentCompany;
+  if (!c) return c;
+  if (String(c.EnableEmployeeLevels || '').toUpperCase() === 'TRUE' && c.benefitLevels && c.benefitLevels.length > 0) {
+    const empLevel = (currentEmployee && currentEmployee.benefitLevel) || 'General';
+    const match = c.benefitLevels.find(l => String(l.LevelName || '').trim().toLowerCase() === empLevel.toLowerCase());
+    if (match) return match;
+  }
+  return c;
+}
+
 function getTierForPosition(weekIndex, pos) {
-  const c=currentCompany; if(!c) return null;
-  const free=parseInt(c.FreeMealsPerWeek)||0, t1=parseInt(c.Tier1_Meals)||0, t2=parseInt(c.Tier2_Meals)||0, t3=parseInt(c.Tier3_Meals)||0;
+  const src = _getPricingSource(); if(!src) return null;
+  const free=parseInt(src.FreeMealsPerWeek)||0, t1=parseInt(src.Tier1_Meals)||0, t2=parseInt(src.Tier2_Meals)||0, t3=parseInt(src.Tier3_Meals)||0;
   if(pos<free)          return {tier:'free', price:0};
-  if(pos<free+t1)       return {tier:'tier1',price:parseFloat(c.Tier1_EmployeePrice)||0};
-  if(pos<free+t1+t2)    return {tier:'tier2',price:parseFloat(c.Tier2_EmployeePrice)||0};
-  if(pos<free+t1+t2+t3) return {tier:'tier3',price:parseFloat(c.Tier3_EmployeePrice)||0};
-  if(c.AllowExtraAtFullPrice==='TRUE'||c.AllowExtraAtFullPrice===true) return {tier:'full',price:parseFloat(c.FullPrice)||16.99};
+  if(pos<free+t1)       return {tier:'tier1',price:parseFloat(src.Tier1_EmployeePrice)||0};
+  if(pos<free+t1+t2)    return {tier:'tier2',price:parseFloat(src.Tier2_EmployeePrice)||0};
+  if(pos<free+t1+t2+t3) return {tier:'tier3',price:parseFloat(src.Tier3_EmployeePrice)||0};
+  const fp = parseFloat(src.FullPrice || currentCompany.FullPrice) || 16.99;
+  if(String(src.AllowExtraAtFullPrice||currentCompany.AllowExtraAtFullPrice||'').toUpperCase()==='TRUE') return {tier:'full',price:fp};
   return null;
 }
 function getTierForNextItem(wi) {
@@ -1792,13 +1808,13 @@ function recomputeTiers(wi) {
   cart.filter(i=>i.weekIndex===wi).forEach((item,idx)=>{const t=getTierForPosition(wi,offset+idx);if(t){item.tier=t.tier;item.price=t.price;}});
 }
 function getNextPriceLabel(wi) { const t=getTierForNextItem(wi); if(!t) return 'Max'; return t.tier==='free'?'FREE 🎉':'$'+t.price.toFixed(2); }
-// Returns {co, bd} subsidy split for a cart item using per-tier company columns.
-// Falls back to full remainder → company if columns not yet populated.
+// Returns {co, bd} subsidy split for a cart item using per-tier columns.
 function getCoverage(item) {
-  const c=currentCompany, fp=parseFloat(c.FullPrice)||16.99;
+  const src = _getPricingSource();
+  const fp = parseFloat(src.FullPrice || currentCompany.FullPrice) || 16.99;
   const pfx = item.tier==='free'?'FreeTier':item.tier==='tier1'?'Tier1':item.tier==='tier2'?'Tier2':item.tier==='tier3'?'Tier3':null;
   if (pfx) {
-    const co=parseFloat(c[pfx+'_CompanySubsidy']), bd=parseFloat(c[pfx+'_BDSubsidy']);
+    const co=parseFloat(src[pfx+'_CompanySubsidy']), bd=parseFloat(src[pfx+'_BDSubsidy']);
     if (!isNaN(co) && !isNaN(bd)) return {co, bd};
   }
   return {co: fp-item.price, bd: 0};
@@ -1862,8 +1878,20 @@ function buildCartItemRows(ic, tc, nc, mc, pc) {
     const rows=Object.values(byWeek[wi]).map(({meal,entries})=>{
       const lt=entries.reduce((s,e)=>s+e.price,0);
       const priceHtml=lt===0?`<span style="color:var(--green);font-weight:800">FREE</span>`:'$'+lt.toFixed(2);
-      const meta=entries.length+'× '+entries.map(e=>e.tier==='free'?'FREE':'$'+e.price.toFixed(2)).join('+');
-      return `<div class="${ic}"><div class="${tc}"><img src="${meal?.image||''}" referrerpolicy="no-referrer" onerror="this.style.display='none'"></div><div style="flex:1;min-width:0"><div class="${nc}">${meal?.name||'Meal'}</div><div class="${mc}">${meta}</div></div><div class="${pc}">${priceHtml}</div></div>`;
+      // Group entries by price tier for clean display: "1 Free · 2 × $1.99"
+      const tierGroups={};
+      entries.forEach(e=>{
+        const label=e.tier==='free'?'Free':'$'+e.price.toFixed(2);
+        tierGroups[label]=(tierGroups[label]||0)+1;
+      });
+      const meta=Object.entries(tierGroups).map(([label,count])=>{
+        const countHtml=`<strong>${count}</strong>`;
+        return label==='Free'?`${countHtml} Free`:`${countHtml} × ${label}`;
+      }).join(' · ');
+      const qty=entries.length;
+      const mj=JSON.stringify(meal).replace(/"/g,'&quot;');
+      const qtyCtrl=`<div class="cart-qty-pill"><button class="cart-qty-btn" onclick="event.stopPropagation();removeMeal('${entries[0].mealId}',${entries[0].weekIndex})">−</button><span class="cart-qty-val">${qty}</span><button class="cart-qty-btn" onclick="event.stopPropagation();addMeal('${entries[0].mealId}',${entries[0].weekIndex},${mj})">+</button></div>`;
+      return `<div class="${ic}"><div class="${tc}"><img src="${meal?.image||''}" referrerpolicy="no-referrer" onerror="this.style.display='none'"></div><div style="flex:1;min-width:0"><div class="${nc}">${meal?.name||'Meal'}</div><div class="${mc}">${meta}</div></div>${qtyCtrl}<div class="${pc}">${priceHtml}</div></div>`;
     }).join('');
     return header+rows;
   }).join('');
@@ -1972,38 +2000,102 @@ async function doCheckout() {
   await _executeCheckout();
 }
 
-function openPaymentModal(total) {
-  const c = currentCompany, emp = currentEmployee;
-  const deliveries = [...new Set(cart.map(i => weeks[i.weekIndex]?.deliveryShort))].join(', ');
-  document.getElementById('paySimAmount').textContent = '$' + total.toFixed(2);
-  document.getElementById('paySimDesc').textContent = cart.length + ' meal' + (cart.length !== 1 ? 's' : '') + ' · Delivery ' + deliveries;
-  document.getElementById('paySimBtn').textContent = 'Pay $' + total.toFixed(2);
-  document.getElementById('paySimBtn').disabled = false;
-  document.getElementById('paySimName').value = emp ? `${emp.firstName} ${emp.lastName}` : '';
-  document.getElementById('paySimProcessing').classList.add('hidden');
-  document.getElementById('paymentModal').classList.remove('hidden');
+var _helcimCheckoutToken = '';
+var _lastHelcimTxnId = '';
+
+async function openPaymentModal(total) {
+  const emp = currentEmployee;
+
+  // Show loading overlay while payment processor initializes
+  var overlay = document.getElementById('checkoutOverlay');
+  overlay.querySelector('.checkout-overlay-label').textContent = 'Connecting to payment processor\u2026';
+  overlay.querySelector('.checkout-overlay-sub').textContent = '$' + total.toFixed(2) + ' \u00b7 Secure checkout by Helcim';
+  overlay.classList.remove('hidden');
+
+  // Initialize checkout session via Flask backend
+  try {
+    const resp = await fetch('/api/helcim/checkout', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        amount: total,
+        order_id: 'BD-' + Date.now()
+      })
+    });
+    const data = await resp.json();
+    if (data.checkoutToken) {
+      _helcimCheckoutToken = data.checkoutToken;
+      // Check if Helcim script loaded
+      if (typeof appendHelcimPayIframe === 'undefined') {
+        throw new Error('Helcim payment script not loaded');
+      }
+      // Update message while iframe loads
+      overlay.querySelector('.checkout-overlay-label').textContent = 'Loading secure payment form\u2026';
+      // Helcim renders its own full-page modal overlay
+      appendHelcimPayIframe(_helcimCheckoutToken);
+      // Hide our overlay once Helcim's iframe appears (poll for it)
+      var _pollCount = 0;
+      var _pollTimer = setInterval(function() {
+        _pollCount++;
+        if (document.querySelector('.helcim-pay-iframe-wrapper, iframe[src*="helcim"]') || _pollCount > 30) {
+          overlay.classList.add('hidden');
+          overlay.querySelector('.checkout-overlay-label').textContent = 'Placing your order\u2026';
+          overlay.querySelector('.checkout-overlay-sub').textContent = "Please don't close this page";
+          clearInterval(_pollTimer);
+        }
+      }, 200);
+    } else {
+      throw new Error(data.error || 'Failed to initialize');
+    }
+  } catch(e) {
+    console.error('Helcim init failed:', e);
+    overlay.classList.add('hidden');
+    overlay.querySelector('.checkout-overlay-label').textContent = 'Placing your order\u2026';
+    overlay.querySelector('.checkout-overlay-sub').textContent = "Please don't close this page";
+    showToast('Payment error: ' + (e.message || 'unavailable'));
+    _checkoutInProgress = false;
+    const btn = document.getElementById('payBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
+    document.getElementById('summaryModal').classList.remove('hidden');
+  }
 }
 
+// Listen for HelcimPay.js payment result
+window.addEventListener('message', function(event) {
+  if (!_helcimCheckoutToken) return;
+  var key = 'helcim-pay-js-' + _helcimCheckoutToken;
+  if (event.data && event.data.eventName === key) {
+    if (event.data.eventStatus === 'SUCCESS') {
+      console.log('Payment successful:', event.data.eventMessage);
+      // Extract transaction ID from Helcim response
+      var txnData = {};
+      try { txnData = typeof event.data.eventMessage === 'string' ? JSON.parse(event.data.eventMessage) : (event.data.eventMessage || {}); } catch(e) {}
+      _lastHelcimTxnId = txnData.transactionId || txnData.id || '';
+      console.log('Helcim transaction ID:', _lastHelcimTxnId);
+      _helcimCheckoutToken = '';
+      // Remove Helcim's iframe overlay so the page is clickable again
+      if (typeof removeHelcimPayIframe === 'function') removeHelcimPayIframe();
+      _executeCheckout();
+    } else if (event.data.eventStatus === 'ABORTED') {
+      console.warn('Payment aborted:', event.data.eventMessage);
+      if (typeof removeHelcimPayIframe === 'function') removeHelcimPayIframe();
+      showToast('Payment was cancelled');
+      closePaymentModal();
+    }
+  }
+});
+
 function closePaymentModal() {
-  document.getElementById('paymentModal').classList.add('hidden');
+  _helcimCheckoutToken = '';
   _checkoutInProgress = false;
   const btn = document.getElementById('payBtn');
   if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
   document.getElementById('summaryModal').classList.remove('hidden');
 }
 
-async function submitPayment() {
-  const btn = document.getElementById('paySimBtn');
-  btn.disabled = true;
-  document.getElementById('paySimProcessing').classList.remove('hidden');
-  await new Promise(r => setTimeout(r, 1800));
-  document.getElementById('paymentModal').classList.add('hidden');
-  await _executeCheckout();
-}
-
 async function _executeCheckout() {
   document.getElementById('checkoutOverlay').classList.remove('hidden');
-
+  try {
   const c=currentCompany, emp=currentEmployee;
   const total=cart.reduce((s,i)=>s+i.price,0), fp=parseFloat(c.FullPrice)||16.99, savings=cart.length*fp-total;
   const bdPerMeal = parseFloat(c.BDCoveragePerMeal) || 0;
@@ -2032,7 +2124,10 @@ async function _executeCheckout() {
       employee_name:`${emp.firstName} ${emp.lastName}`, employee_email:emp.email,
       meal_id:item.mealId, dish_name:item.meal?.name||'',
       diet_type:item.meal?.diet||'', tier:item.tier, employee_price:item.price,
-      company_coverage:getCoverage(item).co.toFixed(2), bd_coverage:getCoverage(item).bd.toFixed(2)
+      company_coverage:getCoverage(item).co.toFixed(2), bd_coverage:getCoverage(item).bd.toFixed(2),
+      employee_level: (emp.benefitLevel || 'General'),
+      payment_transaction_id: _lastHelcimTxnId || '',
+      status: total > 0 ? 'paid' : 'confirmed'
     }).catch(e => { console.error('Order submit error:', e); return {success:false}; });
   });
 
@@ -2041,6 +2136,7 @@ async function _executeCheckout() {
 
   document.getElementById('checkoutOverlay').classList.add('hidden');
   _checkoutInProgress = false;
+  _lastHelcimTxnId = '';
 
   const byWeek={}; cartSnapshot.forEach(i=>{if(!byWeek[i.weekIndex])byWeek[i.weekIndex]=[];byWeek[i.weekIndex].push(i);});
   let dh=`<div class="thankyou-row"><span>Name</span><span>${emp.firstName} ${emp.lastName}</span></div>`;
@@ -2058,7 +2154,20 @@ async function _executeCheckout() {
     const anchor = weeks[i.weekIndex]?.sundayAnchor;
     if (anchor) existingOrderCounts[anchor] = (existingOrderCounts[anchor] || 0) + 1;
   });
-  cart=[]; goTo('sThankYou');
+  cart=[];
+  _checkoutInProgress = false;
+  const payBtn2 = document.getElementById('payBtn');
+  if (payBtn2) { payBtn2.disabled = false; payBtn2.textContent = 'Place Order'; }
+  goTo('sThankYou');
+  } catch(err) {
+    console.error('Checkout error:', err);
+    document.getElementById('checkoutOverlay').classList.add('hidden');
+    _checkoutInProgress = false;
+    const btn = document.getElementById('payBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Place Order'; }
+    showToast('Order failed: ' + (err.message || 'unknown error'));
+    document.getElementById('summaryModal').classList.remove('hidden');
+  }
 }
 
 function goBackToMenu() { computeWeeks(); setupMenu(); goTo('sMenu'); }

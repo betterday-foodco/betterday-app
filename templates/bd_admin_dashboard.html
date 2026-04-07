@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BetterDay Admin — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scrollbar-gutter:stable}
+body{font-family:'DM Sans',sans-serif;background:#FAEBDA;color:#012030;min-height:100vh;display:flex;overflow-y:scroll}
+
+/* ════════ SIDEBAR ════════ */
+.sb{width:218px;background:#003141;position:fixed;top:0;left:0;bottom:0;z-index:10;display:flex;flex-direction:column;padding-top:20px;transition:transform .25s}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px}
+.sb-logo img{height:20px}
+.sb-logo-circle{width:36px;height:36px;background:#FFC600;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#003141}
+.sb-logo-text{font-size:13px;font-weight:700;color:#FAEBDA}
+.sb-sec{font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:rgba(250,235,218,.35);padding:14px 20px 5px}
+.sb-div{height:1px;background:rgba(255,255,255,.07);margin:8px 20px}
+.ni{display:flex;align-items:center;gap:9px;padding:10px 20px;font-size:.82rem;font-weight:600;color:rgba(250,235,218,.65);cursor:pointer;border-left:3px solid transparent;transition:.12s;text-decoration:none}
+.ni:hover{color:#FAEBDA;background:rgba(255,255,255,.06)}
+.ni.on{color:#FFC600;background:rgba(253,196,1,.12);border-left-color:#FFC600;font-weight:800}
+.ni .nbdg{font-size:.5rem;font-weight:800;padding:1px 6px;border-radius:99px;margin-left:auto;background:rgba(253,196,1,.18);color:#FFC600}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9}
+@media(max-width:1000px){
+  .sb{transform:translateX(-100%)}
+  .sb.open{transform:translateX(0)}
+  .sb-overlay.open{display:block}
+  .mn{margin-left:0!important}
+}
+
+/* ════════ MAIN ════════ */
+.mn{margin-left:218px;flex:1;min-height:100vh}
+.tb{height:52px;background:#003141;display:flex;align-items:center;padding:0 26px;gap:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.tb-burger{display:none;background:none;border:none;color:#FAEBDA;font-size:1.4rem;cursor:pointer;padding:4px 8px;margin-left:-8px}
+@media(max-width:1000px){.tb-burger{display:block}}
+.tb-title{font-size:.9rem;font-weight:900;color:#FAEBDA;letter-spacing:-.2px}
+.tb-title b{color:#FFC600}
+.tb-pill{font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:rgba(250,235,218,.35);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:99px;padding:2px 8px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.tb-week{font-size:.68rem;font-weight:700;color:#FFC600;background:rgba(253,196,1,.12);border:1px solid rgba(253,196,1,.22);border-radius:99px;padding:4px 12px}
+.tb-week span{color:rgba(255,255,255,.3);margin-right:4px}
+.tb-out{font-size:.68rem;font-weight:700;color:rgba(250,235,218,.4);border:1px solid rgba(250,235,218,.14);border-radius:99px;padding:5px 14px;text-decoration:none;transition:.14s}
+.tb-out:hover{color:#FAEBDA;border-color:rgba(250,235,218,.4)}
+.cont{padding:24px 36px 24px 36px}
+
+/* ════════ SECTION LABELS ════════ */
+.sl{font-size:.54rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sl:first-child{margin-top:0}
+.sl::after{content:'';flex:1;height:1px;background:#E0D4C2}
+
+/* ════════ HERO REVENUE BAR ════════ */
+.hero-rev{background:#003141;border-radius:14px;padding:24px 30px;margin-bottom:14px;box-shadow:0 8px 30px rgba(0,49,65,.15);display:flex;align-items:center;gap:28px}
+.hero-left .hl-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.5);margin-bottom:6px}
+.hero-left .hl-value{font-size:44px;font-weight:800;color:#FFC600;line-height:1}
+.hero-divider{width:1px;height:50px;background:rgba(255,198,0,.2);flex-shrink:0}
+.hero-stats{display:flex;gap:28px}
+.hero-stats .hs-val{font-size:22px;font-weight:800;color:#fff}
+.hero-stats .hs-label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.45)}
+
+/* ════════ STAT CARDS ════════ */
+.card{background:#fff;border-radius:10px;padding:18px 20px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04)}
+.card-gold{background:linear-gradient(135deg,#fffbf0,#fff8e8);border:1px solid rgba(212,160,41,.4)}
+.card-sky{background:linear-gradient(135deg,#e8f3ff,#f0f7ff);border:1px solid rgba(78,162,253,.35)}
+.card-purple{background:linear-gradient(135deg,#f3eeff,#f8f4ff);border:1px solid rgba(200,164,245,.4)}
+.card-green{background:linear-gradient(135deg,#eefbe8,#f4fdf0);border:1px solid rgba(107,189,82,.35)}
+.card-gradient{background:linear-gradient(145deg,#fde0b0 0%,#e0d0ff 32%,#b8dcff 65%,#b8f0d0 100%);border:1px solid rgba(0,49,65,.1)}
+.card-navy{background:#00465E;border:none;color:#fff}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#5a7268;margin-bottom:14px}
+.card-navy .section-label{color:rgba(255,255,255,.7)}
+.stat-value{font-size:30px;font-weight:800;line-height:1.1;color:#003141}
+.stat-value.gold{color:#b8860b}.stat-value.green{color:#167421}.stat-value.white{color:#fff}.stat-value.sky{color:#2d7ec4}.stat-value.purple{color:#7453A2}
+.stat-label{font-size:12px;color:#5a7268;margin-top:4px}
+.card-navy .stat-label{color:rgba(255,255,255,.7)}
+
+/* ════════ GROWTH GRID ════════ */
+.growth-wrap{background:#fff;border-radius:10px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);overflow:hidden;margin-bottom:14px}
+.growth-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(0,49,65,.06)}
+.gc{background:#fff;padding:18px 20px}
+.gc-val{font-size:28px;font-weight:900;color:#003141}
+.gc-val.green{color:#167421}.gc-val.sky{color:#2d7ec4}.gc-val.purple{color:#7453A2}.gc-val.gold{color:#b8860b}
+.gc-label{font-size:11px;color:#4a6d5c;margin-top:3px}
+.gc-sub{font-size:9px;color:#7A8F9C;margin-top:1px}
+
+/* ════════ COMPANY BAR ════════ */
+.company-card{background:#00465E;border-radius:10px;padding:18px 24px;box-shadow:0 4px 20px rgba(0,49,65,.12);margin-bottom:14px}
+.company-grid{display:flex;gap:36px;align-items:center;flex-wrap:wrap}
+.company-name{font-size:22px;font-weight:800;color:#FFC600;letter-spacing:1px}
+.cg-divider{width:1px;height:40px;background:rgba(255,198,0,.2)}
+.cg-val{font-size:18px;font-weight:800;color:#fff}.cg-val.gold{color:#FFC600}
+.cg-label{font-size:10px;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.5px}
+
+/* ════════ FINANCIAL ════════ */
+.fin-section{background:#fff;border-radius:12px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);margin-bottom:14px}
+.fin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px}
+.fin-title{font-size:14px;font-weight:800;color:#003141}
+.fin-links{display:flex;gap:6px;flex-wrap:wrap}
+.fin-link{font-size:11px;font-weight:700;color:#00465E;background:rgba(0,70,94,.06);border:1px solid rgba(0,70,94,.12);border-radius:20px;padding:5px 14px;text-decoration:none;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:5px}
+.fin-link:hover{background:rgba(0,70,94,.12);border-color:rgba(0,70,94,.25)}
+.fin-link.alert{background:rgba(181,107,16,.08);border-color:rgba(181,107,16,.2);color:#B56B10}
+.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.fin-col{padding-right:24px}
+.fin-col+.fin-col{padding-left:24px;padding-right:0;border-left:1px solid rgba(0,49,65,.07)}
+.fin-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,49,65,.05)}
+.fin-row:last-child{border-bottom:none}
+.fin-row-label{font-size:13px;color:#4a6d5c}
+.fin-row-val{font-size:16px;font-weight:800;color:#003141}
+.fin-row-val.gold{color:#b8860b}.fin-row-val.green{color:#167421}.fin-row-val.sky{color:#2d7ec4}.fin-row-val.amber{color:#B56B10}
+.fin-total{border-top:2px solid #003141;margin-top:4px;padding-top:12px;display:flex;justify-content:space-between;align-items:center}
+.fin-total-label{font-size:13px;font-weight:800;color:#003141;text-transform:uppercase;letter-spacing:.3px}
+.fin-total-val{font-size:22px;font-weight:900;color:#003141}
+
+/* ════════ TABLES ════════ */
+.tw{background:#fff;border-radius:10px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);overflow:hidden}
+.tw table{width:100%;border-collapse:collapse}
+.tw thead{background:#F8F3EC}.tw thead tr{border-bottom:1.5px solid #E8DFD2}
+.tw th{text-align:left;padding:10px 14px;font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#00465E;white-space:nowrap}
+.tw td{padding:11px 14px;font-size:.8rem;border-bottom:1px solid rgba(0,49,65,.05);color:#2E4A5A}
+.tw tbody tr:last-child td{border-bottom:none}
+.tn{font-weight:800;color:#003141}.tg{font-weight:700;color:#167421}.ts{font-weight:700;color:#2d7ec4}
+.bdg{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.58rem;font-weight:800}
+.ba{background:#EEFBE8;color:#167421}.bp{background:#FFF3E0;color:#B56B10}.bs{background:#E8F3FF;color:#0066BF}.bd{background:#FDEDEB;color:#c0392b}.bv{background:#f0f0f0;color:#999}
+.pag{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-top:1px solid rgba(0,49,65,.07);font-size:.74rem;color:#7A8F9C}
+.pgb{font-size:.72rem;font-weight:700;color:#00465E;background:none;border:1.5px solid #E8DFD2;border-radius:7px;padding:4px 11px;cursor:pointer}
+.pgb:hover{border-color:#00465E}
+.pgb:disabled{opacity:.35;cursor:default}
+
+/* ════════ SUMMARY BAR ════════ */
+.summary-bar{display:grid;grid-template-columns:repeat(5,1fr);background:#003141;border-radius:14px 14px 0 0;overflow:hidden}
+.sb-cell{padding:14px 18px}
+.sb-cell .sb-label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:4px}
+.sb-cell .sb-val{font-size:20px;font-weight:800;color:#fff}
+.sb-cell.c-navy .sb-label{color:rgba(255,255,255,.5)}.sb-cell.c-yellow .sb-label{color:#FFC600}
+.sb-cell.c-purple .sb-label{color:#C8A4F5}.sb-cell.c-green .sb-label{color:#6BBD52}.sb-cell.c-sky .sb-label{color:#7BC4FF}
+
+/* ════════ CONTROLS ════════ */
+.sech{display:flex;align-items:center;justify-content:space-between;margin:22px 0 13px;gap:8px}
+.sect{font-size:.94rem;font-weight:900;color:#003141;letter-spacing:-.15px}
+.btn-o{font-size:.7rem;font-weight:700;color:#00465E;background:#fff;border:1.5px solid #E8DFD2;border-radius:7px;padding:5px 12px;text-decoration:none;display:inline-block;transition:.12s}
+.btn-o:hover{border-color:#00465E}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.ctrl-input{font-size:.78rem;padding:7px 12px;border:1.5px solid #E8DFD2;border-radius:8px;outline:none;font-family:inherit}
+.ctrl-input:focus{border-color:#00465E}
+.ctrl-select{font-size:.78rem;padding:7px 12px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;font-family:inherit;cursor:pointer}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.section-title{font-size:1rem;font-weight:900;color:#003141}
+
+/* ════════ TAB PANELS ════════ */
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ════════ BADGE ════════ */
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+.badge-active,.badge-paid{background:rgba(22,116,33,.1);color:#167421;border:1px solid rgba(22,116,33,.15)}
+.badge-pending,.badge-sent{background:rgba(181,107,16,.08);color:#B56B10;border:1px solid rgba(181,107,16,.15)}
+
+/* ════════ COMPANY CARDS ════════ */
+.co-card{background:#fff;border-radius:14px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);padding:22px 24px;margin-bottom:12px}
+.co-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.co-card-name{font-size:1.1rem;font-weight:800;color:#003141}
+.co-card-id{font-size:.72rem;color:#7A8F9C;margin-top:2px}
+.co-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.co-mini-box{background:#FAF6F0;border-radius:8px;padding:10px 14px}
+.co-mini-label{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-bottom:3px}
+.co-mini-val{font-size:1.1rem;font-weight:800;color:#003141}
+.co-mini-val.green{color:#167421}.co-mini-val.bd{color:#2d7ec4}
+.co-actions{display:flex;gap:8px}
+.btn-outline{font-size:.72rem;font-weight:700;color:#00465E;border:1.5px solid #E8DFD2;border-radius:8px;padding:6px 14px;background:#fff;cursor:pointer;text-decoration:none;transition:.12s}
+.btn-outline:hover{border-color:#00465E}
+
+/* ════════ INVOICE DETAIL ════════ */
+.inv-detail{display:none}
+.inv-detail td{background:#F8F3EC;padding:0}
+.inv-detail-inner{padding:14px 20px}
+.inv-detail-inner table{width:100%;border-collapse:collapse;margin-bottom:8px}
+.inv-detail-inner th,.inv-detail-inner td{padding:6px 10px;font-size:.75rem;text-align:left}
+
+/* ════════ RESPONSIVE ════════ */
+@media(max-width:1000px){
+  .hero-rev{flex-direction:column;gap:24px;align-items:flex-start}
+  .fin-grid{grid-template-columns:1fr}
+  .fin-col+.fin-col{border-left:none;padding-left:0;margin-top:18px;padding-top:18px;border-top:1px solid rgba(0,49,65,.07)}
+  .growth-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .cont{padding:16px}
+  .growth-grid{grid-template-columns:1fr 1fr}
+  .summary-bar{grid-template-columns:repeat(3,1fr)}
+  .co-mini{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ SIDEBAR ════════ -->
+<div class="sb-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sb" id="sidebar">
+  <div class="sb-logo" style="display:flex;align-items:center;gap:10px;">
+    <img src="/static/Cream%20Logo.png" alt="BD" style="height:32px;" onerror="this.style.display='none'">
+    <span style="font-size:.6rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(250,235,218,.45);">FOR WORK</span>
+  </div>
+  <div class="sb-sec">Main</div>
+  <div class="ni on" onclick="sidebarNav('overview',this)">&#9632; &nbsp;Overview</div>
+  <div class="ni" onclick="sidebarNav('companies',this)">&#9733; &nbsp;Companies <span class="nbdg">{{ total_companies }}</span></div>
+  <div class="ni" onclick="sidebarNav('invoices',this)">&#9670; &nbsp;Invoices <span class="nbdg">{{ invoices|length }}</span></div>
+  <div class="ni" onclick="sidebarNav('orders',this)">&#9776; &nbsp;Orders</div>
+  <div class="ni" onclick="sidebarNav('reports',this)">&#9881; &nbsp;Reports</div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">Settings</div>
+  <a class="ni" href="/admin-logout">&#8594; &nbsp;Sign out</a>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<div class="mn">
+  <div class="tb">
+    <button class="tb-burger" onclick="toggleSidebar()">&#9776;</button>
+    <div class="tb-right">
+      <span class="tb-week"><span>Week of </span>{{ active_week.label }}</span>
+      <a href="/admin-logout" class="tb-out">Sign out</a>
+    </div>
+  </div>
+
+  <div class="cont">
+
+    <!-- ════════ OVERVIEW TAB ════════ -->
+    <div id="tab-overview" class="tab-panel active">
+
+      <!-- Revenue Hero -->
+      <div class="hero-rev">
+        <div class="hero-left">
+          <div class="hl-label">Total Revenue — All Time</div>
+          <div class="hl-value">${{ "%.2f"|format(total_revenue) }}</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stats">
+          <div><div class="hs-val">{{ total_meals }}</div><div class="hs-label">Meals</div></div>
+          <div><div class="hs-val">{{ total_orders }}</div><div class="hs-label">Orders</div></div>
+          <div><div class="hs-val">{{ total_unique_employees }}</div><div class="hs-label">Customers</div></div>
+        </div>
+      </div>
+
+      <!-- This Week -->
+      <div class="sl">This Week</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px;">
+        <div class="card card-gold"><div class="section-label" style="color:#b8860b;">Revenue</div><div class="stat-value gold">${{ "%.2f"|format(week_revenue) }}</div></div>
+        <div class="card card-sky"><div class="section-label" style="color:#2d7ec4;">Orders</div><div class="stat-value sky">{{ week_order_count }}</div></div>
+        <div class="card card-purple"><div class="section-label" style="color:#7453A2;">Meals</div><div class="stat-value purple">{{ week_meal_count }}</div></div>
+        <div class="card card-green"><div class="section-label" style="color:#167421;">Employees</div><div class="stat-value green">{{ week_employees }}</div></div>
+        <div class="card card-sky"><div class="section-label" style="color:#2d7ec4;">Companies</div><div class="stat-value sky">{{ active_companies_week }}</div></div>
+        <div class="card card-purple"><div class="section-label" style="color:#7453A2;">Avg Order</div><div class="stat-value purple">${{ "%.2f"|format(avg_order_value) }}</div></div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;">
+        <button onclick="openReminderModal()" style="display:flex;align-items:center;gap:10px;background:#B56B10;color:#fff;border:none;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s;box-shadow:0 2px 8px rgba(181,107,16,.25);font-family:'DM Sans',sans-serif;" onmouseover="this.style.background='#D4A04A'" onmouseout="this.style.background='#B56B10'">
+          <span style="font-size:18px;">📧</span> Send Order Reminders
+        </button>
+        <a href="/bd-admin/report/production?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">👨‍🍳</span> Production Summary
+        </a>
+        <a href="/bd-admin/report/picklists?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">📦</span> Company Packing Slips
+        </a>
+        <a href="/bd-admin/report/labels?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">🏷️</span> Meal Labels
+        </a>
+        <a href="/bd-admin/report/delivery?week={{ active_week.anchor }}" target="_blank" style="text-decoration:none;display:flex;align-items:center;gap:10px;background:#003141;color:#fff;border-radius:10px;padding:12px 16px;font-size:.78rem;font-weight:700;transition:.15s;box-shadow:0 2px 8px rgba(0,49,65,.15);" onmouseover="this.style.background='#00465E'" onmouseout="this.style.background='#003141'">
+          <span style="font-size:18px;">🚛</span> Delivery Stops for OptimoRoute
+        </a>
+      </div>
+
+      <!-- Growth & Engagement -->
+      <div class="sl">Growth &amp; Engagement</div>
+      <div class="growth-wrap">
+        <div class="growth-grid">
+          <div class="gc"><div class="gc-val green">{{ total_unique_employees }}</div><div class="gc-label">Active Employees</div></div>
+          <div class="gc"><div class="gc-val green">{{ repeat_rate }}%</div><div class="gc-label">Repeat Order Rate</div></div>
+          <div class="gc"><div class="gc-val sky">{% if total_unique_employees > 0 %}{{ "%.1f"|format(total_meals / total_unique_employees) }}{% else %}0{% endif %}</div><div class="gc-label">Avg Meals / Employee</div></div>
+          <div class="gc"><div class="gc-val sky">{% if total_orders > 0 %}{{ "%.1f"|format(total_meals / total_orders) }}{% else %}0{% endif %}</div><div class="gc-label">Avg Meals / Order</div></div>
+          <div class="gc"><div class="gc-val green"><span style="font-size:18px;opacity:.6">+</span>{{ new_employees_week }}</div><div class="gc-label">New Employees <span class="gc-sub">this week</span></div></div>
+          <div class="gc"><div class="gc-val green"><span style="font-size:18px;opacity:.6">{% if program_growth >= 0 %}+{% endif %}</span>{{ program_growth }}%</div><div class="gc-label">Meal Growth <span class="gc-sub">vs last week</span></div></div>
+          <div class="gc"><div class="gc-val">{{ busiest_week_meals }}</div><div class="gc-label">Peak Week Meals</div><div class="gc-sub">{{ busiest_week }}</div></div>
+          <div class="gc"><div class="gc-val">{{ repeat_rate }}%</div><div class="gc-label">Week Retention <span class="gc-sub">ordered again</span></div></div>
+        </div>
+      </div>
+
+      <!-- Top Performers -->
+      <div class="card card-gradient" style="margin-bottom:14px;display:flex;align-items:center;min-height:90px;padding:22px 28px;">
+        <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:28px;align-items:center;width:100%;">
+          <div style="min-width:0;">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#3a5a4e;margin-bottom:4px;">Top Company</div>
+            <div style="font-size:22px;font-weight:800;color:#00465E;letter-spacing:.5px;">{{ top_company }}</div>
+            <div style="font-size:14px;font-weight:700;color:#00465E;margin-top:6px;">{{ top_company_meals }} meals &middot; ${{ "%.2f"|format(top_company_revenue) }} revenue</div>
+          </div>
+          <div style="background:rgba(0,49,65,.12);height:50px;"></div>
+          <div style="min-width:0;">
+            <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#3a5a4e;margin-bottom:4px;">Best-Selling Dish</div>
+            <div style="font-size:22px;font-weight:800;color:#00465E;letter-spacing:.5px;">{{ top_meal }}</div>
+            <div style="font-size:14px;font-weight:700;color:#00465E;margin-top:6px;">{{ top_meal_count }} orders &middot; ${{ "%.2f"|format(top_meal_revenue) }} revenue</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Overview -->
+      <div class="sl">Financial Overview</div>
+      <div class="fin-section">
+        <div class="fin-header">
+          <div class="fin-title">All-Time Financial Summary</div>
+          <div class="fin-links">
+            {% if pending_invoices_count > 0 %}<a class="fin-link alert" onclick="sidebarNav('invoices',document.querySelectorAll('.ni')[2])">⚠ {{ pending_invoices_count }} Unpaid</a>{% endif %}
+            <a class="fin-link" onclick="sidebarNav('invoices',document.querySelectorAll('.ni')[2])">📄 View Invoices</a>
+          </div>
+        </div>
+        <div class="fin-grid">
+          <div class="fin-col">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#7A8F9C;margin-bottom:10px;">Revenue Breakdown</div>
+            <div class="fin-row"><span class="fin-row-label">Company Spend</span><span class="fin-row-val green">${{ "%.2f"|format(total_co_spend) }}</span></div>
+            <div class="fin-row"><span class="fin-row-label">Employee Payments</span><span class="fin-row-val">${{ "%.2f"|format(total_emp_spend) }}</span></div>
+            <div class="fin-total"><span class="fin-total-label">Total Revenue</span><span class="fin-total-val">${{ "%.2f"|format(total_revenue) }}</span></div>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,49,65,.06);">
+              <div class="fin-row"><span class="fin-row-label">BetterDay Contribution</span><span class="fin-row-val sky">${{ "%.2f"|format(total_bd_spend) }}</span></div>
+            </div>
+          </div>
+          <div class="fin-col">
+            <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#7A8F9C;margin-bottom:10px;">Invoice Status</div>
+            <div class="fin-row"><span class="fin-row-label">Pending Invoices ({{ pending_invoices_count }})</span><span class="fin-row-val amber">${{ "%.2f"|format(pending_invoices_value) }}</span></div>
+            <div class="fin-row"><span class="fin-row-label">Paid Invoices ({{ paid_invoices_count }})</span><span class="fin-row-val green">${{ "%.2f"|format(paid_invoices_value) }}</span></div>
+            <div class="fin-total"><span class="fin-total-label">Outstanding</span><span class="fin-total-val" style="color:#B56B10;">${{ "%.2f"|format(pending_invoices_value) }}</span></div>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,49,65,.06);">
+              <div class="fin-row"><span class="fin-row-label">Total Invoiced (All Time)</span><span class="fin-row-val">${{ "%.2f"|format(pending_invoices_value + paid_invoices_value) }}</span></div>
+              <div class="fin-row"><span class="fin-row-label">Collection Rate</span><span class="fin-row-val">{% if (pending_invoices_value + paid_invoices_value) > 0 %}{{ "%.0f"|format(paid_invoices_value / (pending_invoices_value + paid_invoices_value) * 100) }}%{% else %}0%{% endif %}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Invoices -->
+      <div class="sech"><div class="sect">Recent Invoices</div><a href="#" class="btn-o" onclick="sidebarNav('invoices',document.querySelectorAll('.ni')[2]);return false;">View All</a></div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Invoice #</th><th>Company</th><th>Week Of</th><th>Meals</th><th>Co. Owes</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for inv in invoices[:5] %}
+            {% set iid = inv.invoiceId|default(inv.InvoiceID|default('—')) %}
+            {% set status = (inv.status|default(inv.Status|default('pending')))|lower %}
+            <tr>
+              <td class="tn">{{ iid }}</td>
+              <td class="tn">{{ co_names.get(inv.companyId|default(inv.CompanyID|default(''))|upper, inv.companyName|default(inv.CompanyName|default('—'))) }}</td>
+              <td>{{ inv.weekOf|default(inv.WeekOf|default('—')) }}</td>
+              <td>{{ inv.totalMeals|default(inv.TotalMeals|default(0)) }}</td>
+              <td class="tg">${{ "%.2f"|format(inv.companyOwed|default(inv.CompanyOwed|default(0))|float) }}</td>
+              <td><span class="bdg {% if status == 'paid' %}ba{% elif status == 'sent' %}bs{% else %}bp{% endif %}">{{ status|capitalize }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════ COMPANIES TAB ════════ -->
+    <div id="tab-companies" class="tab-panel">
+      <div class="section-header">
+        <div class="section-title">All Companies</div>
+        <a href="/work/company/new" class="btn-outline" style="background:#FFC600;color:#003141;border-color:#FFC600;font-weight:800;">+ Add Company</a>
+      </div>
+      {% for c in companies %}
+      {% set cid = c.CompanyID|default('')|upper %}
+      {% set cs = co_stats.get(cid, {}) %}
+      <div class="co-card">
+        <div class="co-card-header">
+          <div>
+            <div class="co-card-name">{{ c.CompanyName or cid }}</div>
+            <div class="co-card-id">{{ cid }} · {{ c.CompanyEmailDomain or '—' }}</div>
+          </div>
+          <span class="badge badge-active">{{ c.Status or 'Active' }}</span>
+        </div>
+        <div class="co-mini">
+          <div class="co-mini-box"><div class="co-mini-label">Total Meals</div><div class="co-mini-val">{{ cs.get('meals', 0) }}</div></div>
+          <div class="co-mini-box"><div class="co-mini-label">Employees</div><div class="co-mini-val">{{ cs.get('employee_count', 0) }}</div></div>
+          <div class="co-mini-box"><div class="co-mini-label">Company Spend</div><div class="co-mini-val green">${{ "%.2f"|format(cs.get('co_spend', 0)) }}</div></div>
+          <div class="co-mini-box"><div class="co-mini-label">BD Contributed</div><div class="co-mini-val bd">${{ "%.2f"|format(cs.get('bd_spend', 0)) }}</div></div>
+        </div>
+        <div class="co-actions">
+          <a href="/work/company/{{ cid }}" class="btn-outline">Edit</a>
+          <a href="/bd-admin/manager-view/{{ cid }}" class="btn-outline" target="_blank">Manager View</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- ════════ INVOICES TAB ════════ -->
+    <div id="tab-invoices" class="tab-panel">
+
+      <!-- AR SUMMARY CARDS -->
+      <div id="arSummary" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+        <div style="flex:1;min-width:140px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;">Total Outstanding</div>
+          <div id="arTotal" style="font-size:1.5rem;font-weight:900;color:#003141;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#27ae60;">Current</div>
+          <div id="arCurrent" style="font-size:1.1rem;font-weight:900;color:#27ae60;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#f39c12;">15+ Days</div>
+          <div id="ar15" style="font-size:1.1rem;font-weight:900;color:#f39c12;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#e74c3c;">30+ Days</div>
+          <div id="ar30" style="font-size:1.1rem;font-weight:900;color:#e74c3c;margin-top:4px;">—</div>
+        </div>
+        <div style="flex:1;min-width:110px;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,49,65,.06);">
+          <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#c0392b;">60+ Days</div>
+          <div id="ar60" style="font-size:1.1rem;font-weight:900;color:#c0392b;margin-top:4px;">—</div>
+        </div>
+      </div>
+
+      <!-- INVOICE LIST -->
+      <div class="section-header">
+        <div class="section-title">All Invoices</div>
+        <div class="controls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select class="ctrl-select" id="invCompanyFilter" onchange="filterInvoices()">
+            <option value="">All Companies</option>
+            {% for c in companies %}
+            <option value="{{ c.CompanyID|default('')|upper }}">{{ c.CompanyName or c.CompanyID }}</option>
+            {% endfor %}
+          </select>
+          <select class="ctrl-select" id="invStatusFilter" onchange="filterInvoices()">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+            <option value="partial">Partial</option>
+            <option value="void">Void</option>
+          </select>
+          <button class="btn-outline" onclick="openCreditNoteModal()" style="font-size:.72rem;white-space:nowrap;">+ Issue Credit</button>
+        </div>
+      </div>
+      <div class="tw">
+        {% if invoices %}
+        <table>
+          <thead><tr><th>Invoice #</th><th>Company</th><th>Period</th><th>Meals</th><th>Amount Due</th><th>Due Date</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            {% for inv in invoices %}
+            {% set iid = inv.InvoiceID|default(inv.invoiceId|default('—')) %}
+            {% set inum = inv.InvoiceNumber|default(inv.invoiceNumber|default(iid)) %}
+            {% set cid = inv.CompanyID|default(inv.companyId|default(''))|upper %}
+            {% set status = (inv.Status|default(inv.status|default('pending')))|lower %}
+            {% set amtDue = inv.AmountDue|default(inv.amountDue|default(inv.companyOwed|default(inv.CompanyOwed|default(0))))|float %}
+            {% set dueDate = inv.DueDate|default(inv.dueDate|default('')) %}
+            {% set periodStart = inv.PeriodStart|default(inv.periodStart|default(inv.weekOf|default(inv.WeekOf|default('')))) %}
+            <tr class="clickable inv-row" data-iid="{{ iid }}" data-co="{{ cid }}" data-status="{{ status }}" onclick="toggleInvDetail('{{ iid }}')">
+              <td style="font-weight:700;font-size:.82rem;">{{ inum }}</td>
+              <td class="tn">{{ co_names.get(cid, inv.CompanyName|default(inv.companyName|default(cid))) }}</td>
+              <td style="font-size:.78rem;">{{ periodStart|nicedate }}</td>
+              <td>{{ inv.TotalMeals|default(inv.totalMeals|default(0)) }}</td>
+              <td style="font-weight:800;">${{ "%.2f"|format(amtDue) }}</td>
+              <td style="font-size:.78rem;">{{ dueDate|nicedate }}</td>
+              <td><span class="bdg {% if status == 'paid' %}ba{% elif status == 'sent' %}bs{% elif status == 'overdue' %}bd{% elif status == 'void' %}bv{% else %}bp{% endif %}">{{ status|capitalize }}</span></td>
+              <td style="white-space:nowrap;">
+                {% if status == 'pending' %}
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','sent',this)">Send</button>
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Paid</button>
+                {% elif status == 'sent' or status == 'overdue' %}
+                <button class="btn-outline" onclick="event.stopPropagation();markInvoice('{{ iid }}','paid',this)">Paid</button>
+                {% endif %}
+              </td>
+            </tr>
+            <tr class="inv-detail" id="inv-detail-{{ iid }}">
+              <td colspan="8">
+                <div class="inv-detail-inner">
+                  <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:10px;font-size:.78rem;color:#5a7268;">
+                    <span>Full Retail: <strong>${{ "%.2f"|format(inv.SubtotalFullRetail|default(inv.subtotalFullRetail|default(0))|float) }}</strong></span>
+                    <span>Emp. Paid: <strong>${{ "%.2f"|format(inv.EmployeePaid|default(inv.employeePaid|default(0))|float) }}</strong></span>
+                    <span>Co. Owes: <strong>${{ "%.2f"|format(inv.CompanyOwed|default(inv.companyOwed|default(0))|float) }}</strong></span>
+                    <span>BD Subsidy: <strong>${{ "%.2f"|format(inv.BDContributed|default(inv.bdContributed|default(0))|float) }}</strong></span>
+                    {% if (inv.CreditApplied|default(inv.creditApplied|default(0))|float) > 0 %}
+                    <span style="color:#27ae60;">Credit Applied: <strong>-${{ "%.2f"|format(inv.CreditApplied|default(inv.creditApplied|default(0))|float) }}</strong></span>
+                    {% endif %}
+                  </div>
+                  <strong>Tier Breakdown</strong>
+                  <table>
+                    <thead><tr><th>Tier</th><th>Meals</th><th>Co. Total</th></tr></thead>
+                    <tbody id="inv-bd-{{ iid }}"></tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div style="text-align:center;padding:40px;color:#7A8F9C;">No invoices generated yet.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ════════ ORDERS TAB ════════ -->
+    <div id="tab-orders" class="tab-panel">
+      <div class="section-header">
+        <div class="section-title">All Orders</div>
+        <div class="controls">
+          <input type="text" class="ctrl-input" id="orderSearch" placeholder="Search employee or order #..." oninput="filterOrders()" style="min-width:260px;">
+          <select class="ctrl-select" id="orderCoFilter" onchange="filterOrders()">
+            <option value="">All Companies</option>
+            {% for c in companies %}
+            <option value="{{ c.CompanyID|default('')|upper }}">{{ c.CompanyName or c.CompanyID }}</option>
+            {% endfor %}
+          </select>
+          <select class="ctrl-select" id="orderWeekFilter" onchange="filterOrders()">
+            <option value="">All Weeks</option>
+            {% for w in sorted_weeks %}
+            <option value="{{ w.anchor }}">{{ w.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="summary-bar" id="orderSummaryBar">
+        <div class="sb-cell c-navy"><div class="sb-label">Orders</div><div class="sb-val" id="ordSumOrders">0</div></div>
+        <div class="sb-cell c-yellow"><div class="sb-label">Meals</div><div class="sb-val" id="ordSumMeals">0</div></div>
+        <div class="sb-cell c-purple"><div class="sb-label">Emp Paid</div><div class="sb-val" id="ordSumEmp">$0</div></div>
+        <div class="sb-cell c-green"><div class="sb-label">Company Covered</div><div class="sb-val" id="ordSumCo">$0</div></div>
+        <div class="sb-cell c-sky"><div class="sb-label">BD Contributed</div><div class="sb-val" id="ordSumBd">$0</div></div>
+      </div>
+      <div class="tw" style="border-radius:0 0 10px 10px;">
+        <table>
+          <thead><tr><th>Order #</th><th>Employee</th><th>Company</th><th>Delivery</th><th>Meals</th><th>Emp Paid</th><th>Co Covered</th><th>BD</th></tr></thead>
+          <tbody id="ordersBody"></tbody>
+        </table>
+        <div class="pag"><button class="pgb" id="ordPrev" onclick="ordPage(-1)">← Prev</button><span id="ordPageInfo"></span><button class="pgb" id="ordNext" onclick="ordPage(1)">Next →</button></div>
+      </div>
+    </div>
+
+    <!-- ════════ REPORTS TAB ════════ -->
+    <div id="tab-reports" class="tab-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-size:1rem;font-weight:900;color:#003141;">Reports</div>
+        <select id="reportWeekSelect" style="font-size:.82rem;padding:8px 14px;border:1.5px solid #E8DFD2;border-radius:8px;background:#fff;font-family:inherit;font-weight:700;color:#003141;cursor:pointer;">
+          {% for w in sorted_weeks %}
+          <option value="{{ w.anchor }}" {% if w.anchor == active_week.anchor %}selected{% endif %}>Week of {{ w.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">👨‍🍳</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Production Summary</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Total quantity of each dish by SKU for kitchen production. Sorted by count, diet, then name.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('production')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View Report</a>
+            <a onclick="downloadReportCSV('production')" style="padding:8px 18px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">Download CSV</a>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">📦</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Company Packing Slips</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Per-company meal totals for packing. One page per company, print-ready PDF format.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('picklists')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View / Print PDF</a>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">🏷️</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Meal Labels</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Per-person per-meal labels. Sorted Z→A by last name within each company, with company dividers.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('labels')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View Report</a>
+            <a onclick="downloadReportCSV('labels')" style="padding:8px 18px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">Download CSV</a>
+          </div>
+        </div>
+
+        <div style="background:#fff;border-radius:14px;padding:24px 28px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><span style="font-size:24px;">🚛</span><span style="font-size:.95rem;font-weight:800;color:#003141;">Delivery Stops for OptimoRoute</span></div>
+          <div style="font-size:.78rem;color:#7A8F9C;margin-bottom:14px;line-height:1.4;">Route sheet matching 1.0 CGY format. Export as CSV for upload to OptimoRoute.</div>
+          <div style="display:flex;gap:8px;">
+            <a onclick="openReport('delivery')" style="padding:8px 18px;background:#003141;color:#fff;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">View Report</a>
+            <a onclick="downloadReportCSV('delivery')" style="padding:8px 18px;background:#fff;color:#003141;border:1.5px solid #E8DFD2;border-radius:8px;font-size:.75rem;font-weight:700;cursor:pointer;text-decoration:none;">Download CSV</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cont -->
+</div><!-- /mn -->
+
+<script>
+const ALL_ORDERS = {{ orders_json|safe }};
+const ALL_INVOICES = {{ invoices_json|safe }};
+const CO_NAMES = {{ co_names|tojson|safe }};
+
+/* ── Sidebar Navigation ── */
+function sidebarNav(id, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(s => s.classList.remove('on'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (el) el.classList.add('on');
+  if (id === 'orders') filterOrders();
+  closeSidebar();
+}
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); }
+
+/* ── Invoice Detail Toggle ── */
+function toggleInvDetail(iid) {
+  var el = document.getElementById('inv-detail-' + iid);
+  if (!el) return;
+  var open = el.style.display === 'table-row';
+  el.style.display = open ? 'none' : 'table-row';
+  if (!open) {
+    var inv = ALL_INVOICES.find(i => (i.InvoiceID||i.invoiceId) === iid);
+    if (inv) {
+      var bd = [];
+      try { bd = typeof inv.TierBreakdownJSON === 'string' ? JSON.parse(inv.TierBreakdownJSON) : (inv.TierBreakdownJSON || inv.breakdown || []); } catch(e) {}
+      if (!Array.isArray(bd)) bd = [];
+      var html = '';
+      bd.forEach(function(t) { html += '<tr><td>'+(t.tier||'—')+'</td><td>'+(t.meals||0)+'</td><td class="tg">$'+(t.companyTotal||0).toFixed(2)+'</td></tr>'; });
+      if (!html) html = '<tr><td colspan="3" style="color:#7A8F9C;">No breakdown data</td></tr>';
+      document.getElementById('inv-bd-' + iid).innerHTML = html;
+    }
+  }
+}
+
+/* ── Invoice Filter ── */
+function filterInvoices() {
+  var co = document.getElementById('invCompanyFilter').value;
+  var st = document.getElementById('invStatusFilter').value;
+  document.querySelectorAll('.inv-row').forEach(function(row) {
+    var match = true;
+    if (co && row.dataset.co !== co) match = false;
+    if (st && row.dataset.status !== st) match = false;
+    row.style.display = match ? '' : 'none';
+    var detail = document.getElementById('inv-detail-' + row.dataset.iid);
+    if (detail && !match) detail.style.display = 'none';
+  });
+}
+
+/* ── Mark Invoice ── */
+function markInvoice(iid, newStatus, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Updating…'; }
+  fetch('/bd-admin/invoice-status', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({invoice_id: iid, status: newStatus})
+  }).then(r => r.json()).then(d => { if (d.success) location.reload(); else { if(btn){btn.disabled=false;btn.textContent=newStatus==='paid'?'Mark Paid':'Mark Sent';} alert('Error: ' + (d.error||'Unknown')); }}).catch(() => { if(btn){btn.disabled=false;btn.textContent=newStatus==='paid'?'Mark Paid':'Mark Sent';} alert('Network error'); });
+}
+
+/* ── Orders Tab ── */
+var ordFiltered = [], ordPageNum = 0, ORD_PER_PAGE = 25;
+function filterOrders() {
+  var q = (document.getElementById('orderSearch').value||'').toLowerCase();
+  var co = document.getElementById('orderCoFilter').value;
+  var wk = document.getElementById('orderWeekFilter').value;
+  ordFiltered = ALL_ORDERS.filter(function(o) {
+    if (co && o.company_id !== co) return false;
+    if (wk && o.sunday_anchor !== wk) return false;
+    if (q && o.employee_name.toLowerCase().indexOf(q)<0 && o.order_id.toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  ordPageNum = 0; renderOrders();
+}
+function renderOrders() {
+  var start = ordPageNum * ORD_PER_PAGE;
+  var page = ordFiltered.slice(start, start + ORD_PER_PAGE);
+  var html = '';
+  if (!page.length) html = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#7A8F9C;">No orders match your filters.</td></tr>';
+  page.forEach(function(o) {
+    html += '<tr><td style="font-weight:700;">'+String(o.order_id).substring(0,12)+'</td><td class="tn">'+o.employee_name+'</td><td>'+(CO_NAMES[o.company_id]||o.company_id)+'</td><td>'+o.delivery_date+'</td><td>'+o.meals.length+'</td><td>$'+o.emp_total.toFixed(2)+'</td><td class="tg">$'+o.co_total.toFixed(2)+'</td><td class="ts">$'+o.bd_total.toFixed(2)+'</td></tr>';
+  });
+  document.getElementById('ordersBody').innerHTML = html;
+  var totO=ordFiltered.length,totM=0,totE=0,totC=0,totB=0;
+  ordFiltered.forEach(function(o){totM+=o.meals.length;totE+=o.emp_total;totC+=o.co_total;totB+=o.bd_total;});
+  document.getElementById('ordSumOrders').textContent=totO;
+  document.getElementById('ordSumMeals').textContent=totM;
+  document.getElementById('ordSumEmp').textContent='$'+totE.toFixed(2);
+  document.getElementById('ordSumCo').textContent='$'+totC.toFixed(2);
+  document.getElementById('ordSumBd').textContent='$'+totB.toFixed(2);
+  var total=ordFiltered.length;
+  document.getElementById('ordPageInfo').textContent=total?(start+1)+'–'+Math.min(start+ORD_PER_PAGE,total)+' of '+total+' orders':'No orders';
+  document.getElementById('ordPrev').disabled=ordPageNum===0;
+  document.getElementById('ordNext').disabled=start+ORD_PER_PAGE>=total;
+}
+function ordPage(dir){ordPageNum+=dir;renderOrders();}
+filterOrders();
+
+/* ── Reports Tab ── */
+function openReport(type) {
+  var week = document.getElementById('reportWeekSelect')?.value || '';
+  window.open('/bd-admin/report/' + type + '?week=' + week, '_blank');
+}
+function downloadReportCSV(type) {
+  var week = document.getElementById('reportWeekSelect')?.value || '';
+  window.open('/bd-admin/report/' + type + '?week=' + week + '&format=csv', '_blank');
+}
+
+// ═══ ORDER REMINDER MODAL ═══
+var _reminderSending = false;
+var _reminderCompanies = {{ companies_json|safe }};
+function openReminderModal() {
+  var totalEmp = {{ total_unique_employees }};
+  var weekEmp = {{ week_employees }};
+  var toSend = totalEmp - weekEmp;
+  var pct = totalEmp > 0 ? Math.round(weekEmp / totalEmp * 100) : 0;
+
+  var sortedCos = _reminderCompanies.slice().sort(function(a,b){ return (a.CompanyName||'').localeCompare(b.CompanyName||''); });
+  var coCheckboxes = sortedCos.map(function(c) {
+    var id = c.CompanyID || c.company_id || '';
+    var name = c.CompanyName || c.company_name || id;
+    return '<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.82rem;color:#003141;cursor:pointer;">'
+      + '<input type="checkbox" class="reminder-co-cb" value="' + id + '" checked style="width:15px;height:15px;accent-color:#B56B10;">'
+      + '<span style="font-weight:600;">' + name + '</span></label>';
+  }).join('');
+
+  var modal = document.createElement('div');
+  modal.id = 'reminderModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,20,30,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.2);">'
+    + '<div style="font-size:1.1rem;font-weight:800;color:#003141;margin-bottom:6px;">Send Order Reminders</div>'
+    + '<div style="font-size:.82rem;color:#7A8F9C;margin-bottom:20px;">Delivery week of {{ active_week.label }}</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">'
+    + '<div style="background:#EEFBE8;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#167421;">' + weekEmp + '</div><div style="font-size:.68rem;color:#5a7268;">Ordered</div></div>'
+    + '<div style="background:#FFF3E0;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#B56B10;">' + toSend + '</div><div style="font-size:.68rem;color:#8a6530;">Haven\'t Ordered</div></div>'
+    + '<div style="background:#E8F3FF;border-radius:10px;padding:12px;text-align:center;"><div style="font-size:24px;font-weight:900;color:#2d7ec4;">' + pct + '%</div><div style="font-size:.68rem;color:#3a6a9c;">Participation</div></div>'
+    + '</div>'
+    + '<div style="background:#f8f5f0;border:1px solid #E8DFD2;border-radius:10px;padding:14px 16px;margin-bottom:16px;">'
+    + '<div style="display:flex;gap:8px;margin-bottom:2px;">'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#003141;cursor:pointer;"><input type="radio" name="reminderScope" value="all" checked onchange="document.getElementById(\'reminderCoList\').style.display=\'none\'" style="accent-color:#B56B10;"> All companies</label>'
+    + '<label style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:#003141;cursor:pointer;"><input type="radio" name="reminderScope" value="select" onchange="document.getElementById(\'reminderCoList\').style.display=\'block\'" style="accent-color:#B56B10;"> Select companies</label>'
+    + '</div>'
+    + '<div id="reminderCoList" style="display:none;margin-top:10px;max-height:160px;overflow-y:auto;border-top:1px solid #E8DFD2;padding-top:8px;">'
+    + coCheckboxes
+    + '</div>'
+    + '</div>'
+    + '<div style="background:#FAF6F0;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:.82rem;color:#5a7268;line-height:1.5;">'
+    + '📧 Will send a reminder email to <strong style="color:#003141;">' + toSend + ' employee' + (toSend !== 1 ? 's' : '') + '</strong> who haven\'t placed an order for this week yet.'
+    + '</div>'
+    + '<div style="display:flex;gap:10px;">'
+    + '<button onclick="closeReminderModal()" style="flex:1;padding:12px;background:none;border:1.5px solid #E8DFD2;border-radius:10px;font-size:.82rem;font-weight:700;color:#7A8F9C;cursor:pointer;font-family:DM Sans,sans-serif;">Cancel</button>'
+    + '<button id="sendReminderBtn" onclick="sendReminders()" style="flex:2;padding:12px;background:#B56B10;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:DM Sans,sans-serif;transition:.15s;"'
+    + (toSend === 0 ? ' disabled style="flex:2;padding:12px;background:#ccc;color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:800;cursor:default;font-family:DM Sans,sans-serif;"' : '')
+    + '>Send Reminders</button>'
+    + '</div>'
+    + '<div id="reminderStatus" style="display:none;margin-top:14px;text-align:center;font-size:.82rem;font-weight:700;"></div>'
+    + '</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e) { if (e.target === modal) closeReminderModal(); });
+}
+
+function closeReminderModal() {
+  var m = document.getElementById('reminderModal');
+  if (m) m.remove();
+}
+
+async function sendReminders() {
+  if (_reminderSending) return;
+  _reminderSending = true;
+  var btn = document.getElementById('sendReminderBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending\u2026';
+  btn.style.background = '#9aabb8';
+
+  // Collect selected company IDs (all or filtered)
+  var scope = document.querySelector('input[name="reminderScope"]:checked')?.value || 'all';
+  var selectedCos = [];
+  if (scope === 'select') {
+    document.querySelectorAll('.reminder-co-cb:checked').forEach(function(cb) { selectedCos.push(cb.value); });
+    if (selectedCos.length === 0) { btn.disabled = false; btn.textContent = 'Send Reminders'; btn.style.background = '#B56B10'; _reminderSending = false; alert('Select at least one company'); return; }
+  }
+
+  try {
+    var payload = selectedCos.length > 0 ? {company_ids: selectedCos} : {};
+    var resp = await fetch('/bd-admin/send-reminders', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+    var data = await resp.json();
+    var status = document.getElementById('reminderStatus');
+    status.style.display = 'block';
+    if (data.success) {
+      status.style.color = '#167421';
+      status.textContent = '\u2713 Sent ' + data.sent + ' reminder' + (data.sent !== 1 ? 's' : '') + ' \u00b7 ' + data.skipped + ' already ordered';
+      btn.textContent = 'Done!';
+      btn.style.background = '#167421';
+      setTimeout(closeReminderModal, 3000);
+    } else {
+      status.style.color = '#e74c3c';
+      status.textContent = '\u26a0 ' + (data.error || 'Failed to send');
+      btn.textContent = 'Failed';
+      btn.style.background = '#e74c3c';
+    }
+  } catch(e) {
+    console.error('Reminder error:', e);
+    var status = document.getElementById('reminderStatus');
+    status.style.display = 'block';
+    status.style.color = '#e74c3c';
+    status.textContent = '\u26a0 Network error';
+  }
+  _reminderSending = false;
+}
+
+/* ── AR Summary (loads async) ── */
+(function loadAR() {
+  fetch('/bd-admin/ar-summary').then(r=>r.json()).then(d=>{
+    document.getElementById('arTotal').textContent = '$' + (d.totalOutstanding||0).toFixed(2);
+    document.getElementById('arCurrent').textContent = '$' + (d.current||0).toFixed(2);
+    document.getElementById('ar15').textContent = '$' + (d.over15||0).toFixed(2);
+    document.getElementById('ar30').textContent = '$' + ((d.over30||0)+(d.over60||0)+(d.over90||0)).toFixed(2);
+    document.getElementById('ar60').textContent = '$' + ((d.over60||0)+(d.over90||0)).toFixed(2);
+  }).catch(()=>{});
+})();
+
+/* ── Credit Note Modal ── */
+function openCreditNoteModal() {
+  var existing = document.getElementById('creditNoteModal');
+  if (existing) { existing.style.display = 'flex'; return; }
+  var m = document.createElement('div');
+  m.id = 'creditNoteModal';
+  m.style.cssText = 'position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);';
+  m.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;width:440px;max-width:90vw;box-shadow:0 12px 40px rgba(0,0,0,.2);">
+      <div style="font-size:1.1rem;font-weight:900;color:#003141;margin-bottom:16px;">Issue Credit Note</div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Company</label>
+        <select id="cnCompany" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;">
+          {% for c in companies %}<option value="{{ c.CompanyID|default('')|upper }}">{{ c.CompanyName or c.CompanyID }}</option>{% endfor %}
+        </select>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Amount ($)</label>
+        <input type="number" id="cnAmount" min="0.01" step="0.01" placeholder="0.00" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-size:.88rem;">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Reason</label>
+        <input type="text" id="cnReason" placeholder="e.g. Missed delivery March 15" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-size:.88rem;">
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:.75rem;font-weight:700;color:#5a7268;display:block;margin-bottom:4px;">Notes (optional)</label>
+        <input type="text" id="cnNotes" placeholder="" style="width:100%;padding:10px 12px;border:1px solid #d5d5d5;border-radius:8px;font-size:.88rem;">
+      </div>
+      <div id="cnStatus" style="display:none;font-size:.82rem;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="document.getElementById('creditNoteModal').style.display='none'" style="padding:10px 20px;border:1px solid #d5d5d5;border-radius:10px;background:#fff;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+        <button id="cnSubmitBtn" onclick="submitCreditNote()" style="padding:10px 24px;border:none;border-radius:10px;background:#003141;color:#fff;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;">Issue Credit</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+}
+async function submitCreditNote() {
+  var btn = document.getElementById('cnSubmitBtn');
+  var status = document.getElementById('cnStatus');
+  var company = document.getElementById('cnCompany').value;
+  var amount = parseFloat(document.getElementById('cnAmount').value);
+  var reason = document.getElementById('cnReason').value.trim();
+  if (!amount || amount <= 0) { status.style.display='block'; status.style.color='#e74c3c'; status.textContent='Enter a valid amount'; return; }
+  if (!reason) { status.style.display='block'; status.style.color='#e74c3c'; status.textContent='Enter a reason'; return; }
+  btn.disabled = true; btn.textContent = 'Issuing…';
+  status.style.display = 'none';
+  try {
+    var r = await fetch('/bd-admin/credit-notes', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({_action:'create_credit_note', company_id:company, amount:amount, reason:reason, notes:document.getElementById('cnNotes').value})
+    });
+    var d = await r.json();
+    if (d.success) {
+      status.style.display='block'; status.style.color='#167421';
+      status.textContent = '\u2705 Credit ' + (d.creditNoteId||'') + ' issued — $' + amount.toFixed(2) + ' added to balance';
+      btn.textContent = 'Done'; setTimeout(()=>{ document.getElementById('creditNoteModal').style.display='none'; location.reload(); }, 1500);
+    } else {
+      status.style.display='block'; status.style.color='#e74c3c'; status.textContent = 'Error: ' + (d.error||'Unknown');
+      btn.disabled=false; btn.textContent='Issue Credit';
+    }
+  } catch(e) {
+    status.style.display='block'; status.style.color='#e74c3c'; status.textContent='Network error';
+    btn.disabled=false; btn.textContent='Issue Credit';
+  }
+}
+</script>
+</body>
+</html>

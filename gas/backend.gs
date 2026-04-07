@@ -16,26 +16,12 @@
  */
 const BUFFER_SHEET_ID = "1iI6q2j7fYIcO5Da959RQeOr5BMFunP-VjsIwvNHA8Cg";
 function doGet(e) {
-  var ssHub = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ssHub.getSheetByName("Sheet1");
-  var data = sheet.getDataRange().getValues();
-  if (e && e.parameter && e.parameter.action === "get_bookings") {
-    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
-  }
-  var takenDates = [];
-  for (var i = 1; i < data.length; i++) {
-    if (data[i][0]) {
-      var date = new Date(data[i][0]);
-      takenDates.push(Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd"));
-    }
-  }
-  return ContentService.createTextOutput(JSON.stringify(takenDates)).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({status: "ok"})).setMimeType(ContentService.MimeType.JSON);
 }
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var ssHub = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet1 = ssHub.getSheetByName("Sheet1");
     // ─────────────────────────────────────────
     // GET COMPANY
     // ─────────────────────────────────────────
@@ -48,6 +34,10 @@ function doPost(e) {
         if (String(rows[i][0]).trim().toUpperCase() === String(data.company_id).trim().toUpperCase()) {
           var company = {};
           headers.forEach(function(h, idx) { company[h] = rows[i][idx]; });
+          // Attach benefit levels if enabled
+          if (String(company.EnableEmployeeLevels || "").toUpperCase() === "TRUE") {
+            company.benefitLevels = _getBenefitLevels(ssHub, String(data.company_id).trim().toUpperCase());
+          }
           return jsonOut({found: true, company: company});
         }
       }
@@ -84,6 +74,7 @@ function doPost(e) {
       var email = String(data.email).trim().toLowerCase();
       var companyId = String(data.company_id).trim().toUpperCase();
       var isManagerIdx = headers.indexOf("IsManager");
+      var benefitLevelIdx = headers.indexOf("BenefitLevel");
       for (var i = 1; i < rows.length; i++) {
         var rowEmail   = String(rows[i][4]).trim().toLowerCase();
         var rowCompany = String(rows[i][1]).trim().toUpperCase();
@@ -94,7 +85,8 @@ function doPost(e) {
               firstName: rows[i][2],
               lastName:  rows[i][3],
               email:     rows[i][4],
-              isManager: isManagerIdx >= 0 && rows[i][isManagerIdx] === true
+              isManager: isManagerIdx >= 0 && rows[i][isManagerIdx] === true,
+              benefitLevel: benefitLevelIdx >= 0 ? (String(rows[i][benefitLevelIdx] || "General").trim()) : "General"
             }
           });
         }
@@ -242,15 +234,15 @@ function doPost(e) {
             "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
             "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
             // Header
-            "<tr><td style='background:#4ea2fd;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
-            "<div style='font-family:Georgia,\"Times New Roman\",serif;font-size:1.5rem;color:#ffffff;font-weight:700;letter-spacing:-0.5px;'>BetterDay</div>" +
-            "<div style='font-size:.65rem;color:rgba(255,255,255,.75);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>FOR WORK</div>" +
+            "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
+            "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:36px;display:block;margin:0 auto;'>" +
+            "<div style='font-size:.6rem;color:rgba(250,235,218,.55);letter-spacing:2.5px;text-transform:uppercase;margin-top:5px;'>FOR WORK</div>" +
             "</td></tr>" +
             // Body
             "<tr><td style='background:#ffffff;padding:36px 32px 28px;'>" +
             "<p style='font-size:1.15rem;font-weight:800;color:#0d2030;margin:0 0 10px;'>Your sign-in link is ready</p>" +
             "<p style='font-size:.9rem;color:#50657a;line-height:1.65;margin:0 0 28px;'>Click the button below to sign in — no password needed. This link expires in <strong>15 minutes</strong> and can only be used once.</p>" +
-            "<a href='" + signInUrl + "' style='display:block;background:#4ea2fd;color:#ffffff;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-weight:700;font-size:1rem;letter-spacing:0.2px;'>Sign in to BetterDay &rarr;</a>" +
+            "<a href='" + signInUrl + "' style='display:block;background:#00465e;color:#ffffff;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-weight:700;font-size:1rem;letter-spacing:0.2px;'>Sign in to BetterDay &rarr;</a>" +
             "</td></tr>" +
             // Footer
             "<tr><td style='background:#f9f5f0;border-radius:0 0 16px 16px;padding:20px 32px;border-top:1px solid #e8e0d5;'>" +
@@ -354,7 +346,7 @@ function doPost(e) {
             "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
             "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
             "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
-            "<div style='font-family:Georgia,serif;font-size:1.5rem;color:#faebda;font-weight:700;'>BetterDay</div>" +
+            "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:32px;display:block;margin:0 auto;'>" +
             "<div style='font-size:.65rem;color:rgba(250,235,218,.6);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>MANAGER PORTAL</div>" +
             "</td></tr>" +
             "<tr><td style='background:#fff;padding:36px 32px 28px;'>" +
@@ -514,7 +506,7 @@ function doPost(e) {
       var corpSheet = ssHub.getSheetByName("CorporateOrders");
       if (!corpSheet) {
         corpSheet = ssHub.insertSheet("CorporateOrders");
-        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","StripePaymentIntentID","Status","OrderID"]);
+        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","PaymentTransactionID","Status","OrderID","EmployeeLevel"]);
       }
       corpSheet.appendRow([
         new Date(),
@@ -531,9 +523,10 @@ function doPost(e) {
         data.employee_price,
         data.company_coverage,
         data.bd_coverage || "0.00",
-        "",
-        "pending",
-        data.order_id || ""
+        data.payment_transaction_id || "",
+        data.status || "confirmed",
+        data.order_id || "",
+        data.employee_level || "General"
       ]);
       return jsonOut({success: true});
     }
@@ -619,9 +612,13 @@ function doPost(e) {
       if (!corpSheet) return jsonOut([]);
       var rows = corpSheet.getDataRange().getValues();
       var headers = rows[0];
+      var tiIdx = headers.indexOf("Tier");
+      // Exclude office par-level rows by default; pass include_office=true to get everything
+      var excludeOffice = data.include_office ? false : true;
       var orders = [];
       for (var i = 1; i < rows.length; i++) {
         if (!rows[i][0]) continue;
+        if (excludeOffice && tiIdx >= 0 && String(rows[i][tiIdx]).trim() === "office") continue;
         var order = {};
         headers.forEach(function(h, idx) {
           var val = rows[i][idx];
@@ -646,8 +643,9 @@ function doPost(e) {
       var meatIds = [], veganIds = [];
       // AI (index 34) = single cell with comma-separated meat IDs (e.g. "#509, #319, #508...")
       // AJ (index 35) = single cell with comma-separated vegan IDs (e.g. "#196, #517, #473...")
-      var AI_COL = 34;
-      var AJ_COL = 35;
+      // AJ (index 35) = Meat ID Summary, AK (index 36) = Vegan ID Summary
+      var MEAT_COL = 35;
+      var VEGAN_COL = 36;
       function extractIdsFromCell(cellVal) {
         if (!cellVal) return [];
         var ids = [];
@@ -667,8 +665,8 @@ function doPost(e) {
         var sundayMatchMs = new Date(sundayMatch + 'T12:00:00Z').getTime();
         var diffMs = Math.abs(sundayDate.getTime() - sundayMatchMs);
         if (diffMs <= 24 * 60 * 60 * 1000) {
-          meatIds  = extractIdsFromCell(schedRows[i][AI_COL]);
-          veganIds = extractIdsFromCell(schedRows[i][AJ_COL]);
+          meatIds  = extractIdsFromCell(schedRows[i][MEAT_COL]);
+          veganIds = extractIdsFromCell(schedRows[i][VEGAN_COL]);
           break;
         }
       }
@@ -696,186 +694,446 @@ function doPost(e) {
       veganIds.forEach(function(id) { if(dishMap[id]) veganMenu.push({id:id, ...dishMap[id]}); });
       return jsonOut({meat: meatMenu, vegan: veganMenu});
     }
+
     // ─────────────────────────────────────────
-    // GET ALL DISHES  (Menu Builder — full 7.1 masterlist)
+    // GET PAR LEVEL CATALOG (all items from 9.0 Merged Masterlist, grouped by category)
     // ─────────────────────────────────────────
-    if (data.action === "get_all_dishes") {
+    if (data.action === "get_par_catalog") {
       var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
-      var masterSheet = ssBuffer.getSheetByName("7.1 Dish Masterlist");
-      var masterRows  = masterSheet.getDataRange().getValues();
-      var dishes = [];
-      for (var m = 1; m < masterRows.length; m++) {
-        var dId = String(masterRows[m][0]).trim();
-        if (!dId || !dId.startsWith("#")) continue;
-        var name = String(masterRows[m][2] || "").trim();
-        if (!name) continue;
-        dishes.push({
-          id:          dId,
-          name:        name,
-          diet:        masterRows[m][3] || "",
-          category:    masterRows[m][1] || "",
-          image:       masterRows[m][21] || "",
-          description: masterRows[m][23] || "",
-          cal:         masterRows[m][24] || "",
-          protein:     masterRows[m][25] || "",
-          carbs:       masterRows[m][26] || "",
-          fat:         masterRows[m][27] || "",
-          tags:        masterRows[m][32] || "",
-          allergens:   masterRows[m][4] || "",
-          cuisine:     masterRows[m][5] || ""
+      var sheet = ssBuffer.getSheetByName("9.0 Merged Masterlist");
+      if (!sheet) return jsonOut({error: "9.0 Merged Masterlist not found"});
+      var rows = sheet.getDataRange().getValues();
+      // Column indices: 0=ID, 2=Name, 3=Diet, 4=Active, 6=Type, 21=Photo URL, 23=Description, 24=Cal, 25=Pro, 26=Carb, 27=Fat, 32=Tags
+      var typeMap = {
+        "Omni - Meat":      "meat_entree",
+        "Meat Only":        "meat_entree",
+        "Omni - Vegan":     "plant_entree",
+        "Vegan Only":       "plant_entree",
+        "Breakfast":        "hot_breakfast",
+        "Sandwich & Wraps": "sandwich_wrap",
+        "Snack":            "snack",
+        "Chia & Parfait":   "chia_oats",
+        "Protein Pack":     "snack",
+        "Bulk Prep":        "snack",
+        "Cookie":           "snack",
+        "Juice":            "juice",
+        "Drink":            "juice"
+      };
+      var catalog = {};
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][4]).trim() !== "Active") continue;
+        var typeRaw = String(rows[i][6] || "").trim();
+        var catId = typeMap[typeRaw];
+        if (!catId) continue;
+        if (!catalog[catId]) catalog[catId] = [];
+        catalog[catId].push({
+          id:    String(rows[i][0]).trim(),
+          name:  String(rows[i][2] || "").trim(),
+          diet:  String(rows[i][3] || "").trim(),
+          type:  typeRaw,
+          image: String(rows[i][21] || "").trim(),
+          description: String(rows[i][23] || "").trim(),
+          cal:   rows[i][24] || 0,
+          protein: rows[i][25] || 0,
+          carbs: rows[i][26] || 0,
+          fat:   rows[i][27] || 0,
+          tags:  String(rows[i][32] || "").trim()
         });
       }
-      return jsonOut({dishes: dishes});
+      // No placeholders needed — all categories now pull from 9.0 sheet
+      // Cookies map to "snack", Drinks map to "juice"
+      return jsonOut({catalog: catalog});
     }
+
     // ─────────────────────────────────────────
-    // SAVE MENU STATE  (Menu Builder → "Menu Builder State" tab)
+    // COMPUTE WEEKLY SWAPS (compare two weeks in 8.0 Menu Schedule)
+    // Returns: { swaps: [{oldId, newId, oldName, newName, diet}], fromAnchor, toAnchor }
     // ─────────────────────────────────────────
-    if (data.action === "save_menu_state") {
+    if (data.action === "compute_weekly_swaps") {
+      var fromAnchor = String(data.from_anchor || "").trim();
+      var toAnchor = String(data.to_anchor || "").trim();
+      if (!fromAnchor || !toAnchor) return jsonOut({error: "from_anchor and to_anchor required"});
+
       var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
-      var stateSheet = ssBuffer.getSheetByName("Menu Builder State");
-      if (!stateSheet) {
-        stateSheet = ssBuffer.insertSheet("Menu Builder State");
-        stateSheet.appendRow(["SavedAt", "WeekOf", "Day", "MealSlot", "DishID", "DishName", "Diet", "SavedBy"]);
+      var schedSheet = ssBuffer.getSheetByName("8.0 Menu Schedule");
+      var schedRows = schedSheet.getDataRange().getValues();
+      var MEAT_COL = 35;
+      var VEGAN_COL = 36;
+
+      function extractIds(cellVal) {
+        if (!cellVal) return [];
+        var matches = cellVal.toString().match(/#\d+/g);
+        return matches || [];
       }
-      // Clear previous entries for this week
-      var weekOf = data.week_of || "";
-      if (weekOf) {
-        var existingRows = stateSheet.getDataRange().getValues();
-        for (var r = existingRows.length - 1; r >= 1; r--) {
-          if (String(existingRows[r][1]).trim() === weekOf) {
-            stateSheet.deleteRow(r + 1);
+      function findWeekIds(anchor) {
+        var anchorMs = new Date(anchor + 'T12:00:00Z').getTime();
+        for (var i = 1; i < schedRows.length; i++) {
+          var cellVal = schedRows[i][7];
+          if (!cellVal) continue;
+          var dt = new Date(cellVal);
+          if (isNaN(dt.getTime())) continue;
+          if (Math.abs(dt.getTime() - anchorMs) <= 24*60*60*1000) {
+            return { meat: extractIds(schedRows[i][MEAT_COL]), vegan: extractIds(schedRows[i][VEGAN_COL]) };
+          }
+        }
+        return { meat: [], vegan: [] };
+      }
+
+      var fromIds = findWeekIds(fromAnchor);
+      var toIds = findWeekIds(toAnchor);
+
+      // Build dish name lookup from 7.1 masterlist
+      var masterSheet = ssBuffer.getSheetByName("7.1 Dish Masterlist");
+      var masterRows = masterSheet.getDataRange().getValues();
+      var nameMap = {};
+      for (var m = 1; m < masterRows.length; m++) {
+        var dId = String(masterRows[m][0]).trim();
+        if (dId) nameMap[dId] = String(masterRows[m][2] || "").trim();
+      }
+
+      // Also check 9.0 for names not in 7.1
+      var master9 = ssBuffer.getSheetByName("9.0 Merged Masterlist");
+      if (master9) {
+        var m9Rows = master9.getDataRange().getValues();
+        for (var m = 1; m < m9Rows.length; m++) {
+          var dId = String(m9Rows[m][0]).trim();
+          if (dId && !nameMap[dId]) nameMap[dId] = String(m9Rows[m][2] || "").trim();
+        }
+      }
+
+      // Compare position-by-position for meat and vegan
+      var swaps = [];
+      function compareSlots(fromList, toList, diet) {
+        var maxLen = Math.max(fromList.length, toList.length);
+        for (var i = 0; i < maxLen; i++) {
+          var oldId = fromList[i] || null;
+          var newId = toList[i] || null;
+          if (oldId && newId && oldId !== newId) {
+            swaps.push({
+              oldId: oldId, newId: newId,
+              oldName: nameMap[oldId] || oldId,
+              newName: nameMap[newId] || newId,
+              diet: diet, status: "direct"
+            });
+          } else if (oldId && !newId) {
+            swaps.push({ oldId: oldId, newId: null, oldName: nameMap[oldId] || oldId, newName: null, diet: diet, status: "removed" });
+          } else if (!oldId && newId) {
+            swaps.push({ oldId: null, newId: newId, oldName: null, newName: nameMap[newId] || newId, diet: diet, status: "added" });
+          }
+          // oldId === newId → no swap, dish stays
+        }
+      }
+      compareSlots(fromIds.meat, toIds.meat, "meat");
+      compareSlots(fromIds.vegan, toIds.vegan, "vegan");
+
+      return jsonOut({
+        swaps: swaps,
+        fromAnchor: fromAnchor, toAnchor: toAnchor,
+        fromMeatCount: fromIds.meat.length, toMeatCount: toIds.meat.length,
+        fromVeganCount: fromIds.vegan.length, toVeganCount: toIds.vegan.length,
+        unchanged: {
+          meat: fromIds.meat.filter(function(id, i) { return toIds.meat[i] === id; }).length,
+          vegan: fromIds.vegan.filter(function(id, i) { return toIds.vegan[i] === id; }).length
+        }
+      });
+    }
+
+    // ─────────────────────────────────────────
+    // REBUILD PAR CARTS (Friday AM auto-trigger — apply swaps to all company carts)
+    // ─────────────────────────────────────────
+    if (data.action === "rebuild_par_carts") {
+      var tz = Session.getScriptTimeZone();
+      // Determine current and next week anchors
+      var today = new Date();
+      var sun = new Date(today); sun.setDate(sun.getDate() - sun.getDay()); sun.setHours(0,0,0,0);
+      var currentAnchor = Utilities.formatDate(sun, tz, "yyyy-MM-dd");
+      var nextSun = new Date(sun); nextSun.setDate(nextSun.getDate() + 7);
+      var nextAnchor = Utilities.formatDate(nextSun, tz, "yyyy-MM-dd");
+
+      // Get swap map
+      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+      var schedSheet = ssBuffer.getSheetByName("8.0 Menu Schedule");
+      var schedRows = schedSheet.getDataRange().getValues();
+      var MEAT_COL = 35, VEGAN_COL = 36;
+      function extractIds2(cellVal) {
+        if (!cellVal) return [];
+        return cellVal.toString().match(/#\d+/g) || [];
+      }
+      function findIds2(anchor) {
+        var anchorMs = new Date(anchor + 'T12:00:00Z').getTime();
+        for (var i = 1; i < schedRows.length; i++) {
+          var dt = new Date(schedRows[i][7]);
+          if (!isNaN(dt.getTime()) && Math.abs(dt.getTime() - anchorMs) <= 24*60*60*1000) {
+            return { meat: extractIds2(schedRows[i][MEAT_COL]), vegan: extractIds2(schedRows[i][VEGAN_COL]) };
+          }
+        }
+        return { meat: [], vegan: [] };
+      }
+      var fromIds = findIds2(currentAnchor);
+      var toIds = findIds2(nextAnchor);
+
+      // Build swap map: oldId → newId
+      var swapMap = {};
+      function buildSwapMap(fromList, toList) {
+        for (var i = 0; i < Math.min(fromList.length, toList.length); i++) {
+          if (fromList[i] !== toList[i]) swapMap[fromList[i]] = toList[i];
+        }
+      }
+      buildSwapMap(fromIds.meat, toIds.meat);
+      buildSwapMap(fromIds.vegan, toIds.vegan);
+
+      // Get all companies with par levels
+      var parSheet = ssHub.getSheetByName("ParLevels");
+      if (!parSheet) return jsonOut({success: true, message: "No ParLevels sheet", rebuilt: 0});
+      var parRows = parSheet.getDataRange().getValues();
+      var parHeaders = parRows[0];
+      var coIdx = parHeaders.indexOf("CompanyID");
+      var catIdx = parHeaders.indexOf("CategoryID");
+      var itemsIdx = parHeaders.indexOf("ItemsJSON");
+      var weekIdx = parHeaders.indexOf("CartWeekAnchor");
+      var swapLogIdx = parHeaders.indexOf("SwapLog");
+
+      // Add CartWeekAnchor and SwapLog columns if missing
+      if (weekIdx < 0) {
+        weekIdx = parHeaders.length;
+        parSheet.getRange(1, weekIdx + 1).setValue("CartWeekAnchor");
+      }
+      if (swapLogIdx < 0) {
+        swapLogIdx = parHeaders.length + (weekIdx === parHeaders.length ? 1 : 0);
+        parSheet.getRange(1, swapLogIdx + 1).setValue("SwapLog");
+      }
+
+      var rebuilt = 0;
+      for (var i = 1; i < parRows.length; i++) {
+        var catId = String(parRows[i][catIdx]).trim();
+        // Only swap rotating categories (entrees, sandwiches)
+        if (catId !== "meat_entree" && catId !== "plant_entree" && catId !== "sandwich_wrap") continue;
+        var itemsJson = String(parRows[i][itemsIdx] || "[]");
+        var items = [];
+        try { items = JSON.parse(itemsJson); } catch(e) { continue; }
+        if (items.length === 0) continue;
+
+        var swapLog = [];
+        var newItems = items.map(function(item) {
+          var id = item.id || item;
+          if (swapMap[id]) {
+            swapLog.push({ old: id, new: swapMap[id] });
+            return typeof item === 'string' ? swapMap[id] : Object.assign({}, item, { id: swapMap[id], swapped: true });
+          }
+          return item;
+        });
+
+        // Auto-top-up: if hand-pick mode and total qty < target, fill remaining with random picks
+        var qtyIdx = parHeaders.indexOf("Qty");
+        var targetIdx = parHeaders.indexOf("Target");
+        var modeIdx = parHeaders.indexOf("Mode");
+        var currentQty = parseInt(parRows[i][qtyIdx]) || 0;
+        var targetQty = parseInt(parRows[i][targetIdx]) || 0;
+        var mode = String(parRows[i][modeIdx] || "auto").trim();
+
+        if (mode === "handpick" && targetQty > 0 && currentQty < targetQty) {
+          // Get available dishes for this category from the next week's menu
+          var availableIds = catId === "meat_entree" ? toIds.meat :
+                            catId === "plant_entree" ? toIds.vegan : [];
+          var pickedIds = newItems.map(function(it) { return it.id || it; });
+          var unpicked = availableIds.filter(function(id) { return pickedIds.indexOf(id) < 0; });
+          // Shuffle unpicked for randomness
+          for (var s = unpicked.length - 1; s > 0; s--) {
+            var j = Math.floor(Math.random() * (s + 1));
+            var tmp = unpicked[s]; unpicked[s] = unpicked[j]; unpicked[j] = tmp;
+          }
+          var toFill = targetQty - currentQty;
+          var filled = 0;
+          for (var f = 0; f < unpicked.length && filled < toFill; f++) {
+            newItems.push({ id: unpicked[f], qty: 1, autoFilled: true });
+            filled++;
+          }
+          if (filled > 0) {
+            currentQty += filled;
+            if (qtyIdx >= 0) parSheet.getRange(i + 1, qtyIdx + 1).setValue(currentQty);
+            swapLog.push({ action: "auto_topup", filled: filled });
+          }
+        }
+
+        if (swapLog.length > 0) {
+          parSheet.getRange(i + 1, itemsIdx + 1).setValue(JSON.stringify(newItems));
+          parSheet.getRange(i + 1, weekIdx + 1).setValue(nextAnchor);
+          parSheet.getRange(i + 1, swapLogIdx + 1).setValue(JSON.stringify(swapLog));
+          rebuilt++;
+        }
+      }
+
+      return jsonOut({
+        success: true,
+        rebuilt: rebuilt,
+        swapCount: Object.keys(swapMap).length,
+        currentAnchor: currentAnchor,
+        nextAnchor: nextAnchor
+      });
+    }
+
+    // ─────────────────────────────────────────
+    // GET BENEFIT LEVELS (for a company)
+    // ─────────────────────────────────────────
+    if (data.action === "get_benefit_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var levels = _getBenefitLevels(ssHub, companyId);
+      // Auto-create "General" level from Companies columns if missing
+      var hasGeneral = levels.some(function(l) { return l.LevelName === "General"; });
+      if (!hasGeneral && companyId) {
+        var compSheet = ssHub.getSheetByName("Companies");
+        if (compSheet) {
+          var compRows = compSheet.getDataRange().getValues();
+          var compHeaders = compRows[0];
+          var compRow = null;
+          for (var ci = 1; ci < compRows.length; ci++) {
+            if (String(compRows[ci][0]).trim().toUpperCase() === companyId) { compRow = compRows[ci]; break; }
+          }
+          if (compRow) {
+            var lvSheet = ssHub.getSheetByName("BenefitLevels");
+            if (!lvSheet) {
+              lvSheet = ssHub.insertSheet("BenefitLevels");
+              lvSheet.appendRow(["CompanyID","LevelID","LevelName","LevelOrder","FreeMealsPerWeek","FreeTier_EmployeePrice","FreeTier_BDSubsidy","FreeTier_CompanySubsidy","Tier1_Meals","Tier1_EmployeePrice","Tier1_BDSubsidy","Tier1_CompanySubsidy","Tier2_Meals","Tier2_EmployeePrice","Tier2_BDSubsidy","Tier2_CompanySubsidy","Tier3_Meals","Tier3_EmployeePrice","Tier3_BDSubsidy","Tier3_CompanySubsidy","MaxMealsPerWeek","FullPrice"]);
+              lvSheet.setFrozenRows(1);
+            }
+            var g = function(f) { var idx = compHeaders.indexOf(f); return idx >= 0 ? (compRow[idx] || "") : ""; };
+            lvSheet.appendRow([companyId, "general", "General", 0,
+              g("FreeMealsPerWeek"), g("FreeTier_EmployeePrice"), g("FreeTier_BDSubsidy"), g("FreeTier_CompanySubsidy"),
+              g("Tier1_Meals"), g("Tier1_EmployeePrice"), g("Tier1_BDSubsidy"), g("Tier1_CompanySubsidy"),
+              g("Tier2_Meals"), g("Tier2_EmployeePrice"), g("Tier2_BDSubsidy"), g("Tier2_CompanySubsidy"),
+              g("Tier3_Meals"), g("Tier3_EmployeePrice"), g("Tier3_BDSubsidy"), g("Tier3_CompanySubsidy"),
+              g("MaxMealsPerWeek"), g("FullPrice")]);
+            levels = _getBenefitLevels(ssHub, companyId);
           }
         }
       }
-      // Write new entries
-      var entries = data.entries || [];
-      var now = new Date();
-      var savedBy = data.saved_by || "Chef";
-      for (var e = 0; e < entries.length; e++) {
-        var entry = entries[e];
-        stateSheet.appendRow([
-          now,
-          weekOf,
-          entry.day || "",
-          entry.slot || "",
-          entry.dish_id || "",
-          entry.dish_name || "",
-          entry.diet || "",
-          savedBy
-        ]);
-      }
-      return jsonOut({success: true, saved: entries.length});
+      return jsonOut({levels: levels});
     }
     // ─────────────────────────────────────────
-    // LOAD MENU STATE  (Menu Builder — read saved grid)
+    // SAVE BENEFIT LEVELS (bulk replace for a company)
     // ─────────────────────────────────────────
-    if (data.action === "load_menu_state") {
-      var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
-      var stateSheet = ssBuffer.getSheetByName("Menu Builder State");
-      if (!stateSheet) return jsonOut({entries: []});
-      var rows = stateSheet.getDataRange().getValues();
-      var weekOf = data.week_of || "";
-      var entries = [];
-      for (var i = 1; i < rows.length; i++) {
-        if (weekOf && String(rows[i][1]).trim() !== weekOf) continue;
-        entries.push({
-          day:       rows[i][2],
-          slot:      rows[i][3],
-          dish_id:   rows[i][4],
-          dish_name: rows[i][5],
-          diet:      rows[i][6]
+    if (data.action === "save_benefit_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      if (!companyId) return jsonOut({success: false, error: "CompanyID required"});
+      var levels = data.levels || [];
+      var sheet = ssHub.getSheetByName("BenefitLevels");
+      if (!sheet) {
+        sheet = ssHub.insertSheet("BenefitLevels");
+        sheet.appendRow(["CompanyID","LevelID","LevelName","LevelOrder","FreeMealsPerWeek","FreeTier_EmployeePrice","FreeTier_BDSubsidy","FreeTier_CompanySubsidy","Tier1_Meals","Tier1_EmployeePrice","Tier1_BDSubsidy","Tier1_CompanySubsidy","Tier2_Meals","Tier2_EmployeePrice","Tier2_BDSubsidy","Tier2_CompanySubsidy","Tier3_Meals","Tier3_EmployeePrice","Tier3_BDSubsidy","Tier3_CompanySubsidy","MaxMealsPerWeek","FullPrice"]);
+        sheet.setFrozenRows(1);
+      }
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0];
+      // Delete existing rows for this company (bottom-up to avoid index shift)
+      for (var i = rows.length - 1; i >= 1; i--) {
+        if (String(rows[i][0]).trim().toUpperCase() === companyId) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+      // Append new levels
+      levels.forEach(function(lv, idx) {
+        var row = headers.map(function(h) {
+          if (h === "CompanyID") return companyId;
+          if (h === "LevelOrder") return idx + 1;
+          return lv[h] !== undefined ? lv[h] : "";
         });
-      }
-      return jsonOut({entries: entries});
+        sheet.appendRow(row);
+      });
+      return jsonOut({success: true});
     }
     // ─────────────────────────────────────────
-    // ALL LEGACY ACTIONS — UNCHANGED
+    // DELETE BENEFIT LEVEL (with employee reassignment)
     // ─────────────────────────────────────────
-    if (data.action === "get_profile_data") {
-      var s1Rows = sheet1.getDataRange().getValues();
-      var bookingData = {};
-      for (var i = 1; i < s1Rows.length; i++) {
-        var rDate = Utilities.formatDate(new Date(s1Rows[i][0]), Session.getScriptTimeZone(), "yyyy-MM-dd");
-        if (s1Rows[i][2] == data.school && rDate == data.date) {
-          bookingData = { contact: s1Rows[i][1], address: s1Rows[i][3], staff_count: s1Rows[i][4], lunch_hours: s1Rows[i][5], notes: s1Rows[i][6], status: s1Rows[i][7], email: s1Rows[i][8] || "" };
-          break;
+    if (data.action === "delete_benefit_level") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var levelId = String(data.level_id || "").trim();
+      var levelName = String(data.level_name || "").trim();
+      if (!companyId || !levelId) return jsonOut({success: false, error: "CompanyID and level_id required"});
+      if (levelName === "General") return jsonOut({success: false, error: "Cannot delete the General level"});
+
+      // Count employees on this level
+      var empSheet = ssHub.getSheetByName("Employees");
+      var reassigned = 0;
+      if (empSheet) {
+        var empRows = empSheet.getDataRange().getValues();
+        var empHeaders = empRows[0];
+        var empCoIdx = empHeaders.indexOf("CompanyID");
+        var empLvIdx = empHeaders.indexOf("BenefitLevel");
+        if (empLvIdx >= 0) {
+          for (var e = 1; e < empRows.length; e++) {
+            if (String(empRows[e][empCoIdx]).trim().toUpperCase() !== companyId) continue;
+            if (String(empRows[e][empLvIdx]).trim() === levelName) {
+              empSheet.getRange(e + 1, empLvIdx + 1).setValue("General");
+              reassigned++;
+            }
+          }
         }
       }
-      var orderSheet = ssHub.getSheetByName("TeacherOrders");
-      var orders = [];
-      if (orderSheet) {
-        var oRows = orderSheet.getDataRange().getValues();
-        for (var j = 1; j < oRows.length; j++) {
-          var oDate = oRows[j][2];
-          if (oDate instanceof Date) oDate = Utilities.formatDate(oDate, Session.getScriptTimeZone(), "yyyy-MM-dd");
-          if (oRows[j][1] == data.school && oDate == data.date)
-            orders.push({ teacher: oRows[j][3], meal_id: oRows[j][4], dish_name: oRows[j][5] || "", diet: oRows[j][6] || "" });
+
+      // Delete the level row from BenefitLevels
+      var lvSheet = ssHub.getSheetByName("BenefitLevels");
+      if (lvSheet) {
+        var lvRows = lvSheet.getDataRange().getValues();
+        var lvHeaders = lvRows[0];
+        var lvIdIdx = lvHeaders.indexOf("LevelID");
+        for (var d = lvRows.length - 1; d >= 1; d--) {
+          if (String(lvRows[d][0]).trim().toUpperCase() === companyId &&
+              String(lvRows[d][lvIdIdx]).trim() === levelId) {
+            lvSheet.deleteRow(d + 1);
+          }
         }
       }
-      bookingData.orders = orders;
-      return jsonOut(bookingData);
+
+      return jsonOut({success: true, reassigned: reassigned, deletedLevel: levelName});
     }
-    if (data.action === "update_booking") {
-      var rows = sheet1.getDataRange().getValues();
+    // ─────────────────────────────────────────
+    // GET EMPLOYEE COUNT PER BENEFIT LEVEL
+    // ─────────────────────────────────────────
+    if (data.action === "get_level_employee_count") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var levelName = String(data.level_name || "").trim();
+      var empSheet = ssHub.getSheetByName("Employees");
+      var count = 0;
+      if (empSheet) {
+        var empRows = empSheet.getDataRange().getValues();
+        var empHeaders = empRows[0];
+        var empCoIdx = empHeaders.indexOf("CompanyID");
+        var empLvIdx = empHeaders.indexOf("BenefitLevel");
+        if (empLvIdx >= 0) {
+          for (var e = 1; e < empRows.length; e++) {
+            if (String(empRows[e][empCoIdx]).trim().toUpperCase() !== companyId) continue;
+            var empLv = String(empRows[e][empLvIdx] || "General").trim();
+            if (empLv === levelName) count++;
+          }
+        }
+      }
+      return jsonOut({count: count, levelName: levelName});
+    }
+    // ─────────────────────────────────────────
+    // UPDATE EMPLOYEE BENEFIT LEVEL
+    // ─────────────────────────────────────────
+    if (data.action === "update_employee_level") {
+      var empSheet = getOrCreateEmployeesSheet(ssHub);
+      var rows = empSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var emailIdx = headers.indexOf("Email");
+      var coIdx = headers.indexOf("CompanyID");
+      var levelIdx = headers.indexOf("BenefitLevel");
+      if (levelIdx < 0) {
+        levelIdx = headers.length;
+        empSheet.getRange(1, levelIdx + 1).setValue("BenefitLevel");
+      }
+      var email = String(data.email || "").trim().toLowerCase();
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var newLevel = String(data.benefit_level || "General").trim();
       for (var i = 1; i < rows.length; i++) {
-        var rDate = Utilities.formatDate(new Date(rows[i][0]), Session.getScriptTimeZone(), "yyyy-MM-dd");
-        if (rows[i][2] == data.school && rDate == data.date) {
-          sheet1.getRange(i + 1, 8).setValue(data.status);
-          sheet1.getRange(i + 1, 9).setValue(data.email);
-          return ContentService.createTextOutput("Update Success");
+        if (String(rows[i][emailIdx]).trim().toLowerCase() === email &&
+            String(rows[i][coIdx]).trim().toUpperCase() === companyId) {
+          empSheet.getRange(i + 1, levelIdx + 1).setValue(newLevel);
+          return jsonOut({success: true});
         }
       }
-      return ContentService.createTextOutput("Error: Booking not found");
-    }
-    if (data.action === "submit_teacher_order") {
-      var orderSheet = ssHub.getSheetByName("TeacherOrders");
-      if (!orderSheet) {
-        orderSheet = ssHub.insertSheet("TeacherOrders");
-        orderSheet.appendRow(["Timestamp","School","Delivery Date","Teacher Name","Meal ID","Dish Name","Diet Type"]);
-      }
-      orderSheet.appendRow([new Date(), data.school, data.delivery_date, data.name, data.meal_id, data.dish_name || ("Dish #" + data.meal_id), data.diet || "Unknown"]);
-      return ContentService.createTextOutput("Order Success");
-    }
-    if (data.action === "book_principal") {
-      sheet1.appendRow([data.date, data.contact_name, data.school_name, data.address, data.staff_count, data.lunch_time, data.delivery_notes, "🆕 New Booking", data.email]);
-      return ContentService.createTextOutput("Booking Success");
-    }
-    if (data.action === "get_all_orders") {
-      var orderSheet = ssHub.getSheetByName("TeacherOrders");
-      var orders = [];
-      if (orderSheet) {
-        var rows = orderSheet.getDataRange().getValues();
-        for (var i = 1; i < rows.length; i++) {
-          var d = rows[i][2];
-          if (Object.prototype.toString.call(d) === "[object Date]") d = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
-          orders.push({ school: rows[i][1], date: d, meal_id: rows[i][4], dish_name: rows[i][5] || "", diet: rows[i][6] || "" });
-        }
-      }
-      return jsonOut(orders);
-    }
-    if (data.action === "get_blocked_dates") {
-      var blockSheet = ssHub.getSheetByName("BlockedDates");
-      if (!blockSheet) return jsonOut([]);
-      var bRows = blockSheet.getDataRange().getValues();
-      var blocked = [];
-      for (var i = 1; i < bRows.length; i++) {
-        var d = bRows[i][0];
-        if (d) blocked.push(Object.prototype.toString.call(d) === "[object Date]" ? Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd") : String(d).trim());
-      }
-      return jsonOut(blocked);
-    }
-    if (data.action === "toggle_block_date") {
-      var blockSheet = ssHub.getSheetByName("BlockedDates");
-      if (!blockSheet) { blockSheet = ssHub.insertSheet("BlockedDates"); blockSheet.appendRow(["Blocked Date"]); }
-      var bRows = blockSheet.getDataRange().getValues();
-      var found = false;
-      for (var i = 1; i < bRows.length; i++) {
-        var d = bRows[i][0];
-        var dStr = Object.prototype.toString.call(d) === "[object Date]" ? Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd") : String(d).trim();
-        if (dStr === data.date) { blockSheet.deleteRow(i + 1); found = true; break; }
-      }
-      if (!found) blockSheet.appendRow([data.date]);
-      return ContentService.createTextOutput("Toggled");
+      return jsonOut({success: false, error: "Employee not found"});
     }
     // ─────────────────────────────────────────
     // GET ALL COMPANIES
@@ -952,30 +1210,14 @@ function doPost(e) {
       var companyId = String(data.company_id || "").trim().toUpperCase();
       var invSheet  = getOrCreateInvoiceSheet(ssHub);
       var rows      = invSheet.getDataRange().getValues();
+      var headers   = rows[0];
+      var companyIdIdx = headers.indexOf("CompanyID");
       var result    = [];
       for (var i = 1; i < rows.length; i++) {
-        if (String(rows[i][1]).trim().toUpperCase() !== companyId) continue;
-        result.push({
-          invoiceId:      rows[i][0],
-          companyId:      rows[i][1],
-          companyName:    rows[i][2],
-          weekOf:         rows[i][3] ? Utilities.formatDate(new Date(rows[i][3]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          sundayAnchor:   rows[i][4],
-          totalOrders:    rows[i][5],
-          totalMeals:     rows[i][6],
-          totalEmployees: rows[i][7],
-          employeePaid:   rows[i][8],
-          companyOwed:    rows[i][9],
-          bdContributed:  rows[i][10],
-          breakdown:      rows[i][11] ? JSON.parse(rows[i][11]) : [],
-          status:         rows[i][12] || "pending",
-          createdAt:      rows[i][13] ? Utilities.formatDate(new Date(rows[i][13]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paidAt:         rows[i][14] ? Utilities.formatDate(new Date(rows[i][14]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paymentMethod:  rows[i][15] || "",
-          notes:          rows[i][16] || ""
-        });
+        if (String(rows[i][companyIdIdx]).trim().toUpperCase() !== companyId) continue;
+        result.push(_readInvoiceRow(headers, rows[i]));
       }
-      result.sort(function(a,b){ return b.weekOf.localeCompare(a.weekOf); });
+      result.sort(function(a,b){ return (b.PeriodStart || "").localeCompare(a.PeriodStart || ""); });
       return jsonOut({invoices: result});
     }
     // ─────────────────────────────────────────
@@ -984,48 +1226,46 @@ function doPost(e) {
     if (data.action === "get_all_invoices") {
       var invSheet = getOrCreateInvoiceSheet(ssHub);
       var rows     = invSheet.getDataRange().getValues();
+      var headers  = rows[0];
+      var invoiceNumberIdx = headers.indexOf("InvoiceNumber");
       var result   = [];
       for (var i = 1; i < rows.length; i++) {
-        if (!rows[i][0]) continue;
-        result.push({
-          invoiceId:      rows[i][0],
-          companyId:      rows[i][1],
-          companyName:    rows[i][2],
-          weekOf:         rows[i][3] ? Utilities.formatDate(new Date(rows[i][3]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          sundayAnchor:   rows[i][4],
-          totalOrders:    rows[i][5],
-          totalMeals:     rows[i][6],
-          totalEmployees: rows[i][7],
-          employeePaid:   rows[i][8],
-          companyOwed:    rows[i][9],
-          bdContributed:  rows[i][10],
-          breakdown:      rows[i][11] ? JSON.parse(rows[i][11]) : [],
-          status:         rows[i][12] || "pending",
-          createdAt:      rows[i][13] ? Utilities.formatDate(new Date(rows[i][13]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paidAt:         rows[i][14] ? Utilities.formatDate(new Date(rows[i][14]), Session.getScriptTimeZone(), "yyyy-MM-dd") : "",
-          paymentMethod:  rows[i][15] || "",
-          notes:          rows[i][16] || ""
-        });
+        if (!rows[i][invoiceNumberIdx] && !rows[i][headers.indexOf("InvoiceID")]) continue;
+        result.push(_readInvoiceRow(headers, rows[i]));
       }
-      result.sort(function(a,b){ return b.weekOf.localeCompare(a.weekOf); });
+      result.sort(function(a,b){ return (b.PeriodStart || "").localeCompare(a.PeriodStart || ""); });
       return jsonOut({invoices: result});
     }
     // ─────────────────────────────────────────
     // UPDATE INVOICE STATUS  (admin — mark paid/sent)
     // ─────────────────────────────────────────
     if (data.action === "update_invoice_status") {
-      var invoiceId     = String(data.invoice_id || "").trim();
-      var newStatus     = String(data.status || "").trim();
-      var paymentMethod = String(data.payment_method || "").trim();
-      var notes         = String(data.notes || "").trim();
-      var invSheet      = getOrCreateInvoiceSheet(ssHub);
-      var rows          = invSheet.getDataRange().getValues();
+      var invoiceId      = String(data.invoice_id || "").trim();
+      var newStatus      = String(data.status || "").trim();
+      var paymentMethod  = String(data.payment_method || "").trim();
+      var paidAmount     = data.paid_amount;
+      var paymentRef     = String(data.payment_reference || "").trim();
+      var notes          = String(data.notes || "").trim();
+      var invSheet       = getOrCreateInvoiceSheet(ssHub);
+      var rows           = invSheet.getDataRange().getValues();
+      var headers        = rows[0];
+      var invoiceIdIdx   = headers.indexOf("InvoiceID");
+      var statusIdx      = headers.indexOf("Status");
+      var paidAtIdx      = headers.indexOf("PaidAt");
+      var sentAtIdx      = headers.indexOf("SentAt");
+      var paidAmountIdx  = headers.indexOf("PaidAmount");
+      var payRefIdx      = headers.indexOf("PaymentReference");
+      var payMethodIdx   = headers.indexOf("PaymentMethod");
+      var notesIdx       = headers.indexOf("Notes");
       for (var i = 1; i < rows.length; i++) {
-        if (String(rows[i][0]).trim() !== invoiceId) continue;
-        invSheet.getRange(i+1, 13).setValue(newStatus);
-        if (newStatus === "paid") invSheet.getRange(i+1, 15).setValue(new Date());
-        if (paymentMethod) invSheet.getRange(i+1, 16).setValue(paymentMethod);
-        if (notes)         invSheet.getRange(i+1, 17).setValue(notes);
+        if (String(rows[i][invoiceIdIdx]).trim() !== invoiceId) continue;
+        if (statusIdx >= 0) invSheet.getRange(i+1, statusIdx+1).setValue(newStatus);
+        if (newStatus === "paid" && paidAtIdx >= 0) invSheet.getRange(i+1, paidAtIdx+1).setValue(new Date());
+        if (newStatus === "sent" && sentAtIdx >= 0) invSheet.getRange(i+1, sentAtIdx+1).setValue(new Date());
+        if (paymentMethod && payMethodIdx >= 0) invSheet.getRange(i+1, payMethodIdx+1).setValue(paymentMethod);
+        if (paidAmount !== undefined && paidAmount !== "" && paidAmountIdx >= 0) invSheet.getRange(i+1, paidAmountIdx+1).setValue(parseFloat(paidAmount) || 0);
+        if (paymentRef && payRefIdx >= 0) invSheet.getRange(i+1, payRefIdx+1).setValue(paymentRef);
+        if (notes && notesIdx >= 0) invSheet.getRange(i+1, notesIdx+1).setValue(notes);
         return jsonOut({success: true});
       }
       return jsonOut({success: false, error: "Invoice not found"});
@@ -1040,11 +1280,542 @@ function doPost(e) {
       var result = _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, false);
       return jsonOut(result);
     }
+    // ─────────────────────────────────────────
+    // CREATE CREDIT NOTE
+    // ─────────────────────────────────────────
+    if (data.action === "create_credit_note") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var amount = parseFloat(data.amount) || 0;
+      var reason = String(data.reason || "").trim();
+      var createdBy = String(data.created_by || "admin").trim();
+      if (!companyId || amount <= 0) return jsonOut({success:false, error:"CompanyID and positive amount required"});
+
+      var cnSheet = ssHub.getSheetByName("CreditNotes");
+      if (!cnSheet) {
+        cnSheet = ssHub.insertSheet("CreditNotes");
+        cnSheet.appendRow(["CreditNoteID","CompanyID","CompanyName","Amount","Reason","Status","AppliedToInvoice","CreatedAt","CreatedBy","Notes"]);
+        cnSheet.setFrozenRows(1);
+        cnSheet.getRange(1,1,1,10).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+      }
+      // Look up company name
+      var compSheet = ssHub.getSheetByName("Companies");
+      var compRows = compSheet.getDataRange().getValues();
+      var compHeaders = compRows[0];
+      var coNameIdx = compHeaders.indexOf("CompanyName");
+      var coIdIdx = compHeaders.indexOf("CompanyID");
+      var creditBalIdx = compHeaders.indexOf("CreditBalance");
+      var companyName = "", companyRow = -1;
+      for (var k = 1; k < compRows.length; k++) {
+        if (String(compRows[k][coIdIdx]).trim().toUpperCase() === companyId) {
+          companyName = String(compRows[k][coNameIdx] || "");
+          companyRow = k;
+          break;
+        }
+      }
+      // Generate credit note ID
+      var cnRows = cnSheet.getDataRange().getValues();
+      var cnCount = 0;
+      for (var i = 1; i < cnRows.length; i++) {
+        if (String(cnRows[i][1]).trim().toUpperCase() === companyId) cnCount++;
+      }
+      var cnId = "CN-" + companyId + "-" + String(cnCount + 1).padStart(3, "0");
+      cnSheet.appendRow([cnId, companyId, companyName, amount, reason, "pending", "", new Date(), createdBy, data.notes || ""]);
+      // Add to company's credit balance
+      if (creditBalIdx >= 0 && companyRow >= 0) {
+        var currentBal = parseFloat(compRows[companyRow][creditBalIdx]) || 0;
+        compSheet.getRange(companyRow + 1, creditBalIdx + 1).setValue(Math.round((currentBal + amount) * 100) / 100);
+      }
+      return jsonOut({success:true, creditNoteId:cnId});
+    }
+    // ─────────────────────────────────────────
+    // GET CREDIT NOTES (for a company or all)
+    // ─────────────────────────────────────────
+    if (data.action === "get_credit_notes") {
+      var cnSheet = ssHub.getSheetByName("CreditNotes");
+      if (!cnSheet) return jsonOut({creditNotes:[]});
+      var rows = cnSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var companyId = data.company_id ? String(data.company_id).trim().toUpperCase() : null;
+      var result = [];
+      for (var i = 1; i < rows.length; i++) {
+        if (!rows[i][0]) continue;
+        if (companyId && String(rows[i][headers.indexOf("CompanyID")]).trim().toUpperCase() !== companyId) continue;
+        var cn = {};
+        headers.forEach(function(h, idx) {
+          var val = rows[i][idx];
+          if ((h === "CreatedAt") && val) {
+            try { val = Utilities.formatDate(new Date(val), Session.getScriptTimeZone(), "yyyy-MM-dd"); } catch(e) {}
+          }
+          cn[h] = val !== undefined && val !== null ? val : "";
+        });
+        result.push(cn);
+      }
+      return jsonOut({creditNotes:result});
+    }
+    // ─────────────────────────────────────────
+    // VOID CREDIT NOTE
+    // ─────────────────────────────────────────
+    if (data.action === "void_credit_note") {
+      var cnId = String(data.credit_note_id || "").trim();
+      var cnSheet = ssHub.getSheetByName("CreditNotes");
+      if (!cnSheet) return jsonOut({success:false, error:"No CreditNotes sheet"});
+      var rows = cnSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var idIdx = headers.indexOf("CreditNoteID");
+      var statusIdx = headers.indexOf("Status");
+      var amountIdx = headers.indexOf("Amount");
+      var coIdx = headers.indexOf("CompanyID");
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][idIdx]).trim() !== cnId) continue;
+        if (String(rows[i][statusIdx]).trim() === "applied") return jsonOut({success:false, error:"Cannot void an applied credit"});
+        cnSheet.getRange(i+1, statusIdx+1).setValue("void");
+        // Subtract from company credit balance
+        var amt = parseFloat(rows[i][amountIdx]) || 0;
+        var companyId = String(rows[i][coIdx]).trim().toUpperCase();
+        var compSheet = ssHub.getSheetByName("Companies");
+        var compRows = compSheet.getDataRange().getValues();
+        var compHeaders = compRows[0];
+        var creditBalIdx = compHeaders.indexOf("CreditBalance");
+        var compIdIdx = compHeaders.indexOf("CompanyID");
+        for (var k = 1; k < compRows.length; k++) {
+          if (String(compRows[k][compIdIdx]).trim().toUpperCase() === companyId) {
+            var bal = parseFloat(compRows[k][creditBalIdx]) || 0;
+            compSheet.getRange(k+1, creditBalIdx+1).setValue(Math.max(0, Math.round((bal - amt)*100)/100));
+            break;
+          }
+        }
+        return jsonOut({success:true});
+      }
+      return jsonOut({success:false, error:"Credit note not found"});
+    }
+    // ─────────────────────────────────────────
+    // GET AR SUMMARY (aging report for admin dashboard)
+    // ─────────────────────────────────────────
+    if (data.action === "get_ar_summary") {
+      var invSheet = getOrCreateInvoiceSheet(ssHub);
+      var rows = invSheet.getDataRange().getValues();
+      var headers = rows[0];
+      var now = new Date();
+      var summary = {totalOutstanding:0, current:0, over15:0, over30:0, over60:0, over90:0, byCompany:{}};
+      for (var i = 1; i < rows.length; i++) {
+        var inv = _readInvoiceRow(headers, rows[i]);
+        if (inv.Status === "paid" || inv.Status === "void" || !inv.AmountDue) continue;
+        var due = inv.AmountDue;
+        var paidAmt = parseFloat(inv.PaidAmount) || 0;
+        var outstanding = due - paidAmt;
+        if (outstanding <= 0) continue;
+        summary.totalOutstanding += outstanding;
+        // Aging
+        var dueDate = inv.DueDate ? new Date(inv.DueDate + "T12:00:00") : now;
+        var daysOverdue = Math.floor((now - dueDate) / (1000*60*60*24));
+        if (daysOverdue <= 0) summary.current += outstanding;
+        else if (daysOverdue <= 15) summary.current += outstanding;
+        else if (daysOverdue <= 30) summary.over15 += outstanding;
+        else if (daysOverdue <= 60) summary.over30 += outstanding;
+        else if (daysOverdue <= 90) summary.over60 += outstanding;
+        else summary.over90 += outstanding;
+        // By company
+        var co = inv.CompanyID || "UNKNOWN";
+        if (!summary.byCompany[co]) summary.byCompany[co] = {name:inv.CompanyName||co, outstanding:0, invoiceCount:0, oldestDue:""};
+        summary.byCompany[co].outstanding += outstanding;
+        summary.byCompany[co].invoiceCount++;
+        if (!summary.byCompany[co].oldestDue || inv.DueDate < summary.byCompany[co].oldestDue) {
+          summary.byCompany[co].oldestDue = inv.DueDate;
+        }
+      }
+      summary.totalOutstanding = Math.round(summary.totalOutstanding*100)/100;
+      summary.current = Math.round(summary.current*100)/100;
+      summary.over15 = Math.round(summary.over15*100)/100;
+      summary.over30 = Math.round(summary.over30*100)/100;
+      summary.over60 = Math.round(summary.over60*100)/100;
+      summary.over90 = Math.round(summary.over90*100)/100;
+      return jsonOut(summary);
+    }
+    // ─────────────────────────────────────────
+    // SEND ORDER REMINDERS (admin triggers manually)
+    // Returns summary of who was emailed
+    // ─────────────────────────────────────────
+    if (data.action === "send_order_reminders") {
+      var tz = Session.getScriptTimeZone();
+      // Find current week's Sunday anchor
+      var today = new Date();
+      var dow = today.getDay();
+      var sun = new Date(today);
+      sun.setDate(today.getDate() - dow);
+      var sundayAnchor = Utilities.formatDate(sun, tz, "yyyy-MM-dd");
+      var deliveryMon = new Date(sun);
+      deliveryMon.setDate(sun.getDate() + 1);
+      var deliveryLabel = Utilities.formatDate(deliveryMon, tz, "MMMM d, yyyy");
+
+      // Get all employees
+      var empSheet = getOrCreateEmployeesSheet(ssHub);
+      var empRows = empSheet.getDataRange().getValues();
+      var empHeaders = empRows[0];
+
+      // Get all employee orders for this week (exclude office par-level rows)
+      var corpSheet = ssHub.getSheetByName("CorporateOrders");
+      var orderedEmails = {};
+      if (corpSheet) {
+        var oRows = corpSheet.getDataRange().getValues();
+        var oHeaders = oRows[0];
+        var oEmailIdx = oHeaders.indexOf("EmployeeEmail");
+        var oAnchorIdx = oHeaders.indexOf("SundayAnchor");
+        var oTierIdx  = oHeaders.indexOf("Tier");
+        for (var i = 1; i < oRows.length; i++) {
+          if (oTierIdx >= 0 && String(oRows[i][oTierIdx]).trim() === "office") continue;
+          var rawAn = oRows[i][oAnchorIdx];
+          var rowAn = (rawAn instanceof Date) ? Utilities.formatDate(rawAn, tz, "yyyy-MM-dd") : String(rawAn).trim();
+          if (rowAn === sundayAnchor) {
+            orderedEmails[String(oRows[i][oEmailIdx]).trim().toLowerCase()] = true;
+          }
+        }
+      }
+
+      // Find employees who haven't ordered
+      var APP_URL = PropertiesService.getScriptProperties().getProperty("APP_URL") || "https://betterday-app.onrender.com";
+      var sent = 0, skipped = 0, totalEmployees = 0, totalOrdered = 0;
+      var companies = {};
+      // Optional company filter — if provided, only send to these companies
+      var filterCos = null;
+      if (data.company_ids && data.company_ids.length > 0) {
+        filterCos = {};
+        data.company_ids.forEach(function(c) { filterCos[String(c).trim().toUpperCase()] = true; });
+      }
+
+      for (var i = 1; i < empRows.length; i++) {
+        var email = String(empRows[i][4] || "").trim().toLowerCase();
+        var coId = String(empRows[i][1] || "").trim().toUpperCase();
+        if (!email || !coId) continue;
+        if (filterCos && !filterCos[coId]) continue;
+        totalEmployees++;
+        if (!companies[coId]) companies[coId] = {total: 0, ordered: 0};
+        companies[coId].total++;
+
+        if (orderedEmails[email]) {
+          totalOrdered++;
+          companies[coId].ordered++;
+          skipped++;
+          continue;
+        }
+
+        // Send reminder email
+        try {
+          var firstName = String(empRows[i][2] || "").trim() || "there";
+          MailApp.sendEmail({
+            to: email,
+            subject: "Don't forget to order your meals this week!",
+            htmlBody:
+              "<!DOCTYPE html><html><body style='margin:0;padding:0;background:#f4ede3;font-family:-apple-system,BlinkMacSystemFont,sans-serif;'>" +
+              "<table width='100%' cellpadding='0' cellspacing='0' style='background:#f4ede3;padding:40px 16px;'><tr><td align='center'>" +
+              "<table width='480' cellpadding='0' cellspacing='0' style='max-width:480px;width:100%;'>" +
+              "<tr><td style='background:#00465e;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;'>" +
+              "<img src='https://betterday-app.onrender.com/static/Cream%20Logo.png' alt='BetterDay' style='height:32px;display:block;margin:0 auto;'>" +
+              "<div style='font-size:.65rem;color:rgba(250,235,218,.6);letter-spacing:2px;text-transform:uppercase;margin-top:3px;'>FOR WORK</div>" +
+              "</td></tr>" +
+              "<tr><td style='background:#fff;padding:36px 32px 28px;'>" +
+              "<p style='font-size:1.15rem;font-weight:800;color:#0d2030;margin:0 0 10px;'>Hey " + firstName + ", your meals are waiting!</p>" +
+              "<p style='font-size:.9rem;color:#50657a;line-height:1.65;margin:0 0 28px;'>This week's menu is live and orders close <strong>Wednesday at midnight</strong>. Delivery is <strong>" + deliveryLabel + "</strong>.</p>" +
+              "<a href='" + APP_URL + "/work' style='display:block;background:#00465e;color:#fff;text-decoration:none;padding:16px 24px;border-radius:12px;text-align:center;font-weight:700;font-size:1rem;'>Order your meals &rarr;</a>" +
+              "</td></tr>" +
+              "<tr><td style='background:#f9f5f0;border-radius:0 0 16px 16px;padding:20px 32px;border-top:1px solid #e8e0d5;'>" +
+              "<p style='font-size:.75rem;color:#9aabb8;margin:0;'>You're receiving this because you're enrolled in your company's BetterDay meal program.</p>" +
+              "</td></tr></table></td></tr></table></body></html>"
+          });
+          sent++;
+        } catch(mailErr) {
+          Logger.log("Reminder email failed for " + email + ": " + mailErr.toString());
+        }
+      }
+
+      return jsonOut({
+        success: true,
+        sent: sent,
+        skipped: skipped,
+        totalEmployees: totalEmployees,
+        totalOrdered: totalOrdered,
+        weekOf: sundayAnchor,
+        deliveryDate: deliveryLabel
+      });
+    }
+
+    // ─────────────────────────────────────────
+    // MANAGER SAVE MEAL ALLOWANCES (with audit log)
+    // ─────────────────────────────────────────
+    if (data.action === "manager_save_meal_allowances") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var changedBy = String(data.changed_by || "manager").trim();
+      var changes   = data.changes || [];
+      if (!companyId || changes.length === 0) return jsonOut({success: false, error: "Missing data"});
+
+      var compSheet = ssHub.getSheetByName("Companies");
+      var compRows  = compSheet.getDataRange().getValues();
+      var compHeaders = compRows[0];
+      var compRowIdx  = -1;
+      for (var i = 1; i < compRows.length; i++) {
+        if (String(compRows[i][0]).trim().toUpperCase() === companyId) { compRowIdx = i; break; }
+      }
+      if (compRowIdx < 0) return jsonOut({success: false, error: "Company not found"});
+
+      // Get or create MealEditLog sheet
+      var logSheet = ssHub.getSheetByName("MealEditLog");
+      if (!logSheet) {
+        logSheet = ssHub.insertSheet("MealEditLog");
+        logSheet.appendRow(["Timestamp","CompanyID","ChangedBy","LevelType","LevelName","Field","OldValue","NewValue","Description"]);
+        logSheet.setFrozenRows(1);
+        logSheet.getRange(1,1,1,9).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+      }
+
+      var mealFields = ["FreeMealsPerWeek","Tier1_Meals","Tier2_Meals","Tier3_Meals","MaxMealsPerWeek"];
+      var logEntries = [];
+
+      // All levels now live in BenefitLevels sheet (including General/default)
+      var lvSheet = ssHub.getSheetByName("BenefitLevels");
+      if (!lvSheet) return jsonOut({success: false, error: "BenefitLevels sheet not found"});
+      var lvRows = lvSheet.getDataRange().getValues();
+      var lvHeaders = lvRows[0];
+
+      changes.forEach(function(ch) {
+        // Find matching row — "default"/"general" maps to LevelName="General"
+        var targetId = (ch.level === "default" || ch.level === "general") ? "general" : String(ch.level);
+        for (var j = 1; j < lvRows.length; j++) {
+          if (String(lvRows[j][0]).trim().toUpperCase() !== companyId) continue;
+          if (String(lvRows[j][lvHeaders.indexOf("LevelID")]).trim() !== targetId) continue;
+          mealFields.forEach(function(f) {
+            if (ch[f] === undefined) return;
+            var colIdx = lvHeaders.indexOf(f);
+            if (colIdx < 0) return;
+            var oldVal = String(lvRows[j][colIdx] || "0");
+            var newVal = String(ch[f] || "0");
+            if (oldVal !== newVal) {
+              lvSheet.getRange(j + 1, colIdx + 1).setValue(ch[f]);
+              logEntries.push([new Date(), companyId, changedBy, "level", ch.levelName || "General", f, oldVal, newVal,
+                (ch.levelName || "General") + " " + f + ": " + oldVal + " → " + newVal]);
+            }
+          });
+          break;
+        }
+      });
+
+      // Write all log entries
+      logEntries.forEach(function(row) { logSheet.appendRow(row); });
+
+      return jsonOut({success: true, changesLogged: logEntries.length});
+    }
+
+    // ─────────────────────────────────────────
+    // GET MEAL CHANGE LOG
+    // ─────────────────────────────────────────
+    if (data.action === "get_meal_change_log") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var logSheet = ssHub.getSheetByName("MealEditLog");
+      if (!logSheet) return jsonOut({log: []});
+      var rows = logSheet.getDataRange().getValues();
+      var result = [];
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][1]).trim().toUpperCase() !== companyId) continue;
+        result.push({
+          timestamp: rows[i][0] ? Utilities.formatDate(new Date(rows[i][0]), Session.getScriptTimeZone(), "yyyy-MM-dd HH:mm") : "",
+          changedBy: String(rows[i][2] || ""),
+          levelName: String(rows[i][4] || ""),
+          field: String(rows[i][5] || ""),
+          oldValue: String(rows[i][6] || ""),
+          newValue: String(rows[i][7] || ""),
+          description: String(rows[i][8] || "")
+        });
+      }
+      // Most recent first, max 50
+      result.reverse();
+      if (result.length > 50) result = result.slice(0, 50);
+      return jsonOut({log: result});
+    }
+
+    // ─────────────────────────────────────────
+    // GET PAR LEVELS
+    // ─────────────────────────────────────────
+    if (data.action === "get_par_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var sheet = ssHub.getSheetByName("ParLevels");
+      if (!sheet) return jsonOut({levels: {}});
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0];
+      var levels = {};
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toUpperCase() !== companyId) continue;
+        var catId = String(rows[i][1]).trim();
+        levels[catId] = {
+          qty: parseInt(rows[i][2]) || 0,
+          status: String(rows[i][3] || "active").trim(),
+          mode: String(rows[i][4] || "auto").trim(),
+          items: rows[i][5] ? JSON.parse(rows[i][5]) : []
+        };
+      }
+      return jsonOut({levels: levels});
+    }
+
+    // ─────────────────────────────────────────
+    // SAVE PAR LEVELS
+    // ─────────────────────────────────────────
+    if (data.action === "save_par_levels") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      if (!companyId) return jsonOut({success: false, error: "CompanyID required"});
+      var levels = data.levels || {};
+      var sheet = ssHub.getSheetByName("ParLevels");
+      if (!sheet) {
+        sheet = ssHub.insertSheet("ParLevels");
+        sheet.appendRow(["CompanyID","CategoryID","WeeklyQty","Status","Mode","ItemsJSON","LastModified","ModifiedBy"]);
+        sheet.setFrozenRows(1);
+        sheet.getRange(1,1,1,8).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+      }
+      var rows = sheet.getDataRange().getValues();
+      var headers = rows[0];
+      // Delete existing rows for this company (bottom-up)
+      for (var i = rows.length - 1; i >= 1; i--) {
+        if (String(rows[i][0]).trim().toUpperCase() === companyId) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+      // Append new rows
+      var changedBy = String(data.changed_by || "manager").trim();
+      Object.keys(levels).forEach(function(catId) {
+        var lv = levels[catId];
+        sheet.appendRow([
+          companyId,
+          catId,
+          parseInt(lv.qty) || 0,
+          String(lv.status || "active"),
+          String(lv.mode || "auto"),
+          lv.items ? JSON.stringify(lv.items) : "[]",
+          new Date(),
+          changedBy
+        ]);
+      });
+      return jsonOut({success: true});
+    }
+
+    // ─────────────────────────────────────────
+    // CONFIRM PAR ORDER (creates order rows for this week)
+    // ─────────────────────────────────────────
+    if (data.action === "confirm_par_order") {
+      var companyId = String(data.company_id || "").trim().toUpperCase();
+      var changedBy = String(data.changed_by || "manager").trim();
+      var levels = data.levels || {};
+      // Category unit prices (retail before volume discount)
+      var PAR_PRICES = {
+        meat_entree: 16.99, plant_entree: 16.99, sandwich_wrap: 12.99,
+        hot_breakfast: 10.99, chia_oats: 8.99, snack: 5.99, juice: 7.99
+      };
+      // Get company name
+      var compSheet = ssHub.getSheetByName("Companies");
+      var compRows = compSheet.getDataRange().getValues();
+      var compHeaders = compRows[0];
+      var compNameIdx = compHeaders.indexOf("CompanyName");
+      var companyName = "";
+      for (var i = 1; i < compRows.length; i++) {
+        if (String(compRows[i][0]).trim().toUpperCase() === companyId) {
+          companyName = String(compRows[i][compNameIdx] || "");
+          break;
+        }
+      }
+      // Calculate Sunday anchor (next Sunday)
+      var today = new Date();
+      var daysUntilSun = (7 - today.getDay()) % 7;
+      if (daysUntilSun === 0) daysUntilSun = 7;
+      var nextSunday = new Date(today);
+      nextSunday.setDate(today.getDate() + daysUntilSun);
+      var sundayAnchor = Utilities.formatDate(nextSunday, Session.getScriptTimeZone(), "yyyy-MM-dd");
+      // Delivery date = Monday after Sunday
+      var deliveryDate = new Date(nextSunday);
+      deliveryDate.setDate(deliveryDate.getDate() + 1);
+      var deliveryStr = Utilities.formatDate(deliveryDate, Session.getScriptTimeZone(), "yyyy-MM-dd");
+      // Get or create order ID
+      var orderId = getNextOrderId(ssHub);
+      // Get CorporateOrders sheet
+      var corpSheet = ssHub.getSheetByName("CorporateOrders");
+      if (!corpSheet) {
+        corpSheet = ssHub.insertSheet("CorporateOrders");
+        corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","PaymentTransactionID","Status","OrderID","EmployeeLevel"]);
+      }
+      var totalItems = 0;
+      Object.keys(levels).forEach(function(catId) {
+        var lv = levels[catId];
+        if (!lv || lv.status === 'paused' || !lv.qty || lv.qty <= 0) return;
+        var unitPrice = PAR_PRICES[catId] || 0;
+        var qty = parseInt(lv.qty) || 0;
+        var items = lv.items || {};
+        var handPickCount = 0;
+        // Write one row per hand-picked item with real dish info
+        Object.keys(items).forEach(function(dishId) {
+          var dishQty = parseInt(items[dishId]) || 0;
+          if (dishQty <= 0) return;
+          for (var n = 0; n < dishQty; n++) {
+            corpSheet.appendRow([
+              new Date(), companyId, companyName, deliveryStr, sundayAnchor,
+              "Office Order (" + changedBy + ")", changedBy,
+              dishId, catId + " (hand-pick)", "par_level", "office",
+              "0.00", unitPrice.toFixed(2), "0.00",
+              "", "confirmed", orderId, "par_level"
+            ]);
+            handPickCount++;
+          }
+        });
+        // Fill remaining qty with auto-fill placeholder rows
+        var remaining = qty - handPickCount;
+        for (var r = 0; r < remaining; r++) {
+          corpSheet.appendRow([
+            new Date(), companyId, companyName, deliveryStr, sundayAnchor,
+            "Office Order (" + changedBy + ")", changedBy,
+            "PAR-" + catId + "-" + (r + 1), catId + " (auto-fill)", "par_level", "office",
+            "0.00", unitPrice.toFixed(2), "0.00",
+            "", "confirmed", orderId, "par_level"
+          ]);
+        }
+        totalItems += qty;
+      });
+      return jsonOut({success: true, orderId: orderId, totalItems: totalItems, deliveryDate: deliveryStr});
+    }
+
     return ContentService.createTextOutput("Error: Unknown Action");
   } catch (err) {
     return ContentService.createTextOutput("Error: " + err.toString());
   }
 }
+// ══════════════════════════════════════════
+// BENEFIT LEVELS HELPER
+// ══════════════════════════════════════════
+function _getBenefitLevels(ssHub, companyId) {
+  var sheet = ssHub.getSheetByName("BenefitLevels");
+  if (!sheet) return [];
+  var rows = sheet.getDataRange().getValues();
+  var headers = rows[0];
+  var levels = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).trim().toUpperCase() !== companyId) continue;
+    var level = {};
+    headers.forEach(function(h, idx) { level[h] = rows[i][idx]; });
+    levels.push(level);
+  }
+  levels.sort(function(a, b) { return (a.LevelOrder || 0) - (b.LevelOrder || 0); });
+  return levels;
+}
+
+function _getEmployeeBenefitLevel(ssHub, companyId, email) {
+  var empSheet = ssHub.getSheetByName("Employees");
+  if (!empSheet) return "General";
+  var rows = empSheet.getDataRange().getValues();
+  var headers = rows[0];
+  var emailIdx = headers.indexOf("Email");
+  var coIdx = headers.indexOf("CompanyID");
+  var levelIdx = headers.indexOf("BenefitLevel");
+  if (emailIdx < 0 || coIdx < 0 || levelIdx < 0) return "General";
+  for (var i = 1; i < rows.length; i++) {
+    if (String(rows[i][emailIdx]).trim().toLowerCase() === email.toLowerCase() &&
+        String(rows[i][coIdx]).trim().toUpperCase() === companyId.toUpperCase()) {
+      return String(rows[i][levelIdx] || "General").trim();
+    }
+  }
+  return "General";
+}
+
 // ══════════════════════════════════════════
 // HELPER FUNCTIONS
 // ══════════════════════════════════════════
@@ -1173,33 +1944,94 @@ function getOrCreateInvoiceSheet(ssHub) {
   if (!sheet) {
     sheet = ssHub.insertSheet("CompanyInvoices");
     sheet.appendRow([
-      "InvoiceID","CompanyID","CompanyName","WeekOf","SundayAnchor",
-      "TotalOrders","TotalMeals","TotalEmployees",
-      "EmployeePaid","CompanyOwed","BDContributed",
-      "TierBreakdownJSON","Status","CreatedAt","PaidAt","PaymentMethod","Notes"
+      "InvoiceNumber","InvoiceID","CompanyID","CompanyName","BillingCycle",
+      "PeriodStart","PeriodEnd","SundayAnchors","TotalOrders","TotalMeals",
+      "TotalEmployees","SubtotalFullRetail","EmployeePaid","CompanyOwed",
+      "BDContributed","CreditApplied","AmountDue","TierBreakdownJSON",
+      "Status","CollectionMethod","DueDate","CreatedAt","SentAt","PaidAt",
+      "PaidAmount","PaymentReference","PaymentMethod","OverdueReminderSent","Notes"
     ]);
     sheet.setFrozenRows(1);
-    sheet.getRange(1,1,1,17).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
+    sheet.getRange(1,1,1,29).setFontWeight("bold").setBackground("#00465e").setFontColor("#ffffff");
   }
   return sheet;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INVOICE ROW READER  (header-based — never hardcode column indices)
+// ─────────────────────────────────────────────────────────────────────────────
+function _readInvoiceRow(headers, row) {
+  var tz = Session.getScriptTimeZone();
+  var obj = {};
+  var dateFields = ["PeriodStart","PeriodEnd","DueDate","CreatedAt","SentAt","PaidAt"];
+  for (var c = 0; c < headers.length; c++) {
+    var h = headers[c];
+    var val = row[c];
+    if (dateFields.indexOf(h) >= 0 && val) {
+      try { val = Utilities.formatDate(new Date(val), tz, "yyyy-MM-dd"); } catch(e) { val = String(val); }
+    } else if (h === "TierBreakdownJSON" && val) {
+      try { val = JSON.parse(val); } catch(e) { val = []; }
+    }
+    obj[h] = (val === undefined || val === null) ? "" : val;
+  }
+  return obj;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CORE INVOICE BUILDER  (shared by auto-Thursday trigger + manual generate)
 // ─────────────────────────────────────────────────────────────────────────────
 function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
+  var tz = Session.getScriptTimeZone();
   var invSheet  = getOrCreateInvoiceSheet(ssHub);
   var invRows   = invSheet.getDataRange().getValues();
+  var invHeaders = invRows[0];
+
+  // ── Look up company record (header-based) ──
+  var compSheet = ssHub.getSheetByName("Companies");
+  if (!compSheet) return {success:false, error:"Companies sheet not found"};
+  var compRows = compSheet.getDataRange().getValues();
+  var compHeaders = compRows[0];
+  var compIdIdx         = compHeaders.indexOf("CompanyID");
+  var compNameIdx       = compHeaders.indexOf("CompanyName");
+  var billingCycleIdx   = compHeaders.indexOf("BillingCycle");
+  var collectionIdx     = compHeaders.indexOf("CollectionMethod");
+  var payTermsIdx       = compHeaders.indexOf("PaymentTerms");
+  var invPrefixIdx      = compHeaders.indexOf("InvoicePrefix");
+  var nextInvNumIdx     = compHeaders.indexOf("NextInvoiceNumber");
+  var creditBalIdx      = compHeaders.indexOf("CreditBalance");
+  var fullPriceIdx      = compHeaders.indexOf("FullPrice");
+
+  var companyRow = -1, companyName = "", billingCycle = "weekly", collectionMethod = "";
+  var paymentTerms = "due-on-receipt", invoicePrefix = "BD", nextInvoiceNumber = 1;
+  var creditBalance = 0, fullPrice = 0;
+  for (var k = 1; k < compRows.length; k++) {
+    if (String(compRows[k][compIdIdx]).trim().toUpperCase() === companyId) {
+      companyRow = k;
+      companyName       = compNameIdx >= 0 ? String(compRows[k][compNameIdx] || "") : "";
+      billingCycle      = billingCycleIdx >= 0 ? String(compRows[k][billingCycleIdx] || "weekly").trim() : "weekly";
+      collectionMethod  = collectionIdx >= 0 ? String(compRows[k][collectionIdx] || "").trim() : "";
+      paymentTerms      = payTermsIdx >= 0 ? String(compRows[k][payTermsIdx] || "due-on-receipt").trim() : "due-on-receipt";
+      invoicePrefix     = invPrefixIdx >= 0 ? String(compRows[k][invPrefixIdx] || "BD").trim() : "BD";
+      nextInvoiceNumber = nextInvNumIdx >= 0 ? (parseInt(compRows[k][nextInvNumIdx]) || 1) : 1;
+      creditBalance     = creditBalIdx >= 0 ? (parseFloat(compRows[k][creditBalIdx]) || 0) : 0;
+      fullPrice         = fullPriceIdx >= 0 ? (parseFloat(compRows[k][fullPriceIdx]) || 0) : 0;
+      break;
+    }
+  }
+  if (companyRow < 0) return {success:false, error:"Company not found: " + companyId};
+
+  // ── Build InvoiceID (deterministic, for duplicate check) ──
   var invoiceId = "BD-" + sundayAnchor.replace(/-/g,"").slice(0,8) + "-" + companyId;
 
-  // Skip if already exists (used during auto-run to avoid duplicates)
-  if (skipIfExists) {
+  // ── Duplicate check using InvoiceID column ──
+  var invIdIdx = invHeaders.indexOf("InvoiceID");
+  if (skipIfExists && invIdIdx >= 0) {
     for (var x = 1; x < invRows.length; x++) {
-      if (String(invRows[x][0]).trim() === invoiceId) return {success:false, skipped:true};
+      if (String(invRows[x][invIdIdx]).trim() === invoiceId) return {success:false, skipped:true};
     }
   }
 
-  // Pull orders for this company + week
+  // ── Pull orders for this company + week ──
   var corpSheet = ssHub.getSheetByName("CorporateOrders");
   if (!corpSheet) return {success:false, error:"No CorporateOrders sheet"};
   var rows    = corpSheet.getDataRange().getValues();
@@ -1212,57 +2044,178 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
   var tiIdx   = headers.indexOf("Tier");
   var emIdx   = headers.indexOf("EmployeeEmail");
   var oidIdx  = headers.indexOf("OrderID");
-  var ddIdx   = headers.indexOf("DeliveryDate");
   var cnIdx   = headers.indexOf("CompanyName");
 
-  var empPaid = 0, compOwed = 0, bdContr = 0;
-  var meals = 0, employees = {}, orders = {};
-  var weekOf = "", companyName = "";
+  // ── Separate employee vs office rows ──
+  var empPaid = 0, empCompOwed = 0, empBdContr = 0;
+  var empMeals = 0, officeMeals = 0, employees = {}, orders = {};
   var tierCounts = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
   var tierCompany = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
+  var tierBD     = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
+  var officeRetailSubtotal = 0; // sum of CompanyCoverage for office rows (full retail before discount)
+  var sundayAnchors = {};
 
   for (var i = 1; i < rows.length; i++) {
     if (!rows[i][0]) continue;
     if (String(rows[i][coIdx]).trim().toUpperCase() !== companyId) continue;
-    // SundayAnchor may be stored as a Date object if Sheets auto-converted it
     var rawAnchor = rows[i][anIdx];
     var rowAnchor = rawAnchor instanceof Date
-      ? Utilities.formatDate(rawAnchor, Session.getScriptTimeZone(), "yyyy-MM-dd")
+      ? Utilities.formatDate(rawAnchor, tz, "yyyy-MM-dd")
       : String(rawAnchor).trim();
     if (rowAnchor !== sundayAnchor) continue;
-    meals++;
-    empPaid  += parseFloat(rows[i][epIdx]) || 0;
-    compOwed += parseFloat(rows[i][ccIdx]) || 0;
-    bdContr  += parseFloat(rows[i][bdIdx]) || 0;
-    employees[String(rows[i][emIdx]).trim().toLowerCase()] = true;
     if (oidIdx >= 0) orders[String(rows[i][oidIdx]).trim()] = true;
-    if (!weekOf && ddIdx >= 0 && rows[i][ddIdx]) {
-      weekOf = Utilities.formatDate(new Date(rows[i][ddIdx]), Session.getScriptTimeZone(), "yyyy-MM-dd");
-    }
     if (!companyName && cnIdx >= 0) companyName = String(rows[i][cnIdx]).trim();
+    sundayAnchors[rowAnchor] = true;
     var tier = String(rows[i][tiIdx] || "").trim();
-    if (tierCounts[tier] !== undefined) {
-      tierCounts[tier]++;
-      tierCompany[tier] += parseFloat(rows[i][ccIdx]) || 0;
+
+    if (tier === "office") {
+      // Office par level — CompanyCoverage holds the full retail unit price
+      officeMeals++;
+      officeRetailSubtotal += parseFloat(rows[i][ccIdx]) || 0;
+    } else {
+      // Employee subsidy order
+      empMeals++;
+      empPaid      += parseFloat(rows[i][epIdx]) || 0;
+      empCompOwed  += parseFloat(rows[i][ccIdx]) || 0;
+      empBdContr   += parseFloat(rows[i][bdIdx]) || 0;
+      employees[String(rows[i][emIdx]).trim().toLowerCase()] = true;
+      if (tierCounts[tier] !== undefined) {
+        tierCounts[tier]++;
+        tierCompany[tier] += parseFloat(rows[i][ccIdx]) || 0;
+        tierBD[tier]      += parseFloat(rows[i][bdIdx]) || 0;
+      }
     }
   }
 
+  var meals = empMeals + officeMeals;
   if (meals === 0) return {success:false, error:"No orders found for this week"};
 
-  // Build breakdown array for PDF rendering
+  // ── Volume discount for office orders (BD's contribution) ──
+  officeRetailSubtotal = Math.round(officeRetailSubtotal * 100) / 100;
+  var officeDiscountPct = 0;
+  if (officeRetailSubtotal >= 1000) officeDiscountPct = 25;
+  else if (officeRetailSubtotal >= 500) officeDiscountPct = 20;
+  else if (officeRetailSubtotal >= 250) officeDiscountPct = 15;
+  else if (officeRetailSubtotal > 0) officeDiscountPct = 10;
+  var officeBdContr = Math.round(officeRetailSubtotal * officeDiscountPct / 100 * 100) / 100;
+  var officeCompanyOwes = Math.round((officeRetailSubtotal - officeBdContr) * 100) / 100;
+
+  // ── Totals across both modules ──
+  empCompOwed = Math.round(empCompOwed * 100) / 100;
+  empBdContr  = Math.round(empBdContr * 100) / 100;
+  var compOwed       = Math.round((empCompOwed + officeCompanyOwes) * 100) / 100;
+  var totalBdContr   = Math.round((empBdContr + officeBdContr) * 100) / 100;
+
+  // ── Generate sequential InvoiceNumber ──
+  var paddedNum = String(nextInvoiceNumber);
+  while (paddedNum.length < 3) paddedNum = "0" + paddedNum;
+  var invoiceNumber = invoicePrefix + "-" + paddedNum;
+
+  // Increment NextInvoiceNumber on the Companies sheet
+  if (nextInvNumIdx >= 0 && companyRow >= 0) {
+    compSheet.getRange(companyRow + 1, nextInvNumIdx + 1).setValue(nextInvoiceNumber + 1);
+  }
+
+  // ── Calculate PeriodStart / PeriodEnd from sundayAnchor ──
+  var anchorDate = new Date(sundayAnchor + "T12:00:00");
+  var periodStart = new Date(anchorDate);
+  periodStart.setDate(anchorDate.getDate() + 1); // Monday
+  var periodEnd = new Date(anchorDate);
+  periodEnd.setDate(anchorDate.getDate() + 5); // Friday
+
+  // ── Calculate DueDate from PaymentTerms ──
+  var dueDate = new Date(periodStart);
+  if (paymentTerms === "net-15") {
+    dueDate.setDate(periodStart.getDate() + 15);
+  } else if (paymentTerms === "net-30") {
+    dueDate.setDate(periodStart.getDate() + 30);
+  } else if (paymentTerms === "net-45") {
+    dueDate.setDate(periodStart.getDate() + 45);
+  } else if (paymentTerms === "net-60") {
+    dueDate.setDate(periodStart.getDate() + 60);
+  } else if (paymentTerms === "net-7") {
+    dueDate.setDate(periodStart.getDate() + 7);
+  }
+  // "due-on-receipt" → dueDate stays as periodStart
+
+  // ── SubtotalFullRetail (employee meals at FullPrice + office at retail) ──
+  var subtotalFullRetail = Math.round((empMeals * fullPrice + officeSubtotal) * 100) / 100;
+
+  // ── Apply CreditBalance ──
+  var creditApplied = 0;
+  var amountDue = compOwed;
+  if (creditBalance > 0) {
+    creditApplied = Math.min(creditBalance, compOwed);
+    amountDue = Math.round((compOwed - creditApplied) * 100) / 100;
+    // Update company's CreditBalance
+    if (creditBalIdx >= 0 && companyRow >= 0) {
+      compSheet.getRange(companyRow + 1, creditBalIdx + 1).setValue(Math.round((creditBalance - creditApplied) * 100) / 100);
+    }
+  }
+  creditApplied = Math.round(creditApplied * 100) / 100;
+
+  // ── Build tier breakdown JSON ──
   var breakdown = [];
   var tierLabels = {Free:"Free meals", Tier1:"Tier 1", Tier2:"Tier 2", Tier3:"Tier 3", Additional:"Additional"};
   Object.keys(tierCounts).forEach(function(t) {
-    if (tierCounts[t] > 0) breakdown.push({tier:tierLabels[t], meals:tierCounts[t], companyTotal:Math.round(tierCompany[t]*100)/100});
+    if (tierCounts[t] > 0) breakdown.push({
+      tier: tierLabels[t],
+      meals: tierCounts[t],
+      companyTotal: Math.round(tierCompany[t]*100)/100,
+      bdContribution: Math.round(tierBD[t]*100)/100
+    });
   });
+  // Add office par level section with full retail → discount → net breakdown
+  if (officeMeals > 0) {
+    breakdown.push({
+      tier: "Office Par Levels",
+      meals: officeMeals,
+      retailSubtotal: officeRetailSubtotal,
+      discount: officeDiscountPct + "%",
+      bdContribution: officeBdContr,
+      companyTotal: officeCompanyOwes
+    });
+  }
 
-  invSheet.appendRow([
-    invoiceId, companyId, companyName, weekOf ? new Date(weekOf) : "", sundayAnchor,
-    Object.keys(orders).length || meals, meals, Object.keys(employees).length,
-    Math.round(empPaid*100)/100, Math.round(compOwed*100)/100, Math.round(bdContr*100)/100,
-    JSON.stringify(breakdown), "pending", new Date(), "", "", ""
-  ]);
-  return {success:true, invoiceId:invoiceId};
+  // ── Write all 29 columns using header-based lookups ──
+  var newRow = [];
+  for (var c = 0; c < invHeaders.length; c++) {
+    var h = invHeaders[c];
+    switch(h) {
+      case "InvoiceNumber":      newRow.push(invoiceNumber); break;
+      case "InvoiceID":          newRow.push(invoiceId); break;
+      case "CompanyID":          newRow.push(companyId); break;
+      case "CompanyName":        newRow.push(companyName); break;
+      case "BillingCycle":       newRow.push(billingCycle); break;
+      case "PeriodStart":        newRow.push(periodStart); break;
+      case "PeriodEnd":          newRow.push(periodEnd); break;
+      case "SundayAnchors":      newRow.push(Object.keys(sundayAnchors).join(",")); break;
+      case "TotalOrders":        newRow.push(Object.keys(orders).length || meals); break;
+      case "TotalMeals":         newRow.push(meals); break;
+      case "TotalEmployees":     newRow.push(Object.keys(employees).length); break;
+      case "SubtotalFullRetail": newRow.push(subtotalFullRetail); break;
+      case "EmployeePaid":       newRow.push(Math.round(empPaid*100)/100); break;  // employee subsidy orders only
+      case "CompanyOwed":        newRow.push(compOwed); break;
+      case "BDContributed":      newRow.push(totalBdContr); break;  // employee subsidies + office volume discount
+      case "CreditApplied":      newRow.push(creditApplied); break;
+      case "AmountDue":          newRow.push(amountDue); break;
+      case "TierBreakdownJSON":  newRow.push(JSON.stringify(breakdown)); break;
+      case "Status":             newRow.push("pending"); break;
+      case "CollectionMethod":   newRow.push(collectionMethod); break;
+      case "DueDate":            newRow.push(dueDate); break;
+      case "CreatedAt":          newRow.push(new Date()); break;
+      case "SentAt":             newRow.push(""); break;
+      case "PaidAt":             newRow.push(""); break;
+      case "PaidAmount":         newRow.push(""); break;
+      case "PaymentReference":   newRow.push(""); break;
+      case "PaymentMethod":      newRow.push(""); break;
+      case "OverdueReminderSent": newRow.push(""); break;
+      case "Notes":              newRow.push(""); break;
+      default:                   newRow.push(""); break;
+    }
+  }
+  invSheet.appendRow(newRow);
+  return {success:true, invoiceId:invoiceId, invoiceNumber:invoiceNumber};
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1301,10 +2254,232 @@ function generateWeeklyInvoices() {
     }
   }
 
-  var created = 0, skipped = 0;
+  var created = 0, skipped = 0, errors = [];
   Object.keys(companies).forEach(function(companyId) {
     var result = _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, true);
-    if (result.success) created++; else if (result.skipped) skipped++;
+    if (result.success) {
+      created++;
+      Logger.log("  Created invoice " + (result.invoiceNumber || result.invoiceId) + " for " + companyId);
+    } else if (result.skipped) {
+      skipped++;
+    } else {
+      errors.push(companyId + ": " + (result.error || "unknown"));
+    }
   });
-  Logger.log("generateWeeklyInvoices: anchor=" + sundayAnchor + " created=" + created + " skipped=" + skipped);
+  Logger.log("generateWeeklyInvoices: anchor=" + sundayAnchor + " created=" + created + " skipped=" + skipped + " errors=" + errors.length);
+  if (errors.length > 0) Logger.log("  Errors: " + errors.join("; "));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FRIDAY AUTO-TRIGGER — rebuild par level carts with SKU swaps
+//   Triggers → Add trigger → rebuildParLevelCarts
+//   Time-based → Week timer → Every Friday → 5am–6am
+// ─────────────────────────────────────────────────────────────────────────────
+function rebuildParLevelCarts() {
+  var ssHub = SpreadsheetApp.getActiveSpreadsheet();
+  // Call the rebuild action internally
+  var result = _rebuildParCartsInternal(ssHub);
+  Logger.log("rebuildParLevelCarts: " + JSON.stringify(result));
+}
+
+function _rebuildParCartsInternal(ssHub) {
+  var tz = Session.getScriptTimeZone();
+  var today = new Date();
+  var sun = new Date(today); sun.setDate(sun.getDate() - sun.getDay()); sun.setHours(0,0,0,0);
+  var currentAnchor = Utilities.formatDate(sun, tz, "yyyy-MM-dd");
+  var nextSun = new Date(sun); nextSun.setDate(nextSun.getDate() + 7);
+  var nextAnchor = Utilities.formatDate(nextSun, tz, "yyyy-MM-dd");
+
+  var ssBuffer = SpreadsheetApp.openById(BUFFER_SHEET_ID);
+  var schedSheet = ssBuffer.getSheetByName("8.0 Menu Schedule");
+  var schedRows = schedSheet.getDataRange().getValues();
+  var MEAT_COL = 35, VEGAN_COL = 36;
+
+  function extractIds(cellVal) {
+    return cellVal ? (cellVal.toString().match(/#\d+/g) || []) : [];
+  }
+  function findIds(anchor) {
+    var ms = new Date(anchor + 'T12:00:00Z').getTime();
+    for (var i = 1; i < schedRows.length; i++) {
+      var dt = new Date(schedRows[i][7]);
+      if (!isNaN(dt.getTime()) && Math.abs(dt.getTime() - ms) <= 24*60*60*1000) {
+        return { meat: extractIds(schedRows[i][MEAT_COL]), vegan: extractIds(schedRows[i][VEGAN_COL]) };
+      }
+    }
+    return { meat: [], vegan: [] };
+  }
+
+  var fromIds = findIds(currentAnchor);
+  var toIds = findIds(nextAnchor);
+  var swapMap = {};
+  function buildMap(fromList, toList) {
+    for (var i = 0; i < Math.min(fromList.length, toList.length); i++) {
+      if (fromList[i] !== toList[i]) swapMap[fromList[i]] = toList[i];
+    }
+  }
+  buildMap(fromIds.meat, toIds.meat);
+  buildMap(fromIds.vegan, toIds.vegan);
+
+  var parSheet = ssHub.getSheetByName("ParLevels");
+  if (!parSheet) return { rebuilt: 0, message: "No ParLevels sheet" };
+  var parRows = parSheet.getDataRange().getValues();
+  var parHeaders = parRows[0];
+  var catIdx = parHeaders.indexOf("CategoryID");
+  var itemsIdx = parHeaders.indexOf("ItemsJSON");
+  var weekIdx = parHeaders.indexOf("CartWeekAnchor");
+  var swapLogIdx = parHeaders.indexOf("SwapLog");
+  if (weekIdx < 0) { weekIdx = parHeaders.length; parSheet.getRange(1, weekIdx+1).setValue("CartWeekAnchor"); }
+  if (swapLogIdx < 0) { swapLogIdx = weekIdx + 1; parSheet.getRange(1, swapLogIdx+1).setValue("SwapLog"); }
+
+  var rebuilt = 0;
+  for (var i = 1; i < parRows.length; i++) {
+    var catId = String(parRows[i][catIdx]).trim();
+    if (catId !== "meat_entree" && catId !== "plant_entree" && catId !== "sandwich_wrap") continue;
+    var items = [];
+    try { items = JSON.parse(String(parRows[i][itemsIdx] || "[]")); } catch(e) { continue; }
+    if (items.length === 0) continue;
+
+    var log = [];
+    var newItems = items.map(function(item) {
+      var id = item.id || item;
+      if (swapMap[id]) {
+        log.push({ old: id, "new": swapMap[id] });
+        return typeof item === 'string' ? swapMap[id] : Object.assign({}, item, { id: swapMap[id], swapped: true, swappedFrom: id });
+      }
+      return item;
+    });
+
+    if (log.length > 0) {
+      parSheet.getRange(i+1, itemsIdx+1).setValue(JSON.stringify(newItems));
+      parSheet.getRange(i+1, weekIdx+1).setValue(nextAnchor);
+      parSheet.getRange(i+1, swapLogIdx+1).setValue(JSON.stringify(log));
+      rebuilt++;
+    }
+  }
+
+  // ── Auto-confirm: create next week's CorporateOrders from updated par levels ──
+  var autoConfirmed = _autoConfirmParOrders(ssHub, parSheet, parRows, parHeaders, nextAnchor);
+
+  return { rebuilt: rebuilt, swaps: Object.keys(swapMap).length, from: currentAnchor, to: nextAnchor, autoConfirmed: autoConfirmed };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTO-CONFIRM PAR ORDERS — writes next week's CorporateOrders rows
+// Called by rebuildParLevelCarts after SKU swaps are applied
+// ─────────────────────────────────────────────────────────────────────────────
+function _autoConfirmParOrders(ssHub, parSheet, parRows, parHeaders, nextAnchor) {
+  var tz = Session.getScriptTimeZone();
+  var PAR_PRICES = {
+    meat_entree: 16.99, plant_entree: 16.99, sandwich_wrap: 12.99,
+    hot_breakfast: 10.99, chia_oats: 8.99, snack: 5.99, juice: 7.99
+  };
+
+  var compIdx   = parHeaders.indexOf("CompanyID");
+  var catIdx    = parHeaders.indexOf("CategoryID");
+  var qtyIdx    = parHeaders.indexOf("WeeklyQty");
+  var statusIdx = parHeaders.indexOf("Status");
+  var modeIdx   = parHeaders.indexOf("Mode");
+  var itemsIdx  = parHeaders.indexOf("ItemsJSON");
+
+  // Delivery date = Monday after the Sunday anchor
+  var nextSun = new Date(nextAnchor + "T12:00:00");
+  var deliveryMon = new Date(nextSun);
+  deliveryMon.setDate(nextSun.getDate() + 1);
+  var deliveryStr = Utilities.formatDate(deliveryMon, tz, "yyyy-MM-dd");
+
+  // Check if orders already exist for this anchor (avoid duplicates)
+  var corpSheet = ssHub.getSheetByName("CorporateOrders");
+  if (corpSheet) {
+    var corpRows = corpSheet.getDataRange().getValues();
+    var corpHeaders = corpRows[0];
+    var cTierIdx   = corpHeaders.indexOf("Tier");
+    var cAnchorIdx = corpHeaders.indexOf("SundayAnchor");
+    for (var c = 1; c < corpRows.length; c++) {
+      if (String(corpRows[c][cTierIdx]).trim() === "office") {
+        var rawAn = corpRows[c][cAnchorIdx];
+        var rowAn = (rawAn instanceof Date) ? Utilities.formatDate(rawAn, tz, "yyyy-MM-dd") : String(rawAn).trim();
+        if (rowAn === nextAnchor) {
+          Logger.log("_autoConfirmParOrders: orders already exist for " + nextAnchor + ", skipping");
+          return 0;
+        }
+      }
+    }
+  }
+
+  // Group par level rows by company
+  var byCompany = {};
+  for (var i = 1; i < parRows.length; i++) {
+    var companyId = String(parRows[i][compIdx] || "").trim().toUpperCase();
+    var status    = String(parRows[i][statusIdx] || "").trim();
+    if (!companyId || status === "paused") continue;
+    if (!byCompany[companyId]) byCompany[companyId] = [];
+    byCompany[companyId].push(parRows[i]);
+  }
+
+  // Look up company names
+  var compSheet = ssHub.getSheetByName("Companies");
+  var compRows = compSheet ? compSheet.getDataRange().getValues() : [];
+  var compHeaderRow = compRows[0] || [];
+  var compNameIdx = compHeaderRow.indexOf("CompanyName");
+  var compIdIdx   = compHeaderRow.indexOf("CompanyID");
+  var companyNames = {};
+  for (var j = 1; j < compRows.length; j++) {
+    companyNames[String(compRows[j][compIdIdx] || "").trim().toUpperCase()] = String(compRows[j][compNameIdx] || "");
+  }
+
+  if (!corpSheet) {
+    corpSheet = ssHub.insertSheet("CorporateOrders");
+    corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","PaymentTransactionID","Status","OrderID","EmployeeLevel"]);
+  }
+
+  var totalConfirmed = 0;
+  Object.keys(byCompany).forEach(function(companyId) {
+    var rows = byCompany[companyId];
+    var companyName = companyNames[companyId] || companyId;
+    var orderId = getNextOrderId(ssHub);
+
+    rows.forEach(function(row) {
+      var catId     = String(row[catIdx]).trim();
+      var qty       = parseInt(row[qtyIdx]) || 0;
+      var mode      = String(row[modeIdx] || "auto").trim();
+      var unitPrice = PAR_PRICES[catId] || 0;
+      if (qty <= 0) return;
+
+      var items = {};
+      try { items = JSON.parse(String(row[itemsIdx] || "{}")); } catch(e) { items = {}; }
+
+      var handPickCount = 0;
+      if (mode === "hand-pick" || mode === "handpick") {
+        Object.keys(items).forEach(function(dishId) {
+          var dishQty = parseInt(items[dishId]) || 0;
+          if (dishQty <= 0) return;
+          for (var n = 0; n < dishQty; n++) {
+            corpSheet.appendRow([
+              new Date(), companyId, companyName, deliveryStr, nextAnchor,
+              "Office Order (auto)", "auto-confirm",
+              dishId, catId + " (hand-pick)", "par_level", "office",
+              "0.00", unitPrice.toFixed(2), "0.00",
+              "", "confirmed", orderId, "par_level"
+            ]);
+            handPickCount++;
+          }
+        });
+      }
+
+      var remaining = qty - handPickCount;
+      for (var r = 0; r < remaining; r++) {
+        corpSheet.appendRow([
+          new Date(), companyId, companyName, deliveryStr, nextAnchor,
+          "Office Order (auto)", "auto-confirm",
+          "PAR-" + catId + "-" + (r + 1), catId + " (auto-fill)", "par_level", "office",
+          "0.00", unitPrice.toFixed(2), "0.00",
+          "", "confirmed", orderId, "par_level"
+        ]);
+      }
+      totalConfirmed += qty;
+    });
+  });
+
+  Logger.log("_autoConfirmParOrders: confirmed " + totalConfirmed + " items for " + nextAnchor);
+  return totalConfirmed;
 }
