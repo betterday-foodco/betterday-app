@@ -612,9 +612,13 @@ function doPost(e) {
       if (!corpSheet) return jsonOut([]);
       var rows = corpSheet.getDataRange().getValues();
       var headers = rows[0];
+      var tiIdx = headers.indexOf("Tier");
+      // Exclude office par-level rows by default; pass include_office=true to get everything
+      var excludeOffice = data.include_office ? false : true;
       var orders = [];
       for (var i = 1; i < rows.length; i++) {
         if (!rows[i][0]) continue;
+        if (excludeOffice && tiIdx >= 0 && String(rows[i][tiIdx]).trim() === "office") continue;
         var order = {};
         headers.forEach(function(h, idx) {
           var val = rows[i][idx];
@@ -1448,7 +1452,7 @@ function doPost(e) {
       var empRows = empSheet.getDataRange().getValues();
       var empHeaders = empRows[0];
 
-      // Get all orders for this week
+      // Get all employee orders for this week (exclude office par-level rows)
       var corpSheet = ssHub.getSheetByName("CorporateOrders");
       var orderedEmails = {};
       if (corpSheet) {
@@ -1456,7 +1460,9 @@ function doPost(e) {
         var oHeaders = oRows[0];
         var oEmailIdx = oHeaders.indexOf("EmployeeEmail");
         var oAnchorIdx = oHeaders.indexOf("SundayAnchor");
+        var oTierIdx  = oHeaders.indexOf("Tier");
         for (var i = 1; i < oRows.length; i++) {
+          if (oTierIdx >= 0 && String(oRows[i][oTierIdx]).trim() === "office") continue;
           var rawAn = oRows[i][oAnchorIdx];
           var rowAn = (rawAn instanceof Date) ? Utilities.formatDate(rawAn, tz, "yyyy-MM-dd") : String(rawAn).trim();
           if (rowAn === sundayAnchor) {
@@ -1693,6 +1699,11 @@ function doPost(e) {
       var companyId = String(data.company_id || "").trim().toUpperCase();
       var changedBy = String(data.changed_by || "manager").trim();
       var levels = data.levels || {};
+      // Category unit prices (retail before volume discount)
+      var PAR_PRICES = {
+        meat_entree: 16.99, plant_entree: 16.99, sandwich_wrap: 12.99,
+        hot_breakfast: 10.99, chia_oats: 8.99, snack: 5.99, juice: 7.99
+      };
       // Get company name
       var compSheet = ssHub.getSheetByName("Companies");
       var compRows = compSheet.getDataRange().getValues();
@@ -1728,28 +1739,37 @@ function doPost(e) {
       Object.keys(levels).forEach(function(catId) {
         var lv = levels[catId];
         if (!lv || lv.status === 'paused' || !lv.qty || lv.qty <= 0) return;
-        // One row per category with total qty
-        corpSheet.appendRow([
-          new Date(),
-          companyId,
-          companyName,
-          deliveryStr,
-          sundayAnchor,
-          "Office Order (" + changedBy + ")",
-          changedBy,
-          "PAR-" + catId,
-          catId + " x" + lv.qty,
-          "par_level",
-          "office",
-          "0.00",
-          "0.00",
-          "0.00",
-          "",
-          "confirmed",
-          orderId,
-          "par_level"
-        ]);
-        totalItems += parseInt(lv.qty) || 0;
+        var unitPrice = PAR_PRICES[catId] || 0;
+        var qty = parseInt(lv.qty) || 0;
+        var items = lv.items || {};
+        var handPickCount = 0;
+        // Write one row per hand-picked item with real dish info
+        Object.keys(items).forEach(function(dishId) {
+          var dishQty = parseInt(items[dishId]) || 0;
+          if (dishQty <= 0) return;
+          for (var n = 0; n < dishQty; n++) {
+            corpSheet.appendRow([
+              new Date(), companyId, companyName, deliveryStr, sundayAnchor,
+              "Office Order (" + changedBy + ")", changedBy,
+              dishId, catId + " (hand-pick)", "par_level", "office",
+              "0.00", unitPrice.toFixed(2), "0.00",
+              "", "confirmed", orderId, "par_level"
+            ]);
+            handPickCount++;
+          }
+        });
+        // Fill remaining qty with auto-fill placeholder rows
+        var remaining = qty - handPickCount;
+        for (var r = 0; r < remaining; r++) {
+          corpSheet.appendRow([
+            new Date(), companyId, companyName, deliveryStr, sundayAnchor,
+            "Office Order (" + changedBy + ")", changedBy,
+            "PAR-" + catId + "-" + (r + 1), catId + " (auto-fill)", "par_level", "office",
+            "0.00", unitPrice.toFixed(2), "0.00",
+            "", "confirmed", orderId, "par_level"
+          ]);
+        }
+        totalItems += qty;
       });
       return jsonOut({success: true, orderId: orderId, totalItems: totalItems, deliveryDate: deliveryStr});
     }
@@ -2026,10 +2046,13 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
   var oidIdx  = headers.indexOf("OrderID");
   var cnIdx   = headers.indexOf("CompanyName");
 
-  var empPaid = 0, compOwed = 0, bdContr = 0;
-  var meals = 0, employees = {}, orders = {};
+  // ── Separate employee vs office rows ──
+  var empPaid = 0, empCompOwed = 0, empBdContr = 0;
+  var empMeals = 0, officeMeals = 0, employees = {}, orders = {};
   var tierCounts = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
   var tierCompany = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
+  var tierBD     = {Free:0, Tier1:0, Tier2:0, Tier3:0, Additional:0};
+  var officeRetailSubtotal = 0; // sum of CompanyCoverage for office rows (full retail before discount)
   var sundayAnchors = {};
 
   for (var i = 1; i < rows.length; i++) {
@@ -2040,22 +2063,48 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
       ? Utilities.formatDate(rawAnchor, tz, "yyyy-MM-dd")
       : String(rawAnchor).trim();
     if (rowAnchor !== sundayAnchor) continue;
-    meals++;
-    empPaid  += parseFloat(rows[i][epIdx]) || 0;
-    compOwed += parseFloat(rows[i][ccIdx]) || 0;
-    bdContr  += parseFloat(rows[i][bdIdx]) || 0;
-    employees[String(rows[i][emIdx]).trim().toLowerCase()] = true;
     if (oidIdx >= 0) orders[String(rows[i][oidIdx]).trim()] = true;
     if (!companyName && cnIdx >= 0) companyName = String(rows[i][cnIdx]).trim();
     sundayAnchors[rowAnchor] = true;
     var tier = String(rows[i][tiIdx] || "").trim();
-    if (tierCounts[tier] !== undefined) {
-      tierCounts[tier]++;
-      tierCompany[tier] += parseFloat(rows[i][ccIdx]) || 0;
+
+    if (tier === "office") {
+      // Office par level — CompanyCoverage holds the full retail unit price
+      officeMeals++;
+      officeRetailSubtotal += parseFloat(rows[i][ccIdx]) || 0;
+    } else {
+      // Employee subsidy order
+      empMeals++;
+      empPaid      += parseFloat(rows[i][epIdx]) || 0;
+      empCompOwed  += parseFloat(rows[i][ccIdx]) || 0;
+      empBdContr   += parseFloat(rows[i][bdIdx]) || 0;
+      employees[String(rows[i][emIdx]).trim().toLowerCase()] = true;
+      if (tierCounts[tier] !== undefined) {
+        tierCounts[tier]++;
+        tierCompany[tier] += parseFloat(rows[i][ccIdx]) || 0;
+        tierBD[tier]      += parseFloat(rows[i][bdIdx]) || 0;
+      }
     }
   }
 
+  var meals = empMeals + officeMeals;
   if (meals === 0) return {success:false, error:"No orders found for this week"};
+
+  // ── Volume discount for office orders (BD's contribution) ──
+  officeRetailSubtotal = Math.round(officeRetailSubtotal * 100) / 100;
+  var officeDiscountPct = 0;
+  if (officeRetailSubtotal >= 1000) officeDiscountPct = 25;
+  else if (officeRetailSubtotal >= 500) officeDiscountPct = 20;
+  else if (officeRetailSubtotal >= 250) officeDiscountPct = 15;
+  else if (officeRetailSubtotal > 0) officeDiscountPct = 10;
+  var officeBdContr = Math.round(officeRetailSubtotal * officeDiscountPct / 100 * 100) / 100;
+  var officeCompanyOwes = Math.round((officeRetailSubtotal - officeBdContr) * 100) / 100;
+
+  // ── Totals across both modules ──
+  empCompOwed = Math.round(empCompOwed * 100) / 100;
+  empBdContr  = Math.round(empBdContr * 100) / 100;
+  var compOwed       = Math.round((empCompOwed + officeCompanyOwes) * 100) / 100;
+  var totalBdContr   = Math.round((empBdContr + officeBdContr) * 100) / 100;
 
   // ── Generate sequential InvoiceNumber ──
   var paddedNum = String(nextInvoiceNumber);
@@ -2089,11 +2138,10 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
   }
   // "due-on-receipt" → dueDate stays as periodStart
 
-  // ── SubtotalFullRetail ──
-  var subtotalFullRetail = Math.round(meals * fullPrice * 100) / 100;
+  // ── SubtotalFullRetail (employee meals at FullPrice + office at retail) ──
+  var subtotalFullRetail = Math.round((empMeals * fullPrice + officeSubtotal) * 100) / 100;
 
   // ── Apply CreditBalance ──
-  compOwed = Math.round(compOwed * 100) / 100;
   var creditApplied = 0;
   var amountDue = compOwed;
   if (creditBalance > 0) {
@@ -2110,8 +2158,24 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
   var breakdown = [];
   var tierLabels = {Free:"Free meals", Tier1:"Tier 1", Tier2:"Tier 2", Tier3:"Tier 3", Additional:"Additional"};
   Object.keys(tierCounts).forEach(function(t) {
-    if (tierCounts[t] > 0) breakdown.push({tier:tierLabels[t], meals:tierCounts[t], companyTotal:Math.round(tierCompany[t]*100)/100});
+    if (tierCounts[t] > 0) breakdown.push({
+      tier: tierLabels[t],
+      meals: tierCounts[t],
+      companyTotal: Math.round(tierCompany[t]*100)/100,
+      bdContribution: Math.round(tierBD[t]*100)/100
+    });
   });
+  // Add office par level section with full retail → discount → net breakdown
+  if (officeMeals > 0) {
+    breakdown.push({
+      tier: "Office Par Levels",
+      meals: officeMeals,
+      retailSubtotal: officeRetailSubtotal,
+      discount: officeDiscountPct + "%",
+      bdContribution: officeBdContr,
+      companyTotal: officeCompanyOwes
+    });
+  }
 
   // ── Write all 29 columns using header-based lookups ──
   var newRow = [];
@@ -2130,9 +2194,9 @@ function _buildInvoiceForCompany(ssHub, companyId, sundayAnchor, skipIfExists) {
       case "TotalMeals":         newRow.push(meals); break;
       case "TotalEmployees":     newRow.push(Object.keys(employees).length); break;
       case "SubtotalFullRetail": newRow.push(subtotalFullRetail); break;
-      case "EmployeePaid":       newRow.push(Math.round(empPaid*100)/100); break;
+      case "EmployeePaid":       newRow.push(Math.round(empPaid*100)/100); break;  // employee subsidy orders only
       case "CompanyOwed":        newRow.push(compOwed); break;
-      case "BDContributed":      newRow.push(Math.round(bdContr*100)/100); break;
+      case "BDContributed":      newRow.push(totalBdContr); break;  // employee subsidies + office volume discount
       case "CreditApplied":      newRow.push(creditApplied); break;
       case "AmountDue":          newRow.push(amountDue); break;
       case "TierBreakdownJSON":  newRow.push(JSON.stringify(breakdown)); break;
@@ -2292,5 +2356,130 @@ function _rebuildParCartsInternal(ssHub) {
       rebuilt++;
     }
   }
-  return { rebuilt: rebuilt, swaps: Object.keys(swapMap).length, from: currentAnchor, to: nextAnchor };
+
+  // ── Auto-confirm: create next week's CorporateOrders from updated par levels ──
+  var autoConfirmed = _autoConfirmParOrders(ssHub, parSheet, parRows, parHeaders, nextAnchor);
+
+  return { rebuilt: rebuilt, swaps: Object.keys(swapMap).length, from: currentAnchor, to: nextAnchor, autoConfirmed: autoConfirmed };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTO-CONFIRM PAR ORDERS — writes next week's CorporateOrders rows
+// Called by rebuildParLevelCarts after SKU swaps are applied
+// ─────────────────────────────────────────────────────────────────────────────
+function _autoConfirmParOrders(ssHub, parSheet, parRows, parHeaders, nextAnchor) {
+  var tz = Session.getScriptTimeZone();
+  var PAR_PRICES = {
+    meat_entree: 16.99, plant_entree: 16.99, sandwich_wrap: 12.99,
+    hot_breakfast: 10.99, chia_oats: 8.99, snack: 5.99, juice: 7.99
+  };
+
+  var compIdx   = parHeaders.indexOf("CompanyID");
+  var catIdx    = parHeaders.indexOf("CategoryID");
+  var qtyIdx    = parHeaders.indexOf("WeeklyQty");
+  var statusIdx = parHeaders.indexOf("Status");
+  var modeIdx   = parHeaders.indexOf("Mode");
+  var itemsIdx  = parHeaders.indexOf("ItemsJSON");
+
+  // Delivery date = Monday after the Sunday anchor
+  var nextSun = new Date(nextAnchor + "T12:00:00");
+  var deliveryMon = new Date(nextSun);
+  deliveryMon.setDate(nextSun.getDate() + 1);
+  var deliveryStr = Utilities.formatDate(deliveryMon, tz, "yyyy-MM-dd");
+
+  // Check if orders already exist for this anchor (avoid duplicates)
+  var corpSheet = ssHub.getSheetByName("CorporateOrders");
+  if (corpSheet) {
+    var corpRows = corpSheet.getDataRange().getValues();
+    var corpHeaders = corpRows[0];
+    var cTierIdx   = corpHeaders.indexOf("Tier");
+    var cAnchorIdx = corpHeaders.indexOf("SundayAnchor");
+    for (var c = 1; c < corpRows.length; c++) {
+      if (String(corpRows[c][cTierIdx]).trim() === "office") {
+        var rawAn = corpRows[c][cAnchorIdx];
+        var rowAn = (rawAn instanceof Date) ? Utilities.formatDate(rawAn, tz, "yyyy-MM-dd") : String(rawAn).trim();
+        if (rowAn === nextAnchor) {
+          Logger.log("_autoConfirmParOrders: orders already exist for " + nextAnchor + ", skipping");
+          return 0;
+        }
+      }
+    }
+  }
+
+  // Group par level rows by company
+  var byCompany = {};
+  for (var i = 1; i < parRows.length; i++) {
+    var companyId = String(parRows[i][compIdx] || "").trim().toUpperCase();
+    var status    = String(parRows[i][statusIdx] || "").trim();
+    if (!companyId || status === "paused") continue;
+    if (!byCompany[companyId]) byCompany[companyId] = [];
+    byCompany[companyId].push(parRows[i]);
+  }
+
+  // Look up company names
+  var compSheet = ssHub.getSheetByName("Companies");
+  var compRows = compSheet ? compSheet.getDataRange().getValues() : [];
+  var compHeaderRow = compRows[0] || [];
+  var compNameIdx = compHeaderRow.indexOf("CompanyName");
+  var compIdIdx   = compHeaderRow.indexOf("CompanyID");
+  var companyNames = {};
+  for (var j = 1; j < compRows.length; j++) {
+    companyNames[String(compRows[j][compIdIdx] || "").trim().toUpperCase()] = String(compRows[j][compNameIdx] || "");
+  }
+
+  if (!corpSheet) {
+    corpSheet = ssHub.insertSheet("CorporateOrders");
+    corpSheet.appendRow(["Timestamp","CompanyID","CompanyName","DeliveryDate","SundayAnchor","EmployeeName","EmployeeEmail","MealID","DishName","DietType","Tier","EmployeePrice","CompanyCoverage","BDCoverage","PaymentTransactionID","Status","OrderID","EmployeeLevel"]);
+  }
+
+  var totalConfirmed = 0;
+  Object.keys(byCompany).forEach(function(companyId) {
+    var rows = byCompany[companyId];
+    var companyName = companyNames[companyId] || companyId;
+    var orderId = getNextOrderId(ssHub);
+
+    rows.forEach(function(row) {
+      var catId     = String(row[catIdx]).trim();
+      var qty       = parseInt(row[qtyIdx]) || 0;
+      var mode      = String(row[modeIdx] || "auto").trim();
+      var unitPrice = PAR_PRICES[catId] || 0;
+      if (qty <= 0) return;
+
+      var items = {};
+      try { items = JSON.parse(String(row[itemsIdx] || "{}")); } catch(e) { items = {}; }
+
+      var handPickCount = 0;
+      if (mode === "hand-pick" || mode === "handpick") {
+        Object.keys(items).forEach(function(dishId) {
+          var dishQty = parseInt(items[dishId]) || 0;
+          if (dishQty <= 0) return;
+          for (var n = 0; n < dishQty; n++) {
+            corpSheet.appendRow([
+              new Date(), companyId, companyName, deliveryStr, nextAnchor,
+              "Office Order (auto)", "auto-confirm",
+              dishId, catId + " (hand-pick)", "par_level", "office",
+              "0.00", unitPrice.toFixed(2), "0.00",
+              "", "confirmed", orderId, "par_level"
+            ]);
+            handPickCount++;
+          }
+        });
+      }
+
+      var remaining = qty - handPickCount;
+      for (var r = 0; r < remaining; r++) {
+        corpSheet.appendRow([
+          new Date(), companyId, companyName, deliveryStr, nextAnchor,
+          "Office Order (auto)", "auto-confirm",
+          "PAR-" + catId + "-" + (r + 1), catId + " (auto-fill)", "par_level", "office",
+          "0.00", unitPrice.toFixed(2), "0.00",
+          "", "confirmed", orderId, "par_level"
+        ]);
+      }
+      totalConfirmed += qty;
+    });
+  });
+
+  Logger.log("_autoConfirmParOrders: confirmed " + totalConfirmed + " items for " + nextAnchor);
+  return totalConfirmed;
 }
