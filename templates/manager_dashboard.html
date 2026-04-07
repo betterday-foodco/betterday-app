@@ -39,62 +39,44 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .sl:first-child{margin-top:0}
 .sl::after{content:'';flex:1;height:1px;background:#E0D4C2}
 
-/* ════════ ROI HERO — pinned ════════ */
-.roi-hero{background:linear-gradient(135deg,#003141 0%,#00465E 100%);border-radius:16px;padding:22px 32px;margin-bottom:16px;box-shadow:0 8px 30px rgba(0,49,65,.15);position:relative;overflow:hidden}
-.roi-hero::after{content:'';position:absolute;top:-50px;right:-50px;width:250px;height:250px;background:radial-gradient(circle,rgba(255,198,0,.08) 0%,transparent 65%);pointer-events:none}
-.roi-pill{display:inline-block;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,198,0,.8);background:rgba(255,198,0,.1);border:1px solid rgba(255,198,0,.2);border-radius:99px;padding:3px 12px;margin-bottom:14px}
-.roi-grid{display:flex;align-items:center;gap:0}
-.roi-cell{display:flex;align-items:center;gap:14px;padding:0 24px;border-right:1px solid rgba(255,255,255,.1);flex-shrink:0}
-.roi-cell:first-child{padding-left:0;flex:0 0 auto}
-.roi-cell:last-child{border-right:none;padding-right:0}
-.roi-cell.hero-lead .roi-big{font-size:62px;letter-spacing:-2px}
-.roi-cell.hero-sub{flex:1 1 0}
-.roi-cell.hero-sub .roi-big{font-size:40px;letter-spacing:-1px}
-.roi-big{font-weight:900;color:#FFC600;line-height:1;flex-shrink:0}
-.roi-big .unit{font-size:22px;font-weight:800}
-.roi-right{display:flex;flex-direction:column;gap:2px}
-.roi-label{font-size:12.5px;font-weight:700;color:rgba(255,255,255,.85);line-height:1.3}
-.roi-source{font-size:8px;color:rgba(255,255,255,.25);font-style:italic;margin-top:2px;line-height:1.3}
+/* ════════ ACTION BAR ════════ */
+.action-bar{display:flex;gap:14px;margin-bottom:16px}
+.action-card{background:#fff;border-radius:12px;padding:18px 22px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);border-left:4px solid #D4A029}
+.action-card.good{border-left-color:#1a7a46}
+.action-card-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#7A8F9C;margin-bottom:10px}
+.action-card-main{font-size:1.6rem;font-weight:900;color:#003141;line-height:1.2;margin-bottom:4px}
+.action-card-sub{font-size:.78rem;color:#5A6F7C;margin-bottom:8px}
+.action-progress{height:8px;background:#EDE6DA;border-radius:99px;overflow:hidden;margin-bottom:8px}
+.action-progress div{height:100%;background:linear-gradient(90deg,#1a7a46,#2da85e);border-radius:99px;transition:width .4s}
+.action-names{font-size:.72rem;color:#7A8F9C;margin-bottom:8px}
+.action-btn{display:inline-block;font-size:.72rem;font-weight:700;color:#00465E;background:rgba(0,70,94,.07);border:1px solid rgba(0,70,94,.12);border-radius:6px;padding:5px 14px;cursor:pointer;transition:.15s}
+.action-btn:hover{background:rgba(0,70,94,.14)}
+.action-link{font-size:.78rem;font-weight:700;color:#00465E;cursor:pointer;text-decoration:none;display:inline-block;margin-top:6px}
+.action-link:hover{text-decoration:underline}
+.deadline-tag{display:inline-block;font-size:.65rem;font-weight:700;color:#B56B10;background:#FFF3E0;border-radius:99px;padding:2px 10px;margin-top:4px}
 
 /* ════════ TAB PANELS ════════ */
 .tab-panel{display:none;max-width:1200px}
 .tab-panel.active{display:block}
 
-/* ════════ WEEK + IMPACT ROW ════════ */
-.week-impact-row{display:grid;grid-template-columns:1fr 2fr;gap:14px;margin-bottom:16px;align-items:start}
-.week-stack{display:flex;flex-direction:column;gap:8px}
-.ws{border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:14px}
-.ws.c-purple{background:#F3EEFF;border:1px solid rgba(200,164,245,.3)}
-.ws.c-green{background:#EEFBE8;border:1px solid rgba(107,189,82,.25)}
-.ws.c-gold{background:#FFF8E8;border:1px solid rgba(212,160,41,.25)}
-.ws-val{font-size:28px;font-weight:900;line-height:1;flex-shrink:0}
-.ws-val.purple{color:#7453A2}.ws-val.green{color:#167421}.ws-val.gold{color:#b8860b}
-.ws-info{display:flex;flex-direction:column;gap:1px}
-.ws-label{font-size:12px;font-weight:800;color:#2E4A5A}
-.ws-sub{font-size:9px;color:#7A8F9C}
-.week-stack-title{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#7A8F9C;margin-bottom:2px}
+/* ════════ THIS WEEK GRID ════════ */
+.tw-grid{display:grid;gap:14px;margin-bottom:16px}
+.tw-col{background:#fff;border-radius:12px;padding:18px 22px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04)}
+.tw-col-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#7A8F9C;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #EDE6DA}
+.tw-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.82rem}
+.tw-stat-label{color:#5A6F7C;font-weight:500}
+.tw-stat-val{font-weight:800;color:#003141}
+.tw-stat-val.green{color:#1a7a46}
+.tw-stat-val.gold{color:#b8860b}
+.tw-stat-val.red{color:#c0392b}
+.tw-stat-divider{height:1px;background:#F0EBE2;margin:4px 0}
 
-/* ════════ CAROUSEL ════════ */
-.impact-carousel{position:relative;overflow:hidden;border-radius:14px;background:#fff;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);height:220px}
-.impact-track{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);height:100%}
-.impact-slide{min-width:50%;display:flex;height:100%}
-.rc{border-radius:0;padding:22px 44px;display:flex;flex-direction:column;justify-content:center;flex:1;border-right:1px solid rgba(0,49,65,.05)}
-.rc:last-child{border-right:none}
-.rc.c-mint{background:#EEFBE8}.rc.c-sky{background:#E8F3FF}.rc.c-peach{background:#FFF3E0}.rc.c-lavender{background:#F3EEFF}.rc.c-cream{background:#FFF8F0}.rc.c-rose{background:#FFF0F3}
-.rc-top{display:flex;align-items:center;gap:14px;margin-bottom:8px}
-.rc-val{font-size:34px;font-weight:900;line-height:1;flex-shrink:0}
-.rc-val.green{color:#167421}.rc-val.sky{color:#2d7ec4}.rc-val.amber{color:#B56B10}.rc-val.purple{color:#7453A2}.rc-val.gold{color:#b8860b}.rc-val.rose{color:#c0506a}
-.rc-titles{display:flex;flex-direction:column;gap:1px}
-.rc-label{font-size:12px;font-weight:800;color:#2E4A5A;line-height:1.25}
-.rc-label-sub{font-size:9px;font-weight:600;color:#7A8F9C}
-.rc-desc{font-size:9.5px;color:#7A8F9C;line-height:1.4}
-.rc-source{font-size:8px;color:#B0BEC5;margin-top:4px;font-style:italic}
-.carousel-nav{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.85);border:1px solid rgba(0,49,65,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:#00465E;transition:.15s;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-.carousel-nav:hover{background:rgba(0,49,65,.15);border-color:rgba(0,49,65,.2)}
-.carousel-nav.prev{left:6px}.carousel-nav.next{right:6px}
-.carousel-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
-.carousel-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,49,65,.15);transition:.2s}
-.carousel-dot.active{background:#00465E;width:16px;border-radius:3px}
+/* ════════ PROGRAM HEALTH ROW ════════ */
+.health-row{display:flex;gap:0;background:#fff;border-radius:12px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);margin-bottom:16px;overflow:hidden}
+.health-cell{flex:1;padding:14px 18px;text-align:center;border-right:1px solid #F0EBE2}
+.health-cell:last-child{border-right:none}
+.health-cell-val{font-size:1.3rem;font-weight:900;color:#003141;line-height:1.2}
+.health-cell-label{font-size:.65rem;font-weight:600;color:#7A8F9C;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 
 /* ════════ SHARED: tables, search, summary bars, cards ════════ */
 .tw{background:#fff;border-radius:10px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);overflow:hidden}
@@ -299,8 +281,10 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
   <div class="sb-div"></div>
   <div class="sb-sec">Par Levels</div>
   <div class="ni" onclick="sidebarNav('parlevel', this)">&#9670; &nbsp;Office Par Levels</div>
-  <div class="ni" onclick="sidebarNav('mealplan', this)">&#9733; &nbsp;Subsidy Tiers</div>
   {% endif %}
+  <div class="sb-div"></div>
+  <div class="sb-sec">Meal Program</div>
+  <div class="ni" onclick="sidebarNav('mealplan', this)">&#9733; &nbsp;Subsidy Tiers</div>
   <div class="sb-div"></div>
   <div class="ni" onclick="sidebarNav('account', this)">&#9881; &nbsp;Account Details</div>
   <div class="ni" onclick="window.location='/manager/logout'">&#8594; &nbsp;Sign out</div>
@@ -318,68 +302,90 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     <!-- TAB: OVERVIEW                           -->
     <!-- ════════════════════════════════════════ -->
     <div class="tab-panel active" id="tab-overview">
+    {% set parlevels_on = company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
 
-    <!-- ROI SNAPSHOT -->
-    <div class="roi-hero">
-      <div class="roi-pill">ROI Snapshot</div>
-      <div class="roi-grid">
-        <div class="roi-cell hero-lead">
-          <div class="roi-big">{{ total_meals }}</div>
-          <div class="roi-right"><div class="roi-label">Total meals<br>delivered</div></div>
+    <!-- ══ ACTION BAR ══ -->
+    <div class="action-bar">
+      <div class="action-card{% if not not_ordered %} good{% endif %}" style="flex:1;">
+        <div class="action-card-title">Ordering This Week &mdash; {{ active_week.label if active_week else 'N/A' }}</div>
+        {% set ordered_count = employees|length - not_ordered|length %}
+        <div class="action-card-main">{{ ordered_count }} / {{ employees|length }}</div>
+        <div class="action-card-sub">employees have ordered</div>
+        <div class="action-progress">
+          <div style="width:{{ ((ordered_count / [employees|length, 1]|max) * 100)|int }}%"></div>
         </div>
-        <div class="roi-cell hero-sub">
-          <div class="roi-big">{{ ((total_meals * 0.75)|int) }}<span class="unit">hrs</span></div>
-          <div class="roi-right"><div class="roi-label">Productive hours<br>kept at the office</div><div class="roi-source">45 min/meal saved<br>Fooda Workplace ROI Report</div></div>
-        </div>
-        <div class="roi-cell hero-sub">
-          <div class="roi-big">${{ (total_meals * 0.75 * 32)|int|commafy }}</div>
-          <div class="roi-right"><div class="roi-label">Productivity value<br>recovered</div><div class="roi-source">Hours &times; $32/hr median salary<br>Harvard Business Review</div></div>
-        </div>
-        <div class="roi-cell hero-sub">
-          {% set annual_roi = (total_meals * 0.75 * 32 * 52 / (sorted_weeks|length if sorted_weeks else 1))|int %}
-          {% if annual_roi >= 1000 %}
-          <div class="roi-big">${{ '%.0f'|format(annual_roi / 1000) }}K</div>
-          {% else %}
-          <div class="roi-big">${{ '%.0f'|format(annual_roi) }}</div>
-          {% endif %}
-          <div class="roi-right"><div class="roi-label">Projected<br>annual ROI</div><div class="roi-source">Based on current pace<br>annualized over 52 weeks</div></div>
-        </div>
+        {% if not_ordered %}
+        <div class="action-names">Haven't ordered: {{ not_ordered[:6]|map(attribute='name')|join(', ') }}{% if not_ordered|length > 6 %} +{{ not_ordered|length - 6 }} more{% endif %}</div>
+        <button class="action-btn" onclick="sendReminders(this)">Send Reminders</button>
+        {% endif %}
+        <div id="deadlineCountdown" data-deadline="{{ ordering_deadline }}" class="deadline-tag"></div>
+      </div>
+
+      {% if parlevels_on %}
+      <div class="action-card" style="flex:1;">
+        <div class="action-card-title">Office Par Level Order</div>
+        <div class="action-card-main" id="parStatusVal">—</div>
+        <div class="action-card-sub" id="parStatusSub">Loading...</div>
+        <a class="action-link" onclick="sidebarNav('parlevel', document.querySelector('.ni[onclick*=parlevel]'))">Edit Office Order &rarr;</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ══ THIS WEEK AT A GLANCE ══ -->
+    <div class="sl">This Week at a Glance</div>
+    <div class="tw-grid" style="grid-template-columns:{% if parlevels_on %}1fr 1fr 1fr{% else %}1fr 1fr{% endif %}">
+      <!-- Employee Orders -->
+      <div class="tw-col">
+        <div class="tw-col-title">Employee Orders</div>
+        <div class="tw-stat"><span class="tw-stat-label">Meals ordered</span><span class="tw-stat-val">{{ active_week.meal_count if active_week else 0 }}</span></div>
+        <div class="tw-stat"><span class="tw-stat-label">Participation</span><span class="tw-stat-val">{{ active_week_pct }}% <span style="font-size:.7rem;font-weight:500;color:#7A8F9C">({{ avg_participation_pct }}% avg)</span></span></div>
+        <div class="tw-stat-divider"></div>
+        <div class="tw-stat"><span class="tw-stat-label">Employee paid</span><span class="tw-stat-val">${{ '%.2f'|format(active_week.emp_spend|float) if active_week else '0.00' }}</span></div>
+        <div class="tw-stat"><span class="tw-stat-label">Company covered</span><span class="tw-stat-val gold">${{ '%.2f'|format(active_week.co_spend|float) if active_week else '0.00' }}</span></div>
+        <div class="tw-stat"><span class="tw-stat-label">BetterDay contributed</span><span class="tw-stat-val green">${{ '%.2f'|format(active_week.bd_spend|float) if active_week else '0.00' }}</span></div>
+      </div>
+
+      {% if parlevels_on %}
+      <!-- Par Levels -->
+      <div class="tw-col" id="parWeekCol">
+        <div class="tw-col-title">Office Par Levels</div>
+        <div id="parWeekStats" style="font-size:.82rem;color:#7A8F9C;padding:8px 0;">Loading par level data...</div>
+      </div>
+      {% endif %}
+
+      <!-- Financials -->
+      <div class="tw-col">
+        <div class="tw-col-title">Financials</div>
+        <div class="tw-stat"><span class="tw-stat-label">This month spend</span><span class="tw-stat-val">${{ '%.2f'|format(current_month_spend) }}</span></div>
+        <div class="tw-stat"><span class="tw-stat-label">Last month</span><span class="tw-stat-val" style="color:#7A8F9C">${{ '%.2f'|format(last_month_spend) }}</span></div>
+        <div class="tw-stat"><span class="tw-stat-label">Trend</span><span class="tw-stat-val {% if current_month_spend > last_month_spend %}red{% elif current_month_spend < last_month_spend %}green{% endif %}">{% if last_month_spend > 0 %}{{ '%+.0f'|format(((current_month_spend - last_month_spend) / last_month_spend * 100)) }}%{% else %}&mdash;{% endif %}</span></div>
+        <div class="tw-stat-divider"></div>
+        {% if outstanding_invoices %}
+        <div class="tw-stat"><span class="tw-stat-label">Outstanding invoices</span><span class="tw-stat-val red">{{ outstanding_invoices|length }}</span></div>
+        <div class="tw-stat"><span class="tw-stat-label">Amount owed</span><span class="tw-stat-val red">${{ '%.2f'|format(outstanding_total) }}</span></div>
+        {% else %}
+        <div class="tw-stat"><span class="tw-stat-label">Outstanding invoices</span><span class="tw-stat-val green">0 &mdash; All clear</span></div>
+        {% endif %}
       </div>
     </div>
 
-      <div class="week-impact-row">
-        <div class="week-stack">
-          <div class="week-stack-title">This Week &mdash; {{ active_week.label if active_week else '' }}</div>
-          <div class="ws c-purple"><div class="ws-val purple">{{ active_week.meal_count if active_week else 0 }}</div><div class="ws-info"><div class="ws-label">Meals This Week</div><div class="ws-sub">current delivery week</div></div></div>
-          <div class="ws c-green"><div class="ws-val green">{{ active_week_pct }}%</div><div class="ws-info"><div class="ws-label">Participation</div><div class="ws-sub">this week &middot; {{ avg_participation_pct }}% avg</div></div></div>
-          <div class="ws c-gold"><div class="ws-val gold">${{ (active_week.co_spend|float)|int|commafy if active_week else '0' }}</div><div class="ws-info"><div class="ws-label">Company Covered</div><div class="ws-sub">this week</div></div></div>
-        </div>
-        <div class="impact-carousel" id="impactCarousel">
-          <div class="impact-track" id="impactTrack">
-            <div class="impact-slide"><div class="rc c-mint"><div class="rc-top"><div class="rc-val green">20%</div><div class="rc-titles"><div class="rc-label">Productivity</div><div class="rc-label">Boost</div></div></div><div class="rc-desc">Employees who eat well at work are 20% more productive than those who skip meals or eat poorly</div><div class="rc-source">American Journal of Clinical Nutrition</div></div></div>
-            <div class="impact-slide"><div class="rc c-sky"><div class="rc-top"><div class="rc-val sky">{{ avg_participation_pct }}%</div><div class="rc-titles"><div class="rc-label">Team Repeat</div><div class="rc-label">Rate</div></div></div><div class="rc-desc">Of your employees have ordered more than once &mdash; a strong signal of program adoption</div><div class="rc-source">Your BetterDay data</div></div></div>
-            <div class="impact-slide"><div class="rc c-peach"><div class="rc-top"><div class="rc-val amber">${{ (total_unique_employees * 0.2 * 75000)|int|commafy if total_unique_employees else '0' }}</div><div class="rc-titles"><div class="rc-label">Retention Cost</div><div class="rc-label">At Stake</div></div></div><div class="rc-desc">1 in 5 employees leave voluntarily each year. At $75K&ndash;$120K per replacement, meal programs reduce this risk</div><div class="rc-source">Gallup Employment Report</div></div></div>
-            <div class="impact-slide"><div class="rc c-lavender"><div class="rc-top"><div class="rc-val purple">{% if employees|length > 0 %}{{ '%.1f'|format(total_meals / employees|length) }}{% else %}0{% endif %}</div><div class="rc-titles"><div class="rc-label">Avg Meals</div><div class="rc-label">per Employee</div></div></div><div class="rc-desc">Higher adoption = stronger team culture. Programs above 3 meals/person show highest engagement</div><div class="rc-source">Your BetterDay data</div></div></div>
-            <div class="impact-slide"><div class="rc c-cream"><div class="rc-top"><div class="rc-val gold">{% if employees|length > 0 %}{{ '%.1f'|format(total_meals * 0.75 / employees|length) }}{% else %}0{% endif %}<span style="font-size:16px">hrs</span></div><div class="rc-titles"><div class="rc-label">Hours Saved</div><div class="rc-label">Per Employee</div></div></div><div class="rc-desc">Time each team member didn't spend leaving for lunch &mdash; reinvested into work</div><div class="rc-source">Fooda Workplace ROI Report</div></div></div>
-            <div class="impact-slide"><div class="rc c-rose"><div class="rc-top"><div class="rc-val rose">{{ active_week.new_members if active_week and active_week.new_members is defined else '—' }}</div><div class="rc-titles"><div class="rc-label">New Members</div><div class="rc-label-sub">this week</div></div></div><div class="rc-desc">First-time orderers signal growing adoption. Steady onboarding = 40% higher retention</div><div class="rc-source">Your BetterDay data</div></div></div>
-          </div>
-          <div class="carousel-nav prev" id="carPrev">&#8249;</div>
-          <div class="carousel-nav next" id="carNext">&#8250;</div>
-          <div class="carousel-dots" id="carouselDots"></div>
-        </div>
-      </div><!-- /week-impact-row -->
+    <!-- ══ PROGRAM HEALTH ══ -->
+    <div class="health-row">
+      <div class="health-cell"><div class="health-cell-val">{{ total_meals }}</div><div class="health-cell-label">Total Meals</div></div>
+      <div class="health-cell"><div class="health-cell-val">{{ avg_meals_per_emp }}</div><div class="health-cell-label">Avg / Employee</div></div>
+      <div class="health-cell"><div class="health-cell-val">{{ avg_participation_pct }}%</div><div class="health-cell-label">Avg Participation</div></div>
+      <div class="health-cell"><div class="health-cell-val green">${{ total_bd_spend|round(2)|commafy }}</div><div class="health-cell-label">Lifetime BD Savings</div></div>
+    </div>
 
-      <!-- Recent orders preview -->
-      <div class="sl">Recent Orders</div>
-      <div class="tw">
-        <table>
-          <thead><tr><th>Employee</th><th>Meals</th><th>They Paid</th><th>Co. Covered</th><th>BD</th><th>Delivery</th><th>Status</th></tr></thead>
-          <tbody class="overview-orders" id="overviewOrdersBody">
-            <!-- populated by JS -->
-          </tbody>
-        </table>
-        <div class="pag"><span></span><span style="font-size:.75rem;font-weight:700;color:#00465E;cursor:pointer" onclick="sidebarNav('orders', document.querySelectorAll('.sb .ni')[1])">View all orders &rarr;</span></div>
-      </div>
+    <!-- ══ RECENT ORDERS ══ -->
+    <div class="sl">Recent Orders</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Employee</th><th>Meals</th><th>They Paid</th><th>Co. Covered</th><th>BD</th><th>Delivery</th><th>Status</th></tr></thead>
+        <tbody class="overview-orders" id="overviewOrdersBody"></tbody>
+      </table>
+      <div class="pag"><span></span><span style="font-size:.75rem;font-weight:700;color:#00465E;cursor:pointer" onclick="sidebarNav('orders', document.querySelectorAll('.sb .ni')[1])">View all orders &rarr;</span></div>
+    </div>
     </div>
 
     <!-- ════════════════════════════════════════ -->
@@ -444,22 +450,55 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
                 <div style="max-width:520px;">
                   {% if inv.breakdown %}
                   <table class="inv-tier-table">
-                    <thead><tr><th>Tier</th><th style="text-align:right">Meals</th><th style="text-align:right">Company Total</th></tr></thead>
+                    <thead><tr><th>Tier</th><th style="text-align:right">Meals</th><th style="text-align:right">Company Owes</th><th style="text-align:right">BD Contributed</th></tr></thead>
                     <tbody>
                       {% for tier in inv.breakdown %}
+                      {% if tier.retailSubtotal %}
+                      {# Office Par Levels — show retail → discount → net #}
+                      <tr style="border-top:2px solid #E2E8F0;">
+                        <td colspan="4" style="padding-top:10px;font-weight:700;font-size:.82rem;color:#00465E;">Office Par Level Orders</td>
+                      </tr>
+                      <tr>
+                        <td style="color:#7A8F9C;">{{ tier.meals }} items at full retail</td>
+                        <td></td>
+                        <td style="text-align:right;color:#7A8F9C;">${{ '%.2f' | format(tier.retailSubtotal | float) }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td style="color:#1a7a46;">BetterDay Volume Discount ({{ tier.discount }})</td>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align:right;color:#1a7a46;">${{ '%.2f' | format(tier.bdContribution | default(0) | float) }}</td>
+                      </tr>
+                      <tr style="font-weight:600;">
+                        <td>Office Subtotal</td>
+                        <td style="text-align:right;">{{ tier.meals }}</td>
+                        <td style="text-align:right;">${{ '%.2f' | format(tier.companyTotal | float) }}</td>
+                        <td style="text-align:right;color:#1a7a46;">${{ '%.2f' | format(tier.bdContribution | default(0) | float) }}</td>
+                      </tr>
+                      {% else %}
+                      {# Employee subsidy tier #}
                       <tr>
                         <td>{{ tier.tier }}</td>
                         <td style="text-align:right;">{{ tier.meals }}</td>
                         <td style="text-align:right;">${{ '%.2f' | format(tier.companyTotal | float) }}</td>
+                        <td style="text-align:right;color:#1a7a46;">${{ '%.2f' | format(tier.bdContribution | default(0) | float) }}</td>
                       </tr>
+                      {% endif %}
                       {% endfor %}
                     </tbody>
                   </table>
                   {% endif %}
-                  <div class="inv-total-row">
+                  <div class="inv-total-row" style="margin-top:8px;">
                     <span class="inv-total-label">Total Owed by {{ company_name }}</span>
                     <span class="inv-total-val">${{ '%.2f' | format(inv.CompanyOwed or inv.companyOwed or 0 | float) }}</span>
                   </div>
+                  {% if inv.BDContributed or inv.bdContributed %}
+                  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.82rem;color:#1a7a46;">
+                    <span>Total BetterDay Contributed</span>
+                    <span style="font-weight:600;">${{ '%.2f' | format(inv.BDContributed or inv.bdContributed or 0 | float) }}</span>
+                  </div>
+                  {% endif %}
                   {% if inv.status == 'paid' %}
                   <div style="font-size:.78rem;color:#167421;margin-top:6px;">
                     Paid {{ inv.paidAt or '' }}{% if inv.paymentMethod %} &middot; {{ inv.paymentMethod }}{% endif %}
@@ -1497,11 +1536,38 @@ function downloadInvPDF(idx) {
 
   let tierRows = '';
   (inv.breakdown || []).forEach(t => {
-    tierRows += `<tr>
-      <td>${t.tier}</td>
-      <td style="text-align:right">${t.meals}</td>
-      <td style="text-align:right">${fmt$(t.companyTotal)}</td>
-    </tr>`;
+    if (t.retailSubtotal) {
+      // Office Par Levels — show retail → discount → net
+      tierRows += `<tr style="border-top:2px solid #E2E8F0;">
+        <td colspan="4" style="padding-top:10px;font-weight:700;font-size:.82rem;color:#00465E;">Office Par Level Orders</td>
+      </tr>
+      <tr>
+        <td style="color:#717171;">${t.meals} items at full retail</td>
+        <td></td>
+        <td style="text-align:right;color:#717171;">${fmt$(t.retailSubtotal)}</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="color:#1a7a46;">BetterDay Volume Discount (${t.discount})</td>
+        <td></td>
+        <td></td>
+        <td style="text-align:right;color:#1a7a46;">${fmt$(t.bdContribution || 0)}</td>
+      </tr>
+      <tr style="font-weight:600;">
+        <td>Office Subtotal</td>
+        <td style="text-align:right">${t.meals}</td>
+        <td style="text-align:right">${fmt$(t.companyTotal)}</td>
+        <td style="text-align:right;color:#1a7a46;">${fmt$(t.bdContribution || 0)}</td>
+      </tr>`;
+    } else {
+      // Employee subsidy tier
+      tierRows += `<tr>
+        <td>${t.tier}</td>
+        <td style="text-align:right">${t.meals}</td>
+        <td style="text-align:right">${fmt$(t.companyTotal)}</td>
+        <td style="text-align:right;color:#1a7a46;">${fmt$(t.bdContribution || 0)}</td>
+      </tr>`;
+    }
   });
 
   const statusColor = {pending:'#b56b10', sent:'#1a6cb5', paid:'#1a7a46'};
@@ -1555,8 +1621,8 @@ function downloadInvPDF(idx) {
 </div>
 <h2>Meal Breakdown</h2>
 <table>
-  <thead><tr><th>Tier</th><th style="text-align:right">Meals</th><th style="text-align:right">Company Total</th></tr></thead>
-  <tbody>${tierRows || '<tr><td colspan="3" style="color:#717171">No breakdown available</td></tr>'}</tbody>
+  <thead><tr><th>Tier</th><th style="text-align:right">Meals</th><th style="text-align:right">Company Owes</th><th style="text-align:right">BD Contributed</th></tr></thead>
+  <tbody>${tierRows || '<tr><td colspan="4" style="color:#717171">No breakdown available</td></tr>'}</tbody>
 </table>
 <div style="display:flex;gap:32px;margin-bottom:24px;font-size:.82rem;color:#484848;">
   <div><strong style="display:block;color:#222">Total Meals</strong>${inv.TotalMeals || inv.totalMeals || 0}</div>
@@ -1567,6 +1633,10 @@ function downloadInvPDF(idx) {
 <div class="total-row">
   <span class="total-label">Total Owed by ${COMPANY_NAME}</span>
   <span class="total-val">${fmt$(inv.CompanyOwed || inv.companyOwed || 0)}</span>
+</div>
+<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem;color:#1a7a46;">
+  <span>Total BetterDay Contributed</span>
+  <span style="font-weight:700;">${fmt$(inv.BDContributed || inv.bdContributed || 0)}</span>
 </div>
 ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><strong>Notes:</strong> ' + inv.notes + '</div>' : ''}
 <div class="footer">
@@ -1580,43 +1650,56 @@ ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><str
   win.document.close();
 }
 
-// ═══ CAROUSEL ═══
-requestAnimationFrame(function(){
-  setTimeout(function(){
-    var track = document.getElementById('impactTrack');
-    var dotsWrap = document.getElementById('carouselDots');
-    var prevBtn = document.getElementById('carPrev');
-    var nextBtn = document.getElementById('carNext');
-    if (!track || !dotsWrap || !prevBtn || !nextBtn) return;
-    var slides = track.querySelectorAll('.impact-slide');
-    var total = slides.length;
-    var maxIdx = total - 2;
-    if (maxIdx < 0) return;
-    var current = 0;
-    var interval = 5000;
+// ═══ SEND REMINDERS ═══
+async function sendReminders(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const res = await fetch('/manager/send-reminders', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ company_id: COMPANY_ID })
+    });
+    const data = await res.json();
+    btn.textContent = data.success ? 'Sent!' : 'Error';
+  } catch(e) {
+    btn.textContent = 'Error';
+  }
+  setTimeout(() => { btn.textContent = 'Send Reminders'; btn.disabled = false; }, 3000);
+}
 
-    function goTo(idx){
-      if(idx < 0) idx = maxIdx; if(idx > maxIdx) idx = 0;
-      current = idx;
-      track.style.transform = 'translateX(-' + (current * 50) + '%)';
-      dotsWrap.querySelectorAll('.carousel-dot').forEach(function(d, i){ d.className = 'carousel-dot' + (i === current ? ' active' : ''); });
+// ═══ DEADLINE COUNTDOWN ═══
+(function() {
+  var el = document.getElementById('deadlineCountdown');
+  if (!el || !el.dataset.deadline) return;
+  var deadline = new Date(el.dataset.deadline);
+  function update() {
+    var diff = deadline - new Date();
+    if (diff <= 0) { el.textContent = 'Ordering closed'; return; }
+    var d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000);
+    el.textContent = 'Orders close in ' + (d > 0 ? d + 'd ' : '') + h + 'h';
+  }
+  update();
+  setInterval(update, 60000);
+})();
+
+// ═══ AUTO-LOAD PAR LEVEL OVERVIEW (if par level cards exist on overview tab) ═══
+(function() {
+  if (!document.getElementById('parStatusVal')) return;
+  fetch('/manager/par-levels').then(r => r.json()).then(function(d) {
+    if (d.levels) {
+      Object.keys(d.levels).forEach(function(k) {
+        if (!plData[k]) plData[k] = { qty: 0, status: 'active', mode: 'auto', items: [] };
+        Object.assign(plData[k], d.levels[k]);
+        if (plData[k].qty && !plData[k].target) plData[k].target = plData[k].qty;
+      });
     }
-    for(var i = 0; i <= maxIdx; i++){
-      var d = document.createElement('div');
-      d.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-      d.dataset.idx = i;
-      d.addEventListener('click', function(){ goTo(parseInt(this.dataset.idx)); resetTimer(); });
-      dotsWrap.appendChild(d);
-    }
-    prevBtn.addEventListener('click', function(){ goTo(current - 1); resetTimer(); });
-    nextBtn.addEventListener('click', function(){ goTo(current + 1); resetTimer(); });
-    var timer = setInterval(function(){ goTo(current + 1); }, interval);
-    function resetTimer(){ clearInterval(timer); timer = setInterval(function(){ goTo(current + 1); }, interval); }
-    var carousel = document.getElementById('impactCarousel');
-    carousel.addEventListener('mouseenter', function(){ clearInterval(timer); });
-    carousel.addEventListener('mouseleave', function(){ timer = setInterval(function(){ goTo(current + 1); }, interval); });
-  }, 100);
-});
+    updateParOverviewCards();
+  }).catch(function() {
+    var el = document.getElementById('parStatusSub');
+    if (el) el.textContent = 'Could not load par levels';
+  });
+})();
 
 // ══════════════════════════════════════════
 // BULK EMPLOYEE ACTIONS
@@ -1899,6 +1982,7 @@ function initParLevels() {
     plContent.forEach(el => el.style.display = '');
     renderParGrid();
     updateParTotals();
+    updateParOverviewCards();
   });
 }
 
@@ -1915,6 +1999,41 @@ async function loadParLevels() {
       });
     }
   } catch(e) { /* will render from initParLevels finally block */ }
+}
+
+function updateParOverviewCards() {
+  var totalItems = 0, subtotal = 0;
+  PL_CATEGORIES.forEach(function(c) {
+    var d = plData[c.id];
+    if (d && d.status !== 'paused') {
+      var q = d.target || d.qty || 0;
+      totalItems += q;
+      subtotal += q * c.unitPrice;
+    }
+  });
+  var discPct = subtotal >= 1000 ? 25 : subtotal >= 500 ? 20 : subtotal >= 250 ? 15 : subtotal > 0 ? 10 : 0;
+  var discount = Math.round(subtotal * discPct / 100 * 100) / 100;
+  var net = Math.round((subtotal - discount) * 100) / 100;
+  var state = getOrderWindowState();
+
+  // Action card (top)
+  var valEl = document.getElementById('parStatusVal');
+  var subEl = document.getElementById('parStatusSub');
+  if (valEl) valEl.textContent = totalItems + ' items';
+  if (subEl) subEl.textContent = '$' + net.toFixed(2) + '/wk · ' + discPct + '% volume discount · ' + (state === 'open' ? 'Editing open' : 'Locked');
+
+  // This Week column
+  var weekCol = document.getElementById('parWeekStats');
+  if (!weekCol) return;
+  var activeCats = PL_CATEGORIES.filter(function(c) { var d = plData[c.id]; return d && (d.target || d.qty || 0) > 0 && d.status !== 'paused'; });
+  weekCol.innerHTML =
+    '<div class="tw-stat"><span class="tw-stat-label">Total items</span><span class="tw-stat-val">' + totalItems + '</span></div>' +
+    '<div class="tw-stat"><span class="tw-stat-label">Retail subtotal</span><span class="tw-stat-val">$' + subtotal.toFixed(2) + '</span></div>' +
+    '<div class="tw-stat"><span class="tw-stat-label">Volume discount</span><span class="tw-stat-val green">-$' + discount.toFixed(2) + ' (' + discPct + '%)</span></div>' +
+    '<div class="tw-stat-divider"></div>' +
+    '<div class="tw-stat"><span class="tw-stat-label">Net cost</span><span class="tw-stat-val" style="font-size:1rem;">$' + net.toFixed(2) + '</span></div>' +
+    '<div class="tw-stat"><span class="tw-stat-label">Categories active</span><span class="tw-stat-val">' + activeCats.length + ' of ' + PL_CATEGORIES.length + '</span></div>' +
+    '<div class="tw-stat"><span class="tw-stat-label">Status</span><span class="tw-stat-val ' + (state === 'open' ? 'green' : '') + '">' + (state === 'open' ? 'Editing open' : 'Locked until Monday') + '</span></div>';
 }
 
 function getOrderWindowState() {

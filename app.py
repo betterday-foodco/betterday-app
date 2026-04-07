@@ -1231,6 +1231,45 @@ def manager_dashboard():
         } for m in o['meals']],
     } for o in all_orders])
 
+    # ── Who hasn't ordered this week ─────────────────────────
+    active_week_emails = set()
+    if active_week and active_week.get('orders'):
+        for o in active_week['orders']:
+            if o.get('employee_email'):
+                active_week_emails.add(o['employee_email'].strip().lower())
+
+    not_ordered = []
+    for emp in employees:
+        email = (emp.get('email') or '').strip().lower()
+        if email and email not in active_week_emails:
+            name = f"{emp.get('firstName', '')} {emp.get('lastName', '')}".strip() or email
+            not_ordered.append({'name': name, 'email': email})
+
+    # ── Outstanding invoices ──────────────────────────────────
+    outstanding_invoices = [inv for inv in invoices if (inv.get('status') or '').lower() not in ('paid',)]
+    outstanding_total = sum(float(inv.get('CompanyOwed') or inv.get('companyOwed') or 0) for inv in outstanding_invoices)
+
+    # ── Ordering deadline (Wednesday midnight from active week anchor) ──
+    ordering_deadline = ''
+    if active_week and active_week.get('anchor'):
+        try:
+            anchor_dt = datetime.strptime(active_week['anchor'], '%Y-%m-%d')
+            deadline_dt = anchor_dt + timedelta(days=3, hours=23, minutes=59)
+            ordering_deadline = deadline_dt.strftime('%Y-%m-%dT%H:%M:%S')
+        except:
+            pass
+
+    # ── Month-over-month spend ────────────────────────────────
+    current_month_spend = 0.0
+    last_month_spend = 0.0
+    if sorted_monthly:
+        current_month_spend = sorted_monthly[0].get('co_spend', 0)
+        if len(sorted_monthly) > 1:
+            last_month_spend = sorted_monthly[1].get('co_spend', 0)
+
+    # ── Average meals per employee ────────────────────────────
+    avg_meals_per_emp = round(total_meals / max(len(employees), 1), 1)
+
     saved_tab = request.args.get('saved')
 
     return render_template('manager_dashboard.html',
@@ -1252,7 +1291,28 @@ def manager_dashboard():
                            employees=employees,
                            invoices=invoices,
                            benefit_levels=results.get('levels', {}).get('levels', []),
+                           not_ordered=not_ordered,
+                           outstanding_invoices=outstanding_invoices,
+                           outstanding_total=round(outstanding_total, 2),
+                           ordering_deadline=ordering_deadline,
+                           current_month_spend=round(current_month_spend, 2),
+                           last_month_spend=round(last_month_spend, 2),
+                           avg_meals_per_emp=avg_meals_per_emp,
                            saved_tab=saved_tab)
+
+
+@app.route('/manager/send-reminders', methods=['POST'])
+@manager_required
+def manager_send_reminders():
+    """Send order reminder emails to employees who haven't ordered this week."""
+    company_id = session.get('manager_company_id')
+    result = _gas_post({
+        'action': 'send_order_reminders',
+        'company_ids': [company_id]
+    })
+    if result:
+        return jsonify(result)
+    return jsonify({'error': 'Failed to send reminders'}), 502
 
 
 @app.route('/manager/update-account', methods=['POST'])
