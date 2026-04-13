@@ -2478,14 +2478,28 @@ const PL_CATEGORIES = [
   { id: 'hot_breakfast', name: 'Hot Breakfast',        icon: '🍳', cls: 'breakfast', rotating: false, unitPrice: 10.99, group: 'snacks' },
   { id: 'chia_oats',     name: 'Chia Cups & Oats',    icon: '🥣', cls: 'chia',      rotating: false, unitPrice: 8.99,  group: 'snacks' },
   { id: 'snack',         name: 'Snacks & Cookies',      icon: '🥜', cls: 'snack',     rotating: false, unitPrice: 5.99,  group: 'snacks' },
-  { id: 'well_juice',    name: 'Well Juices',           icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 6.29,  group: 'snacks' },
-  { id: 'energy_protein', name: 'Energy & Protein',     icon: '⚡', cls: 'energy',    rotating: false, unitPrice: 4.29,  group: 'snacks' },
-  { id: 'biosteel',      name: 'BioSteel Hydration',    icon: '💧', cls: 'hydration', rotating: false, unitPrice: 2.99,  group: 'snacks' },
+  { id: 'drinks',        name: 'Drinks',                icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 4.29, perItemPricing: true, group: 'snacks' },
 ];
 
 let plData = {};  // categoryId → { qty, status, mode, items:[] }
 let plInitialized = false;
 let plOverrideMode = false;
+
+// Per-item pricing: calculate actual cost for a category
+function getCatSubtotal(catId) {
+  const cat = PL_CATEGORIES.find(c => c.id === catId);
+  if (!cat) return 0;
+  const d = plData[catId];
+  if (!d || d.status === 'paused') return 0;
+  const qty = d.target || d.qty || 0;
+  if (cat.perItemPricing && d.items && d.items.length > 0) {
+    return d.items.reduce((sum, item) => sum + (item.qty || 1) * (item.price || cat.unitPrice), 0);
+  }
+  return qty * cat.unitPrice;
+}
+function getTotalSubtotal() {
+  return PL_CATEGORIES.reduce((s, c) => s + getCatSubtotal(c.id), 0);
+}
 
 function initParLevels() {
   if (plInitialized) return;
@@ -2558,7 +2572,7 @@ function updateParOverviewCards() {
       var q = d.target || d.qty || 0;
       if (q > 0) {
         totalItems += q;
-        subtotal += q * c.unitPrice;
+        subtotal += getCatSubtotal(c.id);
         activeRows.push({ name: c.name, icon: c.icon, qty: q });
       }
     }
@@ -2637,10 +2651,7 @@ function renderParGrid() {
       const d = plData[c.id];
       return s + ((d && d.status !== 'paused') ? (d.qty || 0) : 0);
     }, 0);
-    const groupCost = g.cats.reduce((s, c) => {
-      const d = plData[c.id];
-      return s + ((d && d.status !== 'paused') ? (d.qty || 0) * c.unitPrice : 0);
-    }, 0);
+    const groupCost = g.cats.reduce((s, c) => s + getCatSubtotal(c.id), 0);
 
     html += `
     <div style="margin-bottom:28px;">
@@ -2654,7 +2665,7 @@ function renderParGrid() {
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">`;
 
     // Compute current discount for display
-    const _totalSub = PL_CATEGORIES.reduce((s, c) => s + ((plData[c.id]?.target || plData[c.id]?.qty || 0) * c.unitPrice), 0);
+    const _totalSub = getTotalSubtotal();
     const _discPct = _totalSub >= 1000 ? 25 : _totalSub >= 500 ? 20 : _totalSub >= 250 ? 15 : _totalSub > 0 ? 10 : 0;
 
     g.cats.forEach(cat => {
@@ -2662,8 +2673,9 @@ function renderParGrid() {
       const qty = d.target || d.qty || 0;
       const mode = d.mode || 'auto';
       const isHandPick = mode === 'handpick';
+      const catRawCost = getCatSubtotal(cat.id);
       const discountedPrice = cat.unitPrice * (1 - _discPct / 100);
-      const lineTotal = qty * discountedPrice;
+      const lineTotal = cat.perItemPricing ? catRawCost * (1 - _discPct / 100) : qty * discountedPrice;
       const dishCount = (d.items && d.items.length > 0) ? d.items.filter(i => (i.qty || 1) > 0).length : 0;
       const hasItems = qty > 0;
 
@@ -2672,7 +2684,7 @@ function renderParGrid() {
           <!-- Category name + discounted price -->
           <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
             <span style="font-size:.84rem;font-weight:800;color:#00465E;">${cat.name}</span>
-            <span style="font-size:.68rem;font-weight:400;color:#7A8F9C;">${_discPct > 0 ? '<span style="text-decoration:line-through;color:#CBD5E1;">$' + cat.unitPrice.toFixed(2) + '</span> ' : ''}$${discountedPrice.toFixed(2)}/ea</span>
+            <span style="font-size:.68rem;font-weight:400;color:#7A8F9C;">${cat.perItemPricing ? 'from $2.99 – $6.29/ea' : (_discPct > 0 ? '<span style="text-decoration:line-through;color:#CBD5E1;">$' + cat.unitPrice.toFixed(2) + '</span> ' : '') + '$' + discountedPrice.toFixed(2) + '/ea'}</span>
           </div>
           <div style="font-size:.62rem;color:#94A3B8;margin-bottom:12px;">Set weekly par level for this category</div>
 
@@ -2742,7 +2754,7 @@ function openOrderSummary() {
 
   const deliveryDate = document.getElementById('plNextDelivery')?.textContent || 'This Week';
   const totalItems = PL_CATEGORIES.reduce((s, c) => s + ((plData[c.id]?.target || plData[c.id]?.qty || 0)), 0);
-  const subtotal = PL_CATEGORIES.reduce((s, c) => s + ((plData[c.id]?.target || plData[c.id]?.qty || 0) * c.unitPrice), 0);
+  const subtotal = getTotalSubtotal();
   const discountPct = subtotal >= 1000 ? 25 : subtotal >= 750 ? 20 : subtotal >= 500 ? 15 : subtotal >= 250 ? 10 : 0;
   const savings = subtotal * discountPct / 100;
   const finalTotal = subtotal - savings;
@@ -2765,7 +2777,7 @@ function openOrderSummary() {
       ${groups.map(g => {
         const cats = g.cats.filter(c => (plData[c.id]?.target || plData[c.id]?.qty || 0) > 0);
         if (cats.length === 0) return '';
-        const groupTotal = cats.reduce((s, c) => s + (plData[c.id]?.target || plData[c.id]?.qty || 0) * c.unitPrice, 0);
+        const groupTotal = cats.reduce((s, c) => s + getCatSubtotal(c.id), 0);
         return '<div style="padding:16px 20px;border-bottom:1px solid #F1F5F9;">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
             '<span style="font-size:.82rem;font-weight:900;color:#00465E;">' + g.label + '</span>' +
@@ -2775,7 +2787,7 @@ function openOrderSummary() {
             const qty = plData[c.id]?.target || plData[c.id]?.qty || 0;
             const mode = plData[c.id]?.mode || 'auto';
             const picked = (plData[c.id]?.items?.length || 0);
-            const line = qty * c.unitPrice;
+            const line = getCatSubtotal(c.id);
             return '<div onclick="editCartCategory(\'' + c.id + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 12px;border-left:3px solid #FBBF24;cursor:pointer;border-radius:6px;transition:.12s;" onmouseover="this.style.background=\'#F8FCFF\'" onmouseout="this.style.background=\'none\'">' +
               '<div>' +
                 '<div style="font-size:.78rem;font-weight:700;color:#00465E;">' + c.name + '</div>' +
@@ -2857,7 +2869,7 @@ function openFullCartEditor() {
               <button onclick="adjustQty('${cat.id}',1);openFullCartEditor()" style="width:36px;height:36px;border:none;background:${qty > 0 ? '#F0F7FA' : '#F9F5F0'};font-size:16px;font-weight:900;color:#00465E;cursor:pointer;font-family:'DM Sans',sans-serif;">+</button>
             </div>
           </div>
-          ${qty > 0 ? '<div style="font-size:.72rem;font-weight:700;color:#00465E;">$' + (qty * cat.unitPrice).toFixed(2) + '/week</div>' : ''}
+          ${qty > 0 ? '<div style="font-size:.72rem;font-weight:700;color:#00465E;">$' + getCatSubtotal(cat.id).toFixed(2) + '/week</div>' : ''}
           ${qty > 0 ? '<button onclick="event.stopPropagation();openCatDetail(\'' + cat.id + '\')" style="margin-top:6px;font-size:.68rem;font-weight:700;color:#00465E;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;">Choose specific items</button>' : ''}
         </div>`;
       }).join('')}
@@ -2873,7 +2885,7 @@ function openFullCartEditor() {
 
   // Update editor totals
   let sub = 0, items = 0;
-  PL_CATEGORIES.forEach(c => { const d = plData[c.id]; if (d && d.status !== 'paused') { sub += (d.qty||0)*c.unitPrice; items += (d.qty||0); } });
+  PL_CATEGORIES.forEach(c => { const d = plData[c.id]; if (d && d.status !== 'paused') { sub += getCatSubtotal(c.id); items += (d?.qty||0); } });
   let dp = sub >= 1000 ? 25 : sub >= 750 ? 20 : sub >= 500 ? 15 : sub > 0 ? 10 : 0;
   const sav = sub * dp / 100;
   const el = document.getElementById('plEditorTotal');
@@ -2913,8 +2925,7 @@ function toggleCatPause(catId) {
 function updateParTotals() {
   let subtotal = 0;
   PL_CATEGORIES.forEach(cat => {
-    const d = plData[cat.id];
-    if (d && d.status !== 'paused') subtotal += (d.qty || 0) * cat.unitPrice;
+    subtotal += getCatSubtotal(cat.id);
   });
   // Discount tiers
   let discountPct = 0;
@@ -3122,24 +3133,21 @@ async function loadWeeklyMenu() {
 }
 
 // Demo drink items — used until these are added to the 9.0 Merged Masterlist
+// Each item has its own price: Well Juices $6.29, Energy & Protein $4.29, BioSteel $2.99
 const DEMO_DRINK_ITEMS = {
-  well_juice: [
-    { id: 'wj-bewell',    name: 'Well Juice — Be Well',   diet: 'Juice', type: 'Well Juice', image: '/static/drinks/well-juice.jpg',   cal: 120, protein: 1, carbs: 28, fat: 0, tags: 'Cold-Pressed · Beet · Ginger' },
-    { id: 'wj-greens',    name: 'Well Juice — Greens',    diet: 'Juice', type: 'Well Juice', image: '/static/drinks/well-juice.jpg',   cal: 90,  protein: 2, carbs: 18, fat: 0, tags: 'Cold-Pressed · Spinach · Kale · Apple' },
-    { id: 'wj-refreshed', name: 'Well Juice — Refreshed', diet: 'Juice', type: 'Well Juice', image: '/static/drinks/well-juice.jpg',   cal: 110, protein: 1, carbs: 26, fat: 0, tags: 'Cold-Pressed · Grapefruit · Lemon · Ginger' },
-  ],
-  energy_protein: [
-    { id: 'ep-monster',   name: 'Monster Zero Ultra',         diet: 'Energy', type: 'Energy Drink',   image: '/static/drinks/monster-zero.jpg',    cal: 0,   protein: 0,  carbs: 0,  fat: 0, tags: 'Zero Sugar · Energy' },
-    { id: 'ep-alani-e',   name: 'Alani Nu Energy',            diet: 'Energy', type: 'Energy Drink',   image: '/static/drinks/alani-energy.jpg',   cal: 10,  protein: 0,  carbs: 1,  fat: 0, tags: 'Zero Sugar · 200mg Caffeine' },
-    { id: 'ep-celsius',   name: 'Celsius Energy',             diet: 'Energy', type: 'Energy Drink',   image: '/static/drinks/celsius.jpg',        cal: 10,  protein: 0,  carbs: 1,  fat: 0, tags: 'Sparkling · Zero Sugar · Energy' },
-    { id: 'ep-alani-p',   name: 'Alani Nu Protein Shake',     diet: 'Protein', type: 'Protein Shake', image: '/static/drinks/alani-protein.jpg',  cal: 180, protein: 30, carbs: 6,  fat: 4, tags: '30g Protein · Low Sugar' },
-    { id: 'ep-premier',   name: 'Premier Protein Shake',      diet: 'Protein', type: 'Protein Shake', image: '/static/drinks/premier-protein.jpg',cal: 160, protein: 30, carbs: 5,  fat: 3, tags: '30g Protein · 24 Vitamins' },
-    { id: 'ep-fairlife',  name: 'Fairlife Protein Shake',     diet: 'Protein', type: 'Protein Shake', image: '/static/drinks/fairlife-protein.jpg',cal: 150, protein: 30, carbs: 3,  fat: 3, tags: '30g Protein · 2g Sugar' },
-  ],
-  biosteel: [
-    { id: 'bs-rainbow',   name: 'BioSteel — Rainbow Twist',   diet: 'Hydration', type: 'Sports Drink', image: '/static/drinks/biosteel.jpg', cal: 20, protein: 0, carbs: 4, fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
-    { id: 'bs-mixed',     name: 'BioSteel — Mixed Berry',     diet: 'Hydration', type: 'Sports Drink', image: '/static/drinks/biosteel.jpg', cal: 20, protein: 0, carbs: 4, fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
-    { id: 'bs-lemon',     name: 'BioSteel — Lemon Lime',      diet: 'Hydration', type: 'Sports Drink', image: '/static/drinks/biosteel.jpg', cal: 20, protein: 0, carbs: 4, fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
+  drinks: [
+    { id: 'wj-bewell',    name: 'Well Juice — Be Well',       diet: 'Juice',     type: 'Cold-Pressed Juice', image: '/static/drinks/well-juice.jpg',      price: 6.29, cal: 120, protein: 1, carbs: 28, fat: 0, tags: 'Cold-Pressed · Beet · Ginger' },
+    { id: 'wj-greens',    name: 'Well Juice — Greens',        diet: 'Juice',     type: 'Cold-Pressed Juice', image: '/static/drinks/well-juice.jpg',      price: 6.29, cal: 90,  protein: 2, carbs: 18, fat: 0, tags: 'Cold-Pressed · Spinach · Kale · Apple' },
+    { id: 'wj-refreshed', name: 'Well Juice — Refreshed',     diet: 'Juice',     type: 'Cold-Pressed Juice', image: '/static/drinks/well-juice.jpg',      price: 6.29, cal: 110, protein: 1, carbs: 26, fat: 0, tags: 'Cold-Pressed · Grapefruit · Lemon · Ginger' },
+    { id: 'ep-monster',   name: 'Monster Zero Ultra',         diet: 'Energy',    type: 'Energy Drink',       image: '/static/drinks/monster-zero.jpg',    price: 4.29, cal: 0,   protein: 0, carbs: 0,  fat: 0, tags: 'Zero Sugar · Energy' },
+    { id: 'ep-alani-e',   name: 'Alani Nu Energy',            diet: 'Energy',    type: 'Energy Drink',       image: '/static/drinks/alani-energy.jpg',    price: 4.29, cal: 10,  protein: 0, carbs: 1,  fat: 0, tags: 'Zero Sugar · 200mg Caffeine' },
+    { id: 'ep-celsius',   name: 'Celsius Energy',             diet: 'Energy',    type: 'Energy Drink',       image: '/static/drinks/celsius.jpg',         price: 4.29, cal: 10,  protein: 0, carbs: 1,  fat: 0, tags: 'Sparkling · Zero Sugar · Energy' },
+    { id: 'ep-alani-p',   name: 'Alani Nu Protein Shake',     diet: 'Protein',   type: 'Protein Shake',      image: '/static/drinks/alani-protein.jpg',   price: 4.29, cal: 180, protein: 30, carbs: 6, fat: 4, tags: '30g Protein · Low Sugar' },
+    { id: 'ep-premier',   name: 'Premier Protein Shake',      diet: 'Protein',   type: 'Protein Shake',      image: '/static/drinks/premier-protein.jpg', price: 4.29, cal: 160, protein: 30, carbs: 5, fat: 3, tags: '30g Protein · 24 Vitamins' },
+    { id: 'ep-fairlife',  name: 'Fairlife Protein Shake',     diet: 'Protein',   type: 'Protein Shake',      image: '/static/drinks/fairlife-protein.jpg',price: 4.29, cal: 150, protein: 30, carbs: 3, fat: 3, tags: '30g Protein · 2g Sugar' },
+    { id: 'bs-rainbow',   name: 'BioSteel — Rainbow Twist',   diet: 'Hydration', type: 'Sports Drink',       image: '/static/drinks/biosteel.jpg',        price: 2.99, cal: 20,  protein: 0, carbs: 4,  fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
+    { id: 'bs-mixed',     name: 'BioSteel — Mixed Berry',     diet: 'Hydration', type: 'Sports Drink',       image: '/static/drinks/biosteel.jpg',        price: 2.99, cal: 20,  protein: 0, carbs: 4,  fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
+    { id: 'bs-lemon',     name: 'BioSteel — Lemon Lime',      diet: 'Hydration', type: 'Sports Drink',       image: '/static/drinks/biosteel.jpg',        price: 2.99, cal: 20,  protein: 0, carbs: 4,  fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
   ]
 };
 
@@ -3157,8 +3165,8 @@ async function loadParCatalog() {
     }
   });
   // Migrate any saved plData from old 'juice' category
-  if (plData['juice'] && !plData['well_juice']) {
-    plData['well_juice'] = { ...plData['juice'], items: [] };
+  if (plData['juice'] && !plData['drinks']) {
+    plData['drinks'] = { ...plData['juice'], items: [] };
     delete plData['juice'];
   }
   return _parCatalog;
@@ -3211,7 +3219,7 @@ async function openCatDetail(catId) {
     d.items = catItems.map(item => {
       const bonus = extra > 0 ? 1 : 0;
       if (bonus) extra--;
-      return { id: item.id, name: item.name, qty: perItem + bonus };
+      return { id: item.id, name: item.name, qty: perItem + bonus, price: item.price || undefined };
     }).filter(i => i.qty > 0);
     plData[catId] = d;
   }
@@ -3286,6 +3294,7 @@ async function openCatDetail(catId) {
               ${isSwapped && swapFrom ? '<div style="font-size:.6rem;color:#B45309;margin-bottom:2px;">Replaced ' + (swapFrom || '') + '</div>' : ''}
               <div class="pl-dish-meta">${macros}</div>
               ${item.tags ? '<div style="font-size:.58rem;color:#94A3B8;margin-top:1px;">' + item.tags + '</div>' : ''}
+              ${item.price ? '<div style="font-size:.72rem;font-weight:800;color:#00465E;margin-top:3px;">$' + item.price.toFixed(2) + '</div>' : ''}
             </div>
             <button onclick="event.stopPropagation();clearDish('${catId}',${i})" title="Remove" style="width:28px;height:28px;border:none;background:none;cursor:pointer;font-size:14px;padding:0;flex-shrink:0;opacity:.4;transition:.15s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'">&#128465;</button>
             <div class="pl-dish-qty-wrap" id="dishQty_${catId}_${i}" style="display:flex;align-items:center;gap:0;border:2px solid ${hasQty ? '#D4A029' : '#E8DFD2'};border-radius:8px;overflow:hidden;">
@@ -3442,7 +3451,7 @@ function _recalcCatTotal(catId) {
     totalQty += q;
     // Save each dish's selection back to plData.items
     if (q > 0 && _plPanelItems[i]) {
-      savedItems.push({ id: _plPanelItems[i].id, name: _plPanelItems[i].name, qty: q });
+      savedItems.push({ id: _plPanelItems[i].id, name: _plPanelItems[i].name, qty: q, price: _plPanelItems[i].price || undefined });
     }
   });
   const d = plData[catId] || { qty: 0, status: 'active', mode: 'auto' };
@@ -3568,9 +3577,7 @@ function generateDemoItems(cat, qty) {
     hot_breakfast: ['Egg & Cheese Muffin', 'Sausage Breakfast Bowl', 'Veggie Scramble'],
     cookie: ['Chocolate Chip', 'Oatmeal Raisin', 'Double Chocolate', 'Peanut Butter'],
     snack: ['Trail Mix Cup', 'Protein Bites', 'Granola Bar', 'Veggie Cup & Hummus'],
-    well_juice: ['Well — Be Well', 'Well — Greens', 'Well — Refreshed'],
-    energy_protein: ['Monster Zero Ultra', 'Alani Nu Energy', 'Celsius', 'Alani Nu Protein', 'Premier Protein', 'Fairlife Protein'],
-    biosteel: ['BioSteel Rainbow Twist', 'BioSteel Mixed Berry', 'BioSteel Lemon Lime'],
+    drinks: ['Well Juice — Be Well', 'Monster Zero Ultra', 'Alani Nu Energy', 'Celsius', 'Alani Nu Protein', 'Premier Protein', 'Fairlife Protein', 'BioSteel Rainbow Twist'],
   };
   const names = demoNames[cat.id] || ['Item'];
   const items = [];
