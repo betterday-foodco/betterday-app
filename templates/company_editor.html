@@ -729,24 +729,19 @@ function updatePreview() {
     const fp = parseFloat(document.getElementById('basePrice')?.value) || 16.99;
     const gl = _getGeneralLevel();
 
+    // All meal counts and prices come from the General benefit level
     const free = gl ? (parseInt(gl.FreeMealsPerWeek) || 0) : 0;
-    const freeEnabled = document.getElementById('enableFree')?.checked;
-
-    const freeBd = parseFloat(document.getElementById('freeBdSubsidy')?.value) || 0;
-
-    const t1En = document.getElementById('enableT1')?.checked;
     const t1m  = gl ? (parseInt(gl.Tier1_Meals) || 0) : 0;
-    const t1ep = parseFloat(document.getElementById('t1EmpPrice')?.value) || 0;
-    const t1bd = parseFloat(document.getElementById('t1BdSubsidy')?.value) || 0;
-
-    const t2En = document.getElementById('enableT2')?.checked;
     const t2m  = gl ? (parseInt(gl.Tier2_Meals) || 0) : 0;
-    const t2ep = parseFloat(document.getElementById('t2EmpPrice')?.value) || 0;
-    const t2bd = parseFloat(document.getElementById('t2BdSubsidy')?.value) || 0;
-
-    const t3En = document.getElementById('enableT3')?.checked;
     const t3m  = gl ? (parseInt(gl.Tier3_Meals) || 0) : 0;
+
+    // Prices from the form inputs (shared across levels)
+    const t1ep = parseFloat(document.getElementById('t1EmpPrice')?.value) || 0;
+    const t2ep = parseFloat(document.getElementById('t2EmpPrice')?.value) || 0;
     const t3ep = parseFloat(document.getElementById('t3EmpPrice')?.value) || 0;
+    const freeBd = parseFloat(document.getElementById('freeBdSubsidy')?.value) || 0;
+    const t1bd = parseFloat(document.getElementById('t1BdSubsidy')?.value) || 0;
+    const t2bd = parseFloat(document.getElementById('t2BdSubsidy')?.value) || 0;
     const t3bd = parseFloat(document.getElementById('t3BdSubsidy')?.value) || 0;
 
     // Update auto-calculated company subsidy = Full price - Employee price - BD subsidy
@@ -754,7 +749,6 @@ function updatePreview() {
         const el = document.getElementById(id);
         if (el) el.value = Math.max(0, fp - ep - bd).toFixed(2);
     };
-    // Free tier: employee pays $0, so company = full price - BD
     const freeCoEl = document.getElementById('freeCoSubsidy');
     if (freeCoEl) freeCoEl.value = Math.max(0, fp - freeBd).toFixed(2);
 
@@ -762,26 +756,30 @@ function updatePreview() {
     setSubsidy('t2CoSubsidy', t2ep, t2bd);
     setSubsidy('t3CoSubsidy', t3ep, t3bd);
 
-    // Build preview rows
+    // Build preview rows — driven entirely by BenefitLevels General row
     const rows = [];
     let cur = 0;
-    if (freeEnabled && free > 0) {
+    if (free > 0) {
         rows.push({ label: `Meal${free > 1 ? 's' : ''} 1\u2013${free}`, val: 'FREE \ud83c\udf89', green: true });
         cur += free;
     }
-    if (t1En && t1m > 0) {
+    if (t1m > 0) {
         rows.push({ label: `Meal${t1m > 1 ? 's' : ''} ${cur+1}\u2013${cur+t1m}`, val: `$${t1ep.toFixed(2)}` });
         cur += t1m;
     }
-    if (t2En && t2m > 0) {
+    if (t2m > 0) {
         rows.push({ label: `Meal${t2m > 1 ? 's' : ''} ${cur+1}\u2013${cur+t2m}`, val: `$${t2ep.toFixed(2)}` });
         cur += t2m;
     }
-    if (t3En && t3m > 0) {
+    if (t3m > 0) {
         rows.push({ label: `Meal${t3m > 1 ? 's' : ''} ${cur+1}\u2013${cur+t3m}`, val: `$${t3ep.toFixed(2)}` });
         cur += t3m;
     }
-    rows.push({ label: 'Additional meals', val: `$${fp.toFixed(2)} (full price)` });
+    if (rows.length === 0) {
+        rows.push({ label: 'Waiting for benefit levels to load\u2026', val: '', green: false });
+    } else {
+        rows.push({ label: 'Additional meals', val: `$${fp.toFixed(2)} (full price)` });
+    }
 
     document.getElementById('previewRows').innerHTML = rows.map(r =>
         `<div class="price-preview-row">
