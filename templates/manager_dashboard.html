@@ -388,6 +388,32 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .roi-final-lbl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#FFC600}
 .roi-final-val{font-size:1.25rem;font-weight:900;color:#FFC600;font-variant-numeric:tabular-nums}
 .roi-final-val small{font-size:.7rem;font-weight:700;opacity:.7;margin-left:4px}
+
+/* ════════ REMINDER MODAL ════════ */
+.rm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:900;align-items:center;justify-content:center}
+.rm-overlay.open{display:flex}
+.rm-card{background:#fff;border-radius:14px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;animation:rmSlide .2s ease}
+@keyframes rmSlide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.rm-header{background:#003141;padding:14px 22px;display:flex;align-items:center;justify-content:space-between}
+.rm-header h3{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#FAEBDA;margin:0}
+.rm-close{background:none;border:none;color:rgba(250,235,218,.5);font-size:1.2rem;cursor:pointer;padding:0 2px;line-height:1}
+.rm-close:hover{color:#FAEBDA}
+.rm-body{padding:22px}
+.rm-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:.84rem;border-bottom:1px solid #F0EBE2}
+.rm-stat:last-of-type{border-bottom:none}
+.rm-stat-label{color:#5A6F7C;font-weight:600}
+.rm-stat-val{font-weight:800;color:#003141}
+.rm-stat-val.green{color:#1a7a46}
+.rm-stat-val.muted{color:#7A8F9C}
+.rm-stat-note{font-size:.65rem;color:#7A8F9C;font-weight:600;margin-left:6px}
+.rm-deadline{font-size:.72rem;color:#B56B10;background:#FFF3E0;border-radius:8px;padding:8px 12px;margin:14px 0 0;text-align:center;font-weight:600}
+.rm-actions{padding:0 22px 22px;display:flex;flex-direction:column;gap:8px}
+.rm-btn-primary{padding:11px 20px;border:none;border-radius:8px;font-family:inherit;font-size:.82rem;font-weight:800;cursor:pointer;background:#D4A029;color:#003141;transition:.15s}
+.rm-btn-primary:hover{background:#c4911f}
+.rm-btn-primary:disabled{opacity:.5;cursor:default}
+.rm-btn-secondary{padding:9px 20px;border:1.5px solid #E0D4C2;border-radius:8px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;background:#fff;color:#003141;transition:.15s}
+.rm-btn-secondary:hover{border-color:#003141;background:#F8F3EC}
+.rm-btn-secondary small{display:block;font-size:.62rem;font-weight:600;color:#7A8F9C;margin-top:2px}
 </style>
 </head>
 <body>
@@ -468,7 +494,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         </div>
 
         {% if not_ordered %}
-        <button class="action-btn" onclick="sendReminders(this)">📣 Send reminders to {{ not_ordered|length }}</button>
+        <button class="action-btn" onclick="openReminderModal()">📣 Send reminders to {{ not_ordered|length }}</button>
         {% endif %}
         <div id="deadlineCountdown" data-deadline="{{ ordering_deadline }}" class="deadline-tag"></div>
       </div>
@@ -2023,10 +2049,41 @@ ${inv.notes ? '<div style="margin-top:16px;font-size:.82rem;color:#484848;"><str
   win.document.close();
 }
 
-// ═══ SEND REMINDERS ═══
-async function sendReminders(btn) {
+// ═══ REMINDER MODAL ═══
+const RM_NOT_ORDERED = {{ not_ordered|length }};
+const RM_TOTAL_EMPLOYEES = {{ employees|length }};
+// Fake opt-out count for demo (2 people, or 1 if only a few haven't ordered)
+const RM_OPTED_OUT = Math.min(2, Math.max(0, RM_NOT_ORDERED - 1));
+const RM_TO_SEND = RM_NOT_ORDERED - RM_OPTED_OUT;
+
+function openReminderModal() {
+  document.getElementById('rmNotOrdered').textContent = RM_NOT_ORDERED;
+  document.getElementById('rmOptedOut').innerHTML = RM_OPTED_OUT + '<span class="rm-stat-note">won\'t receive</span>';
+  document.getElementById('rmToSend').textContent = RM_TO_SEND;
+  document.getElementById('rmSendBtn').textContent = 'Send ' + RM_TO_SEND + ' Reminder' + (RM_TO_SEND !== 1 ? 's' : '');
+  // Deadline context
+  var dlEl = document.getElementById('deadlineCountdown');
+  var rmDl = document.getElementById('rmDeadline');
+  if (dlEl && dlEl.textContent && dlEl.textContent !== '') {
+    rmDl.textContent = '⏰ Orders close ' + dlEl.textContent.replace('Closes in ', 'in ');
+    rmDl.style.display = '';
+  } else {
+    rmDl.style.display = 'none';
+  }
+  document.getElementById('rmOverlay').classList.add('open');
+}
+
+function closeReminderModal() {
+  document.getElementById('rmOverlay').classList.remove('open');
+}
+
+async function confirmSendReminders(sendToAll) {
+  var btn = sendToAll
+    ? document.querySelector('.rm-btn-secondary')
+    : document.getElementById('rmSendBtn');
+  var origText = btn.innerHTML;
   btn.disabled = true;
-  btn.textContent = 'Sending...';
+  btn.textContent = 'Sending…';
   try {
     const res = await fetch('/manager/send-reminders', {
       method: 'POST',
@@ -2034,11 +2091,14 @@ async function sendReminders(btn) {
       body: JSON.stringify({ company_id: COMPANY_ID })
     });
     const data = await res.json();
-    btn.textContent = data.success ? 'Sent!' : 'Error';
+    btn.textContent = data.success ? '✓ Sent!' : 'Error';
+    if (data.success) {
+      setTimeout(() => closeReminderModal(), 1200);
+    }
   } catch(e) {
     btn.textContent = 'Error';
   }
-  setTimeout(() => { btn.textContent = 'Send Reminders'; btn.disabled = false; }, 3000);
+  setTimeout(() => { btn.innerHTML = origText; btn.disabled = false; }, 3000);
 }
 
 // ═══ DEADLINE COUNTDOWN ═══
@@ -3538,5 +3598,38 @@ function adjustCatItemQty(btn, delta) {
   if (row) row.style.background = val > 0 ? 'rgba(22,163,74,.04)' : '';
 }
 </script>
+
+<!-- ════════ REMINDER CONFIRMATION MODAL ════════ -->
+<div class="rm-overlay" id="rmOverlay" onclick="if(event.target===this)closeReminderModal()">
+  <div class="rm-card">
+    <div class="rm-header">
+      <h3>Send Order Reminders</h3>
+      <button class="rm-close" onclick="closeReminderModal()">&times;</button>
+    </div>
+    <div class="rm-body">
+      <div class="rm-stat">
+        <span class="rm-stat-label">Haven't ordered yet</span>
+        <span class="rm-stat-val" id="rmNotOrdered">—</span>
+      </div>
+      <div class="rm-stat">
+        <span class="rm-stat-label">Reminders turned off</span>
+        <span class="rm-stat-val muted" id="rmOptedOut">—<span class="rm-stat-note">won't receive</span></span>
+      </div>
+      <div class="rm-stat">
+        <span class="rm-stat-label">Emails to send</span>
+        <span class="rm-stat-val green" id="rmToSend">—</span>
+      </div>
+      <div class="rm-deadline" id="rmDeadline"></div>
+    </div>
+    <div class="rm-actions">
+      <button class="rm-btn-primary" id="rmSendBtn" onclick="confirmSendReminders(false)">Send Reminders</button>
+      <button class="rm-btn-secondary" onclick="confirmSendReminders(true)">
+        Send to All Employees
+        <small>Includes opted-out &amp; already ordered</small>
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
