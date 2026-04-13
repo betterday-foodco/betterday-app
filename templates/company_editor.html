@@ -712,23 +712,23 @@ function toggleTier(fieldId, show) {
 
 function updatePreview() {
     const fp = parseFloat(document.getElementById('basePrice')?.value) || 16.99;
-    const free = parseInt(document.getElementById('freeMeals')?.value) || 0;
+    const free = parseInt({{ company.FreeMealsPerWeek or 0 }});
     const freeEnabled = document.getElementById('enableFree')?.checked;
 
     const freeBd = parseFloat(document.getElementById('freeBdSubsidy')?.value) || 0;
 
     const t1En = document.getElementById('enableT1')?.checked;
-    const t1m  = parseInt(document.getElementById('t1Meals')?.value) || 0;
+    const t1m  = parseInt({{ company.Tier1_Meals or 0 }});
     const t1ep = parseFloat(document.getElementById('t1EmpPrice')?.value) || 0;
     const t1bd = parseFloat(document.getElementById('t1BdSubsidy')?.value) || 0;
 
     const t2En = document.getElementById('enableT2')?.checked;
-    const t2m  = parseInt(document.getElementById('t2Meals')?.value) || 0;
+    const t2m  = parseInt({{ company.Tier2_Meals or 0 }});
     const t2ep = parseFloat(document.getElementById('t2EmpPrice')?.value) || 0;
     const t2bd = parseFloat(document.getElementById('t2BdSubsidy')?.value) || 0;
 
     const t3En = document.getElementById('enableT3')?.checked;
-    const t3m  = parseInt(document.getElementById('t3Meals')?.value) || 0;
+    const t3m  = parseInt({{ company.Tier3_Meals or 0 }});
     const t3ep = parseFloat(document.getElementById('t3EmpPrice')?.value) || 0;
     const t3bd = parseFloat(document.getElementById('t3BdSubsidy')?.value) || 0;
 
