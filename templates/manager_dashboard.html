@@ -162,7 +162,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .pl-toggle input:checked+.pl-toggle-track{background:#B56B10}
 .pl-toggle input:checked+.pl-toggle-track:before{left:18px}
 /* Slide-in detail panel */
-.pl-detail-panel{position:fixed;top:0;right:-480px;width:460px;max-width:90vw;height:100vh;background:#fff;z-index:300;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.15)}
+.pl-detail-panel{position:fixed;top:0;right:-540px;width:460px;max-width:90vw;height:100vh;background:#fff;z-index:300;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.15)}
 .pl-detail-panel.open{right:0}
 .pl-detail-header{background:#00465E;color:#fff;padding:18px 20px;display:flex;align-items:center;justify-content:space-between}
 .pl-detail-header h3{font-size:1rem;font-weight:800}
@@ -1014,6 +1014,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
                 <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#7A8F9C;">Your Next Delivery</div>
                 <div style="font-size:1.3rem;font-weight:900;color:#00465E;margin-top:2px;" id="plNextDelivery">Monday, April 7</div>
                 <div id="plEditWindow" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:4px;"></div>
+                <button onclick="openOrderSummary()" style="margin-top:14px;padding:11px 22px;background:linear-gradient(135deg,#D4A029,#B8860B);color:#fff;border:none;border-radius:10px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 12px rgba(212,160,41,.3);transition:all .15s;display:inline-flex;align-items:center;gap:8px;letter-spacing:-.01em;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 5px 16px rgba(212,160,41,.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 12px rgba(212,160,41,.3)'">&#x1F6D2; View &amp; Edit Cart</button>
               </div>
               <div style="text-align:right;">
                 <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7A8F9C;" id="plItemCountDisplay">0 items</span>
@@ -2781,12 +2782,15 @@ function openOrderSummary() {
             const mode = plData[c.id]?.mode || 'auto';
             const picked = (plData[c.id]?.items?.length || 0);
             const line = qty * c.unitPrice;
-            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0 6px 12px;border-left:3px solid #FBBF24;">' +
+            return '<div onclick="editCartCategory(\'' + c.id + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 12px;border-left:3px solid #FBBF24;cursor:pointer;border-radius:6px;transition:.12s;" onmouseover="this.style.background=\'#F8FCFF\'" onmouseout="this.style.background=\'none\'">' +
               '<div>' +
                 '<div style="font-size:.78rem;font-weight:700;color:#00465E;">' + c.name + '</div>' +
                 '<div style="font-size:.72rem;color:#7A8F9C;">' + qty + ' items &middot; ' + (mode === 'handpick' ? 'Hand-Picked' : 'Auto-Pick') + '</div>' +
               '</div>' +
-              '<span style="font-size:.78rem;font-weight:800;color:#00465E;">$' + line.toFixed(2) + '</span>' +
+              '<div style="display:flex;align-items:center;gap:10px;">' +
+                '<span style="font-size:.78rem;font-weight:800;color:#00465E;">$' + line.toFixed(2) + '</span>' +
+                '<span style="font-size:.62rem;font-weight:700;color:#D4A029;">Edit &#8250;</span>' +
+              '</div>' +
             '</div>';
           }).join('') +
         '</div>';
@@ -2808,6 +2812,16 @@ function openOrderSummary() {
     </div>
   `;
   requestAnimationFrame(() => { overlay.classList.add('open'); panel.classList.add('open'); });
+}
+
+function editCartCategory(catId) {
+  // Close the summary panel, then open the category detail editor
+  const overlay = document.querySelector('.pl-overlay');
+  const panel = document.querySelector('.pl-detail-panel');
+  if (overlay) overlay.classList.remove('open');
+  if (panel) panel.classList.remove('open');
+  // Small delay for the close animation, then open category detail
+  setTimeout(() => openCatDetail(catId), 320);
 }
 
 function openFullCartEditor() {
@@ -3161,6 +3175,20 @@ async function openCatDetail(catId) {
   // Store panel context for _recalcCatTotal to save picks back
   _plPanelCatId = catId;
   _plPanelItems = catItems;
+
+  // Auto-populate items for auto-mode categories with no picks yet
+  // This creates the "prebuilt cart" — evenly distributed across available dishes
+  const autoTarget = d.target || d.qty || 0;
+  if ((d.mode || 'auto') === 'auto' && autoTarget > 0 && (!d.items || d.items.length === 0) && catItems.length > 0) {
+    const perItem = Math.floor(autoTarget / catItems.length);
+    let extra = autoTarget % catItems.length;
+    d.items = catItems.map(item => {
+      const bonus = extra > 0 ? 1 : 0;
+      if (bonus) extra--;
+      return { id: item.id, name: item.name, qty: perItem + bonus };
+    }).filter(i => i.qty > 0);
+    plData[catId] = d;
+  }
 
   // Build a lookup of saved picks: item id → qty
   const savedPicks = {};
