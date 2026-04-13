@@ -993,13 +993,6 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
     <div class="tab-panel" id="tab-parlevel">
 
-      <!-- ═══════ LOCKED STATE BANNER (Thu-Sun) ═══════ -->
-      <div id="plLockedBanner" style="display:none;background:#FEF3C7;border:1.5px solid #FBBF24;border-radius:12px;padding:18px 22px;margin-bottom:16px;">
-        <div style="font-size:.88rem;font-weight:800;color:#92400E;">Orders locked for this week</div>
-        <div style="font-size:.78rem;color:#92400E;margin-top:4px;line-height:1.5;">Your order for this Sunday is confirmed and in production. Come back <strong>Monday morning</strong> to review and edit your order for the following week.</div>
-        <button onclick="document.getElementById('plLockedBanner').style.display='none'" style="margin-top:10px;font-size:.72rem;font-weight:700;color:#92400E;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);border-radius:8px;padding:6px 14px;cursor:pointer;">View order (read-only)</button>
-      </div>
-
       <!-- ═══════ WEEKLY OVERVIEW — 4-QUADRANT HEADER ═══════ -->
       <div style="background:#fff;border:1.5px solid #E8DFD2;border-radius:14px;overflow:hidden;margin-bottom:20px;">
         <div style="background:rgba(0,70,94,.08);padding:12px 24px;border-bottom:1px solid #E8DFD2;">
@@ -2503,7 +2496,6 @@ function initParLevels() {
   const banner = document.getElementById('plLockedBanner');
   const editWin = document.getElementById('plEditWindow');
   if (state === 'locked') {
-    if (banner) banner.style.display = 'block';
     if (editWin) { editWin.textContent = 'Editing closed — reopens Monday'; editWin.style.color = '#DC2626'; }
   } else {
     if (editWin) { editWin.textContent = 'Editing open until Wednesday midnight'; editWin.style.color = '#167421'; }
