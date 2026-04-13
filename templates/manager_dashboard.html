@@ -2485,7 +2485,9 @@ const PL_CATEGORIES = [
   { id: 'hot_breakfast', name: 'Hot Breakfast',        icon: '🍳', cls: 'breakfast', rotating: false, unitPrice: 10.99, group: 'snacks' },
   { id: 'chia_oats',     name: 'Chia Cups & Oats',    icon: '🥣', cls: 'chia',      rotating: false, unitPrice: 8.99,  group: 'snacks' },
   { id: 'snack',         name: 'Snacks & Cookies',      icon: '🥜', cls: 'snack',     rotating: false, unitPrice: 5.99,  group: 'snacks' },
-  { id: 'juice',         name: 'Drinks',               icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 7.99,  group: 'snacks' },
+  { id: 'well_juice',    name: 'Well Juices',           icon: '🧃', cls: 'juice',     rotating: false, unitPrice: 6.29,  group: 'snacks' },
+  { id: 'energy_protein', name: 'Energy & Protein',     icon: '⚡', cls: 'energy',    rotating: false, unitPrice: 4.29,  group: 'snacks' },
+  { id: 'biosteel',      name: 'BioSteel Hydration',    icon: '💧', cls: 'hydration', rotating: false, unitPrice: 2.99,  group: 'snacks' },
 ];
 
 let plData = {};  // categoryId → { qty, status, mode, items:[] }
@@ -3127,15 +3129,47 @@ async function loadWeeklyMenu() {
   } catch(e) { return {meat_entree:[], plant_entree:[]}; }
 }
 
+// Demo drink items — used until these are added to the 9.0 Merged Masterlist
+const DEMO_DRINK_ITEMS = {
+  well_juice: [
+    { id: 'wj-bewell',    name: 'Well Juice — Be Well',   diet: 'Juice', type: 'Well Juice', image: '/static/drinks/well-juice.jpg',   cal: 120, protein: 1, carbs: 28, fat: 0, tags: 'Cold-Pressed · Beet · Ginger' },
+    { id: 'wj-greens',    name: 'Well Juice — Greens',    diet: 'Juice', type: 'Well Juice', image: '/static/drinks/well-juice.jpg',   cal: 90,  protein: 2, carbs: 18, fat: 0, tags: 'Cold-Pressed · Spinach · Kale · Apple' },
+    { id: 'wj-refreshed', name: 'Well Juice — Refreshed', diet: 'Juice', type: 'Well Juice', image: '/static/drinks/well-juice.jpg',   cal: 110, protein: 1, carbs: 26, fat: 0, tags: 'Cold-Pressed · Grapefruit · Lemon · Ginger' },
+  ],
+  energy_protein: [
+    { id: 'ep-monster',   name: 'Monster Zero Ultra',         diet: 'Energy', type: 'Energy Drink',   image: '/static/drinks/monster-zero.jpg',    cal: 0,   protein: 0,  carbs: 0,  fat: 0, tags: 'Zero Sugar · Energy' },
+    { id: 'ep-alani-e',   name: 'Alani Nu Energy',            diet: 'Energy', type: 'Energy Drink',   image: '/static/drinks/alani-energy.jpg',   cal: 10,  protein: 0,  carbs: 1,  fat: 0, tags: 'Zero Sugar · 200mg Caffeine' },
+    { id: 'ep-celsius',   name: 'Celsius Energy',             diet: 'Energy', type: 'Energy Drink',   image: '/static/drinks/celsius.jpg',        cal: 10,  protein: 0,  carbs: 1,  fat: 0, tags: 'Sparkling · Zero Sugar · Energy' },
+    { id: 'ep-alani-p',   name: 'Alani Nu Protein Shake',     diet: 'Protein', type: 'Protein Shake', image: '/static/drinks/alani-protein.jpg',  cal: 180, protein: 30, carbs: 6,  fat: 4, tags: '30g Protein · Low Sugar' },
+    { id: 'ep-premier',   name: 'Premier Protein Shake',      diet: 'Protein', type: 'Protein Shake', image: '/static/drinks/premier-protein.jpg',cal: 160, protein: 30, carbs: 5,  fat: 3, tags: '30g Protein · 24 Vitamins' },
+    { id: 'ep-fairlife',  name: 'Fairlife Protein Shake',     diet: 'Protein', type: 'Protein Shake', image: '/static/drinks/fairlife-protein.jpg',cal: 150, protein: 30, carbs: 3,  fat: 3, tags: '30g Protein · 2g Sugar' },
+  ],
+  biosteel: [
+    { id: 'bs-rainbow',   name: 'BioSteel — Rainbow Twist',   diet: 'Hydration', type: 'Sports Drink', image: '/static/drinks/biosteel.jpg', cal: 20, protein: 0, carbs: 4, fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
+    { id: 'bs-mixed',     name: 'BioSteel — Mixed Berry',     diet: 'Hydration', type: 'Sports Drink', image: '/static/drinks/biosteel.jpg', cal: 20, protein: 0, carbs: 4, fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
+    { id: 'bs-lemon',     name: 'BioSteel — Lemon Lime',      diet: 'Hydration', type: 'Sports Drink', image: '/static/drinks/biosteel.jpg', cal: 20, protein: 0, carbs: 4, fat: 0, tags: 'Zero Sugar · Electrolytes · B Vitamins' },
+  ]
+};
+
 async function loadParCatalog() {
   if (_parCatalog) return _parCatalog;
   try {
     const r = await fetch('/manager/par-catalog');
     const d = await r.json();
     _parCatalog = d.catalog || {};
-    // catalog loaded
-    return _parCatalog;
-  } catch(e) { return {}; }
+  } catch(e) { _parCatalog = {}; }
+  // Inject demo drink items for categories not yet in the 9.0 masterlist
+  Object.keys(DEMO_DRINK_ITEMS).forEach(catId => {
+    if (!_parCatalog[catId] || _parCatalog[catId].length === 0) {
+      _parCatalog[catId] = DEMO_DRINK_ITEMS[catId];
+    }
+  });
+  // Migrate any saved plData from old 'juice' category
+  if (plData['juice'] && !plData['well_juice']) {
+    plData['well_juice'] = { ...plData['juice'], items: [] };
+    delete plData['juice'];
+  }
+  return _parCatalog;
 }
 
 async function openCatDetail(catId) {
@@ -3542,7 +3576,9 @@ function generateDemoItems(cat, qty) {
     hot_breakfast: ['Egg & Cheese Muffin', 'Sausage Breakfast Bowl', 'Veggie Scramble'],
     cookie: ['Chocolate Chip', 'Oatmeal Raisin', 'Double Chocolate', 'Peanut Butter'],
     snack: ['Trail Mix Cup', 'Protein Bites', 'Granola Bar', 'Veggie Cup & Hummus'],
-    juice: ['Green Machine', 'Berry Blast', 'Orange Sunrise', 'Tropical Mango'],
+    well_juice: ['Well — Be Well', 'Well — Greens', 'Well — Refreshed'],
+    energy_protein: ['Monster Zero Ultra', 'Alani Nu Energy', 'Celsius', 'Alani Nu Protein', 'Premier Protein', 'Fairlife Protein'],
+    biosteel: ['BioSteel Rainbow Twist', 'BioSteel Mixed Berry', 'BioSteel Lemon Lime'],
   };
   const names = demoNames[cat.id] || ['Item'];
   const items = [];
