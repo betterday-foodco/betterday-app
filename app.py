@@ -198,6 +198,15 @@ def _cached_get_company(company_id):
     except Exception as ex:
         log.warning('company lookup error (%s): %s', code, ex)
         return None
+    # Attach benefit levels when employee levels are enabled
+    company = result.get('company') if result else None
+    if company and str(company.get('EnableEmployeeLevels', '')).upper() in ('TRUE', 'ON', '1'):
+        try:
+            lvl_data = _gas_post({'action': 'get_benefit_levels', 'company_id': code}, timeout=8)
+            if lvl_data and lvl_data.get('levels'):
+                company['benefitLevels'] = lvl_data['levels']
+        except Exception:
+            pass
     with _company_cache_lock:
         _company_cache[code] = {'data': result, 'ts': time.time()}
     return result
@@ -229,6 +238,186 @@ def _warmup_gas():
                       timeout=20)
     except Exception:
         pass
+
+
+# ─────────────────────────────────────────────────────────────
+# MANAGER MONTHLY BUDGET STORAGE  (Flask-managed JSON, not GAS)
+#
+# Stored as data/manager_budgets.json:
+#   {
+#     "DEMO": {
+#       "monthly_budget_amount": 4500.00,
+#       "monthly_budget_set_at": "2026-04-07T11:42:00-07:00",
+#       "monthly_budget_set_by": "manager@demo.com",
+#       "alerts_sent": {"2026-04": ["75","90"]}
+#     }
+#   }
+# Soft cap only — tracks company_covered, BD contribution excluded.
+# Will migrate to a PostgreSQL company column once proj-001 lands.
+# ─────────────────────────────────────────────────────────────
+import json as _budget_json
+
+_BUDGET_DIR  = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+_BUDGET_PATH = os.path.join(_BUDGET_DIR, 'manager_budgets.json')
+_budget_lock = threading.Lock()
+
+
+def _load_all_budgets():
+    """Read the entire budgets store. Returns {} if missing or corrupt."""
+    try:
+        with open(_BUDGET_PATH, 'r') as f:
+            data = _budget_json.load(f)
+            return data if isinstance(data, dict) else {}
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def _save_all_budgets(data):
+    """Atomically rewrite the budgets store."""
+    try:
+        os.makedirs(_BUDGET_DIR, exist_ok=True)
+    except Exception:
+        pass
+    tmp = _BUDGET_PATH + '.tmp'
+    with open(tmp, 'w') as f:
+        _budget_json.dump(data, f, indent=2, sort_keys=True)
+    os.replace(tmp, _BUDGET_PATH)
+
+
+def get_company_budget(company_id):
+    """Return {amount, set_at, set_by, alerts_sent} for a company, or None if unset."""
+    if not company_id:
+        return None
+    code = str(company_id).strip().upper()
+    with _budget_lock:
+        store = _load_all_budgets()
+        rec = store.get(code)
+        if not rec:
+            return None
+        amt = rec.get('monthly_budget_amount')
+        if amt in (None, '', 0, '0'):
+            return None
+        try:
+            return {
+                'amount':   float(amt),
+                'set_at':   rec.get('monthly_budget_set_at') or '',
+                'set_by':   rec.get('monthly_budget_set_by') or '',
+                'alerts_sent': rec.get('alerts_sent') or {},
+            }
+        except (TypeError, ValueError):
+            return None
+
+
+def set_company_budget(company_id, amount, set_by):
+    """Persist a new monthly budget. amount=0/None clears it."""
+    if not company_id:
+        return False
+    code = str(company_id).strip().upper()
+    try:
+        amt = float(amount or 0)
+    except (TypeError, ValueError):
+        return False
+    with _budget_lock:
+        store = _load_all_budgets()
+        if amt <= 0:
+            # Clear: remove entry but preserve alerts_sent history (drop entirely is fine)
+            store.pop(code, None)
+        else:
+            existing = store.get(code) or {}
+            store[code] = {
+                'monthly_budget_amount': round(amt, 2),
+                'monthly_budget_set_at': datetime.now().isoformat(timespec='seconds'),
+                'monthly_budget_set_by': set_by or 'manager',
+                # Reset thresholds when the cap moves so alerts can fire again
+                'alerts_sent': {},
+            }
+            # If they're just bumping the same amount, keep existing alerts_sent
+            if existing.get('monthly_budget_amount') == round(amt, 2):
+                store[code]['alerts_sent'] = existing.get('alerts_sent') or {}
+        _save_all_budgets(store)
+    return True
+
+
+def mark_budget_alert_sent(company_id, month_key, threshold):
+    """Record that an alert email fired so we don't double-send."""
+    if not company_id or not month_key or not threshold:
+        return
+    code = str(company_id).strip().upper()
+    with _budget_lock:
+        store = _load_all_budgets()
+        rec = store.get(code)
+        if not rec:
+            return
+        sent = rec.setdefault('alerts_sent', {})
+        sent.setdefault(month_key, [])
+        if str(threshold) not in sent[month_key]:
+            sent[month_key].append(str(threshold))
+            _save_all_budgets(store)
+
+
+def maybe_fire_budget_alert(company_id, company_name, recipient_email,
+                            month_key, month_label, amount, spent, forecast):
+    """If a 75/90/100% threshold has just been crossed and not yet alerted, send email.
+    Fires inline from manager_dashboard load — no cron required for v1.
+    """
+    if not amount or not recipient_email or not month_key:
+        return
+    info = get_company_budget(company_id)
+    if not info:
+        return
+    sent = (info.get('alerts_sent') or {}).get(month_key, [])
+
+    pct = (spent / amount) * 100 if amount > 0 else 0
+    crossed = []
+    if pct >= 100 and '100' not in sent:
+        crossed.append('100')
+    elif pct >= 90 and '90' not in sent:
+        crossed.append('90')
+    elif pct >= 75 and '75' not in sent:
+        crossed.append('75')
+    if not crossed:
+        return
+
+    threshold = crossed[0]
+    label = {'75': '75%', '90': '90%', '100': '100% — over budget'}[threshold]
+    color = {'75': '#D4A029', '90': '#E8B53A', '100': '#E74C3C'}[threshold]
+    subject = f'BetterDay budget alert — {company_name or company_id} at {label}'
+    html_body = f'''
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAEBDA">
+      <div style="background:#003141;color:#fff;padding:18px 22px;border-radius:14px 14px 0 0">
+        <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;opacity:.7">BetterDay for Work</div>
+        <div style="font-size:1.2rem;font-weight:900;margin-top:4px">Monthly budget alert</div>
+      </div>
+      <div style="background:#fff;padding:24px;border-radius:0 0 14px 14px">
+        <p style="font-size:.92rem;color:#003141;margin:0 0 14px">Hi there,</p>
+        <p style="font-size:.92rem;color:#003141;margin:0 0 18px">
+          Your <strong>{month_label}</strong> BetterDay program spend has reached
+          <strong style="color:{color}">{label}</strong> of your monthly budget.
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:.9rem;color:#003141;margin:0 0 18px">
+          <tr><td style="padding:8px 0;border-bottom:1px solid #f0f0f0">Monthly budget</td><td style="padding:8px 0;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:800">${amount:,.2f}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #f0f0f0">Spent so far</td><td style="padding:8px 0;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:800">${spent:,.2f}</td></tr>
+          <tr><td style="padding:8px 0;border-bottom:1px solid #f0f0f0">Pace forecast (full month)</td><td style="padding:8px 0;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:800">${forecast:,.2f}</td></tr>
+        </table>
+        <p style="font-size:.78rem;color:#7b8c9f;margin:0 0 14px">
+          This is a soft cap — orders will not be blocked. The number above tracks the company-covered portion only;
+          BetterDay's volume contribution is excluded.
+        </p>
+        <p style="font-size:.78rem;color:#7b8c9f;margin:0">
+          You can adjust your monthly budget any time from your manager dashboard → Account Settings.
+        </p>
+      </div>
+    </div>
+    '''
+    plain_body = (
+        f"BetterDay budget alert — {company_name or company_id} at {label}\n\n"
+        f"{month_label} program spend: ${spent:,.2f} of ${amount:,.2f}\n"
+        f"Forecast (full month): ${forecast:,.2f}\n\n"
+        f"This is a soft cap; orders are not blocked. "
+        f"The figure tracks the company-covered portion only — BetterDay's contribution is excluded."
+    )
+    if _send_email(recipient_email, subject, html_body, plain_body):
+        mark_budget_alert_sent(company_id, month_key, threshold)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -1284,6 +1473,88 @@ def manager_dashboard():
     # ── Average meals per employee ────────────────────────────
     avg_meals_per_emp = round(total_meals / max(len(employees), 1), 1)
 
+    # ── Monthly budget (Sprint 5) ─────────────────────────────
+    # Soft cap on company_covered for the active month. BD contribution excluded.
+    # Pacing forecast = current_spend × (days_in_month / days_elapsed).
+    budget_info = None
+    budget_record = get_company_budget(company_id)
+    if sorted_monthly:
+        active_month_key  = sorted_monthly[0].get('key', '')
+        active_month_co   = float(sorted_monthly[0].get('co_spend', 0) or 0)
+    else:
+        from datetime import date as _date
+        active_month_key  = _date.today().strftime('%Y-%m')
+        active_month_co   = 0.0
+
+    if budget_record:
+        try:
+            from datetime import date as _date2
+            today = _date2.today()
+            year, month = (int(p) for p in active_month_key.split('-'))
+            # days_in_month
+            if month == 12:
+                next_m = _date2(year + 1, 1, 1)
+            else:
+                next_m = _date2(year, month + 1, 1)
+            first_of_month = _date2(year, month, 1)
+            days_in_month = (next_m - first_of_month).days
+            # days_elapsed: cap at days_in_month for past months
+            if today.year == year and today.month == month:
+                days_elapsed = today.day
+            elif (today.year, today.month) > (year, month):
+                days_elapsed = days_in_month
+            else:
+                days_elapsed = 1
+            days_elapsed = max(1, days_elapsed)
+            forecast = round(active_month_co * (days_in_month / days_elapsed), 2)
+        except Exception:
+            days_in_month = 30
+            days_elapsed = 1
+            forecast = round(active_month_co, 2)
+
+        amount = round(float(budget_record['amount']), 2)
+        pct = round((active_month_co / amount) * 100) if amount > 0 else 0
+        if pct >= 100:
+            state = 'over'
+        elif pct >= 90:
+            state = 'critical'
+        elif pct >= 75:
+            state = 'warn'
+        else:
+            state = 'ok'
+        forecast_pct = round((forecast / amount) * 100) if amount > 0 else 0
+        budget_info = {
+            'amount':       amount,
+            'spent':        round(active_month_co, 2),
+            'remaining':    round(max(amount - active_month_co, 0), 2),
+            'pct':          pct,
+            'state':        state,
+            'forecast':     forecast,
+            'forecast_pct': forecast_pct,
+            'set_at':       budget_record.get('set_at', ''),
+            'set_by':       budget_record.get('set_by', ''),
+            'days_in_month': days_in_month,
+            'days_elapsed': days_elapsed,
+            'month_key':    active_month_key,
+        }
+
+        # Fire-and-forget threshold alert (no-op if already sent this month)
+        try:
+            recipient = (company.get('BillingContactEmail') or
+                         company.get('PrimaryContactEmail') or '').strip()
+            if recipient:
+                month_label = (sorted_monthly[0].get('label', '')
+                               if sorted_monthly else active_month_key)
+                threading.Thread(
+                    target=maybe_fire_budget_alert,
+                    args=(company_id, session.get('manager_company_name'),
+                          recipient, active_month_key, month_label,
+                          amount, active_month_co, forecast),
+                    daemon=True,
+                ).start()
+        except Exception as ex:
+            log.warning('budget alert dispatch failed for %s: %s', company_id, ex)
+
     saved_tab = request.args.get('saved')
 
     return render_template('manager_dashboard.html',
@@ -1312,6 +1583,7 @@ def manager_dashboard():
                            current_month_spend=round(current_month_spend, 2),
                            last_month_spend=round(last_month_spend, 2),
                            avg_meals_per_emp=avg_meals_per_emp,
+                           budget_info=budget_info,
                            saved_tab=saved_tab)
 
 
@@ -1343,6 +1615,27 @@ def manager_update_account():
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({'success': bool(result and result.get('success'))})
     return redirect(url_for('manager_dashboard') + '?saved=account')
+
+
+@app.route('/manager/set-budget', methods=['POST'])
+@manager_required
+def manager_set_budget():
+    """Save / clear the company's monthly budget (soft cap, company spend only)."""
+    company_id = session.get('manager_company_id')
+    set_by     = session.get('manager_email') or session.get('manager_company_name') or 'manager'
+    raw = request.form.get('monthly_budget_amount')
+    if raw is None:
+        body = request.get_json(silent=True) or {}
+        raw = body.get('monthly_budget_amount')
+    try:
+        amt = float(str(raw or '').strip() or 0)
+    except (TypeError, ValueError):
+        amt = 0
+    set_company_budget(company_id, amt, set_by)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        info = get_company_budget(company_id)
+        return jsonify({'success': True, 'amount': info['amount'] if info else 0})
+    return redirect(url_for('manager_dashboard') + '?saved=budget')
 
 
 @app.route('/manager/save-meal-allowances', methods=['POST'])
