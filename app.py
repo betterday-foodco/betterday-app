@@ -58,6 +58,20 @@ SMTP_PASSWORD    = os.environ.get('SMTP_PASSWORD', '')
 app.secret_key  = os.environ.get('FLASK_SECRET_KEY', 'bd-dev-secret-change-in-prod')
 CULINARY_SYNC_KEY = os.environ.get('CULINARY_SYNC_KEY', 'bd-culinary-sync-2026')
 
+# ── Culinary-ops migration feature flag ─────────────────────────
+# When CULINARY_OPS_ENABLED is truthy, Flask routes call the
+# NestJS/PostgreSQL backend instead of GAS (with automatic fallback on
+# any failure). When unset, the client is dormant and every callsite
+# falls through to the existing _gas_post() path. See culinary_ops_client.py.
+CULINARY_OPS_BASE_URL = os.environ.get(
+    'CULINARY_OPS_BASE_URL',
+    'https://culinary-ops-backend-production.up.railway.app',
+)
+CULINARY_OPS_ENABLED = os.environ.get('CULINARY_OPS_ENABLED', '').strip().lower() in (
+    '1', 'true', 'yes', 'on',
+)
+from culinary_ops_client import get_culinary_client  # noqa: E402
+
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
