@@ -43,7 +43,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .action-bar{display:flex;gap:14px;margin-bottom:16px}
 .action-card{background:#fff;border-radius:12px;padding:18px 22px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);border-left:4px solid #D4A029}
 .action-card.good{border-left-color:#1a7a46}
-.action-card-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#7A8F9C;margin-bottom:10px}
+.action-card-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#FAEBDA;background:#003141;margin:-18px -22px 10px;padding:10px 22px;border-radius:12px 12px 0 0}
 .action-card-main{font-size:1.6rem;font-weight:900;color:#003141;line-height:1.2;margin-bottom:4px}
 .action-card-sub{font-size:.78rem;color:#5A6F7C;margin-bottom:8px}
 .action-progress{height:8px;background:#EDE6DA;border-radius:99px;overflow:hidden;margin-bottom:8px}
@@ -62,7 +62,7 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 /* ════════ THIS WEEK GRID ════════ */
 .tw-grid{display:grid;gap:14px;margin-bottom:16px}
 .tw-col{background:#fff;border-radius:12px;padding:18px 22px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04)}
-.tw-col-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#7A8F9C;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #EDE6DA}
+.tw-col-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#FAEBDA;background:#003141;margin:0 -22px 12px;padding:10px 22px;border-radius:12px 12px 0 0}
 .tw-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.82rem}
 .tw-stat-label{color:#5A6F7C;font-weight:500}
 .tw-stat-val{font-weight:800;color:#003141}
@@ -81,8 +81,8 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 /* ════════ SHARED: tables, search, summary bars, cards ════════ */
 .tw{background:#fff;border-radius:10px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04);overflow:hidden}
 .tw table{width:100%;border-collapse:collapse}
-.tw thead{background:#F8F3EC}.tw thead tr{border-bottom:1.5px solid #E8DFD2}
-.tw th{text-align:left;padding:10px 14px;font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#00465E;white-space:nowrap}
+.tw thead{background:#00465E}.tw thead tr{border-bottom:1.5px solid #003A50}
+.tw th{text-align:left;padding:10px 14px;font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#FAEBDA;white-space:nowrap}
 .tw td{padding:11px 14px;font-size:.8rem;border-bottom:1px solid rgba(0,49,65,.05);color:#2E4A5A}
 .tw tbody tr:last-child td{border-bottom:none}
 .tn{font-weight:800;color:#003141}.tg{font-weight:700;color:#167421}.ts{font-weight:700;color:#2d7ec4}
@@ -259,6 +259,135 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
 .tier-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:capitalize}
 .tier-free-badge{background:#EEFBE8;color:#167421}
 .tier-tier1,.tier-tier2,.tier-tier3{background:#E8F3FF;color:#2d7ec4}
+
+/* ════════ SIDEBAR STATUS BADGES ════════ */
+.sb-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:auto;flex-shrink:0}
+.sb-dot.red{background:#E74C3C;box-shadow:0 0 0 3px rgba(231,76,60,.18)}
+.sb-dot.yellow{background:#F59E0B;box-shadow:0 0 0 3px rgba(245,158,11,.18)}
+.sb-dot.green{background:#1a7a46;box-shadow:0 0 0 3px rgba(26,122,70,.18)}
+
+/* ════════ REDESIGNED ACTION BAR ════════ */
+.action-card .ew-stats{display:flex;flex-direction:column;gap:4px;margin:10px 0 12px;padding:10px 12px;background:#F8F3EC;border-radius:8px}
+.action-card .ew-stat-row{display:flex;justify-content:space-between;align-items:center;font-size:.74rem}
+.action-card .ew-stat-row span:first-child{color:#7A8F9C;font-weight:600}
+.action-card .ew-stat-row span:last-child{color:#003141;font-weight:800}
+.action-card .ew-stat-row .gold{color:#b8860b}
+.action-card .ew-stat-row .green{color:#1a7a46}
+.ew-favorite{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#FFF8F0;border:1px solid rgba(212,160,41,.18);border-radius:8px;margin-bottom:10px}
+.ew-fav-thumb{width:36px;height:36px;border-radius:8px;background:#EDE6DA;object-fit:cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.ew-fav-body{flex:1;min-width:0}
+.ew-fav-label{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#B56B10;line-height:1.1}
+.ew-fav-name{font-size:.78rem;font-weight:800;color:#003141;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.ew-fav-meta{font-size:.65rem;color:#7A8F9C;margin-top:1px}
+.quick-add-link{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:700;color:#00465E;cursor:pointer;background:none;border:none;padding:0;text-decoration:none;margin-left:8px}
+.quick-add-link:hover{text-decoration:underline}
+
+/* ════════ PAR MICRO-INVOICE ════════ */
+.par-mini-invoice{margin:10px 0 10px;padding:12px 14px;background:#F8F3EC;border-radius:10px;font-size:.76rem}
+.pmi-section{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
+.pmi-line{display:flex;justify-content:space-between;align-items:center;line-height:1.4}
+.pmi-line .pmi-label{color:#5A6F7C;font-weight:600}
+.pmi-line .pmi-qty{color:#003141;font-weight:800;font-variant-numeric:tabular-nums}
+.pmi-divider{height:1px;background:#E8DFD2;margin:6px 0}
+.pmi-total-line{display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:.74rem}
+.pmi-total-line .pmi-total-label{color:#5A6F7C;font-weight:600}
+.pmi-total-line .pmi-total-val{color:#003141;font-weight:800;font-variant-numeric:tabular-nums}
+.pmi-total-line.grand{padding-top:6px;border-top:1.5px solid #D4A029;margin-top:3px}
+.pmi-total-line.grand .pmi-total-label{font-size:.78rem;font-weight:800;color:#003141;text-transform:uppercase;letter-spacing:.5px}
+.pmi-total-line.grand .pmi-total-val{font-size:1rem;color:#003141}
+.pmi-disc{color:#1a7a46 !important}
+.pmi-co{color:#b8860b !important}
+.pmi-bd{color:#1a7a46 !important}
+.par-status-line{display:flex;align-items:center;gap:6px;font-size:.68rem;color:#7A8F9C;margin-bottom:8px;font-weight:600}
+.par-status-dot{width:7px;height:7px;border-radius:50%;background:#1a7a46}
+.par-status-dot.locked{background:#7A8F9C}
+
+/* ════════ IF-YOU-DO-NOTHING NOTE ════════ */
+.do-nothing-note{background:#FFF8F0;border:1px dashed rgba(212,160,41,.3);border-radius:10px;padding:12px 16px;font-size:.76rem;color:#5a4a2a;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px;line-height:1.45}
+.do-nothing-note .dnn-icon{flex-shrink:0;font-size:1rem;line-height:1.3}
+.do-nothing-note strong{color:#003141}
+.do-nothing-note em{font-style:normal;color:#B56B10;font-weight:700}
+
+/* ════════ COMING-SOON MENU PREVIEW ════════ */
+.coming-soon-card{background:linear-gradient(135deg,#00465E 0%,#003141 100%);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(0,49,65,.08)}
+.cs-icon{width:44px;height:44px;border-radius:10px;background:rgba(255,198,0,.14);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.cs-body{flex:1;min-width:0}
+.cs-tag{display:inline-block;font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:2px 8px;border-radius:99px;background:rgba(255,198,0,.2);color:#FFC600;margin-bottom:3px}
+.cs-title{font-size:.88rem;font-weight:800;color:#FAEBDA;letter-spacing:-.1px}
+.cs-sub{font-size:.7rem;color:rgba(250,235,218,.55);margin-top:2px}
+
+/* ════════ MONTH AT A GLANCE (NEW CARDS A + B) ════════ */
+.month-grid-new{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:900px){.month-grid-new{grid-template-columns:1fr}}
+.month-card-new{background:#fff;border-radius:12px;padding:18px 22px;border:1px solid rgba(0,49,65,.06);box-shadow:0 2px 12px rgba(0,49,65,.04)}
+.mcn-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #EDE6DA}
+.mcn-title{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#7A8F9C}
+.mcn-month{font-size:.9rem;font-weight:900;color:#003141;margin-top:2px}
+.mcn-total{text-align:right}
+.mcn-total-val{font-size:1.3rem;font-weight:900;color:#003141;line-height:1}
+.mcn-total-label{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-top:2px}
+.mcn-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:10px}
+.mcn-table th{text-align:left;padding:5px 8px;font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;border-bottom:1px solid #EDE6DA}
+.mcn-table th.num{text-align:right}
+.mcn-table td{padding:6px 8px;border-bottom:1px solid #F4EFE6;color:#2E4A5A}
+.mcn-table td.num{text-align:right;font-weight:700;color:#003141;font-variant-numeric:tabular-nums}
+.mcn-table tr:last-child td{border-bottom:none}
+.mcn-pills{display:flex;flex-wrap:wrap;gap:6px;padding-top:8px;border-top:1px dashed #EDE6DA;margin-top:4px}
+.mcn-pill{font-size:.66rem;font-weight:700;padding:4px 10px;border-radius:99px;background:#F8F3EC;color:#5A6F7C;white-space:nowrap}
+.mcn-pill strong{color:#003141;font-weight:900}
+.mcn-pill.hot{background:rgba(212,160,41,.14);color:#B56B10}
+.mcn-pill.hot strong{color:#B56B10}
+.mcn-budget{margin-top:12px;padding-top:10px;border-top:1px dashed #EDE6DA}
+.mcn-budget-row{display:flex;justify-content:space-between;font-size:.72rem;color:#5A6F7C;font-weight:700;margin-bottom:5px}
+.mcn-budget-row strong{color:#003141;font-weight:900}
+.mcn-budget-bar{height:7px;background:#F0EBE2;border-radius:99px;overflow:hidden}
+.mcn-budget-fill{height:100%;background:linear-gradient(90deg,#1a7a46,#2da85e);border-radius:99px;transition:width .4s}
+.mcn-budget-fill.warn{background:linear-gradient(90deg,#D4A029,#E8B53A)}
+.mcn-budget-fill.over{background:linear-gradient(90deg,#E74C3C,#F05A4A)}
+.mcn-budget-sub{font-size:.62rem;color:#7A8F9C;margin-top:4px;font-weight:500}
+.mcn-budget-prompt{margin-top:12px;padding:10px 12px;background:#FFF8F0;border:1px dashed rgba(212,160,41,.3);border-radius:8px;font-size:.7rem;color:#5a4a2a;line-height:1.45}
+.mcn-budget-prompt button{font-size:.65rem;font-weight:800;color:#B56B10;background:none;border:none;cursor:pointer;padding:0;margin-top:3px;text-decoration:underline}
+
+/* Card B: Participation */
+.part-big{text-align:center;padding:8px 0 14px}
+.part-big-val{font-size:2.6rem;font-weight:900;color:#003141;line-height:1}
+.part-big-label{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#7A8F9C;margin-top:4px}
+.part-bench{display:flex;justify-content:space-between;padding:6px 0 10px;border-bottom:1px dashed #EDE6DA;margin-bottom:10px;font-size:.7rem}
+.part-bench-cell{flex:1;text-align:center}
+.part-bench-val{font-size:.88rem;font-weight:800;color:#003141}
+.part-bench-lbl{font-size:.56rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#7A8F9C;margin-top:1px}
+.top-users{margin-top:4px}
+.top-users-title{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#7A8F9C;margin-bottom:6px}
+.top-user-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.76rem}
+.top-user-rank{width:18px;height:18px;border-radius:50%;background:#F8F3EC;color:#7A8F9C;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.top-user-rank.gold{background:rgba(255,198,0,.22);color:#B56B10}
+.top-user-name{flex:1;color:#003141;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-user-count{font-size:.72rem;font-weight:800;color:#00465E;font-variant-numeric:tabular-nums}
+.top-user-count span{color:#7A8F9C;font-weight:500}
+.part-link{display:block;margin-top:10px;text-align:center;font-size:.7rem;font-weight:800;color:#00465E;text-decoration:none;padding:6px;border-top:1px solid #EDE6DA}
+.part-link:hover{text-decoration:underline}
+
+/* ════════ IMPACT STRIP + ROI CALC ════════ */
+.impact-strip{background:linear-gradient(135deg,#003141 0%,#00465E 100%);border-radius:12px;padding:20px 24px;margin-bottom:16px;color:#FAEBDA;box-shadow:0 2px 12px rgba(0,49,65,.08)}
+.impact-title{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#FFC600;margin-bottom:12px}
+.impact-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.impact-stat{text-align:center;padding:0 6px;border-right:1px solid rgba(250,235,218,.12)}
+.impact-stat:last-child{border-right:none}
+.impact-stat-val{font-size:1.4rem;font-weight:900;color:#FFC600;line-height:1}
+.impact-stat-lbl{font-size:.58rem;font-weight:700;color:rgba(250,235,218,.55);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.roi-calc{background:rgba(255,255,255,.04);border:1px solid rgba(255,198,0,.14);border-radius:10px;padding:14px 16px}
+.roi-head{font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,198,0,.75);margin-bottom:8px}
+.roi-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.76rem;color:rgba(250,235,218,.78)}
+.roi-row.input-row{padding:8px 0}
+.roi-row .roi-lbl{font-weight:600}
+.roi-row .roi-val{font-weight:800;color:#FAEBDA;font-variant-numeric:tabular-nums}
+.roi-input{width:72px;padding:5px 8px;background:rgba(0,0,0,.22);border:1px solid rgba(255,198,0,.28);border-radius:6px;color:#FFC600;font-family:inherit;font-size:.82rem;font-weight:800;text-align:right;outline:none}
+.roi-input:focus{border-color:#FFC600}
+.roi-divider{height:1px;background:rgba(255,255,255,.08);margin:5px 0}
+.roi-final{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0 0;border-top:1.5px solid rgba(255,198,0,.3);margin-top:4px}
+.roi-final-lbl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#FFC600}
+.roi-final-val{font-size:1.25rem;font-weight:900;color:#FFC600;font-variant-numeric:tabular-nums}
+.roi-final-val small{font-size:.7rem;font-weight:700;opacity:.7;margin-left:4px}
 </style>
 </head>
 <body>
@@ -273,14 +402,14 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
   <div style="padding:0 20px 18px;font-size:.65rem;color:rgba(250,235,218,.35);font-weight:600;">Manager Portal</div>
   <div class="sb-sec">Dashboard</div>
   <div class="ni on" onclick="sidebarNav('overview', this)">&#9632; &nbsp;Overview</div>
-  <div class="ni" onclick="sidebarNav('orders', this)">&#9776; &nbsp;Orders</div>
-  <div class="ni" onclick="sidebarNav('invoices', this)">&#9670; &nbsp;Invoices</div>
+  <div class="ni" onclick="sidebarNav('orders', this)">&#9776; &nbsp;Orders{% if not_ordered %}<span class="sb-dot yellow" title="{{ not_ordered|length }} haven't ordered"></span>{% endif %}</div>
+  <div class="ni" onclick="sidebarNav('invoices', this)">&#9670; &nbsp;Invoices{% if outstanding_invoices %}<span class="sb-dot red" title="{{ outstanding_invoices|length }} outstanding"></span>{% endif %}</div>
   <div class="ni" onclick="sidebarNav('monthly', this)">&#9733; &nbsp;Monthly Report</div>
   <div class="ni" onclick="sidebarNav('employees', this)">&#9632; &nbsp;Employees</div>
   {% if company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
   <div class="sb-div"></div>
   <div class="sb-sec">Par Levels</div>
-  <div class="ni" onclick="sidebarNav('parlevel', this)">&#9670; &nbsp;Office Par Levels</div>
+  <div class="ni" onclick="sidebarNav('parlevel', this)">&#9670; &nbsp;Office Par Levels<span class="sb-dot yellow" id="sbParDot" style="display:none" title="Editing window open"></span></div>
   {% endif %}
   <div class="sb-div"></div>
   <div class="sb-sec">Meal Program</div>
@@ -304,77 +433,236 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
     <div class="tab-panel active" id="tab-overview">
     {% set parlevels_on = company.EnableParLevels and company.EnableParLevels|string|upper in ('TRUE', '1', '1.0', 'ON') %}
 
-    <!-- ══ ACTION BAR ══ -->
+    <!-- ══ ACTION BAR — Employee Orders + Office Par Order ══ -->
+    {% set ordered_count = employees|length - not_ordered|length %}
+    {% set ordered_pct = ((ordered_count / [employees|length, 1]|max) * 100)|int %}
+    {% set this_week_meals = active_week.meal_count if active_week else 0 %}
+    {% set this_week_co = (active_week.co_spend|float) if active_week else 0 %}
+    {% set this_week_bd = (active_week.bd_spend|float) if active_week else 0 %}
+    {% set avg_meals_emp_week = (this_week_meals / ordered_count)|round(1) if ordered_count else 0 %}
+    <div class="sl">This Week — {{ active_week.label if active_week else 'N/A' }}</div>
     <div class="action-bar">
+      <!-- ── EMPLOYEE ORDERS BOX ── -->
       <div class="action-card{% if not not_ordered %} good{% endif %}" style="flex:1;">
-        <div class="action-card-title">Ordering This Week &mdash; {{ active_week.label if active_week else 'N/A' }}</div>
-        {% set ordered_count = employees|length - not_ordered|length %}
-        <div class="action-card-main">{{ ordered_count }} / {{ employees|length }}</div>
-        <div class="action-card-sub">employees have ordered</div>
-        <div class="action-progress">
-          <div style="width:{{ ((ordered_count / [employees|length, 1]|max) * 100)|int }}%"></div>
+        <div class="action-card-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Employee Orders</span>
+          <button type="button" class="quick-add-link" onclick="openQuickAddEmployee()">+ Add employee</button>
         </div>
+        <div class="action-card-main">{{ ordered_count }} / {{ employees|length }}</div>
+        <div class="action-card-sub">employees have ordered &middot; {{ ordered_pct }}%</div>
+        <div class="action-progress"><div style="width:{{ ordered_pct }}%"></div></div>
+
+        <div class="ew-stats">
+          <div class="ew-stat-row"><span>Avg meals / employee</span><span><span id="ewAvgMeals">{{ '%.1f'|format(avg_meals_emp_week) }}</span></span></div>
+          <div class="ew-stat-row"><span>Company subsidy this week</span><span class="gold">${{ '%.2f'|format(this_week_co) }}</span></div>
+          <div class="ew-stat-row"><span>BetterDay contributed</span><span class="green">${{ '%.2f'|format(this_week_bd) }}</span></div>
+        </div>
+
+        <div class="ew-favorite" id="ewFavorite" style="display:none">
+          <div class="ew-fav-thumb" id="ewFavThumb">🍽️</div>
+          <div class="ew-fav-body">
+            <div class="ew-fav-label">Team favorite this week</div>
+            <div class="ew-fav-name" id="ewFavName">—</div>
+            <div class="ew-fav-meta" id="ewFavMeta">—</div>
+          </div>
+        </div>
+
         {% if not_ordered %}
-        <div class="action-names">Haven't ordered: {{ not_ordered[:6]|map(attribute='name')|join(', ') }}{% if not_ordered|length > 6 %} +{{ not_ordered|length - 6 }} more{% endif %}</div>
-        <button class="action-btn" onclick="sendReminders(this)">Send Reminders</button>
+        <button class="action-btn" onclick="sendReminders(this)">📣 Send reminders to {{ not_ordered|length }}</button>
         {% endif %}
         <div id="deadlineCountdown" data-deadline="{{ ordering_deadline }}" class="deadline-tag"></div>
       </div>
 
       {% if parlevels_on %}
+      <!-- ── OFFICE PAR ORDER MICRO-INVOICE ── -->
       <div class="action-card" style="flex:1;">
-        <div class="action-card-title">Office Par Level Order</div>
-        <div class="action-card-main" id="parStatusVal">—</div>
-        <div class="action-card-sub" id="parStatusSub">Loading...</div>
-        <a class="action-link" onclick="sidebarNav('parlevel', document.querySelector('.ni[onclick*=parlevel]'))">Edit Office Order &rarr;</a>
+        <div class="action-card-title">Office Par Order — Standing</div>
+        <div class="par-status-line" id="parStatusLine"><span class="par-status-dot"></span><span id="parStatusVal">Loading…</span></div>
+
+        <div class="par-mini-invoice" id="parMiniInvoice">
+          <div class="pmi-section" id="pmiItems">
+            <div class="pmi-line"><span class="pmi-label">Loading…</span><span class="pmi-qty">—</span></div>
+          </div>
+          <div class="pmi-divider"></div>
+          <div class="pmi-total-line"><span class="pmi-total-label">Retail subtotal</span><span class="pmi-total-val" id="pmiSubtotal">$0.00</span></div>
+          <div class="pmi-total-line"><span class="pmi-total-label">BetterDay covers <span id="pmiDiscPct" style="opacity:.7"></span></span><span class="pmi-total-val pmi-bd" id="pmiBd">−$0.00</span></div>
+          <div class="pmi-total-line grand"><span class="pmi-total-label">Company pays / wk</span><span class="pmi-total-val pmi-co" id="pmiCo">$0.00</span></div>
+        </div>
+
+        <a class="action-link" onclick="sidebarNav('parlevel', document.querySelector('.ni[onclick*=parlevel]'))">Edit office order &rarr;</a>
+        <div id="parStatusSub" class="action-card-sub" style="margin-top:6px;font-size:.68rem;color:#7A8F9C"></div>
       </div>
       {% endif %}
     </div>
 
-    <!-- ══ THIS WEEK AT A GLANCE ══ -->
-    <div class="sl">This Week at a Glance</div>
-    <div class="tw-grid" style="grid-template-columns:{% if parlevels_on %}1fr 1fr 1fr{% else %}1fr 1fr{% endif %}">
-      <!-- Employee Orders -->
-      <div class="tw-col">
-        <div class="tw-col-title">Employee Orders</div>
-        <div class="tw-stat"><span class="tw-stat-label">Meals ordered</span><span class="tw-stat-val">{{ active_week.meal_count if active_week else 0 }}</span></div>
-        <div class="tw-stat"><span class="tw-stat-label">Participation</span><span class="tw-stat-val">{{ active_week_pct }}% <span style="font-size:.7rem;font-weight:500;color:#7A8F9C">({{ avg_participation_pct }}% avg)</span></span></div>
-        <div class="tw-stat-divider"></div>
-        <div class="tw-stat"><span class="tw-stat-label">Employee paid</span><span class="tw-stat-val">${{ '%.2f'|format(active_week.emp_spend|float) if active_week else '0.00' }}</span></div>
-        <div class="tw-stat"><span class="tw-stat-label">Company covered</span><span class="tw-stat-val gold">${{ '%.2f'|format(active_week.co_spend|float) if active_week else '0.00' }}</span></div>
-        <div class="tw-stat"><span class="tw-stat-label">BetterDay contributed</span><span class="tw-stat-val green">${{ '%.2f'|format(active_week.bd_spend|float) if active_week else '0.00' }}</span></div>
+    <!-- ══ IF YOU DO NOTHING NOTE ══ -->
+    <div class="do-nothing-note">
+      <span class="dnn-icon">⏰</span>
+      <div>
+        <strong>If you do nothing:</strong> Your standing order auto-submits every <em>Wednesday at midnight</em> for delivery the following <em>Monday</em>.
+        {% if parlevels_on %}Office par order locks at the same time.{% endif %}
+        Edit anytime before then.
       </div>
+    </div>
 
-      {% if parlevels_on %}
-      <!-- Par Levels -->
-      <div class="tw-col" id="parWeekCol">
-        <div class="tw-col-title">Office Par Levels</div>
-        <div id="parWeekStats" style="font-size:.82rem;color:#7A8F9C;padding:8px 0;">Loading par level data...</div>
+    <!-- ══ COMING SOON: MENU PREVIEW ══ -->
+    <div class="coming-soon-card">
+      <div class="cs-icon">🍽️</div>
+      <div class="cs-body">
+        <div class="cs-tag">Coming soon</div>
+        <div class="cs-title">Next week's menu preview</div>
+        <div class="cs-sub">See what's hitting your office before orders open Monday morning.</div>
       </div>
-      {% endif %}
+    </div>
 
-      <!-- Financials -->
-      <div class="tw-col">
-        <div class="tw-col-title">Financials</div>
-        <div class="tw-stat"><span class="tw-stat-label">This month spend</span><span class="tw-stat-val">${{ '%.2f'|format(current_month_spend) }}</span></div>
-        <div class="tw-stat"><span class="tw-stat-label">Last month</span><span class="tw-stat-val" style="color:#7A8F9C">${{ '%.2f'|format(last_month_spend) }}</span></div>
-        <div class="tw-stat"><span class="tw-stat-label">Trend</span><span class="tw-stat-val {% if current_month_spend > last_month_spend %}red{% elif current_month_spend < last_month_spend %}green{% endif %}">{% if last_month_spend > 0 %}{{ '%+.0f'|format(((current_month_spend - last_month_spend) / last_month_spend * 100)) }}%{% else %}&mdash;{% endif %}</span></div>
-        <div class="tw-stat-divider"></div>
-        {% if outstanding_invoices %}
-        <div class="tw-stat"><span class="tw-stat-label">Outstanding invoices</span><span class="tw-stat-val red">{{ outstanding_invoices|length }}</span></div>
-        <div class="tw-stat"><span class="tw-stat-label">Amount owed</span><span class="tw-stat-val red">${{ '%.2f'|format(outstanding_total) }}</span></div>
+    <!-- ══ THIS MONTH AT A GLANCE — Card A (week-by-week) + Card B (participation) ══ -->
+    <div class="sl">This Month at a Glance</div>
+    {% set this_month = sorted_monthly[0] if sorted_monthly else None %}
+    <div class="month-grid-new">
+      <!-- Card A: Week-by-week spend -->
+      <div class="month-card-new">
+        <div class="mcn-header">
+          <div>
+            <div class="mcn-title">Week-by-week spend</div>
+            <div class="mcn-month">{{ this_month.label if this_month else 'No data yet' }}</div>
+          </div>
+          <div class="mcn-total">
+            <div class="mcn-total-val">${{ '%.2f'|format(this_month.co_spend|float) if this_month else '0.00' }}</div>
+            <div class="mcn-total-label">Company subsidy</div>
+          </div>
+        </div>
+        {% if this_month %}
+        <table class="mcn-table">
+          <thead><tr><th>Week of</th><th class="num">Meals</th><th class="num">Co. paid</th></tr></thead>
+          <tbody>
+            {% set ns = namespace(found=false) %}
+            {% for w in sorted_weeks %}
+              {% if w.anchor and w.anchor[:7] == this_month.key %}
+                {% set ns.found = true %}
+                <tr><td>{{ w.label }}</td><td class="num">{{ w.meal_count }}</td><td class="num">${{ '%.2f'|format(w.co_spend|float) }}</td></tr>
+              {% endif %}
+            {% endfor %}
+            {% if not ns.found %}
+              <tr><td colspan="3" style="text-align:center;color:#7A8F9C;font-style:italic;padding:14px 8px">No weeks in this month yet</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+        <div class="mcn-pills">
+          <span class="mcn-pill"><strong>{{ this_month.meals }}</strong> meals</span>
+          <span class="mcn-pill"><strong>${{ '%.2f'|format((this_month.co_spend|float / [employees|length, 1]|max)) }}</strong>/employee</span>
+          <span class="mcn-pill hot" id="mcnFavPill" style="display:none">Top: <strong id="mcnFavName">—</strong></span>
+        </div>
+        <!-- Monthly budget block (Sprint 5) -->
+        <div class="mcn-budget" id="mcnBudgetBlock">
+          {% if budget_info %}
+          {% set _fillpct = budget_info.pct if budget_info.pct < 100 else 100 %}
+          {% set _state = budget_info.state %}
+          <div class="mcn-budget-row">
+            <span>Monthly budget</span>
+            <strong>${{ '%.0f'|format(budget_info.spent) }} / ${{ '%.0f'|format(budget_info.amount) }}</strong>
+          </div>
+          <div class="mcn-budget-bar">
+            <div class="mcn-budget-fill{% if _state == 'warn' %} warn{% elif _state in ('critical','over') %} over{% endif %}" style="width:{{ _fillpct }}%"></div>
+          </div>
+          <div class="mcn-budget-sub">
+            {% if _state == 'over' %}
+              <strong style="color:#E74C3C">Over budget</strong> &middot; pacing ${{ '%.0f'|format(budget_info.forecast) }} ({{ budget_info.forecast_pct }}% of cap)
+            {% elif _state == 'critical' %}
+              <strong style="color:#B56B10">{{ budget_info.pct }}% used</strong> &middot; pacing ${{ '%.0f'|format(budget_info.forecast) }} by month-end
+            {% elif _state == 'warn' %}
+              <strong style="color:#B56B10">{{ budget_info.pct }}% used</strong> &middot; ${{ '%.0f'|format(budget_info.remaining) }} remaining &middot; pacing ${{ '%.0f'|format(budget_info.forecast) }}
+            {% else %}
+              {{ budget_info.pct }}% used &middot; ${{ '%.0f'|format(budget_info.remaining) }} remaining &middot; pacing ${{ '%.0f'|format(budget_info.forecast) }}
+            {% endif %}
+          </div>
+          {% else %}
+          <div class="mcn-budget-prompt" id="mcnBudgetPrompt">
+            💡 <strong>Set a monthly budget</strong> to track pacing and get heads-up alerts at 75 / 90 / 100%.
+            <button onclick="sidebarNav('account', document.querySelectorAll('.sb .ni')[6])">Set it in Account Details &rarr;</button>
+          </div>
+          {% endif %}
+        </div>
         {% else %}
-        <div class="tw-stat"><span class="tw-stat-label">Outstanding invoices</span><span class="tw-stat-val green">0 &mdash; All clear</span></div>
+        <div style="text-align:center;padding:20px 0;color:#7A8F9C;font-size:.78rem;font-style:italic">Once your team places orders, monthly spend will appear here.</div>
         {% endif %}
       </div>
+
+      <!-- Card B: Participation -->
+      <div class="month-card-new">
+        <div class="mcn-header">
+          <div>
+            <div class="mcn-title">Participation</div>
+            <div class="mcn-month">{{ this_month.label if this_month else 'This month' }}</div>
+          </div>
+        </div>
+        <div class="part-big">
+          <div class="part-big-val">{{ avg_participation_pct }}%</div>
+          <div class="part-big-label">Avg weekly participation</div>
+        </div>
+        <div class="part-bench">
+          <div class="part-bench-cell">
+            <div class="part-bench-val">{{ active_week_pct }}%</div>
+            <div class="part-bench-lbl">This week</div>
+          </div>
+          <div class="part-bench-cell">
+            <div class="part-bench-val">{{ employees|length }}</div>
+            <div class="part-bench-lbl">Active team</div>
+          </div>
+          <div class="part-bench-cell">
+            <div class="part-bench-val">{{ avg_meals_per_emp }}</div>
+            <div class="part-bench-lbl">Avg meals/emp</div>
+          </div>
+        </div>
+        <div class="top-users">
+          <div class="top-users-title">Top eaters this month</div>
+          <div id="topUsersList">
+            <div style="font-size:.7rem;color:#7A8F9C;padding:6px 0;font-style:italic">Computing…</div>
+          </div>
+        </div>
+        <a href="javascript:void(0)" class="part-link" onclick="sidebarNav('employees', document.querySelectorAll('.sb .ni')[4])">View full employees report &rarr;</a>
+      </div>
     </div>
 
-    <!-- ══ PROGRAM HEALTH ══ -->
-    <div class="health-row">
-      <div class="health-cell"><div class="health-cell-val">{{ total_meals }}</div><div class="health-cell-label">Total Meals</div></div>
-      <div class="health-cell"><div class="health-cell-val">{{ avg_meals_per_emp }}</div><div class="health-cell-label">Avg / Employee</div></div>
-      <div class="health-cell"><div class="health-cell-val">{{ avg_participation_pct }}%</div><div class="health-cell-label">Avg Participation</div></div>
-      <div class="health-cell"><div class="health-cell-val green">${{ total_bd_spend|round(2)|commafy }}</div><div class="health-cell-label">Lifetime BD Savings</div></div>
+    <!-- ══ IMPACT STRIP + ROI CALCULATOR ══ -->
+    <div class="impact-strip">
+      <div class="impact-title">Program Impact &middot; Lifetime</div>
+      <div class="impact-stats-row">
+        <div class="impact-stat">
+          <div class="impact-stat-val">{{ total_meals }}</div>
+          <div class="impact-stat-lbl">Meals delivered</div>
+        </div>
+        <div class="impact-stat">
+          <div class="impact-stat-val" id="impactHours">{{ ((total_meals|int) * 0.5)|round(0)|int }}</div>
+          <div class="impact-stat-lbl">Hours reclaimed</div>
+        </div>
+        <div class="impact-stat">
+          <div class="impact-stat-val">${{ total_bd_spend|round(0)|int|commafy }}</div>
+          <div class="impact-stat-lbl">BetterDay covered</div>
+        </div>
+      </div>
+      <div class="roi-calc">
+        <div class="roi-head">📈 ROI calculator</div>
+        <div class="roi-row">
+          <span class="roi-lbl">Hours reclaimed (½ hr/meal)</span>
+          <span class="roi-val" id="roiHours">{{ ((total_meals|int) * 0.5)|round(0)|int }} hrs</span>
+        </div>
+        <div class="roi-row input-row">
+          <span class="roi-lbl">Avg loaded $/hour</span>
+          <span><input type="number" class="roi-input" id="roiRate" value="45" min="0" step="5" oninput="updateRoiCalc()"> /hr</span>
+        </div>
+        <div class="roi-row">
+          <span class="roi-lbl">Productivity recovered</span>
+          <span class="roi-val" id="roiProductivity">$0</span>
+        </div>
+        <div class="roi-row">
+          <span class="roi-lbl">Company spent on program</span>
+          <span class="roi-val" id="roiSpent">${{ '%.0f'|format(total_co_spend|float) }}</span>
+        </div>
+        <div class="roi-final">
+          <span class="roi-final-lbl">Net ROI</span>
+          <span class="roi-final-val" id="roiNet">—<small id="roiMultiplier"></small></span>
+        </div>
+      </div>
     </div>
 
     <!-- ══ RECENT ORDERS ══ -->
@@ -961,6 +1249,10 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
         </div>
       </div>
 
+      {% if saved_tab == 'budget' %}
+      <div style="background:#EEFBE8;border:1px solid #BBF7D0;color:#167421;padding:12px 16px;border-radius:10px;font-size:.875rem;font-weight:600;margin-bottom:18px;">Monthly budget saved.</div>
+      {% endif %}
+
       <!-- Editable fields -->
       <form id="accountForm" method="POST" action="/manager/update-account" onsubmit="saveAccount(event)">
         <div class="card">
@@ -977,6 +1269,56 @@ body{min-height:100%;font-family:'DM Sans',sans-serif;background:#FAEBDA;display
             <div class="field" style="grid-column:span 2"><label>Delivery Instructions</label><input type="text" name="DeliveryInstructions" value="{{ company.DeliveryInstructions or '' }}" placeholder="e.g. Leave with reception on 3rd floor"></div>
           </div>
           <div style="margin-top:16px"><button class="btn-save" type="button" onclick="saveAccount()">Save Changes</button></div>
+        </div>
+      </form>
+
+      <!-- ═══ MONTHLY BUDGET (Sprint 5) ═══ -->
+      <form id="budgetForm" method="POST" action="/manager/set-budget" onsubmit="saveBudget(event)">
+        <div class="card">
+          <div class="card-title">Monthly Budget <span style="font-size:.7rem;color:#7A8F9C;font-weight:600;text-transform:none;letter-spacing:0;margin-left:8px">Optional &middot; soft cap</span></div>
+          <p style="font-size:.78rem;color:#5A6F7C;line-height:1.5;margin:0 0 14px">
+            Set a monthly spending target for your BetterDay program. We'll show a live progress bar on the dashboard and
+            email your billing contact at <strong>75%</strong>, <strong>90%</strong>, and <strong>100%</strong>. This is a
+            <strong>soft cap</strong> — orders are never blocked. We track only the company-covered portion;
+            BetterDay's volume contribution is excluded.
+          </p>
+          <div class="field-grid">
+            <div class="field">
+              <label>Monthly budget (CAD)</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-weight:900;color:#00465E;font-size:1.1rem">$</span>
+                <input type="number" name="monthly_budget_amount" id="monthlyBudgetInput"
+                       min="0" step="50"
+                       value="{{ '%.0f'|format(budget_info.amount) if budget_info else '' }}"
+                       placeholder="e.g. 4500"
+                       style="flex:1">
+                <span style="font-size:.72rem;color:#7A8F9C">/month</span>
+              </div>
+              {% if budget_info and budget_info.set_at %}
+              <div style="font-size:.65rem;color:#7A8F9C;margin-top:4px">
+                Last updated {{ budget_info.set_at[:10] }}{% if budget_info.set_by %} by {{ budget_info.set_by }}{% endif %}
+              </div>
+              {% endif %}
+            </div>
+            {% if budget_info %}
+            <div class="field">
+              <label>This month so far</label>
+              <div class="field-ro">
+                <strong style="color:#00465E">${{ '%.2f'|format(budget_info.spent) }}</strong>
+                <span style="font-size:.7rem;color:#7A8F9C;margin-left:6px">
+                  ({{ budget_info.pct }}% &middot; pacing ${{ '%.0f'|format(budget_info.forecast) }})
+                </span>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+            <button class="btn-save" type="submit">{{ 'Update Budget' if budget_info else 'Set Budget' }}</button>
+            {% if budget_info %}
+            <button type="button" onclick="clearBudget()" style="font-size:.75rem;color:#7A8F9C;background:none;border:none;cursor:pointer;font-weight:700">Remove budget</button>
+            {% endif %}
+            <span id="budgetSaveMsg" style="font-size:.75rem;color:#1a7a46;font-weight:700;display:none">Saved.</span>
+          </div>
         </div>
       </form>
 
@@ -1332,6 +1674,37 @@ async function saveAccount(e) {
   }
 }
 
+// ═══ MONTHLY BUDGET (Sprint 5) ═══
+async function saveBudget(e) {
+  if (e) e.preventDefault();
+  const form = document.getElementById('budgetForm');
+  const msg  = document.getElementById('budgetSaveMsg');
+  try {
+    const res = await fetch('/manager/set-budget', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+      body: new FormData(form)
+    });
+    if (res.ok) {
+      msg.style.display = 'inline';
+      msg.textContent = 'Saved. Refreshing\u2026';
+      setTimeout(() => { window.location = '/manager/dashboard?saved=budget#account'; }, 600);
+    } else { throw new Error(); }
+  } catch {
+    msg.style.display = 'inline';
+    msg.style.color = '#c0392b';
+    msg.textContent = 'Error \u2014 try again.';
+  }
+}
+function clearBudget() {
+  if (!confirm('Remove your monthly budget? Pacing alerts will stop until you set a new one.')) return;
+  const input = document.getElementById('monthlyBudgetInput');
+  if (input) input.value = '0';
+  document.getElementById('budgetForm').requestSubmit
+    ? document.getElementById('budgetForm').requestSubmit()
+    : saveBudget();
+}
+
 // ═══ EMPLOYEE ACCESS PIN ═══
 function startEditPIN() {
   document.getElementById('pinDisplay').style.display = 'none';
@@ -1683,6 +2056,186 @@ async function sendReminders(btn) {
   setInterval(update, 60000);
 })();
 
+// ═══ HTML escape helper ═══
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+// ═══ FAVORITE MEAL + TOP EATERS (computed from ORDERS) ═══
+function computeFavoriteAndTopUsers() {
+  if (typeof ORDERS === 'undefined' || !Array.isArray(ORDERS) || ORDERS.length === 0) return;
+
+  // Active week anchor (passed from server via the ew-favorite block)
+  var now = new Date();
+  var thisMonthKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+  // Use sunday_anchor when present to find this week's orders
+  // Find the most recent anchor in ORDERS, treat that as "this week"
+  var anchors = {};
+  ORDERS.forEach(function(o) {
+    var a = o.sunday_anchor || o.anchor || (o.delivery_date ? String(o.delivery_date).slice(0, 10) : null);
+    if (a) anchors[a] = (anchors[a] || 0) + 1;
+  });
+  var sortedAnchors = Object.keys(anchors).sort().reverse();
+  var thisWeekAnchor = sortedAnchors[0];
+
+  // ── Favorite meal this week (ew-favorite in Employee Orders box) ──
+  var weekMealCounts = {};
+  var weekMealMeta = {};
+  ORDERS.forEach(function(o) {
+    var a = o.sunday_anchor || o.anchor || (o.delivery_date ? String(o.delivery_date).slice(0, 10) : null);
+    if (a !== thisWeekAnchor) return;
+    var meals = o.meals || o.items || [];
+    meals.forEach(function(m) {
+      var name = m.dish_name || m.meal_name || m.name;
+      if (!name) return;
+      weekMealCounts[name] = (weekMealCounts[name] || 0) + 1;
+      if (!weekMealMeta[name]) {
+        weekMealMeta[name] = { image: m.image_url || m.image || null, diet: m.diet || m.category || '' };
+      }
+    });
+  });
+  var favEntries = Object.keys(weekMealCounts).map(function(k) {
+    return { name: k, count: weekMealCounts[k], meta: weekMealMeta[k] };
+  }).sort(function(a, b) { return b.count - a.count; });
+
+  if (favEntries.length > 0) {
+    var fav = favEntries[0];
+    var favBox = document.getElementById('ewFavorite');
+    var favName = document.getElementById('ewFavName');
+    var favMeta = document.getElementById('ewFavMeta');
+    var favThumb = document.getElementById('ewFavThumb');
+    if (favBox) favBox.style.display = 'flex';
+    if (favName) favName.textContent = fav.name;
+    if (favMeta) favMeta.textContent = fav.count + ' order' + (fav.count !== 1 ? 's' : '') + ' this week';
+    if (favThumb && fav.meta && fav.meta.image) {
+      favThumb.innerHTML = '<img src="' + escapeHtml(fav.meta.image) + '" alt="" style="width:100%;height:100%;border-radius:8px;object-fit:cover" onerror="this.parentNode.textContent=\'🍽️\'">';
+    } else if (favThumb) {
+      var diet = (fav.meta && fav.meta.diet || '').toLowerCase();
+      favThumb.textContent = diet.indexOf('plant') >= 0 || diet.indexOf('veg') >= 0 ? '🌱' : '🍽️';
+    }
+  }
+
+  // ── Top eaters this month (Card B leaderboard) ──
+  var monthCounts = {};
+  ORDERS.forEach(function(o) {
+    var d = o.delivery_date || o.sunday_anchor || o.anchor;
+    if (!d || String(d).slice(0, 7) !== thisMonthKey) return;
+    var name = o.employee_name || o.name || 'Unknown';
+    var meals = o.meals || o.items || [];
+    monthCounts[name] = (monthCounts[name] || 0) + meals.length;
+  });
+  var topUsers = Object.keys(monthCounts)
+    .map(function(k) { return { name: k, count: monthCounts[k] }; })
+    .sort(function(a, b) { return b.count - a.count; })
+    .slice(0, 3);
+
+  var listEl = document.getElementById('topUsersList');
+  if (listEl) {
+    if (topUsers.length === 0) {
+      listEl.innerHTML = '<div style="font-size:.7rem;color:#7A8F9C;padding:6px 0;font-style:italic">No orders this month yet</div>';
+    } else {
+      listEl.innerHTML = topUsers.map(function(u, i) {
+        var rankCls = i === 0 ? 'top-user-rank gold' : 'top-user-rank';
+        var medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : '🥉');
+        return '<div class="top-user-row">' +
+                 '<div class="' + rankCls + '">' + medal + '</div>' +
+                 '<div class="top-user-name">' + escapeHtml(u.name) + '</div>' +
+                 '<div class="top-user-count">' + u.count + ' <span>meals</span></div>' +
+               '</div>';
+      }).join('');
+    }
+  }
+
+  // ── Card A "top meal" pill ──
+  var monthMealCounts = {};
+  ORDERS.forEach(function(o) {
+    var d = o.delivery_date || o.sunday_anchor || o.anchor;
+    if (!d || String(d).slice(0, 7) !== thisMonthKey) return;
+    var meals = o.meals || o.items || [];
+    meals.forEach(function(m) {
+      var name = m.dish_name || m.meal_name || m.name;
+      if (!name) return;
+      monthMealCounts[name] = (monthMealCounts[name] || 0) + 1;
+    });
+  });
+  var monthFav = Object.keys(monthMealCounts).sort(function(a, b) {
+    return monthMealCounts[b] - monthMealCounts[a];
+  })[0];
+  var pillEl = document.getElementById('mcnFavPill');
+  var pillName = document.getElementById('mcnFavName');
+  if (monthFav && pillEl && pillName) {
+    pillEl.style.display = 'inline-block';
+    pillName.textContent = monthFav;
+  }
+}
+
+// ═══ ROI CALCULATOR ═══
+function updateRoiCalc() {
+  // Hours come from #impactHours, which was server-rendered as total_meals * 0.5
+  var hoursEl = document.getElementById('impactHours');
+  if (!hoursEl) return;
+  var hours = parseInt(hoursEl.textContent, 10);
+  if (isNaN(hours)) hours = 0;
+
+  var rateInput = document.getElementById('roiRate');
+  var rate = rateInput ? parseFloat(rateInput.value) : 45;
+  if (isNaN(rate) || rate < 0) rate = 0;
+
+  var productivity = hours * rate;
+  var spentEl = document.getElementById('roiSpent');
+  var spent = 0;
+  if (spentEl) {
+    var spentTxt = spentEl.textContent.replace(/[^0-9.]/g, '');
+    spent = parseFloat(spentTxt) || 0;
+  }
+
+  var net = productivity - spent;
+  var multiplier = spent > 0 ? (productivity / spent) : 0;
+
+  var prodEl = document.getElementById('roiProductivity');
+  var netEl = document.getElementById('roiNet');
+  var multEl = document.getElementById('roiMultiplier');
+  var hoursDisp = document.getElementById('roiHours');
+
+  if (hoursDisp) hoursDisp.textContent = hours + ' hrs';
+  if (prodEl) prodEl.textContent = '$' + productivity.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (netEl) {
+    var sign = net >= 0 ? '+$' : '−$';
+    netEl.firstChild.nodeValue = sign + Math.abs(Math.round(net)).toLocaleString('en-US');
+  }
+  if (multEl && multiplier > 0) {
+    multEl.textContent = ' (' + multiplier.toFixed(1) + 'x return)';
+  } else if (multEl) {
+    multEl.textContent = '';
+  }
+}
+
+// ═══ QUICK-ADD EMPLOYEE (placeholder — no /manager/add-employee Flask route yet) ═══
+function openQuickAddEmployee() {
+  // Until the Flask route exists, jump to the Employees tab where the existing add flow lives.
+  var empNav = document.querySelector('.ni[onclick*=employees]');
+  if (empNav) sidebarNav('employees', empNav);
+  // Try to focus the add-employee form once the tab renders
+  setTimeout(function() {
+    var addBtn = document.querySelector('#tab-employees [data-add-employee], #tab-employees button[onclick*=add], #tab-employees .add-employee-btn');
+    if (addBtn && typeof addBtn.click === 'function') addBtn.click();
+    var input = document.querySelector('#tab-employees input[name=name], #tab-employees input[type=email]');
+    if (input && typeof input.focus === 'function') input.focus();
+  }, 120);
+}
+
+// ═══ Wire up overview-tab JS once data is in the DOM ═══
+(function() {
+  // computeFavoriteAndTopUsers depends on ORDERS being defined; it always is by this point
+  // (the ORDERS = {...} script runs above this block in the same template)
+  try { computeFavoriteAndTopUsers(); } catch(e) { console.warn('computeFavoriteAndTopUsers failed', e); }
+  try { updateRoiCalc(); } catch(e) { console.warn('updateRoiCalc failed', e); }
+})();
+
 // ═══ AUTO-LOAD PAR LEVEL OVERVIEW (if par level cards exist on overview tab) ═══
 (function() {
   if (!document.getElementById('parStatusVal')) return;
@@ -2003,12 +2556,16 @@ async function loadParLevels() {
 
 function updateParOverviewCards() {
   var totalItems = 0, subtotal = 0;
+  var activeRows = [];
   PL_CATEGORIES.forEach(function(c) {
     var d = plData[c.id];
     if (d && d.status !== 'paused') {
       var q = d.target || d.qty || 0;
-      totalItems += q;
-      subtotal += q * c.unitPrice;
+      if (q > 0) {
+        totalItems += q;
+        subtotal += q * c.unitPrice;
+        activeRows.push({ name: c.name, icon: c.icon, qty: q });
+      }
     }
   });
   var discPct = subtotal >= 1000 ? 25 : subtotal >= 500 ? 20 : subtotal >= 250 ? 15 : subtotal > 0 ? 10 : 0;
@@ -2016,24 +2573,49 @@ function updateParOverviewCards() {
   var net = Math.round((subtotal - discount) * 100) / 100;
   var state = getOrderWindowState();
 
-  // Action card (top)
-  var valEl = document.getElementById('parStatusVal');
-  var subEl = document.getElementById('parStatusSub');
-  if (valEl) valEl.textContent = totalItems + ' items';
-  if (subEl) subEl.textContent = '$' + net.toFixed(2) + '/wk · ' + discPct + '% volume discount · ' + (state === 'open' ? 'Editing open' : 'Locked');
+  // ── Status line (top of par card) ──
+  var statusValEl = document.getElementById('parStatusVal');
+  var statusDot = document.querySelector('#parStatusLine .par-status-dot');
+  if (statusValEl) {
+    statusValEl.textContent = totalItems > 0
+      ? totalItems + ' items / wk · ' + (state === 'open' ? 'Editing open until Wed midnight' : 'Locked — reopens Monday')
+      : 'No items in standing order yet';
+  }
+  if (statusDot) {
+    statusDot.classList.toggle('locked', state !== 'open');
+  }
 
-  // This Week column
-  var weekCol = document.getElementById('parWeekStats');
-  if (!weekCol) return;
-  var activeCats = PL_CATEGORIES.filter(function(c) { var d = plData[c.id]; return d && (d.target || d.qty || 0) > 0 && d.status !== 'paused'; });
-  weekCol.innerHTML =
-    '<div class="tw-stat"><span class="tw-stat-label">Total items</span><span class="tw-stat-val">' + totalItems + '</span></div>' +
-    '<div class="tw-stat"><span class="tw-stat-label">Retail subtotal</span><span class="tw-stat-val">$' + subtotal.toFixed(2) + '</span></div>' +
-    '<div class="tw-stat"><span class="tw-stat-label">Volume discount</span><span class="tw-stat-val green">-$' + discount.toFixed(2) + ' (' + discPct + '%)</span></div>' +
-    '<div class="tw-stat-divider"></div>' +
-    '<div class="tw-stat"><span class="tw-stat-label">Net cost</span><span class="tw-stat-val" style="font-size:1rem;">$' + net.toFixed(2) + '</span></div>' +
-    '<div class="tw-stat"><span class="tw-stat-label">Categories active</span><span class="tw-stat-val">' + activeCats.length + ' of ' + PL_CATEGORIES.length + '</span></div>' +
-    '<div class="tw-stat"><span class="tw-stat-label">Status</span><span class="tw-stat-val ' + (state === 'open' ? 'green' : '') + '">' + (state === 'open' ? 'Editing open' : 'Locked until Monday') + '</span></div>';
+  // ── Mini-invoice item list (no per-category prices) ──
+  var itemsEl = document.getElementById('pmiItems');
+  if (itemsEl) {
+    if (activeRows.length === 0) {
+      itemsEl.innerHTML = '<div class="pmi-line"><span class="pmi-label" style="font-style:italic;color:#7A8F9C">No active categories</span><span class="pmi-qty">—</span></div>';
+    } else {
+      itemsEl.innerHTML = activeRows.map(function(r) {
+        return '<div class="pmi-line"><span class="pmi-label">' + r.icon + ' ' + r.name + '</span><span class="pmi-qty">' + r.qty + '</span></div>';
+      }).join('');
+    }
+  }
+
+  // ── Totals ──
+  var subEl = document.getElementById('pmiSubtotal');
+  var bdEl  = document.getElementById('pmiBd');
+  var coEl  = document.getElementById('pmiCo');
+  var pctEl = document.getElementById('pmiDiscPct');
+  if (subEl) subEl.textContent = '$' + subtotal.toFixed(2);
+  if (bdEl)  bdEl.textContent  = '−$' + discount.toFixed(2);
+  if (coEl)  coEl.textContent  = '$' + net.toFixed(2);
+  if (pctEl) pctEl.textContent = discPct > 0 ? '(' + discPct + '%)' : '';
+
+  // ── Sub-text under invoice (delivery cadence reminder) ──
+  var subTextEl = document.getElementById('parStatusSub');
+  if (subTextEl) {
+    subTextEl.textContent = 'Delivered every Monday · Auto-bills weekly';
+  }
+
+  // ── Sidebar dot: light up when editing window is open and there's a standing order ──
+  var sbDot = document.getElementById('sbParDot');
+  if (sbDot) sbDot.style.display = (state === 'open' && totalItems > 0) ? 'inline-block' : 'none';
 }
 
 function getOrderWindowState() {
